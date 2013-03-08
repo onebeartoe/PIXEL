@@ -5,11 +5,10 @@ import java.awt.event.*;
 import javax.swing.*;
 
 import ioio.lib.api.RgbLedMatrix;
+import ioio.lib.api.exception.ConnectionLostException;
 import java.awt.image.BufferedImage;
-import java.io.ByteArrayOutputStream;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.imageio.ImageIO;
 
 public class DrawingCanvas extends JPanel implements MouseListener, MouseMotionListener 
 {
@@ -27,11 +26,17 @@ public class DrawingCanvas extends JPanel implements MouseListener, MouseMotionL
     private ioio.lib.api.RgbLedMatrix matrix;
     
     private short [] frame;
+    private static byte[] BitmapBytes;
+    
+    private static BufferedImage originalImage;    
+    private static BufferedImage ResizedImage;
           
     public DrawingCanvas(RgbLedMatrix matrix, short [] frame, RgbLedMatrix.Matrix KIND) 
     {
 	this.matrix = matrix;
 	this.frame = frame;
+	
+	BitmapBytes = new byte[KIND.width * KIND.height *2]; //512 * 2 = 1024 or 1024 * 2 = 2048
 
 	addMouseListener(this);         
 	addMouseMotionListener(this);   
@@ -44,6 +49,24 @@ public class DrawingCanvas extends JPanel implements MouseListener, MouseMotionL
 	setPreferredSize(d);
     }
 
+    private void loadRGB565PNG() throws ConnectionLostException 
+    {		
+	if(matrix == null)
+	{
+	    throw new ConnectionLostException();
+	}
+	else
+	{
+	    int y = 0;
+	    for (int i = 0; i < frame.length; i++) 
+	    {
+		    frame[i] = (short) (((short) BitmapBytes[y] & 0xFF) | (((short) BitmapBytes[y + 1] & 0xFF) << 8));
+		    y = y + 2;
+	    }
+	    matrix.frame(frame);
+	}
+    }
+    
     /**
      * Determines the starting point of the next line
      * @param event 
@@ -70,60 +93,30 @@ public class DrawingCanvas extends JPanel implements MouseListener, MouseMotionL
 
 	lastX = current.x; 
 	lastY = current.y; 
-
 	
 	Dimension d = new Dimension(CANVAS_WIDTH, CANVAS_HEIGHT);
-	Rectangle canvas = new Rectangle(getLocation(), d);
+	Rectangle canvas = new Rectangle(getLocation(), d);	
+	BufferedImage screenCapture = null;
 	try 
 	{
-	    BufferedImage screencapture = new Robot().createScreenCapture(canvas);
-	    ByteArrayOutputStream baos = new ByteArrayOutputStream(1000);
-	    ImageIO.write(screencapture, "jpeg", baos);
-	    baos.flush();
-		
-/* I assume these bytes can be loaded into a ByteBuffer, but 
- * am not sure how to do it without Android's Bitmap, Canvas, and Matrix classes. */		
-	    byte[] imageAsRawBytes = baos.toByteArray();
-
-	    baos.close();
-
-	    int width_original = CANVAS_WIDTH;
-	    int height_original = CANVAS_HEIGHT;
-	    float scaleWidth = ((float) KIND.width) / width_original;
-	    float scaleHeight = ((float) KIND.height) / height_original;
-		
-/*
- * I am not sure how to port this commented Android graphics specific part of the code to Java desktop APIs.
-	    // create matrix for the manipulation
-	    ioio.lib.api.RgbLedMatrix.Matrix matrix2 = new ioio.lib.api.RgbLedMatrix.Matrix();
-	    // resize the bit map
-	    matrix2.postScale(scaleWidth, scaleHeight);
-	    resizedBitmap = Bitmap.createBitmap(mBitmap, 0, 0, width_original, height_original, matrix2, true);
-	    canvasBitmap = Bitmap.createBitmap(KIND.width, KIND.height, Config.RGB_565);
-	    canvas = new Canvas(canvasBitmap);
-	    //canvas.drawRGB(0,0,0); //a black background
-	    canvas.drawBitmap(resizedBitmap, 0, 0, null);
-	    canvas.rotate(90);
-	    ByteBuffer buffer = ByteBuffer.allocate(KIND.width * KIND.height * 2); //Create a new buffer
-	    canvasBitmap.copyPixelsToBuffer(buffer); //copy the bitmap 565 to the buffer		
-	    BitmapBytes = buffer.array(); //copy the buffer into the type array
-
-	    loadImage();
-
-	    if (appAlreadyStarted == 1) 
+	    screenCapture = new Robot().createScreenCapture(canvas);
+	    originalImage = screenCapture;	    
+	    try 
 	    {
-		try {
-		    matrix_.frame(frame_);    //this was caushing a crash so switched to a timer
-		} catch (ConnectionLostException e) {
-		    e.printStackTrace();
-		}
-	    }
-*/		
+		WriteImagetoMatrix();
+		loadRGB565PNG();
 	    } 
-	    catch (Exception ex) 
+	    catch (ConnectionLostException ex) 
 	    {
-		Logger.getLogger(DrawingCanvas.class.getName()).log(Level.SEVERE, null, ex);
-	    }
+		String message = "The connection to the IOIO was lost.";
+		Logger.getLogger(DrawingCanvas.class.getName()).log(Level.SEVERE, message, ex);
+	    }	    
+	} 
+	catch (AWTException ex) 
+	{
+	    String message = "An exception occured while screen captureing.";
+	    Logger.getLogger(DrawingCanvas.class.getName()).log(Level.SEVERE, message, ex);
+	}
     }
 
     public void mouseReleased(MouseEvent event) {
@@ -139,6 +132,78 @@ public class DrawingCanvas extends JPanel implements MouseListener, MouseMotionL
     }
 
     public void mouseMoved(MouseEvent event) {
+    }
+    
+    private void WriteImagetoMatrix() throws ConnectionLostException 
+    {  
+	//here we'll take a PNG, BMP, or whatever and convert it to RGB565 via a canvas, also we'll re-size the image if necessary
+		
+	int width_original = originalImage.getWidth();
+	int height_original = originalImage.getHeight();
+
+	if (width_original != KIND.width || height_original != KIND.height) 
+	{  
+	    //the image is not the right dimensions, ie, 32px by 32px	
+	    ResizedImage = new BufferedImage(KIND.width, KIND.height, originalImage.getType());
+	    Graphics2D g = ResizedImage.createGraphics();
+	    g.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+	    g.drawImage(originalImage, 0, 0, KIND.width, KIND.height, 0, 0, originalImage.getWidth(), originalImage.getHeight(), null);
+	    g.dispose(); 
+	    originalImage = ResizedImage;
+	}						
+
+	int numByte=0;
+	int i = 0;
+	int j = 0;
+	int len = BitmapBytes.length;
+
+	for (i = 0; i < KIND.height; i++) 
+	{                 
+	    for (j = 0; j < KIND.width; j++) 		 
+	    {            
+		Color c = new Color(originalImage.getRGB(j, i));  //i and j were reversed which was rotationg the image by 90 degrees
+                
+		int aRGBpix = originalImage.getRGB(j, i);  //i and j were reversed which was rotationg the image by 90 degrees
+                
+		int alpha;
+                
+		int red = c.getRed();
+                
+		int green = c.getGreen();
+                
+		int blue = c.getBlue();
+
+		//RGB888
+		//  red = (aRGBpix >> 16) & 0x0FF;
+		//  green = (aRGBpix >> 8) & 0x0FF;
+		//  blue = (aRGBpix >> 0) & 0x0FF; 
+		//  alpha = (aRGBpix >> 24) & 0x0FF;
+
+		//RGB565
+		red = red >> 3;
+		green = green >> 2;
+		blue = blue >> 3;   
+		//A pixel is represented by a 4-byte (32 bit) integer, like so:
+		//00000000 00000000 00000000 11111111
+		//^ Alpha  ^Red     ^Green   ^Blue
+		//Converting to RGB565
+
+		short pixel_to_send = 0;
+		int pixel_to_send_int = 0;
+		pixel_to_send_int = (red << 11) | (green << 5) | (blue);
+		pixel_to_send = (short) pixel_to_send_int;
+
+		//dividing into bytes
+		byte byteH=(byte)((pixel_to_send >> 8) & 0x0FF);
+		byte byteL=(byte)(pixel_to_send & 0x0FF);
+
+		//Writing it to array - High-byte is the first
+                    
+		BitmapBytes[numByte+1]=byteH;
+		BitmapBytes[numByte]=byteL;                    
+		numByte+=2;
+	    }
+	}						 	
     }
     
 }

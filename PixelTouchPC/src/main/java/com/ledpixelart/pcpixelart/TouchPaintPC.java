@@ -79,19 +79,20 @@ public class TouchPaintPC extends IOIOSwingApp implements ActionListener
 
     public TouchPaintPC() 
     {      		       
-	 setPreferences();        
+	setPreferences();        
         
-	 connectTimer = new ConnectTimer(30000,5000); //pop up a message if it's not connected by this timer
-	 connectTimer.run();//this timer will pop up a message box if the device is not found 		 		
-    }
-
-    public static void main(String[] args) throws Exception 
-    {  
+	connectTimer = new ConnectTimer(30000,5000); //pop up a message if it's not connected by this timer
+	connectTimer.run();//this timer will pop up a message box if the device is not found 		 		
+	 
 	KIND = ioio.lib.api.RgbLedMatrix.Matrix.SEEEDSTUDIO_32x32;
 	frame_ = new short[KIND.width * KIND.height];
 	BitmapBytes = new byte[KIND.width * KIND.height * 2]; //512 * 2 = 1024 or 1024 * 2 = 2048
-	
-	new TouchPaintPC().go(args); //ui stuff		
+    }
+
+    public static void main(String[] args) throws Exception 
+    {  		
+	TouchPaintPC app = new TouchPaintPC();
+	app.go(args); //ui stuff		
 
 	animateTimer = new ActionListener() 
 	{

@@ -4,8 +4,10 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.ledpixelart</groupId>
+    
     <artifactId>pcpixelart</artifactId>
-    <name>pcpixelart</name>
+    
+    <name>pixel-animations-pc</name>
 
     <packaging>jar</packaging>
     <version>1.0-SNAPSHOT</version>
