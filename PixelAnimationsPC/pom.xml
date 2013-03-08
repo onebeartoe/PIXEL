@@ -43,6 +43,72 @@
                 </configuration>
             </plugin>
 
+<plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>2.5.1</version>
+        <!--configuration>
+          <source>1.6</source>
+          <target>1.6</target>
+        </configuration-->
+      </plugin>
+      <plugin>
+         <artifactId>maven-jar-plugin</artifactId>
+         <version>2.3.2</version>
+         <configuration>
+           <archive>
+             <manifest>
+               <addClasspath>true</addClasspath>
+               <classpathPrefix>lib/</classpathPrefix>
+               <mainClass>com.ledpixelart.pc.PixelApp</mainClass>
+             </manifest>
+           </archive>
+         </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-dependency-plugin</artifactId>
+        <version>2.1</version>
+        <executions>
+          <execution>
+            <id>copy-dependencies</id>
+            <phase>package</phase>
+            <goals>
+              <goal>copy-dependencies</goal>
+            </goals>
+            <configuration>
+              <outputDirectory>${project.build.directory}/lib</outputDirectory>
+              <overWriteReleases>false</overWriteReleases>
+              <overWriteSnapshots>false</overWriteSnapshots>
+              <overWriteIfNewer>true</overWriteIfNewer>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      
+<!--
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-jarsigner-plugin</artifactId>
+        <version>1.2</version>
+        <executions>
+          <execution>
+            <goals>
+              <goal>sign</goal>
+            </goals>
+            <phase>package</phase>
+            <configuration>
+              <archiveDirectory>target/lib</archiveDirectory>
+              <keystore>/home/rmarquez/group/DHD/configuration-management/ssl-certificates/dhd.keystore</keystore>
+              <alias>dhd</alias>
+              <storepass>dhd.com</storepass>
+              <keypass>dhd.com</keypass>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+-->
+
         </plugins>
     </build>
     
