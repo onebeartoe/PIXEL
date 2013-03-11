@@ -66,7 +66,7 @@ public class PixelApp extends IOIOSwingApp implements ActionListener
     
     private static InputStream BitmapInputStream;
 
-    private static ActionListener AnimateTimer = null;
+    private static ActionListener animateTimer = null;
 
     private JFileChooser userDirectoryChooser;
     
@@ -133,7 +133,7 @@ public class PixelApp extends IOIOSwingApp implements ActionListener
 	// loadRGB565();
 	//**************************************************************************
 
-	AnimateTimer = new ActionListener() 
+	animateTimer = new ActionListener() 
 	{
 	    public void actionPerformed(ActionEvent evt) 
 	    {
@@ -333,7 +333,8 @@ public class PixelApp extends IOIOSwingApp implements ActionListener
 	    File[] listOfFiles = folder.listFiles();
 
 	    //put all the names of the file objects into myArr
-	    for (int i = 0; i < listOfFiles.length; i++) {
+	    for (int i = 0; i < listOfFiles.length; i++) 
+	    {
 		if (listOfFiles[i].isFile()) {
 		    myArr.add(directory + listOfFiles[i].getName());
 		}//end inner if
@@ -345,7 +346,7 @@ public class PixelApp extends IOIOSwingApp implements ActionListener
 	}//end else
 
 	return myArr;
-    }//end method
+    }
 
     private static void writeTest() 
     {
@@ -660,7 +661,7 @@ public class PixelApp extends IOIOSwingApp implements ActionListener
 	b40 = new JButton("", izarcade);
 	b40.setMnemonic(KeyEvent.VK_C);
 	b40.setActionCommand("zarcade");
-
+/*
 	b1.setEnabled(false);
 	b1.setEnabled(false);
 	b2.setEnabled(false);
@@ -702,7 +703,7 @@ public class PixelApp extends IOIOSwingApp implements ActionListener
 	b38.setEnabled(false);
 	b39.setEnabled(false);
 	b40.setEnabled(false);
-
+*/
 	b1.addActionListener(this);
 	b2.addActionListener(this);
 	b3.addActionListener(this);
@@ -968,7 +969,7 @@ public class PixelApp extends IOIOSwingApp implements ActionListener
 	numFrames = selectedFileTotalFrames;
 	// System.out.println("file delay: " + selectedFileDelay);
 
-	timer = new Timer(selectedFileDelay, AnimateTimer);
+	timer = new Timer(selectedFileDelay, animateTimer);
 
 	if (timer.isRunning() == true) 
         {
