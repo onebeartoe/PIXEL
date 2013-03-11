@@ -3,7 +3,6 @@ package com.ledpixelart.pc;
 
 import java.awt.GridLayout;
 import java.awt.event.ActionListener;
-import java.net.URL;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;

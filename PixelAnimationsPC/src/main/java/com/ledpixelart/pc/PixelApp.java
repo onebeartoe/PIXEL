@@ -12,7 +12,6 @@ import java.awt.BorderLayout;
 
 import java.awt.Color;
 import java.awt.Container;
-import java.awt.Dimension;
 import java.awt.Graphics2D;
 import java.awt.GridLayout;
 import java.awt.RenderingHints;
@@ -51,26 +50,30 @@ import javax.swing.JTabbedPane;
 public class PixelApp extends IOIOSwingApp implements ActionListener 
 {
 
-    private Logger logger;
-    
-    protected boolean ledOn_;
-    
-    private static RgbLedMatrix matrix_;
-    private static RgbLedMatrix.Matrix KIND;  //have to do it this way because there is a matrix library conflict
-    
-//    private static final String LOG_TAG = "PixelTest";
-    private static short[] frame_;
-    
-    private static byte[] BitmapBytes;
-
-    private static InputStream BitmapInputStream;
-
     private static int width_original;
     
     private static int height_original;
     
+    private static short[] frame_;
+    
+    private static byte[] BitmapBytes;
+    
+    private Logger logger;
+    
+    private static RgbLedMatrix matrix_;
+    
+    private static RgbLedMatrix.Matrix KIND;
+    
+    private static InputStream BitmapInputStream;
+
     private static ActionListener AnimateTimer = null;
 
+    private JFileChooser userDirectoryChooser;
+    
+    JPanel userPanel;
+    
+    JPanel userTilePanel;
+    
     private static BufferedImage originalImage;
 
     private static BufferedImage ResizedImage;
@@ -91,8 +94,11 @@ public class PixelApp extends IOIOSwingApp implements ActionListener
     private Timer timer;
     private static String decodedDirPath;
     private static String selectedFileName;
+    
     private static InputStream decodedFile;
+    
     private static BufferedReader br;
+    
     private static String line;
     private static String fdelim;
     private static String fileAttribs;
@@ -101,6 +107,12 @@ public class PixelApp extends IOIOSwingApp implements ActionListener
     public PixelApp()
     {
 	logger = Logger.getLogger(PixelApp.class.getName());//.log(Level.SEVERE, message, ex);	
+        
+        String path = System.getProperty("user.home");
+//        File homeDir = new File(path);
+//        userDirectoryChooser = new JFileChooser(homeDir);
+        userDirectoryChooser = new JFileChooser();
+        userDirectoryChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
     }
 
     public static void main(String[] args) throws Exception 
@@ -164,7 +176,7 @@ public class PixelApp extends IOIOSwingApp implements ActionListener
 	BitmapInputStream = PixelApp.class.getClassLoader().getResourceAsStream(raw565ImagePath);
 
 	try 
-	{
+	{   
 	    int n = BitmapInputStream.read(BitmapBytes, 0, BitmapBytes.length); // reads
 	    // the
 	    // input
@@ -777,26 +789,23 @@ public class PixelApp extends IOIOSwingApp implements ActionListener
 	JTabbedPane tabbedPane = new JTabbedPane();
         ImageIcon icon = createImageIcon("images/middle.gif");
         
-//        JComponent panel1 = makeTextPanel("Panel #1");
-        tabbedPane.addTab("Images", icon, imagesPanel,
-                "Load built-in images.");
+        tabbedPane.addTab("Images", icon, imagesPanel, "Load built-in images.");
         tabbedPane.setMnemonicAt(0, KeyEvent.VK_1);
         
-//        JComponent panel2 = makeTextPanel("Panel #2");
 	PixelTilePanel animationsPanel = new AnimationsPanel();
         tabbedPane.addTab("Animations", icon, animationsPanel, "Does twice as much nothing");
         tabbedPane.setMnemonicAt(1, KeyEvent.VK_2);
         
         JComponent panel3 = makeTextPanel("Panel #3");
-        tabbedPane.addTab("Interactive", icon, panel3,
-                "Still does nothing");
+        tabbedPane.addTab("Interactive", icon, panel3, "Still does nothing");
         tabbedPane.setMnemonicAt(2, KeyEvent.VK_3);
-        
-        JPanel userPanel = new JPanel();	
+                
+        userPanel = new JPanel();	
 	userPanel.setLayout( new BorderLayout() );
 	JButton userButton = new JButton("Browse");
+        userButton.addActionListener( new UserButtonListener() );
         userPanel.add(userButton, BorderLayout.NORTH);
-//	PixelTilePanel userTilePanel = new 
+        userTilePanel = makeTextPanel("panel");
         tabbedPane.addTab("User Defined", icon, userPanel, "Does nothing at all");
         tabbedPane.setMnemonicAt(3, KeyEvent.VK_4);        
         
@@ -815,7 +824,7 @@ public class PixelApp extends IOIOSwingApp implements ActionListener
     }
 
 /* delte */    
-     protected JComponent makeTextPanel(String text) 
+     protected JPanel makeTextPanel(String text) 
      {
         JPanel panel = new JPanel(false);
         JLabel filler = new JLabel(text);
@@ -956,10 +965,35 @@ public class PixelApp extends IOIOSwingApp implements ActionListener
 
 	timer = new Timer(selectedFileDelay, AnimateTimer);
 
-	if (timer.isRunning() == true) {
+	if (timer.isRunning() == true) 
+        {
 	    timer.stop();
 	}
 	timer.start();
 
     }
+    
+    private class UserButtonListener implements ActionListener    
+    {
+        public void actionPerformed(ActionEvent ae) 
+        {
+            int result = userDirectoryChooser.showOpenDialog(null);
+            if(result == JFileChooser.APPROVE_OPTION)
+            {
+                File directory = userDirectoryChooser.getSelectedFile();
+                if( directory == null )
+                {
+                    System.out.println("laters");   
+                }
+                else
+                {
+                    
+                    userPanel.remove(userTilePanel);
+                    userTilePanel = new UserProvidedPanel(directory);
+                    userPanel.add(userTilePanel, BorderLayout.CENTER);
+                }
+            }            
+        }        
+    }
+    
 }
