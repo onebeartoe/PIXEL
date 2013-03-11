@@ -4,8 +4,12 @@ package com.ledpixelart.pc;
 import java.awt.event.ActionEvent;
 import java.io.File;
 import java.io.FilenameFilter;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.ImageIcon;
 
 /**
@@ -13,7 +17,7 @@ import javax.swing.ImageIcon;
  */
 public class UserProvidedPanel extends PixelTilePanel
 {
-    File imageDirectory;
+    private File imageDirectory;
     
     public UserProvidedPanel(File imageDirectory)
     {
@@ -23,7 +27,21 @@ public class UserProvidedPanel extends PixelTilePanel
     @Override
     protected ImageIcon getImageIcon(String path) 
     {
-	throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+	String url = imagePath() + "/" + path;
+	File file = new File(url);
+	URL iconUrl;	
+	ImageIcon icon = null;
+	try 
+	{
+	    iconUrl = file.toURI().toURL();
+	    icon = new ImageIcon(iconUrl);
+	} 
+	catch (MalformedURLException ex) 
+	{
+	    Logger.getLogger(UserProvidedPanel.class.getName()).log(Level.SEVERE, null, ex);
+	}	
+	
+	return icon;
     }
 
     @Override
@@ -35,7 +53,7 @@ public class UserProvidedPanel extends PixelTilePanel
             {
                 boolean accecpted = false;
                 String toLower = string.toLowerCase();
-                if(toLower.endsWith(".gif") || toLower.endsWith(".jpg"))
+                if(toLower.endsWith(".gif") || toLower.endsWith(".jpg") || toLower.endsWith(".png"))
                 {
                     accecpted = true;
                 }
@@ -57,9 +75,10 @@ public class UserProvidedPanel extends PixelTilePanel
     @Override
     protected String imagePath() 
     {
-	throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+	return imageDirectory.getAbsolutePath();
     }
 
+    @Override
     public void actionPerformed(ActionEvent e) 
     {
 	throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.

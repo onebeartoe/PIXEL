@@ -70,9 +70,9 @@ public class PixelApp extends IOIOSwingApp implements ActionListener
 
     private JFileChooser userDirectoryChooser;
     
-    JPanel userPanel;
+    private JPanel userPanel;
     
-    JPanel userTilePanel;
+    private PixelTilePanel userTilePanel;
     
     private static BufferedImage originalImage;
 
@@ -374,6 +374,7 @@ public class PixelApp extends IOIOSwingApp implements ActionListener
 	frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);	
 	
 	GridLayout experimentLayout = new GridLayout(0, 5);
+	
 	Container imagesPanel = new JPanel();
 	imagesPanel.setLayout(experimentLayout);
 
@@ -612,7 +613,6 @@ public class PixelApp extends IOIOSwingApp implements ActionListener
 	b28.setMnemonic(KeyEvent.VK_C);
 	b28.setActionCommand("scmakeout");
 
-
 	b29 = new JButton("", iscreddance);
 	b29.setMnemonic(KeyEvent.VK_C);
 	b29.setActionCommand("screddance");
@@ -793,6 +793,7 @@ public class PixelApp extends IOIOSwingApp implements ActionListener
         tabbedPane.setMnemonicAt(0, KeyEvent.VK_1);
         
 	PixelTilePanel animationsPanel = new AnimationsPanel();
+	animationsPanel.populate();;
         tabbedPane.addTab("Animations", icon, animationsPanel, "Does twice as much nothing");
         tabbedPane.setMnemonicAt(1, KeyEvent.VK_2);
         
@@ -805,7 +806,11 @@ public class PixelApp extends IOIOSwingApp implements ActionListener
 	JButton userButton = new JButton("Browse");
         userButton.addActionListener( new UserButtonListener() );
         userPanel.add(userButton, BorderLayout.NORTH);
-        userTilePanel = makeTextPanel("panel");
+	String path = System.getProperty("user.home");
+        File homeDirectory = new File(path);
+	userTilePanel = new UserProvidedPanel(homeDirectory);
+	userTilePanel.populate();
+	userPanel.add(userTilePanel, BorderLayout.CENTER);
         tabbedPane.addTab("User Defined", icon, userPanel, "Does nothing at all");
         tabbedPane.setMnemonicAt(3, KeyEvent.VK_4);        
         
@@ -970,7 +975,6 @@ public class PixelApp extends IOIOSwingApp implements ActionListener
 	    timer.stop();
 	}
 	timer.start();
-
     }
     
     private class UserButtonListener implements ActionListener    
@@ -990,6 +994,7 @@ public class PixelApp extends IOIOSwingApp implements ActionListener
                     
                     userPanel.remove(userTilePanel);
                     userTilePanel = new UserProvidedPanel(directory);
+		    userTilePanel.populate();
                     userPanel.add(userTilePanel, BorderLayout.CENTER);
                 }
             }            
