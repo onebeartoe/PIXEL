@@ -1,6 +1,7 @@
 
 package com.ledpixelart.pc;
 
+import com.ledpixelart.pc.filters.ImageFilters;
 import java.awt.event.ActionEvent;
 import java.io.File;
 import java.io.FilenameFilter;
@@ -47,23 +48,8 @@ public class UserProvidedPanel extends PixelTilePanel
     @Override
     protected List<String> imageNames() throws Exception 
     {
-        FilenameFilter filter = new FilenameFilter() 
-        {
-            public boolean accept(File directory, String string) 
-            {
-                boolean accecpted = false;
-                String toLower = string.toLowerCase();
-                if(toLower.endsWith(".gif") || toLower.endsWith(".jpg") || toLower.endsWith(".png"))
-                {
-                    accecpted = true;
-                }
-                
-                return accecpted;
-            }
-        };
-            
         List<String> images = new ArrayList();
-        String [] files = imageDirectory.list(filter);
+        String [] files = imageDirectory.list(ImageFilters.stills);
         for(String image : files)
         {
             images.add(image);

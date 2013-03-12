@@ -792,6 +792,10 @@ public class PixelApp extends IOIOSwingApp implements ActionListener
         
         tabbedPane.addTab("Images", icon, imagesPanel, "Load built-in images.");
         tabbedPane.setMnemonicAt(0, KeyEvent.VK_1);
+	
+	PixelTilePanel imagesPanelReal = new ImageTilePanel();
+	imagesPanelReal.populate();
+	tabbedPane.addTab("Images - real", icon, imagesPanelReal, "Load built-in images.");
         
 	PixelTilePanel animationsPanel = new AnimationsPanel();
 	animationsPanel.populate();;
@@ -819,7 +823,7 @@ public class PixelApp extends IOIOSwingApp implements ActionListener
         tabbedPane.setTabLayoutPolicy(JTabbedPane.SCROLL_TAB_LAYOUT);
 
 	frame.add(tabbedPane, BorderLayout.CENTER);	
-	frame.setSize(400, 450);
+	frame.setSize(500, 450);
 	
 	// center it
 	frame.setLocationRelativeTo(null); 

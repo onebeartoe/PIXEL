@@ -13,8 +13,13 @@ import javax.swing.ImageIcon;
 /**
  * @author rmarquez
  */
-public class AnimationsPanel extends PixelTilePanel
+public class AnimationsPanel extends ImageTilePanel
 {
+    
+    public AnimationsPanel()
+    {
+	imageListPath = "/animations.text";
+    }
     
     @Override
     public void actionPerformed(ActionEvent e) 
@@ -22,33 +27,6 @@ public class AnimationsPanel extends PixelTilePanel
 	String command = e.getActionCommand();
 	System.out.println("animation comamand: " + command);
     }
-    
-    @Override
-    protected ImageIcon getImageIcon(String pathName) 
-    {
-	URL iconUrl = getClass().getResource( imagePath() + "/" + pathName);
-	ImageIcon icon = new ImageIcon(iconUrl);
-	
-	return icon;
-    }
-
-    @Override
-    protected List<String> imageNames() throws Exception
-    {
-	List<String> names = new ArrayList();
-	
-	InputStream instream = getClass().getResourceAsStream("/animations.text");
-	BufferedReader br = new BufferedReader(new InputStreamReader(instream));
-	String line = br.readLine();  	
-	while (line != null)   
-	{
-	    names.add(line);
-	    line = br.readLine();
-	}	
-	instream.close(); 		
-	
-	return names;
-    }   
 
     @Override
     protected String imagePath() 

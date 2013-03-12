@@ -41,7 +41,7 @@ public abstract class PixelTilePanel extends JPanel implements ActionListener
 	    for(String file : filenames)
 	    {
 		ImageIcon icon = getImageIcon(file);
-		JButton button = new JButton(file, icon);
+		JButton button = new JButton(icon);
 		add(button);
 		buttons.add(button);
 	    }
