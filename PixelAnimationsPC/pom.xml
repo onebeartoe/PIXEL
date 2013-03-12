@@ -43,15 +43,39 @@
                 </configuration>
             </plugin>
 
-<plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-compiler-plugin</artifactId>
-        <version>2.5.1</version>
-        <!--configuration>
-          <source>1.6</source>
-          <target>1.6</target>
-        </configuration-->
-      </plugin>
+	    <plugin>
+		<artifactId>maven-assembly-plugin</artifactId>
+		<configuration>
+		  <archive>
+		    <manifest>
+		      <mainClass>com.ledpixelart.pc.PixelApp</mainClass>
+		    </manifest>
+		  </archive>
+		  <descriptorRefs>
+		    <descriptorRef>jar-with-dependencies</descriptorRef>
+		  </descriptorRefs>
+		</configuration>
+		<executions>
+		  <execution>
+		    <id>make-assembly</id> <!-- this is used for inheritance merges -->
+		    <phase>package</phase> <!-- bind to the packaging phase -->
+		    <goals>
+		      <goal>single</goal>
+		    </goals>
+		  </execution>
+		</executions>
+	    </plugin>
+
+	<plugin>
+	    <groupId>org.apache.maven.plugins</groupId>
+	    <artifactId>maven-compiler-plugin</artifactId>
+	    <version>2.5.1</version>
+	    <!--configuration>
+	      <source>1.6</source>
+	      <target>1.6</target>
+	    </configuration-->
+	</plugin>
+
       <plugin>
          <artifactId>maven-jar-plugin</artifactId>
          <version>2.3.2</version>
@@ -65,6 +89,8 @@
            </archive>
          </configuration>
       </plugin>
+
+<!--            
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-dependency-plugin</artifactId>
@@ -85,6 +111,7 @@
           </execution>
         </executions>
       </plugin>
+-->
       
 <!--
       <plugin>
@@ -120,56 +147,28 @@
 	    <version>1.0-SNAPSHOT</version>
 	</dependency>
 
-        <dependency>
-            <groupId>com.miglayout</groupId>
-            <artifactId>miglayout-javafx</artifactId>
-            <version>4.2</version>
-        </dependency>
-
-<!--
-	<dependency>
-	     place the bin/ directory along side the 2.0 folder 
-	    <groupId>com.oracle</groupId> 
-	    <artifactId>javafx</artifactId> 
-	    <version>2.0</version>        
-	</dependency> 
--->
-        <dependency>
-            <groupId>commons-lang</groupId>
-            <artifactId>commons-lang</artifactId>
-            <version>2.6</version>
-        </dependency>
-<!--
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-api</artifactId>
-            <version>${slf4j.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>jcl-over-slf4j</artifactId>
-            <version>${slf4j.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-log4j12</artifactId>
-            <version>${slf4j.version}</version>
-        </dependency>
--->
 	<dependency>
 	    <groupId>junit</groupId>
 	    <artifactId>junit</artifactId>
 	    <version>3.8.1</version>
 	    <scope>test</scope>
 	</dependency>
+
+<!--  
+        <dependency>
+            <groupId>commons-lang</groupId>
+            <artifactId>commons-lang</artifactId>
+            <version>2.6</version>
+        </dependency>
+
+	
     
         <dependency>
             <groupId>log4j</groupId>
             <artifactId>log4j</artifactId>
             <version>1.2.16</version>
         </dependency>
+-->
 
     </dependencies>
 
