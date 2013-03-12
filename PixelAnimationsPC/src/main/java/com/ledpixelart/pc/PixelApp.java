@@ -113,7 +113,7 @@ public class PixelApp extends IOIOSwingApp
 	    logger.log(Level.SEVERE, message, ex);	
 	}	
 
-	JFrame frame = new JFrame("Click an Animation");
+	JFrame frame = new JFrame("PIXEL PC Edition");
 	frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);	
 	
 	JTabbedPane tabbedPane = new JTabbedPane();
