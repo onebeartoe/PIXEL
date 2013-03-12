@@ -2,6 +2,7 @@
 package com.ledpixelart.pc;
 
 import com.ledpixelart.pc.filters.ImageFilters;
+import ioio.lib.api.RgbLedMatrix;
 import java.awt.event.ActionEvent;
 import java.io.File;
 import java.io.FilenameFilter;
@@ -20,8 +21,9 @@ public class UserProvidedPanel extends PixelTilePanel
 {
     private File imageDirectory;
     
-    public UserProvidedPanel(File imageDirectory)
+    public UserProvidedPanel(RgbLedMatrix matrix, RgbLedMatrix.Matrix KIND, File imageDirectory)
     {
+	super(matrix, KIND);
         this.imageDirectory = imageDirectory;
     }
 

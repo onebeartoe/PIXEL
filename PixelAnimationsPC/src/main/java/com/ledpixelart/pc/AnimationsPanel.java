@@ -1,14 +1,8 @@
 
 package com.ledpixelart.pc;
 
+import ioio.lib.api.RgbLedMatrix;
 import java.awt.event.ActionEvent;
-import java.io.BufferedReader;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
-import javax.swing.ImageIcon;
 
 /**
  * @author rmarquez
@@ -16,8 +10,9 @@ import javax.swing.ImageIcon;
 public class AnimationsPanel extends ImageTilePanel
 {
     
-    public AnimationsPanel()
+    public AnimationsPanel(RgbLedMatrix matrix, RgbLedMatrix.Matrix KIND)
     {
+	super(matrix, KIND);
 	imageListPath = "/animations.text";
     }
     
