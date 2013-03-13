@@ -53,8 +53,9 @@ public class ImageTilePanel extends PixelTilePanel
 		    i = 0;
 		}
 
+		String animationName = evt.getActionCommand();
 		// framestring = "animations/decoded/boat/boat" + i + ".rgb565";
-		String framestring = "/images/" + animation_name + ".rgb565";
+		String framestring = "/images/" + animationName + ".rgb565";
 		try 
 		{
 		    System.out.println("Attemping to load " + framestring + " from the classpath.");

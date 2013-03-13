@@ -40,9 +40,10 @@ import javax.swing.JTabbedPane;
 
 public class PixelApp extends IOIOSwingApp
 {    
+    private boolean foundPixel;
 //    private static int height_original;
     
-    private Logger logger;
+    private final Logger logger;
     
     private static RgbLedMatrix matrix_;
     
@@ -76,14 +77,11 @@ public class PixelApp extends IOIOSwingApp
 	KIND = ioio.lib.api.RgbLedMatrix.Matrix.SEEEDSTUDIO_32x32;
 	
 	// ui stuff
-	new PixelApp().go(args); 	
-		
-	//************ this part of code writes to the LED matrix in code without any external file *********
-	//  writeTest(); //this just writes a test pattern to the LEDs in code without using any external file, uncomment out this line if you want to see that and then comment out the next two lines
-	//***************************************************************************************************
+	new PixelApp().go(args);			
 
 	///************ this set of code loads a raw RGB565 image *****************
-	// BitmapInputStream = PixelAlbumPC.class.getClassLoader().getResourceAsStream("images/gumball.rgb565"); //loads in a raw file in rgb565 format, use the windows program paint.net with the rgb565 plug-in to convert png, jpg, etc to this format
+	// BitmapInputStream = PixelAlbumPC.class.getClassLoader().getResourceAsStream("images/gumball.rgb565"); 
+	//loads in a raw file in rgb565 format, use the windows program paint.net with the rgb565 plug-in to convert png, jpg, etc to this format
 	//BitmapInputStream = PixelAlbumPC.class.getClassLoader().getResourceAsStream("images/ginseng.rgb565"); 
 	// loadRGB565();
 	//**************************************************************************
@@ -214,6 +212,7 @@ public class PixelApp extends IOIOSwingApp
     
     private void setPixelFound()
     {
+	foundPixel = true;
 	for(PixelTilePanel panel : imagePanels)
 	{
 	    panel.setPixelFound(true);

@@ -94,7 +94,6 @@ public abstract class PixelTilePanel extends JPanel implements ActionListener
 	}
 
 	matrix_.frame(frame_);
-
     }
     
     private static void loadRGB565PNG() throws ConnectionLostException 
@@ -221,6 +220,12 @@ public abstract class PixelTilePanel extends JPanel implements ActionListener
 	loadRGB565PNG();
     }
     
+    /**
+     * 
+     * //************ this part of code writes to the LED matrix in code without any external file *********
+	//  writeTest(); //this just writes a test pattern to the LEDs in code without using any external file, uncomment out this line if you want to see that and then comment out the next two lines
+	//***************************************************************************************************
+     */
     private static void writeTest() 
     {
 	for (int i = 0; i < frame_.length; i++) 
