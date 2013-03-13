@@ -19,16 +19,12 @@ import javax.swing.Timer;
  */
 public class ImageTilePanel extends PixelTilePanel
 {
-   
-    private static int i = 0;
-    
+       
     protected String imageListPath = "/images.text";
     
-    private String command;
+    private volatile String command;
     
     private static ActionListener animateTimer = null;
-    
-    private int numFrames = 0;
     
     public ImageTilePanel(RgbLedMatrix matrix, RgbLedMatrix.Matrix KIND)
     {
@@ -44,15 +40,7 @@ public class ImageTilePanel extends PixelTilePanel
 		    return;
 		}
 
-		i++;
-
-		if (i >= numFrames - 1) 
-		{
-		    i = 0;
-		}
-
-		String animationName = command;		
-		String framestring = "/images/" + animationName + ".rgb565";
+		String framestring = "/images/" + command + ".rgb565";
 		try 
 		{
 		    System.out.println("Attemping to load " + framestring + " from the classpath.");
