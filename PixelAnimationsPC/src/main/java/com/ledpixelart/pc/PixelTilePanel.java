@@ -81,6 +81,8 @@ public abstract class PixelTilePanel extends JPanel implements ActionListener
 	} 
 	catch (IOException e) 
 	{
+	    System.err.println("An error occured while trying to load " + raw565ImagePath + ".");
+	    System.err.println("Make sure " + raw565ImagePath + "is included in the executable JAR.");
 	    e.printStackTrace();
 	}
 

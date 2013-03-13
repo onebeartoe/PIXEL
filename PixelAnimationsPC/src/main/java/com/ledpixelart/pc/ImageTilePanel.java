@@ -54,9 +54,10 @@ public class ImageTilePanel extends PixelTilePanel
 		}
 
 		// framestring = "animations/decoded/boat/boat" + i + ".rgb565";
-		String framestring = "animations/decoded/" + animation_name + "/" + animation_name + i + ".rgb565";
+		String framestring = "/images/" + animation_name + ".rgb565";
 		try 
 		{
+		    System.out.println("Attemping to load " + framestring + " from the classpath.");
 		    loadRGB565(framestring);
 		} 
 		catch (ConnectionLostException e1) 
