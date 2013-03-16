@@ -22,45 +22,22 @@ public class ImageTilePanel extends PixelTilePanel
        
     protected String imageListPath = "/images.text";
     
-    private volatile String command;
+//    private volatile String command;
     
-    private static ActionListener animateTimer = null;
+//    private static ActionListener animateTimer = null;
     
     public ImageTilePanel(RgbLedMatrix matrix, RgbLedMatrix.Matrix KIND)
     {
-	super(matrix, KIND);
-	
-	animateTimer = new ActionListener() 
-	{
-	    public void actionPerformed(ActionEvent evt) 
-	    {
-		if (!pixelFound) 
-		{  
-		    //only go here if PIXEL wa found, other leave the timer
-		    return;
-		}
-
-		String framestring = "/images/" + command + ".rgb565";
-		try 
-		{
-		    System.out.println("Attemping to load " + framestring + " from the classpath.");
-		    loadRGB565(framestring);
-		} 
-		catch (ConnectionLostException e1) 
-		{
-		    // TODO Auto-generated catch block
-		    e1.printStackTrace();
-		}
-	    }
-	};
+	super(matrix, KIND);	
     }
     
     @Override
     public void actionPerformed(ActionEvent event) 
     {	
-	command = event.getActionCommand();
+	String command = event.getActionCommand();
 	System.out.println("image comamand: " + command);	
 	int selectedFileDelay = 100;
+        ImageTimer animateTimer = new ImageTimer((command));
 	Timer timer = new Timer(selectedFileDelay, animateTimer);
 
 	if (timer.isRunning() == true) 
@@ -100,6 +77,37 @@ public class ImageTilePanel extends PixelTilePanel
     protected String imagePath() 
     {
 	return "/images";
+    }
+    
+    class ImageTimer implements ActionListener
+    {
+        private String imageName;
+        
+        public ImageTimer(String imageName)
+        {
+            this.imageName = imageName;
+        }
+        
+        public void actionPerformed(ActionEvent evt) 
+        {
+            if (!pixelFound) 
+            {  
+                //only go here if PIXEL wa found, other leave the timer
+                return;
+            }
+
+            String framestring = "/images/" + imageName + ".rgb565";
+            try 
+            {
+                System.out.println("Attemping to load " + framestring + " from the classpath.");
+                loadRGB565(framestring);
+            } 
+            catch (ConnectionLostException e1) 
+            {
+                // TODO Auto-generated catch block
+                e1.printStackTrace();
+            }
+        }	
     }
     
 }
