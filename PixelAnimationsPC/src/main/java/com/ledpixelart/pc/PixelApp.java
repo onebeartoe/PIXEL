@@ -54,7 +54,9 @@ public class PixelApp extends IOIOSwingApp
     
     private PixelTilePanel userTilePanel;
     
-    private List<PixelTilePanel> imagePanels;   
+    private List<PixelTilePanel> imagePanels;
+    
+    private IOIO ioiO;   
     
     public PixelApp()
     {
@@ -111,6 +113,7 @@ public class PixelApp extends IOIOSwingApp
 	JTabbedPane tabbedPane = new JTabbedPane();
         ImageIcon icon = createImageIcon("images/middle.gif");                
 	
+        RgbLedMatrix matrix_ = getMatrix();
 	PixelTilePanel imagesPanelReal = new ImageTilePanel(matrix_, KIND);
 	imagesPanelReal.populate();
 	imagePanels.add(imagesPanelReal);
@@ -193,7 +196,8 @@ public class PixelApp extends IOIOSwingApp
 		    InterruptedException 
 	    {
 		led_ = ioio_.openDigitalOutput(IOIO.LED_PIN, true);
-		matrix_ = ioio_.openRgbLedMatrix(KIND);
+                PixelApp.this.ioiO = ioio_;
+		RgbLedMatrix matrix_ = ioio_.openRgbLedMatrix(KIND);
 		setPixelFound();
 		System.out.println("Found PIXEL: " + matrix_ + "\n");
 		System.out.println("You may now select one of the animations\n");
@@ -228,12 +232,41 @@ public class PixelApp extends IOIOSwingApp
                 else
                 {                    
                     userPanel.remove(userTilePanel);
+                    RgbLedMatrix matrix_ = getMatrix();
+                    
                     userTilePanel = new UserProvidedPanel(matrix_, KIND, directory);
 		    userTilePanel.populate();
                     userPanel.add(userTilePanel, BorderLayout.CENTER);
                 }
             }            
         }        
+    }
+    
+    private RgbLedMatrix getMatrix() 
+    {
+        RgbLedMatrix matrix_ = null;
+        try 
+        {
+            while(ioiO == null)
+            {
+                try 
+                {
+                    Thread.sleep(1000);
+                } 
+                catch (InterruptedException ex) 
+                {
+                    Logger.getLogger(PixelApp.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+            matrix_ = ioiO.openRgbLedMatrix(KIND);
+        } 
+        catch (ConnectionLostException ex) 
+        {
+            String message = "The IOIO connection was lost.";
+            Logger.getLogger(PixelApp.class.getName()).log(Level.SEVERE, message, ex);
+        }
+        
+        return matrix_;
     }
     
 }
