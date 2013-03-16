@@ -41,7 +41,7 @@ public abstract class PixelTilePanel extends JPanel implements ActionListener
     
     protected RgbLedMatrix.Matrix KIND;   
     
-    public PixelTilePanel(RgbLedMatrix matrix, RgbLedMatrix.Matrix KIND)
+    public PixelTilePanel(RgbLedMatrix.Matrix KIND)
     {
 	GridLayout experimentLayout = new GridLayout(0, 5);
 	experimentLayout.setHgap(5);	
@@ -59,8 +59,8 @@ public abstract class PixelTilePanel extends JPanel implements ActionListener
 	
 	this.KIND = KIND;
 	
-	this.matrix_ = matrix;
-        System.out.println("matrix in PixelTilePanel: " + this.matrix_);
+//	this.matrix_ = matrix;
+//        System.out.println("matrix in PixelTilePanel: " + this.matrix_);
     }
     
     protected void loadRGB565(String raw565ImagePath) throws ConnectionLostException 
@@ -93,7 +93,7 @@ public abstract class PixelTilePanel extends JPanel implements ActionListener
 	    frame_[f] = (short) (((short) BitmapBytes[y] & 0xFF) | (((short) BitmapBytes[y + 1] & 0xFF) << 8));
 	    y = y + 2;
 	}
-
+        matrix_= PixelApp.getMatrix();
 	matrix_.frame(frame_);
     }
     

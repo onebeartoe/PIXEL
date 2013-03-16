@@ -10,9 +10,9 @@ import java.awt.event.ActionEvent;
 public class AnimationsPanel extends ImageTilePanel
 {
     
-    public AnimationsPanel(RgbLedMatrix matrix, RgbLedMatrix.Matrix KIND)
+    public AnimationsPanel(RgbLedMatrix.Matrix KIND)
     {
-	super(matrix, KIND);
+	super(KIND);
 	imageListPath = "/animations.text";
     }
     

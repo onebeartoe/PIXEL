@@ -21,9 +21,9 @@ public class UserProvidedPanel extends PixelTilePanel
 {
     private File imageDirectory;
     
-    public UserProvidedPanel(RgbLedMatrix matrix, RgbLedMatrix.Matrix KIND, File imageDirectory)
+    public UserProvidedPanel(RgbLedMatrix.Matrix KIND, File imageDirectory)
     {
-	super(matrix, KIND);
+	super(KIND);
         this.imageDirectory = imageDirectory;
     }
 

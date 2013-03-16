@@ -26,9 +26,9 @@ public class ImageTilePanel extends PixelTilePanel
     
 //    private static ActionListener animateTimer = null;
     
-    public ImageTilePanel(RgbLedMatrix matrix, RgbLedMatrix.Matrix KIND)
+    public ImageTilePanel(RgbLedMatrix.Matrix KIND)
     {
-	super(matrix, KIND);	
+	super(KIND);	
     }
     
     @Override

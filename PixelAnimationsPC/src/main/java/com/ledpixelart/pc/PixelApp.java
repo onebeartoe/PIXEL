@@ -44,7 +44,7 @@ public class PixelApp extends IOIOSwingApp
     
     private final Logger logger;
     
-    private RgbLedMatrix matrix_;
+    private static RgbLedMatrix matrix_;
 
     public RgbLedMatrix getMatrix_() {
         return matrix_;
@@ -54,7 +54,7 @@ public class PixelApp extends IOIOSwingApp
         this.matrix_ = matrix_;
     }
     
-    private RgbLedMatrix.Matrix KIND;   
+    private static RgbLedMatrix.Matrix KIND;   
 
     private JFileChooser userDirectoryChooser;
     
@@ -64,7 +64,7 @@ public class PixelApp extends IOIOSwingApp
     
     private List<PixelTilePanel> imagePanels;
     
-    private IOIO ioiO;   
+    private static IOIO ioiO;   
     
     public PixelApp()
     {
@@ -122,12 +122,12 @@ public class PixelApp extends IOIOSwingApp
         ImageIcon icon = createImageIcon("images/middle.gif");                
 	
         //matrix_ = getMatrix();
-	PixelTilePanel imagesPanelReal = new ImageTilePanel(matrix_, KIND);
+	PixelTilePanel imagesPanelReal = new ImageTilePanel(KIND);
 	imagesPanelReal.populate();
 	imagePanels.add(imagesPanelReal);
 	tabbedPane.addTab("Images", icon, imagesPanelReal, "Load built-in images.");
         
-	PixelTilePanel animationsPanel = new AnimationsPanel(matrix_, KIND);
+	PixelTilePanel animationsPanel = new AnimationsPanel(KIND);
 	animationsPanel.populate();
 	imagePanels.add(animationsPanel);
         tabbedPane.addTab("Animations", icon, animationsPanel, "Does twice as much nothing");
@@ -144,7 +144,7 @@ public class PixelApp extends IOIOSwingApp
         userPanel.add(userButton, BorderLayout.NORTH);
 	String path = System.getProperty("user.home");
         File homeDirectory = new File(path);
-	userTilePanel = new UserProvidedPanel(matrix_, KIND, homeDirectory);
+	userTilePanel = new UserProvidedPanel(KIND, homeDirectory);
 	userTilePanel.populate();
 	imagePanels.add(userTilePanel);
 	userPanel.add(userTilePanel, BorderLayout.CENTER);
@@ -242,7 +242,7 @@ public class PixelApp extends IOIOSwingApp
                     userPanel.remove(userTilePanel);
                     RgbLedMatrix matrix_ = getMatrix();
                     
-                    userTilePanel = new UserProvidedPanel(matrix_, KIND, directory);
+                    userTilePanel = new UserProvidedPanel(KIND, directory);
 		    userTilePanel.populate();
                     userPanel.add(userTilePanel, BorderLayout.CENTER);
                 }
@@ -250,17 +250,18 @@ public class PixelApp extends IOIOSwingApp
         }        
     }
     
-    private RgbLedMatrix getMatrix() 
+    public static RgbLedMatrix getMatrix() 
     {
-        RgbLedMatrix matrix_ = null;
-        try 
-        {
-            matrix_ = ioiO.openRgbLedMatrix(KIND);
-        } 
-        catch (ConnectionLostException ex) 
-        {
-            String message = "The IOIO connection was lost.";
-            Logger.getLogger(PixelApp.class.getName()).log(Level.SEVERE, message, ex);
+        if (matrix_==null) {
+            try 
+            {
+                matrix_ = ioiO.openRgbLedMatrix(KIND);
+            } 
+            catch (ConnectionLostException ex) 
+            {
+                String message = "The IOIO connection was lost.";
+                Logger.getLogger(PixelApp.class.getName()).log(Level.SEVERE, message, ex);
+            }
         }
         
         return matrix_;
