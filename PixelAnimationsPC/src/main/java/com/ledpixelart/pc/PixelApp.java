@@ -44,9 +44,9 @@ public class PixelApp extends IOIOSwingApp
     
     private final Logger logger;
     
-    private static RgbLedMatrix matrix_;
+    private RgbLedMatrix matrix_;
     
-    private static RgbLedMatrix.Matrix KIND;   
+    private RgbLedMatrix.Matrix KIND;   
 
     private JFileChooser userDirectoryChooser;
     
@@ -55,26 +55,21 @@ public class PixelApp extends IOIOSwingApp
     private PixelTilePanel userTilePanel;
     
     private List<PixelTilePanel> imagePanels;   
-
-//    private static BufferedImage ResizedImage;
     
     public PixelApp()
     {
 	logger = Logger.getLogger(PixelApp.class.getName());//.log(Level.SEVERE, message, ex);	
-        
-//        String path = System.getProperty("user.home");
-//        File homeDir = new File(path);
-//        userDirectoryChooser = new JFileChooser(homeDir);
+
         userDirectoryChooser = new JFileChooser();
         userDirectoryChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
 	
 	imagePanels = new ArrayList();
+        
+        KIND = ioio.lib.api.RgbLedMatrix.Matrix.SEEEDSTUDIO_32x32;
     }
 
     public static void main(String[] args) throws Exception 
-    {
-	KIND = ioio.lib.api.RgbLedMatrix.Matrix.SEEEDSTUDIO_32x32;
-	
+    {		
 	// ui stuff
 	new PixelApp().go(args);			
 
@@ -87,7 +82,7 @@ public class PixelApp extends IOIOSwingApp
 	
     }        
 
-    public static byte[] extractBytes(BufferedImage image) throws IOException 
+    public byte[] extractBytes(BufferedImage image) throws IOException 
     {
 
 	// get DataBufferBytes from Raster
@@ -170,7 +165,7 @@ public class PixelApp extends IOIOSwingApp
         return panel;
     }
      
-    protected static ImageIcon createImageIcon(String path) 
+    protected ImageIcon createImageIcon(String path) 
     {
         java.net.URL imgURL = PixelApp.class.getResource(path);
         if (imgURL != null) {
