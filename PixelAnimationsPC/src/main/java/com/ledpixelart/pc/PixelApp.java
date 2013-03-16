@@ -41,7 +41,6 @@ import javax.swing.JTabbedPane;
 public class PixelApp extends IOIOSwingApp
 {    
     private boolean foundPixel;
-//    private static int height_original;
     
     private final Logger logger;
     
@@ -201,7 +200,7 @@ public class PixelApp extends IOIOSwingApp
 		led_ = ioio_.openDigitalOutput(IOIO.LED_PIN, true);
 		matrix_ = ioio_.openRgbLedMatrix(KIND);
 		setPixelFound();
-		System.out.println("Found PIXEL\n");
+		System.out.println("Found PIXEL: " + matrix_ + "\n");
 		System.out.println("You may now select one of the animations\n");
 		enableButtons();
 		
