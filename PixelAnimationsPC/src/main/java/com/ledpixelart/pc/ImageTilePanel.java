@@ -37,14 +37,24 @@ public class ImageTilePanel extends PixelTilePanel
 	String command = event.getActionCommand();
 	System.out.println("image comamand: " + command);	
 	int selectedFileDelay = 100;
-        ImageTimer animateTimer = new ImageTimer((command));
-	Timer timer = new Timer(selectedFileDelay, animateTimer);
+        
+        if (!pixelFound) 
+        {  
+            //only go here if PIXEL wa found, other leave the timer
+            return;
+        }
 
-	if (timer.isRunning() == true) 
+        String framestring = "images/" + command + ".rgb565";
+        try 
         {
-	    timer.stop();
-	}
-	timer.start();
+            System.out.println("Attemping to load " + framestring + " from the classpath.");
+            loadRGB565(framestring);
+        } 
+        catch (ConnectionLostException e1) 
+        {
+            // TODO Auto-generated catch block
+            e1.printStackTrace();
+        }               
     }    
 	
     @Override
