@@ -96,7 +96,7 @@ public class ImageTilePanel extends PixelTilePanel
                 return;
             }
 
-            String framestring = "/images/" + imageName + ".rgb565";
+            String framestring = "images/" + imageName + ".rgb565";
             try 
             {
                 System.out.println("Attemping to load " + framestring + " from the classpath.");

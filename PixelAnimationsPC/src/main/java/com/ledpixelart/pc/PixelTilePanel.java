@@ -29,17 +29,17 @@ public abstract class PixelTilePanel extends JPanel implements ActionListener
 {
     protected List<JButton> buttons;
     
-    protected static byte[] BitmapBytes;
+    protected byte[] BitmapBytes;
     
     protected boolean pixelFound;
     
-    protected static InputStream BitmapInputStream;
+    protected InputStream BitmapInputStream;
     
-    protected static short[] frame_;
+    protected short[] frame_;
     
-    protected static RgbLedMatrix matrix_;
+    protected RgbLedMatrix matrix_;
     
-    protected static RgbLedMatrix.Matrix KIND;   
+    protected RgbLedMatrix.Matrix KIND;   
     
     public PixelTilePanel(RgbLedMatrix matrix, RgbLedMatrix.Matrix KIND)
     {
@@ -62,7 +62,7 @@ public abstract class PixelTilePanel extends JPanel implements ActionListener
 	this.matrix_ = matrix;
     }
     
-    protected static void loadRGB565(String raw565ImagePath) throws ConnectionLostException 
+    protected void loadRGB565(String raw565ImagePath) throws ConnectionLostException 
     {
 
 	BitmapInputStream = PixelApp.class.getClassLoader().getResourceAsStream(raw565ImagePath);
@@ -96,7 +96,7 @@ public abstract class PixelTilePanel extends JPanel implements ActionListener
 	matrix_.frame(frame_);
     }
     
-    private static void loadRGB565PNG() throws ConnectionLostException 
+    private void loadRGB565PNG() throws ConnectionLostException 
     {
 	int y = 0;
 	for (int f = 0; f < frame_.length; f++) 
@@ -147,7 +147,7 @@ public abstract class PixelTilePanel extends JPanel implements ActionListener
 	pixelFound = found;
     }
     
-    private static void writeImagetoMatrix(String imagePath) throws ConnectionLostException 
+    private void writeImagetoMatrix(String imagePath) throws ConnectionLostException 
     {  
 	//here we'll take a PNG, BMP, or whatever and convert it to RGB565 via a canvas, also we'll re-size the image if necessary
 	
@@ -226,7 +226,7 @@ public abstract class PixelTilePanel extends JPanel implements ActionListener
 	//  writeTest(); //this just writes a test pattern to the LEDs in code without using any external file, uncomment out this line if you want to see that and then comment out the next two lines
 	//***************************************************************************************************
      */
-    private static void writeTest() 
+    private void writeTest() 
     {
 	for (int i = 0; i < frame_.length; i++) 
 	{
