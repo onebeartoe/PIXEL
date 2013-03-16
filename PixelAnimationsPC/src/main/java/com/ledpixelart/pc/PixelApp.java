@@ -45,6 +45,14 @@ public class PixelApp extends IOIOSwingApp
     private final Logger logger;
     
     private RgbLedMatrix matrix_;
+
+    public RgbLedMatrix getMatrix_() {
+        return matrix_;
+    }
+
+    public void setMatrix_(RgbLedMatrix matrix_) {
+        this.matrix_ = matrix_;
+    }
     
     private RgbLedMatrix.Matrix KIND;   
 
@@ -113,7 +121,7 @@ public class PixelApp extends IOIOSwingApp
 	JTabbedPane tabbedPane = new JTabbedPane();
         ImageIcon icon = createImageIcon("images/middle.gif");                
 	
-        RgbLedMatrix matrix_ = getMatrix();
+        //matrix_ = getMatrix();
 	PixelTilePanel imagesPanelReal = new ImageTilePanel(matrix_, KIND);
 	imagesPanelReal.populate();
 	imagePanels.add(imagesPanelReal);
@@ -197,7 +205,7 @@ public class PixelApp extends IOIOSwingApp
 	    {
 		led_ = ioio_.openDigitalOutput(IOIO.LED_PIN, true);
                 PixelApp.this.ioiO = ioio_;
-		RgbLedMatrix matrix_ = ioio_.openRgbLedMatrix(KIND);
+		matrix_ = ioio_.openRgbLedMatrix(KIND);
 		setPixelFound();
 		System.out.println("Found PIXEL: " + matrix_ + "\n");
 		System.out.println("You may now select one of the animations\n");
@@ -247,17 +255,6 @@ public class PixelApp extends IOIOSwingApp
         RgbLedMatrix matrix_ = null;
         try 
         {
-            while(ioiO == null)
-            {
-                try 
-                {
-                    Thread.sleep(1000);
-                } 
-                catch (InterruptedException ex) 
-                {
-                    Logger.getLogger(PixelApp.class.getName()).log(Level.SEVERE, null, ex);
-                }
-            }
             matrix_ = ioiO.openRgbLedMatrix(KIND);
         } 
         catch (ConnectionLostException ex) 
