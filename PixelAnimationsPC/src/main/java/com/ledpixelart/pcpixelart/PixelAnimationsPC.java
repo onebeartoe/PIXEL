@@ -71,19 +71,19 @@ public class PixelAnimationsPC extends IOIOSwingApp implements ActionListener
 	private static String animation_name;
 	private StringBuilder text = new StringBuilder();
 	//private String fileAttribs = null;
-	private int selectedFileTotalFrames;
- 	private int selectedFileDelay;
+//	private int selectedFileTotalFrames;
+// 	private int selectedFileDelay;
  	private int selectedFileResolution;
  	private Timer timer;
  	
-	private static String decodedDirPath;
-	private static String selectedFileName;
-	private static InputStream decodedFile;
+	//private static String decodedDirPath;
+//	private static String selectedFileName;
+//	private static InputStream decodedFile;
 	private static BufferedReader br;
 	private static String line;
 	private static String fdelim;
-	private static String fileAttribs;
-	private static String[] fileAttribs2;
+//	private static String fileAttribs;
+//	private static String[] fileAttribs2;
 
 	
 	public static void main(String[] args) throws Exception {  //this used to be static
@@ -884,20 +884,20 @@ public class PixelAnimationsPC extends IOIOSwingApp implements ActionListener
 	
 
 	@Override
-	public void actionPerformed(ActionEvent event) {
+	public void actionPerformed(ActionEvent event) 
+        {
+            String selectedFileName = event.getActionCommand();
+            String decodedDirPath = "animations/decoded";			    
 		
-		selectedFileName = event.getActionCommand();
-		decodedDirPath = "animations/decoded";
-		
-	    //System.out.println("selected file name: " + selectedFileName);
-		
-		decodedFile = PixelAnimationsPC.class.getClassLoader().getResourceAsStream(decodedDirPath + "/" + selectedFileName  + "/" + selectedFileName + ".txt"); //decoded/rain/rain.text
+            InputStream decodedFile = PixelAnimationsPC.class.getClassLoader().getResourceAsStream(decodedDirPath + "/" + selectedFileName  + "/" + selectedFileName + ".txt"); //decoded/rain/rain.text
 		//note can't use file operator here as you can't reference files from a jar file
 		
-		if (decodedFile != null) {
-	   		    // ok good, now let's read it, we need to get the total numbers of frames and the frame speed
-
-	   	      try {
+            if (decodedFile != null) 
+            {
+                // ok good, now let's read it, we need to get the total numbers of frames and the frame speed
+                    
+                try 
+                {
 	   	        //  BufferedReader br = new BufferedReader(new FileReader(decodedFile));
 	   	        br = new BufferedReader(
 	   	                new InputStreamReader(decodedFile));
@@ -913,23 +913,20 @@ public class PixelAnimationsPC extends IOIOSwingApp implements ActionListener
 	   	          //You'll need to add proper error handling here
 	   	      }
 
-	   	    fileAttribs = line.toString();  //now convert to a string	 
+	   	    String fileAttribs = line.toString();  //now convert to a string	 
 	   	    //System.out.println(fileAttribs);
-	   	    fdelim = "[,]"; //now parse this string considering the comma split  ie, 32,60
-	        fileAttribs2 = fileAttribs.split(fdelim);
-	        selectedFileTotalFrames = Integer.parseInt(fileAttribs2[0].trim());
+	   	    String fdelim = "[,]"; //now parse this string considering the comma split  ie, 32,60
+	        String [] fileAttribs2 = fileAttribs.split(fdelim);
+	        int selectedFileTotalFrames = Integer.parseInt(fileAttribs2[0].trim());
 	        
 	   	    //System.out.println("total frames: " + selectedFileTotalFrames);
 	   	    //System.out.println(fileAttribs2[0] + " " + fileAttribs2[1] + fileAttribs2[2]);
 	        
-	    	selectedFileDelay = Integer.parseInt(fileAttribs2[1].trim());
+	    	int selectedFileDelay = Integer.parseInt(fileAttribs2[1].trim());
 	    	//selectedFileResolution = 32;
 	    	//selectedFileResolution = Integer.parseInt(fileAttribs2[2].trim());
-		}
-		
-		 // System.out.println(fileAttribs);
-		
-		//****** Now let's setup the animation ******
+                
+                //****** Now let's setup the animation ******
 		i = 0;
 		animation_name = event.getActionCommand();
 		numFrames = selectedFileTotalFrames;
@@ -942,5 +939,10 @@ public class PixelAnimationsPC extends IOIOSwingApp implements ActionListener
 		 }
          timer.start();
 		//*********************************************
+		}
+		
+		 // System.out.println(fileAttribs);
+		
+		
 	}
 }
