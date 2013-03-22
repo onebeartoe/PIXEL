@@ -4,6 +4,7 @@ package com.ledpixelart.pcpixelart;
 import ioio.lib.api.DigitalOutput;
 import ioio.lib.api.IOIO;
 import ioio.lib.api.RgbLedMatrix;
+import ioio.lib.api.RgbLedMatrix.Matrix;
 import ioio.lib.api.exception.ConnectionLostException;
 import ioio.lib.util.BaseIOIOLooper;
 import ioio.lib.util.IOIOLooper;
@@ -47,6 +48,7 @@ public class TouchPaintPC extends IOIOSwingApp implements ActionListener
     private int deviceFound = 0;    
     private int matrix_model;    
     
+    private static IOIO ioiO;   
     private static RgbLedMatrix matrix_;
     private static RgbLedMatrix.Matrix KIND;  //have to do it this way because there is a matrix library conflict
 
@@ -68,6 +70,7 @@ public class TouchPaintPC extends IOIOSwingApp implements ActionListener
     private int selectedFileDelay;
 
     private Timer timer;
+    
     private static String decodedDirPath;
     private static String selectedFileName;
     private static InputStream decodedFile;
@@ -134,6 +137,7 @@ public class TouchPaintPC extends IOIOSwingApp implements ActionListener
 	    y = y + 2;
 	}
 
+        RgbLedMatrix matrix_ = getMatrix();
 	if(matrix_ != null)
 	{
 	    matrix_.frame(frame_);
@@ -149,6 +153,7 @@ public class TouchPaintPC extends IOIOSwingApp implements ActionListener
 	    y = y + 2;
 	}
 
+        RgbLedMatrix matrix_ = getMatrix();
 	matrix_.frame(frame_);
     }
     
@@ -183,13 +188,13 @@ public class TouchPaintPC extends IOIOSwingApp implements ActionListener
 	frame_ = new short [KIND.width * KIND.height];
 	BitmapBytes = new byte[KIND.width * KIND.height *2]; //512 * 2 = 1024 or 1024 * 2 = 2048
 	 
-	try 
+//	try 
 	{
-	    loadRGB565(); //this function loads a raw RGB565 image to the matrix
+//	    loadRGB565(); //this function loads a raw RGB565 image to the matrix
 	} 
-	catch (ConnectionLostException ex) 
+//	catch (ConnectionLostException ex) 
 	{
-	    Logger.getLogger(TouchPaintPC.class.getName()).log(Level.SEVERE, null, ex);
+//	    Logger.getLogger(TouchPaintPC.class.getName()).log(Level.SEVERE, null, ex);
 	}          
     }
 
@@ -332,6 +337,24 @@ public class TouchPaintPC extends IOIOSwingApp implements ActionListener
 	return myArr;
     }
 
+    public static RgbLedMatrix getMatrix() 
+    {        
+        if (matrix_ == null) 
+        {
+            try 
+            {
+                matrix_ = ioiO.openRgbLedMatrix(KIND);
+            } 
+            catch (ConnectionLostException ex) 
+            {
+                String message = "The IOIO connection was lost.";
+                Logger.getLogger(TouchPaintPC.class.getName()).log(Level.SEVERE, message, ex);
+            }
+        }
+        
+        return matrix_;
+    }
+        
     private static void writeTest() 
     {
 	for (int i = 0; i < frame_.length; i++) 
@@ -364,6 +387,7 @@ public class TouchPaintPC extends IOIOSwingApp implements ActionListener
 
 	contentPane.setLayout(experimentLayout);
 	JLabel label = new JLabel("PixelTouchPC");
+//        RgbLedMatrix matrix_ = getMatrix();
 	DrawingCanvas canvas = new DrawingCanvas(matrix_, frame_, KIND);
 	contentPane.add(canvas, BorderLayout.CENTER);
 
@@ -385,7 +409,12 @@ public class TouchPaintPC extends IOIOSwingApp implements ActionListener
 	    protected void setup() throws ConnectionLostException, InterruptedException 
 	    {
 		led_ = ioio_.openDigitalOutput(IOIO.LED_PIN, true);
+                
+//                RgbLedMatrix matrix_ = getMatrix();
 		matrix_ = ioio_.openRgbLedMatrix(KIND);
+                
+                TouchPaintPC.this.ioiO = ioio_;
+                
 		pixelFound = true;
 		
 		System.out.println("Found PIXEL\n");
@@ -457,7 +486,8 @@ public class TouchPaintPC extends IOIOSwingApp implements ActionListener
 	@Override
 	protected void setup() throws ConnectionLostException 
 	{
-	    matrix_ = ioio_.openRgbLedMatrix(KIND);
+//            RgbLedMatrix matrix_ = getMatrix();
+//	    matrix_ = ioio_.openRgbLedMatrix(KIND);
 	    deviceFound = 1; 
 
 	    //if we went here, then we are connected over bluetooth or USB

@@ -23,7 +23,7 @@ public class DrawingCanvas extends JPanel implements MouseListener, MouseMotionL
     
     private ioio.lib.api.RgbLedMatrix.Matrix KIND;
     
-    private ioio.lib.api.RgbLedMatrix matrix;
+//    private ioio.lib.api.RgbLedMatrix matrix;
     
     private short [] frame;
     private static byte[] BitmapBytes;
@@ -33,7 +33,7 @@ public class DrawingCanvas extends JPanel implements MouseListener, MouseMotionL
           
     public DrawingCanvas(RgbLedMatrix matrix, short [] frame, RgbLedMatrix.Matrix KIND) 
     {
-	this.matrix = matrix;
+//	this.matrix = matrix;
 	this.frame = frame;
 	
 	BitmapBytes = new byte[KIND.width * KIND.height *2]; //512 * 2 = 1024 or 1024 * 2 = 2048
@@ -51,7 +51,7 @@ public class DrawingCanvas extends JPanel implements MouseListener, MouseMotionL
 
     private void loadRGB565PNG() throws ConnectionLostException 
     {		
-	if(matrix == null)
+	if(TouchPaintPC.getMatrix() == null)
 	{
 	    throw new ConnectionLostException();
 	}
@@ -63,7 +63,7 @@ public class DrawingCanvas extends JPanel implements MouseListener, MouseMotionL
 		    frame[i] = (short) (((short) BitmapBytes[y] & 0xFF) | (((short) BitmapBytes[y + 1] & 0xFF) << 8));
 		    y = y + 2;
 	    }
-	    matrix.frame(frame);
+	    TouchPaintPC.getMatrix().frame(frame);
 	}
     }
     
