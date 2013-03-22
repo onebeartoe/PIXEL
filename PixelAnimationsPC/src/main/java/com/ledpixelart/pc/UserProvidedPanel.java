@@ -5,7 +5,6 @@ import com.ledpixelart.pc.filters.ImageFilters;
 import ioio.lib.api.RgbLedMatrix;
 import java.awt.event.ActionEvent;
 import java.io.File;
-import java.io.FilenameFilter;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -69,7 +68,7 @@ public class UserProvidedPanel extends PixelTilePanel
     @Override
     public void actionPerformed(ActionEvent e) 
     {
-	throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+	
     }
     
 }

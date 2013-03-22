@@ -22,10 +22,6 @@ public class ImageTilePanel extends PixelTilePanel
        
     protected String imageListPath = "/images.text";
     
-//    private volatile String command;
-    
-//    private static ActionListener animateTimer = null;
-    
     public ImageTilePanel(RgbLedMatrix.Matrix KIND)
     {
 	super(KIND);	
@@ -36,7 +32,6 @@ public class ImageTilePanel extends PixelTilePanel
     {	
 	String command = event.getActionCommand();
 	System.out.println("image comamand: " + command);	
-	int selectedFileDelay = 100;
         
         if (!pixelFound) 
         {  
@@ -47,14 +42,11 @@ public class ImageTilePanel extends PixelTilePanel
         String framestring = "images/" + command + ".png";
         try 
         {
-// good day            
             System.out.println("Attemping to load " + framestring + " from the classpath.");
-//            loadRGB565(framestring);
             writeImagetoMatrix(framestring);
         } 
         catch (ConnectionLostException e1) 
         {
-            // TODO Auto-generated catch block
             e1.printStackTrace();
         }               
     }    
@@ -90,37 +82,5 @@ public class ImageTilePanel extends PixelTilePanel
     {
 	return "/images";
     }
-/*    
-    class ImageTimer implements ActionListener
-    {
-        private String imageName;
-        
-        public ImageTimer(String imageName)
-        {
-            this.imageName = imageName;
-        }
-        
-        public void actionPerformed(ActionEvent evt) 
-        {
-            if (!pixelFound) 
-            {  
-                //only go here if PIXEL wa found, other leave the timer
-                return;
-            }
-
-            String framestring = "images/" + imageName + ".rgb565";
-            try 
-            {
-                System.out.println("Attemping to load " + framestring + " from the classpath.");
-                loadRGB565(framestring);
-            } 
-            catch (ConnectionLostException e1) 
-            {
-                // TODO Auto-generated catch block
-                e1.printStackTrace();
-            }
-        }	
-    }
-    */ 
     
 }
