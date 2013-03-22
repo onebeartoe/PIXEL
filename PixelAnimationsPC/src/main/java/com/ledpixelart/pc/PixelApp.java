@@ -46,13 +46,13 @@ public class PixelApp extends IOIOSwingApp
     
     private static RgbLedMatrix matrix_;
 
-    public RgbLedMatrix getMatrix_() {
-        return matrix_;
-    }
+//    public RgbLedMatrix getMatrix_() {
+//        return matrix_;
+//    }
 
-    public void setMatrix_(RgbLedMatrix matrix_) {
-        this.matrix_ = matrix_;
-    }
+//    public void setMatrix_(RgbLedMatrix matrix_) {
+//        this.matrix_ = matrix_;
+//    }
     
     private static RgbLedMatrix.Matrix KIND;   
 
