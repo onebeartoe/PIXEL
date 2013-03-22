@@ -37,22 +37,19 @@ public class Pixel
 	
 	frame_ = new short[KIND.width * KIND.height];
     }
-    
+
+    /**
+     * Read the input stream into a byte array
+     * @param raw565ImagePath
+     * @throws ConnectionLostException 
+     */
     public void loadRGB565(String raw565ImagePath) throws ConnectionLostException 
     {
-
 	BitmapInputStream = PixelApp.class.getClassLoader().getResourceAsStream(raw565ImagePath);
 
 	try 
 	{   
-	    int n = BitmapInputStream.read(BitmapBytes, 0, BitmapBytes.length); // reads
-	    // the
-	    // input
-	    // stream
-	    // into
-	    // a
-	    // byte
-	    // array
+	    int n = BitmapInputStream.read(BitmapBytes, 0, BitmapBytes.length);
 	    Arrays.fill(BitmapBytes, n, BitmapBytes.length, (byte) 0);
 	} 
 	catch (IOException e) 
@@ -86,86 +83,70 @@ public class Pixel
     }
     
     public void writeImagetoMatrix(BufferedImage originalImage) throws ConnectionLostException     
-//    public void writeImagetoMatrix(String imagePath) throws ConnectionLostException 
-    {  
+    {        
 	//here we'll take a PNG, BMP, or whatever and convert it to RGB565 via a canvas, also we'll re-size the image if necessary
+        int width_original = originalImage.getWidth();
+        int height_original = originalImage.getHeight();
 
-	
-//	try
-	{
-//	URL url = PixelApp.class.getClassLoader().getResource(imagePath);
-//	try 
-//	{
-//	    BufferedImage originalImage = ImageIO.read(url);
-	    int width_original = originalImage.getWidth();
-	    int height_original = originalImage.getHeight();
+        if (width_original != KIND.width || height_original != KIND.height) 
+        {  
+            //the image is not the right dimensions, ie, 32px by 32px				
+            BufferedImage ResizedImage = new BufferedImage(KIND.width, KIND.height, originalImage.getType());
+            Graphics2D g = ResizedImage.createGraphics();
+            g.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+            g.drawImage(originalImage, 0, 0, KIND.width, KIND.height, 0, 0, originalImage.getWidth(), originalImage.getHeight(), null);
+            g.dispose();
+            originalImage = ResizedImage;		
+        }
 
-	    if (width_original != KIND.width || height_original != KIND.height) 
-	    {  
-		//the image is not the right dimensions, ie, 32px by 32px				
-		BufferedImage ResizedImage = new BufferedImage(KIND.width, KIND.height, originalImage.getType());
-		Graphics2D g = ResizedImage.createGraphics();
-		g.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
-		g.drawImage(originalImage, 0, 0, KIND.width, KIND.height, 0, 0, originalImage.getWidth(), originalImage.getHeight(), null);
-		g.dispose();
-		originalImage = ResizedImage;		
-	    }
+        int numByte = 0;
+        int i = 0;
+        int j = 0;
 
-	    int numByte = 0;
-	    int i = 0;
-	    int j = 0;
+        for (i = 0; i < KIND.height; i++) 
+        {
+            for (j = 0; j < KIND.width; j++) 
+            {
+                Color c = new Color(originalImage.getRGB(j, i));  //i and j were reversed which was rotationg the image by 90 degrees
+                int aRGBpix = originalImage.getRGB(j, i);  //i and j were reversed which was rotationg the image by 90 degrees
+                int alpha;
+                int red = c.getRed();
+                int green = c.getGreen();
+                int blue = c.getBlue();
 
-	    for (i = 0; i < KIND.height; i++) 
-	    {
-		for (j = 0; j < KIND.width; j++) 
-		{
-		    Color c = new Color(originalImage.getRGB(j, i));  //i and j were reversed which was rotationg the image by 90 degrees
-		    int aRGBpix = originalImage.getRGB(j, i);  //i and j were reversed which was rotationg the image by 90 degrees
-		    int alpha;
-		    int red = c.getRed();
-		    int green = c.getGreen();
-		    int blue = c.getBlue();
+                //RGB565
+                red = red >> 3;
+                green = green >> 2;
+                blue = blue >> 3;
+                //A pixel is represented by a 4-byte (32 bit) integer, like so:
+                //00000000 00000000 00000000 11111111
+                //^ Alpha  ^Red     ^Green   ^Blue
+                //Converting to RGB565
 
-		    //RGB565
-		    red = red >> 3;
-		    green = green >> 2;
-		    blue = blue >> 3;
-		    //A pixel is represented by a 4-byte (32 bit) integer, like so:
-		    //00000000 00000000 00000000 11111111
-		    //^ Alpha  ^Red     ^Green   ^Blue
-		    //Converting to RGB565
+                short pixel_to_send = 0;
+                int pixel_to_send_int = 0;
+                pixel_to_send_int = (red << 11) | (green << 5) | (blue);
+                pixel_to_send = (short) pixel_to_send_int;
 
-		    short pixel_to_send = 0;
-		    int pixel_to_send_int = 0;
-		    pixel_to_send_int = (red << 11) | (green << 5) | (blue);
-		    pixel_to_send = (short) pixel_to_send_int;
+                //dividing into bytes
+                byte byteH = (byte) ((pixel_to_send >> 8) & 0x0FF);
+                byte byteL = (byte) (pixel_to_send & 0x0FF);
 
-		    //dividing into bytes
-		    byte byteH = (byte) ((pixel_to_send >> 8) & 0x0FF);
-		    byte byteL = (byte) (pixel_to_send & 0x0FF);
+                //Writing it to array - High-byte is the first
 
-		    //Writing it to array - High-byte is the first
-
-		    BitmapBytes[numByte + 1] = byteH;
-		    BitmapBytes[numByte] = byteL;
-		    numByte += 2;
-		}
-	    }
-	}
-//	catch (IOException e) 
-	{
-	    // TODO Auto-generated catch block
-//	    e.printStackTrace();
-	}
+                BitmapBytes[numByte + 1] = byteH;
+                BitmapBytes[numByte] = byteL;
+                numByte += 2;
+            }
+        }
 
 	loadRGB565PNG();
     }
     
-    /**
-     * 
-     * //************ this part of code writes to the LED matrix in code without any external file *********
-	//  writeTest(); //this just writes a test pattern to the LEDs in code without using any external file, uncomment out this line if you want to see that and then comment out the next two lines
-	//***************************************************************************************************
+    /**          
+     * this part of code writes to the LED matrix in code without any external file
+     * this just writes a test pattern to the LEDs in code without using any external 
+     * file	
      */
     private void writeTest() 
     {

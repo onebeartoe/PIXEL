@@ -124,5 +124,14 @@ public class AnimationsPanel extends ImageTilePanel
 	return "/animations";
     }
     
+    @Override
+    protected void stopPixelActivity()
+    {
+        if(timer != null && timer.isRunning() )
+        {            
+            timer.stop();
+        }
+    }
+    
 }
 

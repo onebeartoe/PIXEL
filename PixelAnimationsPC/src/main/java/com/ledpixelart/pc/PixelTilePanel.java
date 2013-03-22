@@ -17,15 +17,9 @@ import javax.swing.JPanel;
  */
 public abstract class PixelTilePanel extends JPanel implements ActionListener
 {
-    protected List<JButton> buttons;
+    protected List<JButton> buttons;    
     
-//    protected byte[] BitmapBytes;
-    
-    protected boolean pixelFound;
-    
-//    protected InputStream BitmapInputStream;
-    
-//    protected short[] frame_;
+    protected boolean pixelFound;       
     
     protected RgbLedMatrix matrix_;
     
@@ -39,18 +33,11 @@ public abstract class PixelTilePanel extends JPanel implements ActionListener
 	
 	setLayout(experimentLayout);
 	
-	buttons = new ArrayList();
-	
-//	BitmapBytes = new byte[KIND.width * KIND.height * 2]; //512 * 2 = 1024 or 1024 * 2 = 2048
-	
-//	frame_ = new short[KIND.width * KIND.height];
+	buttons = new ArrayList();		
 	
 	pixelFound = false;
 	
-	this.KIND = KIND;
-	
-//	this.matrix_ = matrix;
-//        System.out.println("matrix in PixelTilePanel: " + this.matrix_);
+	this.KIND = KIND;	
     }    
     
     /**
@@ -90,6 +77,11 @@ public abstract class PixelTilePanel extends JPanel implements ActionListener
     protected void setPixelFound(boolean found)
     {
 	pixelFound = found;
-    }     
+    }
+    
+    protected void stopPixelActivity()
+    {
+        
+    }
 	    
 }

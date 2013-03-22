@@ -73,20 +73,11 @@ public class UserProvidedPanel extends PixelTilePanel
 	String command = event.getActionCommand();
 	System.out.println("image comamand: " + command);	
         
-        if (!pixelFound) 
-        {  
-            //only go here if PIXEL wa found, other leave the timer
-            return;
-        }
-
         String framestring = imageDirectory.getAbsolutePath() + "/" + command + ".png";
         try 
         {
-            System.out.println("Attemping to load " + framestring + " from the classpath.");
-	    File infile = new File(framestring);
-	    
-//	try 
-//	{
+            System.out.println("Attemping to load User image: " + framestring);
+	    File infile = new File(framestring);	    
 	    BufferedImage originalImage = ImageIO.read(infile);
 	    PixelApp.pixel.writeImagetoMatrix(originalImage);
         } 

@@ -37,16 +37,16 @@ import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
+import javax.swing.Timer;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
+import javax.swing.plaf.basic.BasicMenuUI;
 
 public class PixelApp extends IOIOSwingApp
 {    
     private boolean foundPixel;
     
-    private final Logger logger;
-    
-//    private static RgbLedMatrix matrix_;
-    
-//    private static RgbLedMatrix.Matrix KIND;   
+    private final Logger logger;   
 
     private JFileChooser userDirectoryChooser;
     
@@ -82,7 +82,6 @@ public class PixelApp extends IOIOSwingApp
 
     public byte[] extractBytes(BufferedImage image) throws IOException 
     {
-
 	// get DataBufferBytes from Raster
 	WritableRaster raster = image.getRaster();
 	DataBufferByte data = (DataBufferByte) raster.getDataBuffer();
@@ -109,13 +108,12 @@ public class PixelApp extends IOIOSwingApp
 	JTabbedPane tabbedPane = new JTabbedPane();
         ImageIcon icon = createImageIcon("images/middle.gif");                
 	
-        //matrix_ = getMatrix();
 	PixelTilePanel imagesPanelReal = new ImageTilePanel(pixel.KIND);
 	imagesPanelReal.populate();
 	imagePanels.add(imagesPanelReal);
 	tabbedPane.addTab("Images", icon, imagesPanelReal, "Load built-in images.");
         
-	PixelTilePanel animationsPanel = new AnimationsPanel(pixel.KIND);
+	final PixelTilePanel animationsPanel = new AnimationsPanel(pixel.KIND);
 	animationsPanel.populate();
 	imagePanels.add(animationsPanel);
         tabbedPane.addTab("Animations", icon, animationsPanel, "Does twice as much nothing");
@@ -141,6 +139,13 @@ public class PixelApp extends IOIOSwingApp
         
         //The following line enables to use scrolling tabs.
         tabbedPane.setTabLayoutPolicy(JTabbedPane.SCROLL_TAB_LAYOUT);
+        tabbedPane.addChangeListener( new ChangeListener() 
+        {
+            public void stateChanged(ChangeEvent e) 
+            {
+                animationsPanel.stopPixelActivity();
+            }
+        });
 
 	frame.add(tabbedPane, BorderLayout.CENTER);	
 	frame.setSize(500, 450);
