@@ -4,6 +4,7 @@ package com.ledpixelart.pc;
 import com.ledpixelart.pc.filters.ImageFilters;
 import ioio.lib.api.RgbLedMatrix;
 import java.awt.event.ActionEvent;
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -11,6 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
 
 /**
@@ -66,9 +68,32 @@ public class UserProvidedPanel extends PixelTilePanel
     }
 
     @Override
-    public void actionPerformed(ActionEvent e) 
+    public void actionPerformed(ActionEvent event) 
     {
-	
+	String command = event.getActionCommand();
+	System.out.println("image comamand: " + command);	
+        
+        if (!pixelFound) 
+        {  
+            //only go here if PIXEL wa found, other leave the timer
+            return;
+        }
+
+        String framestring = imageDirectory.getAbsolutePath() + "/" + command + ".png";
+        try 
+        {
+            System.out.println("Attemping to load " + framestring + " from the classpath.");
+	    File infile = new File(framestring);
+	    
+//	try 
+//	{
+	    BufferedImage originalImage = ImageIO.read(infile);
+	    PixelApp.pixel.writeImagetoMatrix(originalImage);
+        } 
+        catch (Exception e1) 
+        {
+            e1.printStackTrace();
+        }
     }
     
 }

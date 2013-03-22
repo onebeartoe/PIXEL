@@ -1,6 +1,7 @@
 
 package com.ledpixelart.pc;
 
+import com.ledpixelart.hardware.Pixel;
 import ioio.lib.api.DigitalOutput;
 import ioio.lib.api.IOIO;
 import ioio.lib.api.RgbLedMatrix;
@@ -10,7 +11,6 @@ import ioio.lib.util.IOIOLooper;
 import ioio.lib.util.pc.IOIOSwingApp;
 import java.awt.BorderLayout;
 
-import java.awt.Container;
 import java.awt.GridLayout;
 import java.awt.Window;
 import javax.swing.JFileChooser;
@@ -44,17 +44,9 @@ public class PixelApp extends IOIOSwingApp
     
     private final Logger logger;
     
-    private static RgbLedMatrix matrix_;
-
-//    public RgbLedMatrix getMatrix_() {
-//        return matrix_;
-//    }
-
-//    public void setMatrix_(RgbLedMatrix matrix_) {
-//        this.matrix_ = matrix_;
-//    }
+//    private static RgbLedMatrix matrix_;
     
-    private static RgbLedMatrix.Matrix KIND;   
+//    private static RgbLedMatrix.Matrix KIND;   
 
     private JFileChooser userDirectoryChooser;
     
@@ -64,7 +56,9 @@ public class PixelApp extends IOIOSwingApp
     
     private List<PixelTilePanel> imagePanels;
     
-    private static IOIO ioiO;   
+    private static IOIO ioiO; 
+    
+    public static Pixel pixel;
     
     public PixelApp()
     {
@@ -75,21 +69,15 @@ public class PixelApp extends IOIOSwingApp
 	
 	imagePanels = new ArrayList();
         
-        KIND = ioio.lib.api.RgbLedMatrix.Matrix.SEEEDSTUDIO_32x32;
+        RgbLedMatrix.Matrix KIND = ioio.lib.api.RgbLedMatrix.Matrix.SEEEDSTUDIO_32x32;
+	
+	pixel = new Pixel(KIND);
     }
 
     public static void main(String[] args) throws Exception 
     {		
-	// ui stuff
-	new PixelApp().go(args);			
-
-	///************ this set of code loads a raw RGB565 image *****************
-	// BitmapInputStream = PixelAlbumPC.class.getClassLoader().getResourceAsStream("images/gumball.rgb565"); 
-	//loads in a raw file in rgb565 format, use the windows program paint.net with the rgb565 plug-in to convert png, jpg, etc to this format
-	//BitmapInputStream = PixelAlbumPC.class.getClassLoader().getResourceAsStream("images/ginseng.rgb565"); 
-	// loadRGB565();
-	//**************************************************************************
-	
+	PixelApp app = new PixelApp();
+	app.go(args);		
     }        
 
     public byte[] extractBytes(BufferedImage image) throws IOException 
@@ -122,12 +110,12 @@ public class PixelApp extends IOIOSwingApp
         ImageIcon icon = createImageIcon("images/middle.gif");                
 	
         //matrix_ = getMatrix();
-	PixelTilePanel imagesPanelReal = new ImageTilePanel(KIND);
+	PixelTilePanel imagesPanelReal = new ImageTilePanel(pixel.KIND);
 	imagesPanelReal.populate();
 	imagePanels.add(imagesPanelReal);
 	tabbedPane.addTab("Images", icon, imagesPanelReal, "Load built-in images.");
         
-	PixelTilePanel animationsPanel = new AnimationsPanel(KIND);
+	PixelTilePanel animationsPanel = new AnimationsPanel(pixel.KIND);
 	animationsPanel.populate();
 	imagePanels.add(animationsPanel);
         tabbedPane.addTab("Animations", icon, animationsPanel, "Does twice as much nothing");
@@ -144,7 +132,7 @@ public class PixelApp extends IOIOSwingApp
         userPanel.add(userButton, BorderLayout.NORTH);
 	String path = System.getProperty("user.home");
         File homeDirectory = new File(path);
-	userTilePanel = new UserProvidedPanel(KIND, homeDirectory);
+	userTilePanel = new UserProvidedPanel(pixel.KIND, homeDirectory);
 	userTilePanel.populate();
 	imagePanels.add(userTilePanel);
 	userPanel.add(userTilePanel, BorderLayout.CENTER);
@@ -205,10 +193,10 @@ public class PixelApp extends IOIOSwingApp
 	    {
 		led_ = ioio_.openDigitalOutput(IOIO.LED_PIN, true);
                 PixelApp.this.ioiO = ioio_;
-		matrix_ = ioio_.openRgbLedMatrix(KIND);
+		pixel.matrix = ioio_.openRgbLedMatrix(pixel.KIND);
 		setPixelFound();
-		System.out.println("Found PIXEL: " + matrix_ + "\n");
-		System.out.println("You may now select one of the animations\n");
+		System.out.println("Found PIXEL: " + pixel.matrix + "\n");
+		System.out.println("You may now interact with the PIXEL\n");
 		enableButtons();
 		
 		//TODO: Load something on startup
@@ -239,10 +227,8 @@ public class PixelApp extends IOIOSwingApp
                 }
                 else
                 {                    
-                    userPanel.remove(userTilePanel);
-                    RgbLedMatrix matrix_ = getMatrix();
-                    
-                    userTilePanel = new UserProvidedPanel(KIND, directory);
+                    userPanel.remove(userTilePanel);                    
+                    userTilePanel = new UserProvidedPanel(pixel.KIND, directory);
 		    userTilePanel.populate();
                     userPanel.add(userTilePanel, BorderLayout.CENTER);
                 }
@@ -252,10 +238,11 @@ public class PixelApp extends IOIOSwingApp
     
     public static RgbLedMatrix getMatrix() 
     {
-        if (matrix_==null) {
+        if (pixel.matrix == null) 
+	{
             try 
             {
-                matrix_ = ioiO.openRgbLedMatrix(KIND);
+                pixel.matrix = ioiO.openRgbLedMatrix(pixel.KIND);
             } 
             catch (ConnectionLostException ex) 
             {
@@ -264,7 +251,7 @@ public class PixelApp extends IOIOSwingApp
             }
         }
         
-        return matrix_;
+        return pixel.matrix;
     }
     
 }

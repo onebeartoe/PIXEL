@@ -2,17 +2,16 @@
 package com.ledpixelart.pc;
 
 import ioio.lib.api.RgbLedMatrix;
-import ioio.lib.api.exception.ConnectionLostException;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
-import javax.swing.Timer;
 
 /**
  * @author rmarquez
@@ -39,16 +38,19 @@ public class ImageTilePanel extends PixelTilePanel
             return;
         }
 
-        String framestring = "images/" + command + ".png";
+        String imagePath = "images/" + command + ".png";
         try 
         {
-            System.out.println("Attemping to load " + framestring + " from the classpath.");
-            writeImagetoMatrix(framestring);
+            System.out.println("Attemping to load " + imagePath + " from the classpath.");
+	    URL url = PixelApp.class.getClassLoader().getResource(imagePath);
+
+	    BufferedImage originalImage = ImageIO.read(url);
+            PixelApp.pixel.writeImagetoMatrix(originalImage);
         } 
-        catch (ConnectionLostException e1) 
+        catch (Exception e1) 
         {
             e1.printStackTrace();
-        }               
+        }
     }    
 	
     @Override
