@@ -44,11 +44,13 @@ public class ImageTilePanel extends PixelTilePanel
             return;
         }
 
-        String framestring = "images/" + command + ".rgb565";
+        String framestring = "images/" + command + ".png";
         try 
         {
+// good day            
             System.out.println("Attemping to load " + framestring + " from the classpath.");
-            loadRGB565(framestring);
+//            loadRGB565(framestring);
+            writeImagetoMatrix(framestring);
         } 
         catch (ConnectionLostException e1) 
         {
@@ -88,7 +90,7 @@ public class ImageTilePanel extends PixelTilePanel
     {
 	return "/images";
     }
-    
+/*    
     class ImageTimer implements ActionListener
     {
         private String imageName;
@@ -119,5 +121,6 @@ public class ImageTilePanel extends PixelTilePanel
             }
         }	
     }
+    */ 
     
 }

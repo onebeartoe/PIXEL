@@ -106,6 +106,7 @@ public abstract class PixelTilePanel extends JPanel implements ActionListener
 	    y = y + 2;
 	}
 
+        matrix_= PixelApp.getMatrix();
 	matrix_.frame(frame_);
     }    
     
@@ -148,7 +149,7 @@ public abstract class PixelTilePanel extends JPanel implements ActionListener
 	pixelFound = found;
     }
     
-    private void writeImagetoMatrix(String imagePath) throws ConnectionLostException 
+    protected void writeImagetoMatrix(String imagePath) throws ConnectionLostException 
     {  
 	//here we'll take a PNG, BMP, or whatever and convert it to RGB565 via a canvas, also we'll re-size the image if necessary
 	
