@@ -17,15 +17,12 @@ import java.awt.Component;
 
 import java.awt.GridLayout;
 import java.awt.Window;
-import javax.swing.JFileChooser;
 
 import javax.swing.UIManager;
-import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.ImageIcon;
 
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 
 import java.awt.image.BufferedImage;
@@ -52,13 +49,8 @@ import javax.swing.event.ChangeListener;
 
 public class PixelApp extends IOIOSwingApp
 {    
-//    private boolean foundPixel;
     
     private final Logger logger;   
-
-    private JFileChooser userDirectoryChooser;
-    
-    private JPanel userPanel;
     
     private PixelTilePanel userTilePanel;
     
@@ -71,9 +63,6 @@ public class PixelApp extends IOIOSwingApp
     public PixelApp()
     {
 	logger = Logger.getLogger(PixelApp.class.getName());//.log(Level.SEVERE, message, ex);	
-
-        userDirectoryChooser = new JFileChooser();
-        userDirectoryChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
 	
 	imagePanels = new ArrayList();
         
@@ -128,22 +117,17 @@ public class PixelApp extends IOIOSwingApp
         tabbedPane.setMnemonicAt(1, KeyEvent.VK_2);
         
         PixelTilePanel interactiveAnimations = new ProximityPanel(pixel.KIND);
+	interactiveAnimations.populate();
 	imagePanels.add(interactiveAnimations);
         tabbedPane.addTab("Interactive", icon, interactiveAnimations, "Still does nothing");
         tabbedPane.setMnemonicAt(2, KeyEvent.VK_3);
                 
-        userPanel = new JPanel();	
-	userPanel.setLayout( new BorderLayout() );
-	JButton userButton = new JButton("Browse");
-        userButton.addActionListener( new UserButtonListener() );
-        userPanel.add(userButton, BorderLayout.NORTH);
 	String path = System.getProperty("user.home");
         File homeDirectory = new File(path);
 	userTilePanel = new UserProvidedPanel(pixel.KIND, homeDirectory);
 	userTilePanel.populate();
 	imagePanels.add(userTilePanel);
-	userPanel.add(userTilePanel, BorderLayout.CENTER);
-        tabbedPane.addTab("User Defined", icon, userPanel, "Does nothing at all");
+        tabbedPane.addTab("User Defined", icon, userTilePanel, "Does nothing at all");
         tabbedPane.setMnemonicAt(3, KeyEvent.VK_4);        
         
         //The following line enables to use scrolling tabs.
@@ -317,49 +301,28 @@ public class PixelApp extends IOIOSwingApp
     
     private void setPixelFound()
     {
-//	foundPixel = true;
 	for(PixelTilePanel panel : imagePanels)
 	{
 	    panel.setPixelFound(true);
 	}
     }
     
-    private class UserButtonListener implements ActionListener    
-    {
-        public void actionPerformed(ActionEvent ae) 
-        {
-            int result = userDirectoryChooser.showOpenDialog(null);
-            if(result == JFileChooser.APPROVE_OPTION)
-            {
-                File directory = userDirectoryChooser.getSelectedFile();
-                if( directory == null )
-                {
-                    System.out.println("laters");   
-                }
-                else
-                {                    
-                    userPanel.remove(userTilePanel);                    
-                    userTilePanel = new UserProvidedPanel(pixel.KIND, directory);
-		    userTilePanel.populate();
-                    userPanel.add(userTilePanel, BorderLayout.CENTER);
-                }
-            }            
-        }        
-    }
-    
     public static RgbLedMatrix getMatrix() 
     {
         if (pixel.matrix == null) 
 	{
-            try 
-            {
-                pixel.matrix = ioiO.openRgbLedMatrix(pixel.KIND);
-            } 
-            catch (ConnectionLostException ex) 
-            {
-                String message = "The IOIO connection was lost.";
-                Logger.getLogger(PixelApp.class.getName()).log(Level.SEVERE, message, ex);
-            }
+	    if(ioiO != null)
+	    {
+		try 
+		{
+		    pixel.matrix = ioiO.openRgbLedMatrix(pixel.KIND);
+		} 
+		catch (ConnectionLostException ex) 
+		{
+		    String message = "The IOIO connection was lost.";
+		    Logger.getLogger(PixelApp.class.getName()).log(Level.SEVERE, message, ex);
+		}
+	    }            
         }
         
         return pixel.matrix;

@@ -3,7 +3,9 @@ package com.ledpixelart.pc;
 
 import com.ledpixelart.pc.filters.ImageFilters;
 import ioio.lib.api.RgbLedMatrix;
+import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.net.MalformedURLException;
@@ -14,19 +16,30 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
+import javax.swing.JButton;
+import javax.swing.JFileChooser;
 
 /**
  * @author rmarquez
  */
 public class UserProvidedPanel extends ImageTilePanel
-//public class UserProvidedPanel extends PixelTilePanel
 {
+    
+    private JFileChooser userDirectoryChooser;
+	
     private File imageDirectory;
     
     public UserProvidedPanel(RgbLedMatrix.Matrix KIND, File imageDirectory)
     {
 	super(KIND);
         this.imageDirectory = imageDirectory;
+	
+	userDirectoryChooser = new JFileChooser(this.imageDirectory);
+        userDirectoryChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+		
+	JButton userButton = new JButton("Browse");
+        userButton.addActionListener( new UserButtonListener() );
+        add(userButton, BorderLayout.NORTH);
     }
 
     @Override
@@ -87,6 +100,28 @@ public class UserProvidedPanel extends ImageTilePanel
             e1.printStackTrace();
         }
     }
+    
+    private class UserButtonListener implements ActionListener    
+    {
+        public void actionPerformed(ActionEvent ae) 
+        {
+            int result = userDirectoryChooser.showOpenDialog(null);
+            if(result == JFileChooser.APPROVE_OPTION)
+            {
+                File directory = userDirectoryChooser.getSelectedFile();
+                if( directory == null )
+                {
+                    System.out.println("laters");   
+                }
+                else
+                {                    
+		    imageDirectory = directory;
+		    buttonsPanel.removeAll();
+		    populate();
+                }
+            }            
+        }        
+    }    
     
 }
 

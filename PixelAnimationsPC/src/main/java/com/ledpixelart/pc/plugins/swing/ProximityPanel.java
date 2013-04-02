@@ -20,8 +20,6 @@ import javax.swing.Timer;
  * @author rmarquez
  */
 public class ProximityPanel extends ImageTilePanel
-//public class ProximityPanel extends ZeroThreadedPixelPanel
-    
     implements ActionListener   // remove this
 {
     private AnalogInput proximitySensor;
@@ -85,12 +83,9 @@ public class ProximityPanel extends ImageTilePanel
 	System.out.println("animation comamand: " + command);
 
 	String selectedFileName = event.getActionCommand();
-	String decodedDirPath = "animations/decoded";
-
-	//System.out.println("selected file name: " + selectedFileName);
+	String decodedDirPath = "animations/decoded";	
 
 	InputStream decodedFile = PixelAnimationsPC.class.getClassLoader().getResourceAsStream(decodedDirPath + "/" + selectedFileName + "/" + selectedFileName + ".txt"); //decoded/rain/rain.text
-	//note can't use file operator here as you can't reference files from a jar file
 
 	if (decodedFile != null) 
 	{
@@ -180,4 +175,3 @@ public class ProximityPanel extends ImageTilePanel
     }
     
 }
-

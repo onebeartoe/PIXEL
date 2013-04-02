@@ -3,6 +3,7 @@ package com.ledpixelart.pc;
 
 import com.ledpixelart.pc.plugins.swing.ZeroThreadedPixelPanel;
 import ioio.lib.api.RgbLedMatrix;
+import java.awt.BorderLayout;
 import java.awt.GridLayout;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
@@ -11,6 +12,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JPanel;
 
 /**
  * @author rmarquez
@@ -18,21 +20,28 @@ import javax.swing.JButton;
 public abstract class PixelTilePanel extends ZeroThreadedPixelPanel implements ActionListener
 //public abstract class PixelTilePanel extends PixelPluginPanel implements ActionListener
 {
+    protected RgbLedMatrix matrix_;
+    
+    protected RgbLedMatrix.Matrix KIND;   
+    
+    protected JPanel buttonsPanel;
+    
     protected List<JButton> buttons;    
     
 //    protected boolean pixelFound;       
     
-    protected RgbLedMatrix matrix_;
-    
-    protected RgbLedMatrix.Matrix KIND;   
+
     
     public PixelTilePanel(RgbLedMatrix.Matrix KIND)
     {
 	GridLayout experimentLayout = new GridLayout(0, 5);
 	experimentLayout.setHgap(5);	
 	experimentLayout.setVgap(5);
+	buttonsPanel = new JPanel();
+	buttonsPanel.setLayout(experimentLayout);
 	
-	setLayout(experimentLayout);
+	setLayout(new BorderLayout() );
+	add(buttonsPanel, BorderLayout.CENTER);
 	
 	buttons = new ArrayList();		
 	
@@ -58,7 +67,7 @@ public abstract class PixelTilePanel extends ZeroThreadedPixelPanel implements A
 		String command = file.substring(0, i);
 		button.setActionCommand(command);
 		button.addActionListener(this);
-		add(button);
+		buttonsPanel.add(button);
 		buttons.add(button);
 	    }
 	} 
