@@ -35,7 +35,7 @@ public class ImageTilePanel extends PixelTilePanel
         if (!pixelFound) 
         {  
             //only go here if PIXEL wa found, other leave the timer
-            return;
+//            return;
         }
 
         String imagePath = "images/" + command + ".png";

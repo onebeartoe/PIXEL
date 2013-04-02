@@ -39,7 +39,7 @@ public class AnimationsPanel extends ImageTilePanel
 		if (!pixelFound) 
 		{  
 		    //only go here if PIXEL wa found, other leave the timer
-		    return;
+//		    return;
 		}		
 
 		i++;
