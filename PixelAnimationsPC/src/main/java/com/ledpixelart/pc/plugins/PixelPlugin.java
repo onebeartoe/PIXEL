@@ -8,5 +8,7 @@ public interface PixelPlugin
 {
     void setPixelFound(boolean found);
 	    
+    void startPixelActivity();
+    
     void stopPixelActivity();    
 }

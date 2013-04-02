@@ -9,7 +9,20 @@ import javax.swing.JPanel;
  */
 public class ZeroThreadedPixelPanel extends JPanel implements PixelPlugin
 {
+    
     protected boolean pixelFound;
+
+    @Override
+    public void setPixelFound(boolean found) 
+    {
+	this.pixelFound = found;
+    }    
+	
+    @Override
+    public void startPixelActivity()
+    {
+        System.out.println("Starting PIXEL activity 0 in " + getClass().getSimpleName() + ".");
+    }
     
     @Override
     public void stopPixelActivity()
@@ -17,9 +30,4 @@ public class ZeroThreadedPixelPanel extends JPanel implements PixelPlugin
         
     }
 
-    @Override
-    public void setPixelFound(boolean found) 
-    {
-	this.pixelFound = found;
-    }    
 }

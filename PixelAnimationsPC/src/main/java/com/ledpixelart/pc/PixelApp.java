@@ -2,6 +2,8 @@
 package com.ledpixelart.pc;
 
 import com.ledpixelart.hardware.Pixel;
+import com.ledpixelart.pc.plugins.swing.ProximityPanel;
+import com.ledpixelart.pc.plugins.swing.ZeroThreadedPixelPanel;
 import ioio.lib.api.AnalogInput;
 import ioio.lib.api.DigitalOutput;
 import ioio.lib.api.IOIO;
@@ -11,6 +13,7 @@ import ioio.lib.util.BaseIOIOLooper;
 import ioio.lib.util.IOIOLooper;
 import ioio.lib.util.pc.IOIOSwingApp;
 import java.awt.BorderLayout;
+import java.awt.Component;
 
 import java.awt.GridLayout;
 import java.awt.Window;
@@ -36,7 +39,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.ButtonGroup;
 import javax.swing.JCheckBoxMenuItem;
-import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
@@ -125,8 +127,8 @@ public class PixelApp extends IOIOSwingApp
         tabbedPane.addTab("Animations", icon, animationsPanel, "Does twice as much nothing");
         tabbedPane.setMnemonicAt(1, KeyEvent.VK_2);
         
-        JComponent panel3 = makeTextPanel("Panel #3");
-        tabbedPane.addTab("Interactive", icon, panel3, "Still does nothing");
+        PixelTilePanel interactiveAnimations = new ProximityPanel(pixel.KIND);
+        tabbedPane.addTab("Interactive", icon, interactiveAnimations, "Still does nothing");
         tabbedPane.setMnemonicAt(2, KeyEvent.VK_3);
                 
         userPanel = new JPanel();	
@@ -151,9 +153,16 @@ public class PixelApp extends IOIOSwingApp
             {
 		for(PixelTilePanel panel : imagePanels)
 		{
+		    // stop all panels' PIXEL activity
 		    panel.stopPixelActivity();
 		}
-                
+		
+		// start the selected panel/tab's PIXEL activity
+		Object o = e.getSource();
+		JTabbedPane tabs = (JTabbedPane) o;
+		Component c = tabs.getSelectedComponent();		
+		ZeroThreadedPixelPanel p = (ZeroThreadedPixelPanel) c;
+		p.startPixelActivity();
             }
         });
 
@@ -359,15 +368,18 @@ public class PixelApp extends IOIOSwingApp
     {
         if (pixel.analogInput1 == null) 
 	{
-            try 
-            {
-                pixel.analogInput1 = ioiO.openAnalogInput(1);
-            } 
-            catch (ConnectionLostException ex) 
-            {
-                String message = "The IOIO connection was lost.";
-                Logger.getLogger(PixelApp.class.getName()).log(Level.SEVERE, message, ex);
-            }
+	    if(ioiO != null)
+	    {
+		try 
+		{
+		    pixel.analogInput1 = ioiO.openAnalogInput(1);
+		} 
+		catch (ConnectionLostException ex) 
+		{
+		    String message = "The IOIO connection was lost.";
+		    Logger.getLogger(PixelApp.class.getName()).log(Level.SEVERE, message, ex);
+		}		
+	    }
         }
         
         return pixel.analogInput1;

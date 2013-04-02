@@ -1,7 +1,9 @@
 
-package com.ledpixelart.pc;
+package com.ledpixelart.pc.plugins.swing;
 
+import com.ledpixelart.pc.*;
 import com.ledpixelart.pcpixelart.PixelAnimationsPC;
+import ioio.lib.api.AnalogInput;
 import ioio.lib.api.RgbLedMatrix;
 import ioio.lib.api.exception.ConnectionLostException;
 import java.awt.event.ActionEvent;
@@ -10,13 +12,20 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.Timer;
 
 /**
  * @author rmarquez
  */
-public class AnimationsPanel extends ImageTilePanel
+public class ProximityPanel extends ImageTilePanel
+//public class ProximityPanel extends ZeroThreadedPixelPanel
+    
+    implements ActionListener   // remove this
 {
+    private AnalogInput proximitySensor;
+    
     private int i;
     
     private static int numFrames = 0;
@@ -25,12 +34,18 @@ public class AnimationsPanel extends ImageTilePanel
     
     private Timer timer;
     
+    ProximityListener proximityListener;
+	    
+    private Timer animationTimer;
+    
     private static ActionListener AnimateTimer;
     
-    public AnimationsPanel(RgbLedMatrix.Matrix KIND)
+    public ProximityPanel(RgbLedMatrix.Matrix KIND)
     {
-	super(KIND);
-	imageListPath = "/animations.text";
+	super(KIND);	
+    
+	proximityListener = new ProximityListener();
+	
         
         AnimateTimer = new ActionListener() 
 	{
@@ -108,29 +123,60 @@ public class AnimationsPanel extends ImageTilePanel
 	    numFrames = selectedFileTotalFrames;
 	    // System.out.println("file delay: " + selectedFileDelay);
 
-	    timer = new Timer(selectedFileDelay, AnimateTimer);
+	    animationTimer = new Timer(selectedFileDelay, AnimateTimer);
 
-	    if (timer.isRunning() == true) 
+	    if (animationTimer.isRunning() == true) 
 	    {
-		timer.stop();
+		animationTimer.stop();
 	    }
-	    timer.start();
+	    animationTimer.start();
 	}
-    }
-
-    @Override
-    protected String imagePath() 
-    {
-	return "/animations";
     }
     
     @Override
-    protected void stopPixelActivity()
+    public void startPixelActivity()
     {
+	System.out.println("Starting PIXEL activity in " + getClass().getSimpleName() + ".");
+	
+	proximitySensor  = PixelApp.getAnalogInput1();
+	
+	timer = new Timer(500, proximityListener);
+	timer.start();
+    }
+   
+    @Override
+    public void stopPixelActivity()
+    {
+	System.out.println("Preparing to stop PIXEL activity in " + getClass().getSimpleName() + ".");
+	
         if(timer != null && timer.isRunning() )
         {            
+	    System.out.println("Stoping PIXEL activity in " + getClass().getSimpleName() + ".");
             timer.stop();
         }
+    }
+    
+    private class ProximityListener implements ActionListener
+    {
+	public void actionPerformed(ActionEvent e) 
+	{
+	    if(proximitySensor == null)
+	    {
+		System.out.println("The proximity sensor is not initialized");
+	    }
+	    else
+	    {
+		try 
+		{
+		    float p = proximitySensor.read();
+		    System.out.println("proximity sensor: " + p);
+		} 
+		catch (Exception ex) 
+		{
+		    Logger.getLogger(ProximityPanel.class.getName()).log(Level.SEVERE, null, ex);
+		}
+	    }	    
+	}
     }
     
 }

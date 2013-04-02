@@ -18,7 +18,8 @@ import javax.swing.ImageIcon;
 /**
  * @author rmarquez
  */
-public class UserProvidedPanel extends PixelTilePanel
+public class UserProvidedPanel extends ImageTilePanel
+//public class UserProvidedPanel extends PixelTilePanel
 {
     private File imageDirectory;
     
@@ -88,3 +89,4 @@ public class UserProvidedPanel extends PixelTilePanel
     }
     
 }
+
