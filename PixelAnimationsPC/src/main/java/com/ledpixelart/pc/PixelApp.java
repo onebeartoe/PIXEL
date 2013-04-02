@@ -372,7 +372,7 @@ public class PixelApp extends IOIOSwingApp
 	    {
 		try 
 		{
-		    pixel.analogInput1 = ioiO.openAnalogInput(1);
+		    pixel.analogInput1 = ioiO.openAnalogInput(32);
 		} 
 		catch (ConnectionLostException ex) 
 		{
