@@ -52,7 +52,7 @@ import javax.swing.event.ChangeListener;
 
 public class PixelApp extends IOIOSwingApp
 {    
-    private boolean foundPixel;
+//    private boolean foundPixel;
     
     private final Logger logger;   
 
@@ -128,6 +128,7 @@ public class PixelApp extends IOIOSwingApp
         tabbedPane.setMnemonicAt(1, KeyEvent.VK_2);
         
         PixelTilePanel interactiveAnimations = new ProximityPanel(pixel.KIND);
+	imagePanels.add(interactiveAnimations);
         tabbedPane.addTab("Interactive", icon, interactiveAnimations, "Still does nothing");
         tabbedPane.setMnemonicAt(2, KeyEvent.VK_3);
                 
@@ -316,7 +317,7 @@ public class PixelApp extends IOIOSwingApp
     
     private void setPixelFound()
     {
-	foundPixel = true;
+//	foundPixel = true;
 	for(PixelTilePanel panel : imagePanels)
 	{
 	    panel.setPixelFound(true);

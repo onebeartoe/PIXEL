@@ -140,7 +140,7 @@ public class ProximityPanel extends ImageTilePanel
 	
 	proximitySensor  = PixelApp.getAnalogInput1();
 	
-	timer = new Timer(500, proximityListener);
+	timer = new Timer(1000, proximityListener);
 	timer.start();
     }
    

@@ -20,7 +20,7 @@ public abstract class PixelTilePanel extends ZeroThreadedPixelPanel implements A
 {
     protected List<JButton> buttons;    
     
-    protected boolean pixelFound;       
+//    protected boolean pixelFound;       
     
     protected RgbLedMatrix matrix_;
     
@@ -36,7 +36,7 @@ public abstract class PixelTilePanel extends ZeroThreadedPixelPanel implements A
 	
 	buttons = new ArrayList();		
 	
-	pixelFound = false;
+//	pixelFound = false;
 	
 	this.KIND = KIND;	
     }    
@@ -66,20 +66,12 @@ public abstract class PixelTilePanel extends ZeroThreadedPixelPanel implements A
 	{
 	    Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
 	}
-	
-    }
-    
-//    public void setPixelFound(boolean found) 
-//    {
-//	this.pixelFound = found;
-//    }
+    }    
 	
     protected abstract ImageIcon getImageIcon(String path);
     
     protected abstract List<String> imageNames() throws Exception;
     
-    protected abstract String imagePath();
-    
-//    protected abstract void stopPixelActivity();
+    protected abstract String imagePath();    
 	    
 }
