@@ -2,7 +2,10 @@
 package com.ledpixelart.hardware;
 
 import com.ledpixelart.pc.PixelApp;
+
+import ioio.lib.api.AnalogInput;
 import ioio.lib.api.RgbLedMatrix;
+
 import ioio.lib.api.exception.ConnectionLostException;
 import java.awt.Color;
 import java.awt.Graphics2D;
@@ -22,6 +25,8 @@ public class Pixel
     public RgbLedMatrix matrix;
     
     public RgbLedMatrix.Matrix KIND;
+    
+    public AnalogInput analogInput1;
     
     protected byte[] BitmapBytes;
     

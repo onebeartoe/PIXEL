@@ -1,6 +1,7 @@
 
 package com.ledpixelart.pc;
 
+import com.ledpixelart.pc.plugins.swing.ZeroThreadedPixelPanel;
 import ioio.lib.api.RgbLedMatrix;
 import java.awt.GridLayout;
 import java.awt.event.ActionListener;
@@ -10,12 +11,12 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
-import javax.swing.JPanel;
 
 /**
  * @author rmarquez
  */
-public abstract class PixelTilePanel extends JPanel implements ActionListener
+public abstract class PixelTilePanel extends ZeroThreadedPixelPanel implements ActionListener
+//public abstract class PixelTilePanel extends PixelPluginPanel implements ActionListener
 {
     protected List<JButton> buttons;    
     
@@ -68,20 +69,17 @@ public abstract class PixelTilePanel extends JPanel implements ActionListener
 	
     }
     
+//    public void setPixelFound(boolean found) 
+//    {
+//	this.pixelFound = found;
+//    }
+	
     protected abstract ImageIcon getImageIcon(String path);
     
     protected abstract List<String> imageNames() throws Exception;
     
     protected abstract String imagePath();
     
-    protected void setPixelFound(boolean found)
-    {
-	pixelFound = found;
-    }
-    
-    protected void stopPixelActivity()
-    {
-        
-    }
+//    protected abstract void stopPixelActivity();
 	    
 }

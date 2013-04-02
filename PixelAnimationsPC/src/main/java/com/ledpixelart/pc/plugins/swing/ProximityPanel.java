@@ -125,7 +125,7 @@ public class AnimationsPanel extends ImageTilePanel
     }
     
     @Override
-    public void stopPixelActivity()
+    protected void stopPixelActivity()
     {
         if(timer != null && timer.isRunning() )
         {            
