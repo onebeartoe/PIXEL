@@ -2,7 +2,9 @@
 package com.ledpixelart.pc;
 
 import com.ledpixelart.hardware.Pixel;
+import com.ledpixelart.pc.plugins.swing.PixelPanel;
 import com.ledpixelart.pc.plugins.swing.ProximityPanel;
+import com.ledpixelart.pc.plugins.swing.ScrollingTextPanel;
 import com.ledpixelart.pc.plugins.swing.ZeroThreadedPixelPanel;
 import ioio.lib.api.AnalogInput;
 import ioio.lib.api.DigitalOutput;
@@ -54,7 +56,7 @@ public class PixelApp extends IOIOSwingApp
     
     private PixelTilePanel userTilePanel;
     
-    private List<PixelTilePanel> imagePanels;
+    private List<PixelPanel> imagePanels;
     
     private static IOIO ioiO; 
     
@@ -128,7 +130,11 @@ public class PixelApp extends IOIOSwingApp
 	userTilePanel.populate();
 	imagePanels.add(userTilePanel);
         tabbedPane.addTab("User Defined", icon, userTilePanel, "Does nothing at all");
-        tabbedPane.setMnemonicAt(3, KeyEvent.VK_4);        
+        tabbedPane.setMnemonicAt(3, KeyEvent.VK_4);
+        
+        PixelPanel scrollPanel = new ScrollingTextPanel(pixel.KIND);
+        imagePanels.add(scrollPanel);
+        tabbedPane.addTab("Scolling Text", icon, scrollPanel, "Scrolls a text message across the PIXEL");
         
         //The following line enables to use scrolling tabs.
         tabbedPane.setTabLayoutPolicy(JTabbedPane.SCROLL_TAB_LAYOUT);
@@ -136,9 +142,8 @@ public class PixelApp extends IOIOSwingApp
         {
             public void stateChanged(ChangeEvent e) 
             {
-		for(PixelTilePanel panel : imagePanels)
+		for(PixelPanel panel : imagePanels)
 		{
-		    // stop all panels' PIXEL activity
 		    panel.stopPixelActivity();
 		}
 		
@@ -146,7 +151,7 @@ public class PixelApp extends IOIOSwingApp
 		Object o = e.getSource();
 		JTabbedPane tabs = (JTabbedPane) o;
 		Component c = tabs.getSelectedComponent();		
-		ZeroThreadedPixelPanel p = (ZeroThreadedPixelPanel) c;
+		PixelPanel p = (PixelPanel) c;
 		p.startPixelActivity();
             }
         });
@@ -301,7 +306,7 @@ public class PixelApp extends IOIOSwingApp
     
     private void setPixelFound()
     {
-	for(PixelTilePanel panel : imagePanels)
+	for(PixelPanel panel : imagePanels)
 	{
 	    panel.setPixelFound(true);
 	}

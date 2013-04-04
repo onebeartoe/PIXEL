@@ -18,22 +18,15 @@ import javax.swing.JPanel;
  * @author rmarquez
  */
 public abstract class PixelTilePanel extends ZeroThreadedPixelPanel implements ActionListener
-//public abstract class PixelTilePanel extends PixelPluginPanel implements ActionListener
-{
-    protected RgbLedMatrix matrix_;
-    
-    protected RgbLedMatrix.Matrix KIND;   
-    
+{    
     protected JPanel buttonsPanel;
     
     protected List<JButton> buttons;    
-    
-//    protected boolean pixelFound;       
-    
-
-    
+     
     public PixelTilePanel(RgbLedMatrix.Matrix KIND)
     {
+        super(KIND);
+        
 	GridLayout experimentLayout = new GridLayout(0, 5);
 	experimentLayout.setHgap(5);	
 	experimentLayout.setVgap(5);
@@ -43,11 +36,7 @@ public abstract class PixelTilePanel extends ZeroThreadedPixelPanel implements A
 	setLayout(new BorderLayout() );
 	add(buttonsPanel, BorderLayout.CENTER);
 	
-	buttons = new ArrayList();		
-	
-//	pixelFound = false;
-	
-	this.KIND = KIND;	
+	buttons = new ArrayList();					
     }    
     
     /**

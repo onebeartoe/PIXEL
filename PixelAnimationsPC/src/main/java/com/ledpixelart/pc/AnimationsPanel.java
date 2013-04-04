@@ -23,7 +23,7 @@ public class AnimationsPanel extends ImageTilePanel
     
     private static String animation_name;
     
-    private Timer timer;
+    private volatile Timer timer;
     
     private static ActionListener AnimateTimer;
     
@@ -36,12 +36,6 @@ public class AnimationsPanel extends ImageTilePanel
 	{
 	    public void actionPerformed(ActionEvent evt) 
 	    {
-		if (!pixelFound) 
-		{  
-		    //only go here if PIXEL wa found, other leave the timer
-//		    return;
-		}		
-
 		i++;
 
 		if (i >= numFrames - 1) 
@@ -107,13 +101,10 @@ public class AnimationsPanel extends ImageTilePanel
 	    animation_name = event.getActionCommand();
 	    numFrames = selectedFileTotalFrames;
 	    // System.out.println("file delay: " + selectedFileDelay);
+            
+            stopExistingTimer();
 
 	    timer = new Timer(selectedFileDelay, AnimateTimer);
-
-	    if (timer.isRunning() == true) 
-	    {
-		timer.stop();
-	    }
 	    timer.start();
 	}
     }
@@ -124,14 +115,25 @@ public class AnimationsPanel extends ImageTilePanel
 	return "/animations";
     }
     
+    private void stopExistingTimer()
+    {
+        if(timer != null && timer.isRunning() )
+        {
+            System.out.println("Stoping PIXEL activity in " + getClass().getSimpleName() + ".");
+            timer.stop();
+        }        
+    }
+    
     @Override
     public void stopPixelActivity()
     {
-        if(timer != null && timer.isRunning() )
-        {            
-            timer.stop();
-        }
+        stopExistingTimer();
+
+//        if(timer != null && timer.isRunning() )
+//        {
+//            System.out.println("Stoping PIXEL activity in " + getClass().getSimpleName() + ".");
+//            timer.stop();
+//        }
     }
     
 }
-

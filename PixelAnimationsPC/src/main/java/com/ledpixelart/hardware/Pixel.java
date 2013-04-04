@@ -24,7 +24,7 @@ public class Pixel
 
     public RgbLedMatrix matrix;
     
-    public RgbLedMatrix.Matrix KIND;
+    public final RgbLedMatrix.Matrix KIND;
     
     public AnalogInput analogInput1;
     
@@ -113,8 +113,8 @@ public class Pixel
             for (j = 0; j < KIND.width; j++) 
             {
                 Color c = new Color(originalImage.getRGB(j, i));  //i and j were reversed which was rotationg the image by 90 degrees
-                int aRGBpix = originalImage.getRGB(j, i);  //i and j were reversed which was rotationg the image by 90 degrees
-                int alpha;
+//                int aRGBpix = originalImage.getRGB(j, i);  //i and j were reversed which was rotationg the image by 90 degrees
+//                int alpha;
                 int red = c.getRed();
                 int green = c.getGreen();
                 int blue = c.getBlue();

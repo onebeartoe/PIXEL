@@ -19,7 +19,9 @@ import javax.swing.Timer;
 /**
  * @author rmarquez
  */
-public class ProximityPanel extends ImageTilePanel
+public class ProximityPanel 
+extends ImageTilePanel
+// this should overrive SingleThreadedPixelPanel
     implements ActionListener   // remove this
 {
     private AnalogInput proximitySensor;
@@ -142,7 +144,7 @@ public class ProximityPanel extends ImageTilePanel
     @Override
     public void stopPixelActivity()
     {
-	System.out.println("Preparing to stop PIXEL activity in " + getClass().getSimpleName() + ".");
+//	System.out.println("Preparing to stop PIXEL activity in " + getClass().getSimpleName() + ".");
 	
         if(timer != null && timer.isRunning() )
         {            

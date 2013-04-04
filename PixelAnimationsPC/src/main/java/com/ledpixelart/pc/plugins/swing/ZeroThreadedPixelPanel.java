@@ -1,14 +1,19 @@
 
 package com.ledpixelart.pc.plugins.swing;
 
-import com.ledpixelart.pc.plugins.PixelPlugin;
-import javax.swing.JPanel;
+import ioio.lib.api.RgbLedMatrix;
 
 /**
  * @author rmarquez
  */
-public class ZeroThreadedPixelPanel extends JPanel implements PixelPlugin
+public class ZeroThreadedPixelPanel extends PixelPanel
+//public class ZeroThreadedPixelPanel extends JPanel implements PixelPlugin
 {
+    
+    public ZeroThreadedPixelPanel(RgbLedMatrix.Matrix KIND)
+    {
+        super(KIND);
+    }
     
     protected boolean pixelFound;
 
@@ -21,7 +26,7 @@ public class ZeroThreadedPixelPanel extends JPanel implements PixelPlugin
     @Override
     public void startPixelActivity()
     {
-        System.out.println("Starting PIXEL activity 0 in " + getClass().getSimpleName() + ".");
+        System.out.println("Starting PIXEL activity in " + getClass().getSimpleName() + ".");
     }
     
     @Override

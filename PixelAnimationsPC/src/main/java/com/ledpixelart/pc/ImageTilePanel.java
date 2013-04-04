@@ -32,12 +32,6 @@ public class ImageTilePanel extends PixelTilePanel
 	String command = event.getActionCommand();
 	System.out.println("image comamand: " + command);	
         
-        if (!pixelFound) 
-        {  
-            //only go here if PIXEL wa found, other leave the timer
-//            return;
-        }
-
         String imagePath = "images/" + command + ".png";
         try 
         {
