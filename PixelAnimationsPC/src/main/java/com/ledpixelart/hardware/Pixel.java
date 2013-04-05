@@ -15,9 +15,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
 
+
 /**
- *
  * @author rmarquez
+ * @deprecated use the version in org.ioio-commons
  */
 public class Pixel 
 {

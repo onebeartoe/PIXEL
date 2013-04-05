@@ -5,7 +5,6 @@ import com.ledpixelart.hardware.Pixel;
 import com.ledpixelart.pc.plugins.swing.PixelPanel;
 import com.ledpixelart.pc.plugins.swing.ProximityPanel;
 import com.ledpixelart.pc.plugins.swing.ScrollingTextPanel;
-import com.ledpixelart.pc.plugins.swing.ZeroThreadedPixelPanel;
 import ioio.lib.api.AnalogInput;
 import ioio.lib.api.DigitalOutput;
 import ioio.lib.api.IOIO;

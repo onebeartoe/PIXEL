@@ -27,9 +27,12 @@ import javax.swing.JTextField;
  */
 public class ScrollingTextPanel extends SingleThreadedPixelPanel
 {
-    private JTextField textField;
+
+	private static final long serialVersionUID = 1L;
+
+	private JTextField textField;
     
-    private JComboBox fontFamilyChooser;
+    private JComboBox<String> fontFamilyChooser;
     
     private HashMap<String, Font> fonts;
     
@@ -79,7 +82,7 @@ public class ScrollingTextPanel extends SingleThreadedPixelPanel
         {        
             int w = 64;
             int h = 64;
-            BufferedImage img = new BufferedImage(            w, h, BufferedImage.TYPE_INT_ARGB);
+            BufferedImage img = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
             
             Graphics2D g2d = img.createGraphics();
             g2d.setPaint(Color.orange);
