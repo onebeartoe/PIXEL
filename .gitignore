@@ -1,4 +1,11 @@
+/IOIOLibPC/target/
+/ioio-android/target/
+/ioio-commons/target/
+/ioio-pc/target/
 /PixelTouchPC/target/
 /PixelAnimationsPC/target/
-/IOIOLibPC/target/
-/ioio-pc/target/
+/pixel-art-android/bin/
+/pixel-art-android/target/
+/pixel-touch-android/bin/
+/pixel-touch-android/target/
+
