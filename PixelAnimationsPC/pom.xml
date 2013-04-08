@@ -7,7 +7,7 @@
     
     <artifactId>pcpixelart</artifactId>
     
-    <name>pixel-animations-pc</name>
+    <name>pixel-pc</name>
 
     <packaging>jar</packaging>
     <version>1.0-SNAPSHOT</version>
