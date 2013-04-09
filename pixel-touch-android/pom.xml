@@ -16,7 +16,7 @@
         <dependency>
             <groupId>com.google.android</groupId>
             <artifactId>android</artifactId>
-            <version>1.6_r2</version>
+            <version>2.1_r1</version>
             <scope>provided</scope>
         </dependency>
 
@@ -36,21 +36,33 @@
                     <groupId>com.jayway.maven.plugins.android.generation2</groupId>
                     <artifactId>android-maven-plugin</artifactId>
                     <version>3.5.2</version>
-
                     <extensions>true</extensions>
                 </plugin>
             </plugins>
         </pluginManagement>
+
+	
         <plugins>
             <plugin>
                 <groupId>com.jayway.maven.plugins.android.generation2</groupId>
                 <artifactId>android-maven-plugin</artifactId>
-                <configuration>
+                <configuration>		    
                     <sdk>
                         <!-- platform or api level (api level 4 = platform 1.6)-->
                         <platform>11</platform>
                     </sdk>
+
+		    <androidManifestFile>${project.basedir}/AndroidManifest.xml</androidManifestFile>
+		    <assetsDirectory>${project.basedir}/assets</assetsDirectory>
+		    <resourceDirectory>${project.basedir}/res</resourceDirectory>
+		    <nativeLibrariesDirectory>${project.basedir}/src/main/native</nativeLibrariesDirectory>
+
+		    <apkMetaIncludes>
+			    <metaInclude>services/**</metaInclude>
+		    </apkMetaIncludes>
                 </configuration>
+
+		<extensions>true</extensions>
             </plugin>
         </plugins>
     </build>

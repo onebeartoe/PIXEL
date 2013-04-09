@@ -3,14 +3,12 @@ package ioio.hardware;
 
 import ioio.lib.api.AnalogInput;
 import ioio.lib.api.RgbLedMatrix;
-
 import ioio.lib.api.exception.ConnectionLostException;
-import java.awt.Color;
-import java.awt.Graphics2D;
-import java.awt.RenderingHints;
-import java.awt.image.BufferedImage;
+
+import java.awt.Canvas;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.ByteBuffer;
 import java.util.Arrays;
 
 
@@ -31,7 +29,7 @@ public class Pixel
     protected InputStream BitmapInputStream;
     
     protected short[] frame_;
-    
+       
     public Pixel(RgbLedMatrix matrix, RgbLedMatrix.Matrix KIND)
     {
     	this.matrix = matrix;
@@ -87,66 +85,6 @@ public class Pixel
 	matrix.frame(frame_);
     }
     
-    public void writeImagetoMatrix(BufferedImage originalImage) throws ConnectionLostException     
-    {        
-	//here we'll take a PNG, BMP, or whatever and convert it to RGB565 via a canvas, also we'll re-size the image if necessary
-        int width_original = originalImage.getWidth();
-        int height_original = originalImage.getHeight();
-
-        if (width_original != KIND.width || height_original != KIND.height) 
-        {  
-            //the image is not the right dimensions, ie, 32px by 32px				
-            BufferedImage ResizedImage = new BufferedImage(KIND.width, KIND.height, originalImage.getType());
-            Graphics2D g = ResizedImage.createGraphics();
-            g.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
-            g.drawImage(originalImage, 0, 0, KIND.width, KIND.height, 0, 0, originalImage.getWidth(), originalImage.getHeight(), null);
-            g.dispose();
-            originalImage = ResizedImage;		
-        }
-
-        int numByte = 0;
-        int i = 0;
-        int j = 0;
-
-        for (i = 0; i < KIND.height; i++) 
-        {
-            for (j = 0; j < KIND.width; j++) 
-            {
-                Color c = new Color(originalImage.getRGB(j, i));  //i and j were reversed which was rotationg the image by 90 degrees
-//                int aRGBpix = originalImage.getRGB(j, i);  //i and j were reversed which was rotationg the image by 90 degrees
-//                int alpha;
-                int red = c.getRed();
-                int green = c.getGreen();
-                int blue = c.getBlue();
-
-                //RGB565
-                red = red >> 3;
-                green = green >> 2;
-                blue = blue >> 3;
-                //A pixel is represented by a 4-byte (32 bit) integer, like so:
-                //00000000 00000000 00000000 11111111
-                //^ Alpha  ^Red     ^Green   ^Blue
-                //Converting to RGB565
-
-                short pixel_to_send = 0;
-                int pixel_to_send_int = 0;
-                pixel_to_send_int = (red << 11) | (green << 5) | (blue);
-                pixel_to_send = (short) pixel_to_send_int;
-
-                //dividing into bytes
-                byte byteH = (byte) ((pixel_to_send >> 8) & 0x0FF);
-                byte byteL = (byte) (pixel_to_send & 0x0FF);
-
-                //Writing it to array - High-byte is the first
-
-                BitmapBytes[numByte + 1] = byteH;
-                BitmapBytes[numByte] = byteL;
-                numByte += 2;
-            }
-        }
-
-	loadRGB565PNG();
-    }
     
     /**          
      * this part of code writes to the LED matrix in code without any external file

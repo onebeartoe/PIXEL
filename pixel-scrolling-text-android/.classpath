@@ -16,5 +16,6 @@
 	<classpathentry kind="con" path="com.android.ide.eclipse.adt.ANDROID_FRAMEWORK"/>
 	<classpathentry combineaccessrules="false" exported="true" kind="src" path="/ioio-android"/>
 	<classpathentry combineaccessrules="false" exported="true" kind="src" path="/ioio-commons"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/ioio-bluetooth"/>
 	<classpathentry kind="output" path="bin/classes"/>
 </classpath>
