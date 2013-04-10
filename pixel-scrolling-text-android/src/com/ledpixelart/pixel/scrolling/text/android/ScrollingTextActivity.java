@@ -7,6 +7,20 @@ import ioio.lib.util.BaseIOIOLooper;
 import ioio.lib.util.IOIOLooper;
 import ioio.lib.util.android.IOIOActivity;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import android.graphics.Color;
+import android.graphics.Paint;
+import android.graphics.Rect;
+import android.graphics.Typeface;
+import android.os.Bundle;
+import android.widget.EditText;
+import android.widget.SeekBar;
+import android.widget.TextView;
+import android.widget.ToggleButton;
+
+import com.ledpixelart.pixel.hardware.Pixel;
 /*
 import java.awt.Color;
 import java.awt.Font;
@@ -15,16 +29,6 @@ import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 */
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
-import android.os.Bundle;
-import android.widget.SeekBar;
-import android.widget.TextView;
-import android.widget.ToggleButton;
-
-import com.ledpixelart.pixel.hardware.Pixel;
-
 public class ScrollingTextActivity extends IOIOActivity 
 {
 	private TextView textView_;
@@ -32,6 +36,8 @@ public class ScrollingTextActivity extends IOIOActivity
 	private SeekBar seekBar_;
 	
 	private ToggleButton toggleButton_;
+	
+	private EditText textField;
 	
 	private int x;
 
@@ -44,6 +50,8 @@ public class ScrollingTextActivity extends IOIOActivity
         textView_ = (TextView)findViewById(R.id.TextView);
         seekBar_ = (SeekBar)findViewById(R.id.SeekBar);
         toggleButton_ = (ToggleButton)findViewById(R.id.ToggleButton);
+        
+        textField = (EditText) findViewById(R.id.textField);
 
         enableUi(false);
     }
@@ -83,32 +91,23 @@ public class ScrollingTextActivity extends IOIOActivity
 		public void loop() throws ConnectionLostException 
 		{ 
 			{
-				int w = 64;
-	            int h = 64;
-/*	            
-	            BufferedImage img = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
-	            
-	            Graphics2D g2d = img.createGraphics();
-	            g2d.setPaint(Color.orange);
-	            
-	            String fontFamily = "Arial";
-	            
-	            Font font = new Font(fontFamily, Font.PLAIN, 32);
-	                	            
-	            g2d.setFont(font);
-	            
-	            String message = "Hello, world!";
-	            
-	            FontMetrics fm = g2d.getFontMetrics();
-	            
-	            int y = fm.getHeight();            
+//				int w = 64;	            
 
-	            g2d.drawString(message, x, y);
-	            g2d.dispose();
-*/
+	            Rect bounds = new Rect();
 	            try 
-	            {              
-	                pixel.writeImagetoMatrix();
+	            {	            	
+	            	Paint paint = new Paint();
+	            	paint.setColor(Color.GREEN);
+	            	Typeface tf = Typeface.create("Helvetica",Typeface.NORMAL);   	   
+	            	paint.setTypeface(tf);
+	            	paint.setTextSize(32);
+	            	paint.setFlags(Paint.ANTI_ALIAS_FLAG);
+	            	
+	            	
+	            	String text = textField.getText().toString();
+	            	paint.getTextBounds(text, 0, text.length(), bounds);
+	            	
+	                pixel.writeImagetoMatrix(x, text, paint);
 	                
 	            } 
 	            catch (ConnectionLostException ex) 
@@ -118,26 +117,26 @@ public class ScrollingTextActivity extends IOIOActivity
 	            
 	            try 
 	            {
-					Thread.sleep(1200);
+					Thread.sleep(120);
 				} 
 	            catch (InterruptedException e) 
 				{
 					System.out.println("coudl not sleep in " + getClass().getName() );
 				}
 	            
-/*	                        
-	            int messageWidth = fm.stringWidth(message);            
+	                        
+	            int messageWidth = bounds.width();            
 	            int resetX = 0 - messageWidth;
 	            
 	            if(x == resetX)
 	            {
-	                x = w;
+	                x = 64;
 	            }
 	            else
 	            {
 	                x--;
 	            }
-*/	            
+	            
 			}	
 		}
 	}
