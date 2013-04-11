@@ -1,14 +1,12 @@
-/IOIOLibPC/target/
 /ioio-android/target/
 /ioio-commons/target/
 /ioio-pc/target/
-/PixelTouchPC/target/
-/PixelAnimationsPC/target/
 /pixel-art-android/bin/
 /pixel-art-android/target/
+/pixel-pc/target/
 /pixel-scrolling-text-android/bin/
-pixel-scrolling-text-android/gen/
+/pixel-scrolling-text-android/gen/
 /pixel-touch-android/bin/
 /pixel-touch-android/target/
-
+/pixel-touch-pc/target/
 /pixel-scrolling-text-android/target/
