@@ -4,8 +4,8 @@
   <modelVersion>4.0.0</modelVersion>
   
     <parent>
-	    <groupId>ioio</groupId>
-	    <artifactId>ioiolib</artifactId>
+	    <groupId>org.onebeartoe</groupId>
+	    <artifactId>pixel</artifactId>
 	    <version>0.0.1-SNAPSHOT</version>
     </parent>
 
