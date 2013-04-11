@@ -16,6 +16,7 @@
 	<modules>
 		<module>ioio-commons</module>
 		<module>ioio-android</module>
+		<module>ioio-bluetooth</module>
 		<module>ioio-pc</module>
 		<module>pixel-scrolling-text-android</module>
 		<module>pixel-touch-android</module>
