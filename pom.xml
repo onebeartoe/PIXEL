@@ -18,6 +18,7 @@
 		<module>ioio-android</module>
 		<module>ioio-bluetooth</module>
 		<module>ioio-pc</module>
+		<module>pixel-pc</module>
 		<module>pixel-scrolling-text-android</module>
 		<module>pixel-touch-android</module>
 	</modules>
