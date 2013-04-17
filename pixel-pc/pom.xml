@@ -3,13 +3,20 @@
 
     <modelVersion>4.0.0</modelVersion>
 
+    <parent>
+	    <groupId>org.onebeartoe</groupId>
+	    <artifactId>pixel</artifactId>
+	    <version>0.0.1-SNAPSHOT</version>
+    </parent>
+
     <groupId>com.ledpixelart</groupId>
     
-    <artifactId>pcpixelart</artifactId>
+    <artifactId>pixel-pc</artifactId>
     
     <name>pixel-pc</name>
 
     <packaging>jar</packaging>
+    
     <version>1.0-SNAPSHOT</version>
     
     <organization>
@@ -70,10 +77,6 @@
 	    <groupId>org.apache.maven.plugins</groupId>
 	    <artifactId>maven-compiler-plugin</artifactId>
 	    <version>2.5.1</version>
-	    <!--configuration>
-	      <source>1.6</source>
-	      <target>1.6</target>
-	    </configuration-->
 	</plugin>
 
       <plugin>
@@ -107,15 +110,6 @@
 	    <artifactId>pc</artifactId>
 	    <version>1.0-SNAPSHOT</version>
 	</dependency>
-
-<!--  
-	<dependency>
-	    <groupId>com.ledpixelart.pcpixelart</groupId>                     
-	    <artifactId>ioio.pc</artifactId>
-	    <version>1.0-SNAPSHOT</version>
-	</dependency>        
--->
-
     </dependencies>
 
 </project>

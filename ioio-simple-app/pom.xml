@@ -10,7 +10,7 @@
     
     <packaging>apk</packaging>
     
-    <name>pixel-scrolling-text-android</name>
+    <name>ioio-simple-app</name>
 
     <dependencies>
         <dependency>
