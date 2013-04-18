@@ -44,17 +44,17 @@ public abstract class PixelTilePanel extends ZeroThreadedPixelPanel implements A
      */
     public void populate()
     {
-	List<String> filenames;
 	try 
 	{
-	    filenames = imageNames();
+	    List<String> filenames = imageNames();
 	    for(String file : filenames)
 	    {
 		ImageIcon icon = getImageIcon(file);
 		JButton button = new JButton(icon);
-		int i = file.lastIndexOf(".");
-		String command = file.substring(0, i);
-		button.setActionCommand(command);
+		button.setActionCommand(file);
+//		int i = file.lastIndexOf(".");
+//		String command = file.substring(0, i);
+//		button.setActionCommand(command);
 		button.addActionListener(this);
 		buttonsPanel.add(button);
 		buttons.add(button);

@@ -12,7 +12,7 @@ import java.util.List;
 public class ImageFilters 
 {
     
-    static String [] stillEndings = {".gif", ".jpg", ".png"};
+    static String [] stillEndings = {".gif", ".jpeg", ".jpg", ".png"};
     
     public static ImageFilter stills = new ImageFilter(stillEndings);     
     

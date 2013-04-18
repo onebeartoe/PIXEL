@@ -45,6 +45,9 @@ public class AnimationsPanel extends ImageTilePanel
 		}
 		
 		String framestring = "animations/decoded/" + animation_name + "/" + animation_name + i + ".rgb565";
+		
+System.out.println("framestring: " + framestring);
+
 		try 
 		{
 		    PixelApp.pixel.loadRGB565(framestring);
@@ -61,15 +64,17 @@ public class AnimationsPanel extends ImageTilePanel
     @Override
     public void actionPerformed(ActionEvent event) 
     {
-	String command = event.getActionCommand();
-	System.out.println("animation comamand: " + command);
-
 	String selectedFileName = event.getActionCommand();
 	String decodedDirPath = "animations/decoded";
 
-	//System.out.println("selected file name: " + selectedFileName);
+System.out.println("selected file name: " + selectedFileName);
+	int i = selectedFileName.lastIndexOf(".");
+	selectedFileName = selectedFileName.substring(0, i);
+System.out.println("corrected file name: " + selectedFileName);
 
-	InputStream decodedFile = PixelAnimationsPC.class.getClassLoader().getResourceAsStream(decodedDirPath + "/" + selectedFileName + "/" + selectedFileName + ".txt"); //decoded/rain/rain.text
+	String path = decodedDirPath + "/" + selectedFileName + "/" + selectedFileName + ".txt";
+
+	InputStream decodedFile = PixelAnimationsPC.class.getClassLoader().getResourceAsStream(path);
 	//note can't use file operator here as you can't reference files from a jar file
 
 	if (decodedFile != null) 
@@ -98,8 +103,13 @@ public class AnimationsPanel extends ImageTilePanel
 	    int selectedFileDelay = Integer.parseInt(fileAttribs2[1].trim());	    
 
 	    //****** Now let's setup the animation ******
-	    i = 0;
-	    animation_name = event.getActionCommand();
+	    
+	    animation_name = selectedFileName;
+//	    i = 0;
+//	    String name = event.getActionCommand();	    	    		
+//	    int i = name.lastIndexOf(".");	    
+//	    animation_name = name.substring(0, i);	    
+	    
 	    numFrames = selectedFileTotalFrames;
 	    // System.out.println("file delay: " + selectedFileDelay);
             
@@ -129,12 +139,6 @@ public class AnimationsPanel extends ImageTilePanel
     public void stopPixelActivity()
     {
         stopExistingTimer();
-
-//        if(timer != null && timer.isRunning() )
-//        {
-//            System.out.println("Stoping PIXEL activity in " + getClass().getSimpleName() + ".");
-//            timer.stop();
-//        }
     }
     
 }

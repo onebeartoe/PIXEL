@@ -88,7 +88,8 @@ public class UserProvidedPanel extends ImageTilePanel
 	String command = event.getActionCommand();
 	System.out.println("image comamand: " + command);	
         
-        String framestring = imageDirectory.getAbsolutePath() + "/" + command + ".png";
+        String framestring = imageDirectory.getAbsolutePath() + "/" + command;
+//        String framestring = imageDirectory.getAbsolutePath() + "/" + command + ".png";
         try 
         {
             System.out.println("Attemping to load User image: " + framestring);

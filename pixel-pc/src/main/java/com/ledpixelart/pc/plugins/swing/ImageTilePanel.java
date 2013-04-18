@@ -33,7 +33,9 @@ public class ImageTilePanel extends PixelTilePanel
 	String command = event.getActionCommand();
 	System.out.println("image comamand: " + command);	
         
-        String imagePath = "images/" + command + ".png";
+        String imagePath = "images/" + command;        
+//        String imagePath = "images/" + command + ".png";
+	
         try 
         {
             System.out.println("Attemping to load " + imagePath + " from the classpath.");
