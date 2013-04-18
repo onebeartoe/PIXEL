@@ -1,6 +1,7 @@
 
-package com.ledpixelart.pc;
+package com.ledpixelart.pc.plugins.swing;
 
+import com.ledpixelart.pc.PixelApp;
 import ioio.lib.api.RgbLedMatrix;
 import java.awt.event.ActionEvent;
 import java.awt.image.BufferedImage;

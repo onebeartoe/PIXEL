@@ -1,5 +1,5 @@
 
-package com.ledpixelart.pc;
+package com.ledpixelart.pc.plugins.swing;
 
 import com.ledpixelart.pc.plugins.swing.ZeroThreadedPixelPanel;
 import ioio.lib.api.RgbLedMatrix;

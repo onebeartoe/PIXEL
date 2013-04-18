@@ -1,6 +1,7 @@
 
-package com.ledpixelart.pc;
+package com.ledpixelart.pc.plugins.swing;
 
+import com.ledpixelart.pc.PixelApp;
 import com.ledpixelart.pc.filters.ImageFilters;
 import ioio.lib.api.RgbLedMatrix;
 import java.awt.BorderLayout;
