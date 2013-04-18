@@ -19,8 +19,6 @@ import ioio.lib.util.IOIOLooper;
 import ioio.lib.util.pc.IOIOSwingApp;
 import java.awt.BorderLayout;
 import java.awt.Component;
-
-import java.awt.GridLayout;
 import java.awt.Window;
 
 import javax.swing.UIManager;
@@ -41,11 +39,9 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.ButtonGroup;
 import javax.swing.JCheckBoxMenuItem;
-import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
-import javax.swing.JPanel;
 import javax.swing.JRadioButtonMenuItem;
 import javax.swing.JTabbedPane;
 import javax.swing.KeyStroke;
@@ -120,12 +116,6 @@ public class PixelApp extends IOIOSwingApp
 	imagePanels.add(animationsPanel);
         tabbedPane.addTab("Animations", icon, animationsPanel, "Does twice as much nothing");
         tabbedPane.setMnemonicAt(1, KeyEvent.VK_2);
-        
-        PixelTilePanel interactiveAnimations = new ProximityPanel(pixel.KIND);
-	interactiveAnimations.populate();
-	imagePanels.add(interactiveAnimations);
-        tabbedPane.addTab("Interactive", icon, interactiveAnimations, "Still does nothing");
-        tabbedPane.setMnemonicAt(2, KeyEvent.VK_3);
                 
 	String path = System.getProperty("user.home");
         File homeDirectory = new File(path);
@@ -133,7 +123,7 @@ public class PixelApp extends IOIOSwingApp
 	userTilePanel.populate();
 	imagePanels.add(userTilePanel);
         tabbedPane.addTab("User Defined", icon, userTilePanel, "Does nothing at all");
-        tabbedPane.setMnemonicAt(3, KeyEvent.VK_4);
+        tabbedPane.setMnemonicAt(2, KeyEvent.VK_4);
         
         PixelPanel scrollPanel = new ScrollingTextPanel(pixel.KIND);
         imagePanels.add(scrollPanel);
@@ -181,17 +171,17 @@ public class PixelApp extends IOIOSwingApp
 	JRadioButtonMenuItem rbMenuItem;
 	JCheckBoxMenuItem cbMenuItem;
 
-	//Create the menu bar.
+	// Create the menu bar.
 	menuBar = new JMenuBar();
 
-	//Build the first menu.
+	// Build the first menu.
 	menu = new JMenu("Application");
 	menu.setMnemonic(KeyEvent.VK_A);
 	menu.getAccessibleContext().setAccessibleDescription(
 		"The only menu in this program that has menu items");
 	menuBar.add(menu);
 
-	//a group of JMenuItems
+	// a group of JMenuItems
 	menuItem = new JMenuItem("A text-only menu item",
 				 KeyEvent.VK_T);
 	menuItem.setAccelerator(KeyStroke.getKeyStroke(
@@ -209,7 +199,7 @@ public class PixelApp extends IOIOSwingApp
 	menuItem.setMnemonic(KeyEvent.VK_D);
 	menu.add(menuItem);
 
-	//a group of radio button menu items
+	// a group of radio button menu items
 	menu.addSeparator();
 	ButtonGroup group = new ButtonGroup();
 	rbMenuItem = new JRadioButtonMenuItem("A radio button menu item");
@@ -223,7 +213,7 @@ public class PixelApp extends IOIOSwingApp
 	group.add(rbMenuItem);
 	menu.add(rbMenuItem);
 
-	//a group of check box menu items
+	// a group of check box menu items
 	menu.addSeparator();
 	cbMenuItem = new JCheckBoxMenuItem("A check box menu item");
 	cbMenuItem.setMnemonic(KeyEvent.VK_C);
@@ -256,17 +246,6 @@ public class PixelApp extends IOIOSwingApp
 	return menuBar;
     }
 
-/* delete me! */
-     protected JPanel makeTextPanel(String text) 
-     {
-        JPanel panel = new JPanel(false);
-        JLabel filler = new JLabel(text);
-        filler.setHorizontalAlignment(JLabel.CENTER);
-        panel.setLayout(new GridLayout(1, 1));
-        panel.add(filler);
-        return panel;
-    }
-     
     protected ImageIcon createImageIcon(String path) 
     {
         java.net.URL imgURL = PixelApp.class.getResource(path);
@@ -276,11 +255,6 @@ public class PixelApp extends IOIOSwingApp
             System.err.println("Couldn't find file: " + path);
             return null;
         }
-    }
-    
-    private void enableButtons() 
-    {
-	
     }
 
     @Override
@@ -300,7 +274,6 @@ public class PixelApp extends IOIOSwingApp
 		setPixelFound();
 		System.out.println("Found PIXEL: " + pixel.matrix + "\n");
 		System.out.println("You may now interact with the PIXEL\n");
-		enableButtons();
 		
 		//TODO: Load something on startup
 	    }	    

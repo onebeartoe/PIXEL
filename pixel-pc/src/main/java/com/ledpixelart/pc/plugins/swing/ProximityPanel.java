@@ -17,6 +17,8 @@ import java.util.logging.Logger;
 import javax.swing.Timer;
 
 /**
+ * This was intended for the functionality seen in the Android PIXEL app for interactive images.
+ * 
  * @author rmarquez
  */
 public class ProximityPanel 
