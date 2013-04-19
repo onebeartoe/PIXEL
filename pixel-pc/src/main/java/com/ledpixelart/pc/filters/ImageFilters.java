@@ -12,13 +12,13 @@ import java.util.List;
 public class ImageFilters 
 {
     
-    static String [] stillEndings = {".gif", ".jpeg", ".jpg", ".png"};
+    static final String [] stillEndings = {".gif", ".jpeg", ".jpg", ".png"};
     
-    public static ImageFilter stills = new ImageFilter(stillEndings);     
+    public static ImageFilter stills = new ImageFilter(stillEndings);
     
-    static String [] animationEndings = {".gif"};
+    static final String [] animationEndings = {".gif"};
         
-    public static ImageFilter animations = new ImageFilter(animationEndings);     
+    static ImageFilter animations = new ImageFilter(animationEndings);     
     
     public static class ImageFilter implements FilenameFilter
     {
