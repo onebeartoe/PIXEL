@@ -10,7 +10,7 @@
     
     <packaging>apk</packaging>
     
-    <name>ioio-simple-app</name>
+    <name>ioio-simple-app-android</name>
 
     <dependencies>
         <dependency>
