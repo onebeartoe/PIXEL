@@ -57,7 +57,7 @@ public class ScrollingTextPanel extends SingleThreadedPixelPanel
 	
 	colorChooser = new JColorChooser();
         
-        textField = new JTextField("Hello world!");
+        textField = new JTextField("Type Something Here");
         
         JPanel inputSubPanel = new JPanel( new BorderLayout() );
         JPanel inputPanel = new JPanel( new BorderLayout() );
@@ -95,7 +95,7 @@ public class ScrollingTextPanel extends SingleThreadedPixelPanel
 	textPanel.setPreferredSize( new Dimension(250, 1) );
 	textPanel.setBorder( BorderFactory.createTitledBorder("Text") );	
 	
-	scrollSpeedSlider = new JSlider(10, 700);
+	scrollSpeedSlider = new JSlider(200, 709);
 	JPanel xPanel = new JPanel();
 	xPanel.add(scrollSpeedSlider);
 	xPanel.setBorder( BorderFactory.createTitledBorder("Scroll Speed") );
@@ -117,7 +117,8 @@ public class ScrollingTextPanel extends SingleThreadedPixelPanel
     {
         public void actionPerformed(ActionEvent e) 
         {
-	    int delay = scrollSpeedSlider.getValue();	    
+	    int delay = scrollSpeedSlider.getValue();	
+	    delay = 710 - delay;                            //al linke: added this so the higher slider value means faster scrolling
 	    ScrollingTextPanel.this.timer.setDelay(delay);
 	    
             int w = 64;

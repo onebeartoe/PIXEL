@@ -3,6 +3,7 @@
 	<name>pixel-pc</name>
 	<comment></comment>
 	<projects>
+		<project>pixel</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>

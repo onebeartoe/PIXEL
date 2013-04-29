@@ -42,7 +42,9 @@ import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
 import javax.swing.JRadioButtonMenuItem;
+import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
 import javax.swing.KeyStroke;
 import javax.swing.event.ChangeEvent;
@@ -58,6 +60,7 @@ public class PixelApp extends IOIOSwingApp
     private List<PixelPanel> imagePanels;
     
     private static IOIO ioiO; 
+    private JFrame frame;
     
     public static Pixel pixel;
     
@@ -100,8 +103,16 @@ public class PixelApp extends IOIOSwingApp
 	    logger.log(Level.SEVERE, message, ex);	
 	}	
 
-	JFrame frame = new JFrame("PIXEL PC Edition");
+	//JFrame frame = new JFrame("PIXEL");
+	frame = new JFrame("PIXEL");
 	frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);	
+	
+	
+//	JFrame frame = new JFrame();
+//	 JPanel panel = new JPanel();
+	
+	
+	
 	
 	JTabbedPane tabbedPane = new JTabbedPane();
         ImageIcon icon = createImageIcon("images/middle.gif");                
@@ -110,6 +121,15 @@ public class PixelApp extends IOIOSwingApp
 	imagesPanelReal.populate();
 	imagePanels.add(imagesPanelReal);
 	tabbedPane.addTab("Images", icon, imagesPanelReal, "Load built-in images.");
+	
+	
+	//JScrollPane inner1 = new JScrollPane(imagesPanelReal);
+	//tabbedPane.add("Scroll", inner1);
+	//JTabbedPane inner2 = new JTabbedPane();
+//	tabs.add("Tabs", inner2);
+	
+//	 JScrollPane scroll = new JScrollPane( imagesPanelReal );
+//	 frame.add( scroll);
         
 	final PixelTilePanel animationsPanel = new AnimationsPanel(pixel.KIND);
 	animationsPanel.populate();
@@ -117,13 +137,13 @@ public class PixelApp extends IOIOSwingApp
         tabbedPane.addTab("Animations", icon, animationsPanel, "Does twice as much nothing");
         tabbedPane.setMnemonicAt(1, KeyEvent.VK_2);
                 
-	String path = System.getProperty("user.home");
-        File homeDirectory = new File(path);
-	userTilePanel = new UserProvidedPanel(pixel.KIND, homeDirectory);
-	userTilePanel.populate();
-	imagePanels.add(userTilePanel);
-        tabbedPane.addTab("User Defined", icon, userTilePanel, "Does nothing at all");
-        tabbedPane.setMnemonicAt(2, KeyEvent.VK_4);
+	//String path = System.getProperty("user.home");
+     //   File homeDirectory = new File(path);
+	//userTilePanel = new UserProvidedPanel(pixel.KIND, homeDirectory);
+	//userTilePanel.populate();
+	//imagePanels.add(userTilePanel);
+     //   tabbedPane.addTab("User Defined", icon, userTilePanel, "Does nothing at all");
+      //  tabbedPane.setMnemonicAt(2, KeyEvent.VK_4);
         
         PixelPanel scrollPanel = new ScrollingTextPanel(pixel.KIND);
         imagePanels.add(scrollPanel);
@@ -149,11 +169,11 @@ public class PixelApp extends IOIOSwingApp
             }
         });
 
-	JMenuBar menuBar = createMenuBar();
+	//JMenuBar menuBar = createMenuBar();
 	
 	frame.add(tabbedPane, BorderLayout.CENTER);	
-	frame.setSize(500, 450);		
-	frame.setJMenuBar(menuBar);
+	frame.setSize(450, 700);		
+	//frame.setJMenuBar(menuBar);
 	
 	// center it
 	frame.setLocationRelativeTo(null); 
@@ -276,6 +296,8 @@ public class PixelApp extends IOIOSwingApp
 		System.out.println("You may now interact with the PIXEL\n");
 		
 		//TODO: Load something on startup
+		JOptionPane.showMessageDialog(frame, "Found PIXEL: Click an image or animation");
+		//frame.setVisible(true);
 	    }	    
 	};
     }
