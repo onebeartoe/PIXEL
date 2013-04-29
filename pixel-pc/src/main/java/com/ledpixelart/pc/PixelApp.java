@@ -115,7 +115,9 @@ public class PixelApp extends IOIOSwingApp
 	
 	
 	JTabbedPane tabbedPane = new JTabbedPane();
-        ImageIcon icon = createImageIcon("images/middle.gif");                
+        ImageIcon icon = new ImageIcon("images/middle.png");
+//        ImageIcon icon = createImageIcon("images/middle.png");
+
 	
 	PixelTilePanel imagesPanelReal = new ImageTilePanel(pixel.KIND);
 	imagesPanelReal.populate();
@@ -266,6 +268,7 @@ public class PixelApp extends IOIOSwingApp
 	return menuBar;
     }
 
+/*    
     protected ImageIcon createImageIcon(String path) 
     {
         java.net.URL imgURL = PixelApp.class.getResource(path);
@@ -276,6 +279,7 @@ public class PixelApp extends IOIOSwingApp
             return null;
         }
     }
+*/
 
     @Override
     public IOIOLooper createIOIOLooper(String connectionType, Object extra) 
@@ -296,8 +300,8 @@ public class PixelApp extends IOIOSwingApp
 		System.out.println("You may now interact with the PIXEL\n");
 		
 		//TODO: Load something on startup
+		
 		JOptionPane.showMessageDialog(frame, "Found PIXEL: Click an image or animation");
-		//frame.setVisible(true);
 	    }	    
 	};
     }

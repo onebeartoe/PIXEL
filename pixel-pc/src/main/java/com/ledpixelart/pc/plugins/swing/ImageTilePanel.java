@@ -53,7 +53,12 @@ public class ImageTilePanel extends PixelTilePanel
     @Override
     protected ImageIcon getImageIcon(String pathName) 
     {
-	URL iconUrl = getClass().getResource( imagePath() + "/" + pathName);
+	String path = imagePath() + "/" + pathName;
+	URL iconUrl = getClass().getResource(path);
+	if(iconUrl == null)
+	{
+	    System.err.println("iconUrl is null for " + path);
+	}
 	ImageIcon icon = new ImageIcon(iconUrl);
 	
 	return icon;
