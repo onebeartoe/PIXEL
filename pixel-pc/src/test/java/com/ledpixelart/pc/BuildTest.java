@@ -9,6 +9,9 @@ import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import junit.framework.Test;
@@ -55,6 +58,10 @@ public class BuildTest extends TestCase
 	    System.out.println("images working directory: " + imagesDirectory.getAbsolutePath() );
 	    	    
 	    String [] imageNames = imagesDirectory.list(ImageFilters.stills);
+	    
+	    List<String> nameList = Arrays.asList(imageNames);
+	    Collections.sort(nameList);
+	    
 	    System.out.print("adding images: " + imagesDirectory.getAbsolutePath() );
 	    StringBuilder text = new StringBuilder();
 	    String newLine = System.getProperty("line.separator");
@@ -79,9 +86,7 @@ public class BuildTest extends TestCase
 	{
 	    Logger.getLogger(BuildTest.class.getName()).log(Level.SEVERE, null, ex);
 	}
-	
-	
-	
+		
         assertTrue( true );
     }
 }
