@@ -13,6 +13,7 @@ import java.util.logging.Logger;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 
 /**
  * @author rmarquez
@@ -33,8 +34,10 @@ public abstract class PixelTilePanel extends ZeroThreadedPixelPanel implements A
 	buttonsPanel = new JPanel();
 	buttonsPanel.setLayout(experimentLayout);
 	
+	JScrollPane scrollPane = new JScrollPane(buttonsPanel);
+	
 	setLayout(new BorderLayout() );
-	add(buttonsPanel, BorderLayout.CENTER);
+	add(scrollPane, BorderLayout.CENTER);
 	
 	buttons = new ArrayList();					
     }    

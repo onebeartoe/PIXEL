@@ -107,15 +107,8 @@ public class PixelApp extends IOIOSwingApp
 	frame = new JFrame("PIXEL");
 	frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);	
 	
-	
-//	JFrame frame = new JFrame();
-//	 JPanel panel = new JPanel();
-	
-	
-	
-	
 	JTabbedPane tabbedPane = new JTabbedPane();
-        ImageIcon icon = new ImageIcon("images/middle.png");
+        ImageIcon icon = new ImageIcon("/images/onion.png");
 //        ImageIcon icon = createImageIcon("images/middle.png");
 
 	
@@ -174,7 +167,7 @@ public class PixelApp extends IOIOSwingApp
 	//JMenuBar menuBar = createMenuBar();
 	
 	frame.add(tabbedPane, BorderLayout.CENTER);	
-	frame.setSize(450, 700);		
+	frame.setSize(450, 500);		
 	//frame.setJMenuBar(menuBar);
 	
 	// center it
