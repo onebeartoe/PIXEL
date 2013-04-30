@@ -124,13 +124,13 @@ public class PixelApp extends IOIOSwingApp
         tabbedPane.setMnemonicAt(1, KeyEvent.VK_2);
     
     // temp commented out this tab until working    
-	//String path = System.getProperty("user.home");
-    //File homeDirectory = new File(path);
-	//userTilePanel = new UserProvidedPanel(pixel.KIND, homeDirectory);
-	//userTilePanel.populate();
-	//imagePanels.add(userTilePanel);
-    //tabbedPane.addTab("User Defined", icon, userTilePanel, "Does nothing at all");
-    //tabbedPane.setMnemonicAt(2, KeyEvent.VK_4);
+	String path = System.getProperty("user.home");
+    File homeDirectory = new File(path);
+	userTilePanel = new UserProvidedPanel(pixel.KIND, homeDirectory);
+	userTilePanel.populate();
+	imagePanels.add(userTilePanel);
+    tabbedPane.addTab("User Defined", icon, userTilePanel, "Does nothing at all");
+    tabbedPane.setMnemonicAt(2, KeyEvent.VK_4);
         
         PixelPanel scrollPanel = new ScrollingTextPanel(pixel.KIND);
         imagePanels.add(scrollPanel);

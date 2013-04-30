@@ -36,7 +36,8 @@ public class UserProvidedPanel extends ImageTilePanel
         this.imageDirectory = imageDirectory;
 	
 	userDirectoryChooser = new JFileChooser(this.imageDirectory);
-        userDirectoryChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+    userDirectoryChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+	//userDirectoryChooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);  //get a crash when picking a single file
 		
 	JButton userButton = new JButton("Browse");
         userButton.addActionListener( new UserButtonListener() );
@@ -89,7 +90,7 @@ public class UserProvidedPanel extends ImageTilePanel
 	System.out.println("image comamand: " + command);	
         
         String framestring = imageDirectory.getAbsolutePath() + "/" + command;
-//        String framestring = imageDirectory.getAbsolutePath() + "/" + command + ".png";
+       //String framestring = imageDirectory.getAbsolutePath() + "/" + command + ".png";
         try 
         {
             System.out.println("Attemping to load User image: " + framestring);
