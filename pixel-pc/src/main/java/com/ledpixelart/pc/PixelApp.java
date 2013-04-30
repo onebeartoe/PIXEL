@@ -62,17 +62,15 @@ public class PixelApp extends IOIOSwingApp
     private static IOIO ioiO; 
     private JFrame frame;
     
-    public static Pixel pixel;
+    private static RgbLedMatrix.Matrix KIND = ioio.lib.api.RgbLedMatrix.Matrix.SEEEDSTUDIO_32x32;
+    
+    public static final Pixel pixel = new Pixel(KIND);
     
     public PixelApp()
     {
 	logger = Logger.getLogger(PixelApp.class.getName());//.log(Level.SEVERE, message, ex);	
 	
-	imagePanels = new ArrayList();
-        
-        RgbLedMatrix.Matrix KIND = ioio.lib.api.RgbLedMatrix.Matrix.SEEEDSTUDIO_32x32;
-	
-	pixel = new Pixel(KIND);
+	imagePanels = new ArrayList();	
     }
 
     public static void main(String[] args) throws Exception 
