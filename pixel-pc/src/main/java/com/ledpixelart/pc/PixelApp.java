@@ -116,29 +116,21 @@ public class PixelApp extends IOIOSwingApp
 	imagesPanelReal.populate();
 	imagePanels.add(imagesPanelReal);
 	tabbedPane.addTab("Images", icon, imagesPanelReal, "Load built-in images.");
-	
-	
-	//JScrollPane inner1 = new JScrollPane(imagesPanelReal);
-	//tabbedPane.add("Scroll", inner1);
-	//JTabbedPane inner2 = new JTabbedPane();
-//	tabs.add("Tabs", inner2);
-	
-//	 JScrollPane scroll = new JScrollPane( imagesPanelReal );
-//	 frame.add( scroll);
         
 	final PixelTilePanel animationsPanel = new AnimationsPanel(pixel.KIND);
 	animationsPanel.populate();
 	imagePanels.add(animationsPanel);
         tabbedPane.addTab("Animations", icon, animationsPanel, "Does twice as much nothing");
         tabbedPane.setMnemonicAt(1, KeyEvent.VK_2);
-                
+    
+    // temp commented out this tab until working    
 	//String path = System.getProperty("user.home");
-     //   File homeDirectory = new File(path);
+    //File homeDirectory = new File(path);
 	//userTilePanel = new UserProvidedPanel(pixel.KIND, homeDirectory);
 	//userTilePanel.populate();
 	//imagePanels.add(userTilePanel);
-     //   tabbedPane.addTab("User Defined", icon, userTilePanel, "Does nothing at all");
-      //  tabbedPane.setMnemonicAt(2, KeyEvent.VK_4);
+    //tabbedPane.addTab("User Defined", icon, userTilePanel, "Does nothing at all");
+    //tabbedPane.setMnemonicAt(2, KeyEvent.VK_4);
         
         PixelPanel scrollPanel = new ScrollingTextPanel(pixel.KIND);
         imagePanels.add(scrollPanel);
@@ -167,7 +159,7 @@ public class PixelApp extends IOIOSwingApp
 	//JMenuBar menuBar = createMenuBar();
 	
 	frame.add(tabbedPane, BorderLayout.CENTER);	
-	frame.setSize(450, 500);		
+	frame.setSize(450, 600);		
 	//frame.setJMenuBar(menuBar);
 	
 	// center it
