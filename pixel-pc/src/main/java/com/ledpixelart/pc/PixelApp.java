@@ -6,9 +6,7 @@ import com.ledpixelart.pc.plugins.swing.AnimationsPanel;
 import com.ledpixelart.pc.plugins.swing.ImageTilePanel;
 import com.ledpixelart.pc.plugins.swing.PixelPanel;
 import com.ledpixelart.pc.plugins.swing.PixelTilePanel;
-import com.ledpixelart.pc.plugins.swing.ProximityPanel;
 import com.ledpixelart.pc.plugins.swing.ScrollingTextPanel;
-import com.ledpixelart.pc.plugins.swing.UserProvidedPanel;
 import ioio.lib.api.AnalogInput;
 import ioio.lib.api.DigitalOutput;
 import ioio.lib.api.IOIO;
@@ -31,8 +29,8 @@ import java.awt.event.KeyEvent;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferByte;
 import java.awt.image.WritableRaster;
-import java.io.File;
 import java.io.IOException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
@@ -44,7 +42,6 @@ import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JRadioButtonMenuItem;
-import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
 import javax.swing.KeyStroke;
 import javax.swing.event.ChangeEvent;
@@ -68,7 +65,7 @@ public class PixelApp extends IOIOSwingApp
     
     public PixelApp()
     {
-	logger = Logger.getLogger(PixelApp.class.getName());//.log(Level.SEVERE, message, ex);	
+	logger = Logger.getLogger(PixelApp.class.getName());
 	
 	imagePanels = new ArrayList();	
     }
@@ -106,7 +103,9 @@ public class PixelApp extends IOIOSwingApp
 	frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);	
 	
 	JTabbedPane tabbedPane = new JTabbedPane();
-        ImageIcon icon = new ImageIcon("/images/onion.png");
+	String path = "/images/onion.png";
+	URL url = getClass().getResource(path);
+        ImageIcon icon = new ImageIcon(url);
 //        ImageIcon icon = createImageIcon("images/middle.png");
 
 	
