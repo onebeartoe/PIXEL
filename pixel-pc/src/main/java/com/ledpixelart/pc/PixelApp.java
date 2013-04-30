@@ -118,7 +118,7 @@ public class PixelApp extends IOIOSwingApp
 	final PixelTilePanel animationsPanel = new AnimationsPanel(pixel.KIND);
 	animationsPanel.populate();
 	imagePanels.add(animationsPanel);
-        tabbedPane.addTab("Animations", icon, animationsPanel, "Does twice as much nothing");
+        tabbedPane.addTab("Animations", icon, animationsPanel, "Load built-in animations.");
         tabbedPane.setMnemonicAt(1, KeyEvent.VK_2);
     
     // temp commented out this tab until working    
@@ -355,8 +355,13 @@ public class PixelApp extends IOIOSwingApp
 
 	public void actionPerformed(ActionEvent e) 
 	{
-	    String message = "This is about this application.";	    
-	    JOptionPane.showMessageDialog(frame, message);
+	    String path = "/images/";
+	    String iconPath = path + "aaagumball.png";
+	    URL resource = getClass().getResource(iconPath);
+	    ImageIcon imageIcon = new ImageIcon(resource);
+	    String message = "About Pixel PC";
+	    AboutPixelPc about = new AboutPixelPc();
+	    JOptionPane.showMessageDialog(frame, about, message, JOptionPane.INFORMATION_MESSAGE, imageIcon);
 	}
 	
     }
