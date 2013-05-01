@@ -72,7 +72,7 @@ public class ScrollingTextPanel extends SingleThreadedPixelPanel
 	
 	colorPanel = new JPanel();
 	colorPanel.setBackground(Color.GREEN);
-	JButton colorButton = new JButton("choose");
+	JButton colorButton = new JButton("change color");
 	colorButton.addActionListener( new ActionListener() 
 	{
 	    public void actionPerformed(ActionEvent e) 
