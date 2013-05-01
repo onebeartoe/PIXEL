@@ -105,20 +105,30 @@ public class PixelApp extends IOIOSwingApp
 	frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);	
 	
 	JTabbedPane tabbedPane = new JTabbedPane();
-	String path = "/images/onion.png";
+	
+	String path = "/images/apple_small.png";
 	URL url = getClass().getResource(path);
-        ImageIcon icon = new ImageIcon(url);
+    ImageIcon imagesTab_icon = new ImageIcon(url);
+
+	String path2 = "/images/ship_small.png";
+	URL url2 = getClass().getResource(path2);
+    ImageIcon animationsTab_icon = new ImageIcon(url2);
+    
+    String path3 = "/images/text_small.png";
+	URL url3 = getClass().getResource(path3);
+    ImageIcon textTab_icon = new ImageIcon(url3);
+    
 //        ImageIcon icon = createImageIcon("images/middle.png");
 	
 	PixelTilePanel imagesPanelReal = new ImageTilePanel(pixel.KIND);
 	imagesPanelReal.populate();
 	imagePanels.add(imagesPanelReal);
-	tabbedPane.addTab("Images", icon, imagesPanelReal, "Load built-in images.");
+	tabbedPane.addTab("Images", imagesTab_icon, imagesPanelReal, "Load built-in images.");
         
 	final PixelTilePanel animationsPanel = new AnimationsPanel(pixel.KIND);
 	animationsPanel.populate();
 	imagePanels.add(animationsPanel);
-        tabbedPane.addTab("Animations", icon, animationsPanel, "Load built-in animations.");
+        tabbedPane.addTab("Animations", animationsTab_icon, animationsPanel, "Load built-in animations.");
         tabbedPane.setMnemonicAt(1, KeyEvent.VK_2);
     
     // temp commented out this tab until working    
@@ -132,7 +142,7 @@ public class PixelApp extends IOIOSwingApp
         
         PixelPanel scrollPanel = new ScrollingTextPanel(pixel.KIND);
         imagePanels.add(scrollPanel);
-        tabbedPane.addTab("Scolling Text", icon, scrollPanel, "Scrolls a text message across the PIXEL");
+        tabbedPane.addTab("Scolling Text", textTab_icon, scrollPanel, "Scrolls a text message across the PIXEL");
         
         //The following line enables to use scrolling tabs.
         tabbedPane.setTabLayoutPolicy(JTabbedPane.SCROLL_TAB_LAYOUT);
@@ -180,7 +190,7 @@ public class PixelApp extends IOIOSwingApp
 	menuBar = new JMenuBar();
 
 	// Build the first menu.
-	menu = new JMenu("Application");
+	menu = new JMenu("Help");
 	menu.setMnemonic(KeyEvent.VK_A);
 	menu.getAccessibleContext().setAccessibleDescription("update with accessible description");
 	menuBar.add(menu);
@@ -190,16 +200,27 @@ public class PixelApp extends IOIOSwingApp
 	ImageIcon menuIcon = new ImageIcon(url);
 
 	// a group of JMenuItems
-	menuItem = new JMenuItem("About", menuIcon);
-	KeyStroke aboutKeyStroke = KeyStroke.getKeyStroke(KeyEvent.VK_1, ActionEvent.ALT_MASK);
+//	menuItem = new JMenuItem("About", menuIcon);
+	
+	menuItem = new JMenuItem("Instructions");
+	KeyStroke instructionsKeyStroke = KeyStroke.getKeyStroke(KeyEvent.VK_1, ActionEvent.ALT_MASK);
+	menuItem.setAccelerator(instructionsKeyStroke);
+	menuItem.getAccessibleContext().setAccessibleDescription("update with accessible description");
+	menuItem.addActionListener( new InstructionsListener() );
+	menu.add(menuItem);
+
+	
+	menuItem = new JMenuItem("About");
+	KeyStroke aboutKeyStroke = KeyStroke.getKeyStroke(KeyEvent.VK_2, ActionEvent.ALT_MASK);
 	menuItem.setAccelerator(aboutKeyStroke);
 	menuItem.getAccessibleContext().setAccessibleDescription("update with accessible description");
 	menuItem.addActionListener( new AboutListener() );
 	menu.add(menuItem);
 
 	
-	menuItem = new JMenuItem("Quit", menuIcon);
-	KeyStroke keyStroke = KeyStroke.getKeyStroke(KeyEvent.VK_2, ActionEvent.ALT_MASK);
+	//menuItem = new JMenuItem("Exit", menuIcon);
+	menuItem = new JMenuItem("Exit");
+	KeyStroke keyStroke = KeyStroke.getKeyStroke(KeyEvent.VK_3, ActionEvent.ALT_MASK);
 	menuItem.setAccelerator(keyStroke);
 	menuItem.addActionListener( new QuitListener() );
 //	menuItem.setMnemonic(KeyEvent.VK_B);
@@ -359,8 +380,24 @@ public class PixelApp extends IOIOSwingApp
 	    String iconPath = path + "aaagumball.png";
 	    URL resource = getClass().getResource(iconPath);
 	    ImageIcon imageIcon = new ImageIcon(resource);
-	    String message = "About Pixel PC";
+	    String message = "About PIXEL";
 	    AboutPixelPc about = new AboutPixelPc();
+	    JOptionPane.showMessageDialog(frame, about, message, JOptionPane.INFORMATION_MESSAGE, imageIcon);
+	}
+	
+    }
+    
+    private class InstructionsListener implements ActionListener
+    {
+
+	public void actionPerformed(ActionEvent e) 
+	{
+	    String path = "/images/";
+	    String iconPath = path + "aaagumball.png";
+	    URL resource = getClass().getResource(iconPath);
+	    ImageIcon imageIcon = new ImageIcon(resource);
+	    String message = "PIXEL Instructions";
+	    InstructionsPixelPc about = new InstructionsPixelPc();
 	    JOptionPane.showMessageDialog(frame, about, message, JOptionPane.INFORMATION_MESSAGE, imageIcon);
 	}
 	
