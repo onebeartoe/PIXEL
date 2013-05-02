@@ -34,6 +34,7 @@ import java.awt.image.WritableRaster;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -49,6 +50,7 @@ import javax.swing.JRadioButtonMenuItem;
 import javax.swing.JTabbedPane;
 import javax.swing.KeyStroke;
 import javax.swing.SwingConstants;
+import javax.swing.Timer;
 import javax.swing.border.BevelBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
@@ -67,6 +69,8 @@ public class PixelApp extends IOIOSwingApp
     private JFrame frame;
     
     private JLabel statusLabel;
+    
+    private Timer searchTimer;
     
     private static RgbLedMatrix.Matrix KIND = ioio.lib.api.RgbLedMatrix.Matrix.SEEEDSTUDIO_32x32;
      
@@ -159,9 +163,9 @@ public class PixelApp extends IOIOSwingApp
 	
 	JPanel statusPanel = new JPanel();
 	statusPanel.setBorder(new BevelBorder(BevelBorder.LOWERED));
-	statusPanel.setPreferredSize(new Dimension(frame.getWidth(), 16));
+//	statusPanel.setPreferredSize(new Dimension(frame.getWidth(), 16));
 	statusPanel.setLayout(new BoxLayout(statusPanel, BoxLayout.X_AXIS));
-	statusLabel = new JLabel("status");
+	statusLabel = new JLabel("default status");
 	statusLabel.setHorizontalAlignment(SwingConstants.LEFT);
 	statusPanel.add(statusLabel);
 	
@@ -349,12 +353,10 @@ public class PixelApp extends IOIOSwingApp
 	    }
 	};
     }
-    
-
-    
+        
     public static RgbLedMatrix getMatrix() 
     {
-        if (pixel.matrix == null) 
+        if(pixel.matrix == null) 
 	{
 	    if(ioiO != null)
 	    {
@@ -389,8 +391,11 @@ public class PixelApp extends IOIOSwingApp
     
     private void startSearchTimer()
     {
-	
-    }
+	int delay = 1000;
+	SearchTimer worker = new SearchTimer();
+	searchTimer = new Timer(delay, worker);
+	searchTimer.start();
+    }   
     
     public static AnalogInput getAnalogInput1() 
     {
@@ -447,12 +452,68 @@ public class PixelApp extends IOIOSwingApp
     
     private class QuitListener implements ActionListener
     {
-
-	public void actionPerformed(ActionEvent e) 
+	public void actionPerformed(ActionEvent e)
 	{
 	    System.exit(1);
 	}
+    }
+    
+    private class SearchTimer implements ActionListener 
+    {
+	final long searchPeriodLength = 15 * 1000;
 	
+	final long periodStart;
+	
+	final long periodEnd;
+	
+	private int dotCount = 0;
+	
+	String message = "Searching";
+	
+	StringBuilder label = new StringBuilder(message);
+	
+	public SearchTimer()
+	{
+	    label.insert(0, "<html><body><h2>");
+	    
+	    Date d = new Date();
+	    periodStart = d.getTime();
+	    periodEnd = periodStart + searchPeriodLength;
+	}
+	
+	public void actionPerformed(ActionEvent e) 
+	{	    	    	    
+	    if(dotCount > 10)
+	    {
+		label = new StringBuilder(message);
+		label.insert(0, "<html><body><h2>");
+		
+		dotCount = 0;
+	    }
+	    else
+	    {
+		label.append('.');
+	    }
+	    dotCount++;
+//	    label.insert(0, "<html><body><h2>");
+//	    label.append("</h2></body></html>");
+	    PixelApp.this.statusLabel.setText( label.toString() );
+	    
+	    Date d = new Date();
+	    long now = d.getTime();
+	    if(now > periodEnd)
+	    {
+		searchTimer.stop();
+		if(pixel.matrix == null)
+		{
+		    message = "A connection to the PIXEL could not be established.";
+		    PixelApp.this.statusLabel.setText(message);
+		    System.out.println(message);
+		    String title = "PIXEL Connection Unsuccessful";
+		    JOptionPane.showMessageDialog(frame, message, title, JOptionPane.INFORMATION_MESSAGE);
+		}
+	    }
+	}
     }
     
 }
