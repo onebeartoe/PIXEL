@@ -17,6 +17,7 @@ import ioio.lib.util.IOIOLooper;
 import ioio.lib.util.pc.IOIOSwingApp;
 import java.awt.BorderLayout;
 import java.awt.Component;
+import java.awt.Dimension;
 import java.awt.Window;
 
 import javax.swing.UIManager;
@@ -36,15 +37,19 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.swing.ButtonGroup;
+import javax.swing.BoxLayout;
 import javax.swing.JCheckBoxMenuItem;
+import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
+import javax.swing.JPanel;
 import javax.swing.JRadioButtonMenuItem;
 import javax.swing.JTabbedPane;
 import javax.swing.KeyStroke;
+import javax.swing.SwingConstants;
+import javax.swing.border.BevelBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
@@ -61,9 +66,11 @@ public class PixelApp extends IOIOSwingApp
     
     private JFrame frame;
     
-    private static RgbLedMatrix.Matrix KIND = ioio.lib.api.RgbLedMatrix.Matrix.SEEEDSTUDIO_32x32;
+    private JLabel statusLabel;
     
-    public static final Pixel pixel = new Pixel(KIND);
+    private static RgbLedMatrix.Matrix KIND = ioio.lib.api.RgbLedMatrix.Matrix.SEEEDSTUDIO_32x32;
+     
+   public static final Pixel pixel = new Pixel(KIND);
     
     public PixelApp()
     {
@@ -72,20 +79,7 @@ public class PixelApp extends IOIOSwingApp
 	imagePanels = new ArrayList();	
     }
 
-    public static void main(String[] args) throws Exception 
-    {		
-	PixelApp app = new PixelApp();
-	app.go(args);		
-    }        
 
-    public byte[] extractBytes(BufferedImage image) throws IOException 
-    {
-	// get DataBufferBytes from Raster
-	WritableRaster raster = image.getRaster();
-	DataBufferByte data = (DataBufferByte) raster.getDataBuffer();
-
-	return (data.getData());
-    }
 
     @Override
     protected Window createMainWindow(String args[]) 
@@ -98,27 +92,23 @@ public class PixelApp extends IOIOSwingApp
 	{
 	    String message = "An error occured while setting the native look and feel.";
 	    logger.log(Level.SEVERE, message, ex);	
-	}	
-
-	//JFrame frame = new JFrame("PIXEL");
-	frame = new JFrame("PIXEL");
-	frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);	
+	}
+	
+	JMenuBar menuBar = createMenuBar();
 	
 	JTabbedPane tabbedPane = new JTabbedPane();
 	
 	String path = "/images/apple_small.png";
 	URL url = getClass().getResource(path);
-    ImageIcon imagesTab_icon = new ImageIcon(url);
+        ImageIcon imagesTab_icon = new ImageIcon(url);
 
 	String path2 = "/images/ship_small.png";
 	URL url2 = getClass().getResource(path2);
-    ImageIcon animationsTab_icon = new ImageIcon(url2);
+	ImageIcon animationsTab_icon = new ImageIcon(url2);
     
-    String path3 = "/images/text_small.png";
+	String path3 = "/images/text_small.png";
 	URL url3 = getClass().getResource(path3);
-    ImageIcon textTab_icon = new ImageIcon(url3);
-    
-//        ImageIcon icon = createImageIcon("images/middle.png");
+	ImageIcon textTab_icon = new ImageIcon(url3);
 	
 	PixelTilePanel imagesPanelReal = new ImageTilePanel(pixel.KIND);
 	imagesPanelReal.populate();
@@ -148,6 +138,7 @@ public class PixelApp extends IOIOSwingApp
         tabbedPane.setTabLayoutPolicy(JTabbedPane.SCROLL_TAB_LAYOUT);
         tabbedPane.addChangeListener( new ChangeListener() 
         {
+// move this to a non-anonymous class	    
             public void stateChanged(ChangeEvent e) 
             {
 		for(PixelPanel panel : imagePanels)
@@ -164,14 +155,27 @@ public class PixelApp extends IOIOSwingApp
             }
         });
 
-	JMenuBar menuBar = createMenuBar();
+	frame = new JFrame("PIXEL");
 	
-	frame.add(tabbedPane, BorderLayout.CENTER);	
-	frame.setSize(450, 600);		
+	JPanel statusPanel = new JPanel();
+	statusPanel.setBorder(new BevelBorder(BevelBorder.LOWERED));
+	statusPanel.setPreferredSize(new Dimension(frame.getWidth(), 16));
+	statusPanel.setLayout(new BoxLayout(statusPanel, BoxLayout.X_AXIS));
+	statusLabel = new JLabel("status");
+	statusLabel.setHorizontalAlignment(SwingConstants.LEFT);
+	statusPanel.add(statusLabel);
+	
+	frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);	
+	frame.setLayout( new BorderLayout() );
 	frame.setJMenuBar(menuBar);
-	
+	frame.add(tabbedPane, BorderLayout.CENTER);	
+	frame.add(statusPanel, BorderLayout.SOUTH);
+	frame.setSize(450, 600);		
+		
 	// center it
 	frame.setLocationRelativeTo(null); 
+	
+	startSearchTimer();
 	
 	frame.setVisible(true);
 	
@@ -281,6 +285,15 @@ public class PixelApp extends IOIOSwingApp
 	
 	return menuBar;
     }
+    
+    public byte[] extractBytes(BufferedImage image) throws IOException 
+    {
+	// get DataBufferBytes from Raster
+	WritableRaster raster = image.getRaster();
+	DataBufferByte data = (DataBufferByte) raster.getDataBuffer();
+
+	return (data.getData());
+    }    
 
 /*    
     protected ImageIcon createImageIcon(String path) 
@@ -303,8 +316,7 @@ public class PixelApp extends IOIOSwingApp
 	    private DigitalOutput led_;
 
 	    @Override
-	    protected void setup() throws ConnectionLostException,
-		    InterruptedException 
+	    protected void setup() throws ConnectionLostException, InterruptedException
 	    {
 		led_ = ioio_.openDigitalOutput(IOIO.LED_PIN, true);
                 PixelApp.this.ioiO = ioio_;
@@ -315,19 +327,30 @@ public class PixelApp extends IOIOSwingApp
 		
 		//TODO: Load something on startup
 
+		String message = "PIXEL connection successful: Click an image or animation";
 // Use PixelApp.this instead of frame.		
-		JOptionPane.showMessageDialog(frame, "Found PIXEL: Click an image or animation");
-	    }	    
+		JOptionPane.showMessageDialog(frame, message);
+	    }
+	    
+	    @Override
+	    public void disconnected() 
+	    {
+		String message = "The IOIO was disconected.";
+		System.out.println(message);
+		statusLabel.setText(message);
+	    }
+
+	    @Override
+	    public void incompatible() 
+	    {
+		String message = "The IOIO is incompatible.";
+		System.out.println(message);
+		statusLabel.setText(message);
+	    }
 	};
     }
     
-    private void setPixelFound()
-    {
-	for(PixelPanel panel : imagePanels)
-	{
-	    panel.setPixelFound(true);
-	}
-    }
+
     
     public static RgbLedMatrix getMatrix() 
     {
@@ -348,6 +371,25 @@ public class PixelApp extends IOIOSwingApp
         }
         
         return pixel.matrix;
+    }
+    
+    public static void main(String[] args) throws Exception 
+    {		
+	PixelApp app = new PixelApp();
+	app.go(args);		
+    }
+    
+    private void setPixelFound()
+    {
+	for(PixelPanel panel : imagePanels)
+	{
+	    panel.setPixelFound(true);
+	}
+    }
+    
+    private void startSearchTimer()
+    {
+	
     }
     
     public static AnalogInput getAnalogInput1() 
