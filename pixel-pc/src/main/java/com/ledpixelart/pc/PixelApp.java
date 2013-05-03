@@ -102,15 +102,15 @@ public class PixelApp extends IOIOSwingApp
 	
 	JTabbedPane tabbedPane = new JTabbedPane();
 	
-	String path = "/images/apple_small.png";
+	String path = "/tab_icons/apple_small.png";
 	URL url = getClass().getResource(path);
         ImageIcon imagesTab_icon = new ImageIcon(url);
 
-	String path2 = "/images/ship_small.png";
+	String path2 = "/tab_icons/ship_small.png";
 	URL url2 = getClass().getResource(path2);
 	ImageIcon animationsTab_icon = new ImageIcon(url2);
     
-	String path3 = "/images/text_small.png";
+	String path3 = "/tab_icons/text_small.png";
 	URL url3 = getClass().getResource(path3);
 	ImageIcon textTab_icon = new ImageIcon(url3);
 	
@@ -165,7 +165,7 @@ public class PixelApp extends IOIOSwingApp
 	statusPanel.setBorder(new BevelBorder(BevelBorder.LOWERED));
 //	statusPanel.setPreferredSize(new Dimension(frame.getWidth(), 16));
 	statusPanel.setLayout(new BoxLayout(statusPanel, BoxLayout.X_AXIS));
-	statusLabel = new JLabel("default status");
+	statusLabel = new JLabel("PIXEL Status: Searching...");
 	statusLabel.setHorizontalAlignment(SwingConstants.LEFT);
 	statusPanel.add(statusLabel);
 	
@@ -331,9 +331,12 @@ public class PixelApp extends IOIOSwingApp
 		
 		//TODO: Load something on startup
 
-		String message = "PIXEL connection successful: Click an image or animation";
+	//	String message = "PIXEL connection successful: Click an image or animation";
 // Use PixelApp.this instead of frame.		
-		JOptionPane.showMessageDialog(frame, message);
+	//	JOptionPane.showMessageDialog(frame, message);
+		searchTimer.stop(); //need to stop the timer so we don't still display the pixel searching message
+		String message = "PIXEL Status: Connected";
+	    PixelApp.this.statusLabel.setText(message);
 	    }
 	    
 	    @Override
@@ -460,7 +463,7 @@ public class PixelApp extends IOIOSwingApp
     
     private class SearchTimer implements ActionListener 
     {
-	final long searchPeriodLength = 15 * 1000;
+	final long searchPeriodLength = 45 * 1000;
 	
 	final long periodStart;
 	
@@ -468,7 +471,7 @@ public class PixelApp extends IOIOSwingApp
 	
 	private int dotCount = 0;
 	
-	String message = "Searching";
+	String message = "Searching for PIXEL";
 	
 	StringBuilder label = new StringBuilder(message);
 	
@@ -486,6 +489,7 @@ public class PixelApp extends IOIOSwingApp
 	    if(dotCount > 10)
 	    {
 		label = new StringBuilder(message);
+		//label.insert(0, "<html><body>");
 		label.insert(0, "<html><body><h2>");
 		
 		dotCount = 0;
@@ -506,7 +510,7 @@ public class PixelApp extends IOIOSwingApp
 		searchTimer.stop();
 		if(pixel.matrix == null)
 		{
-		    message = "A connection to the PIXEL could not be established.";
+		    message = "A Bluetooth connection to PIXEL could not be established. \n\nPlease ensure you have Bluetooth paired your PC to PIXEL first using code: 4545 and then try again.";
 		    PixelApp.this.statusLabel.setText(message);
 		    System.out.println(message);
 		    String title = "PIXEL Connection Unsuccessful";

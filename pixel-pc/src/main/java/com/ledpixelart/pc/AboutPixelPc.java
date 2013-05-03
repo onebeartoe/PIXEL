@@ -27,7 +27,7 @@ public class AboutPixelPc extends JPanel
     
     public AboutPixelPc()
     {
-	String version = "0.5";
+	String version = "0.5.1";
 	String text = "PIXEL PC Beta Version " + version;
 	String html = "<html><body><h2>" + text + "</h2></body></html>";
 	JLabel productLabel = new JLabel(html, JLabel.CENTER);
