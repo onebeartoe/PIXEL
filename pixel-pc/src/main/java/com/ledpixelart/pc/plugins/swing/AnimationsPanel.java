@@ -2,7 +2,7 @@
 package com.ledpixelart.pc.plugins.swing;
 
 import com.ledpixelart.pc.PixelApp;
-import com.ledpixelart.pcpixelart.PixelAnimationsPC;
+//import com.ledpixelart.pcpixelart.PixelAnimationsPC;
 import ioio.lib.api.RgbLedMatrix;
 import ioio.lib.api.exception.ConnectionLostException;
 import java.awt.event.ActionEvent;
@@ -74,7 +74,7 @@ System.out.println("corrected file name: " + selectedFileName);
 
 	String path = decodedDirPath + "/" + selectedFileName + "/" + selectedFileName + ".txt";
 
-	InputStream decodedFile = PixelAnimationsPC.class.getClassLoader().getResourceAsStream(path);
+	InputStream decodedFile = PixelApp.class.getClassLoader().getResourceAsStream(path);
 	//note can't use file operator here as you can't reference files from a jar file
 
 	if (decodedFile != null) 

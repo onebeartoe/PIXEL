@@ -2,7 +2,6 @@
 package com.ledpixelart.pc.plugins.swing;
 
 import com.ledpixelart.pc.*;
-import com.ledpixelart.pcpixelart.PixelAnimationsPC;
 import ioio.lib.api.AnalogInput;
 import ioio.lib.api.RgbLedMatrix;
 import ioio.lib.api.exception.ConnectionLostException;
@@ -89,7 +88,7 @@ extends ImageTilePanel
 	String selectedFileName = event.getActionCommand();
 	String decodedDirPath = "animations/decoded";	
 
-	InputStream decodedFile = PixelAnimationsPC.class.getClassLoader().getResourceAsStream(decodedDirPath + "/" + selectedFileName + "/" + selectedFileName + ".txt"); //decoded/rain/rain.text
+	InputStream decodedFile = PixelApp.class.getClassLoader().getResourceAsStream(decodedDirPath + "/" + selectedFileName + "/" + selectedFileName + ".txt"); //decoded/rain/rain.text
 
 	if (decodedFile != null) 
 	{
