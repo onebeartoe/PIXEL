@@ -17,6 +17,8 @@ import javax.swing.JPanel;
 /**
  * @author rmarquez
  */
+
+// rename this to InstructionsPanel
 public class InstructionsPixelPc extends JPanel
 {
     

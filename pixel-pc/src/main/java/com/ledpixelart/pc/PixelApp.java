@@ -72,7 +72,8 @@ public class PixelApp extends IOIOSwingApp
      
     public static final Pixel pixel = new Pixel(KIND);
     
-    private PixelTilePanel userTilePanel;
+// rename to localImagePanel
+    private UserProvidedPanel userTilePanel;
     
     private List<PixelPanel> pixelPanels;
     
@@ -82,7 +83,10 @@ public class PixelApp extends IOIOSwingApp
     
     public PixelApp()
     {
-	logger = Logger.getLogger(PixelApp.class.getName());
+	String className = PixelApp.class.getName();
+	logger = Logger.getLogger(className);
+	
+	preferences = Preferences.userNodeForPackage(PixelApp.class);
 	
 	pixelPanels = new ArrayList();	
     }
@@ -100,27 +104,21 @@ public class PixelApp extends IOIOSwingApp
 	    logger.log(Level.SEVERE, message, ex);	
 	}
 	
-	JMenuBar menuBar = createMenuBar();
-	
 	JTabbedPane tabbedPane = new JTabbedPane();
 	
+	// images tab
 	String path = "/tab_icons/apple_small.png";
 	URL url = getClass().getResource(path);
         ImageIcon imagesTabIcon = new ImageIcon(url);
-
-	String path2 = "/tab_icons/ship_small.png";
-	URL url2 = getClass().getResource(path2);
-	ImageIcon animationsTabIcon = new ImageIcon(url2);
-    
-	String path3 = "/tab_icons/text_small.png";
-	URL url3 = getClass().getResource(path3);
-	ImageIcon textTabIcon = new ImageIcon(url3);
-	
 	PixelTilePanel imagesPanelReal = new ImageTilePanel(pixel.KIND);
 	imagesPanelReal.populate();
 	pixelPanels.add(imagesPanelReal);
 	tabbedPane.addTab("Images", imagesTabIcon, imagesPanelReal, "Load built-in images.");
-        
+
+	// animations tab
+	String path2 = "/tab_icons/ship_small.png";
+	URL url2 = getClass().getResource(path2);
+	ImageIcon animationsTabIcon = new ImageIcon(url2);
 	final PixelTilePanel animationsPanel = new AnimationsPanel(pixel.KIND);
 	animationsPanel.populate();
 	pixelPanels.add(animationsPanel);
@@ -139,6 +137,10 @@ public class PixelApp extends IOIOSwingApp
 	tabbedPane.addTab("Local Images", userTabIcon, userTilePanel, "This panel displays images from your local hard drive.");
 	tabbedPane.setMnemonicAt(2, KeyEvent.VK_4);
 	
+	// scrolling text panel
+	String path3 = "/tab_icons/text_small.png";
+	URL url3 = getClass().getResource(path3);
+	ImageIcon textTabIcon = new ImageIcon(url3);
         PixelPanel scrollPanel = new ScrollingTextPanel(pixel.KIND);
         pixelPanels.add(scrollPanel);
         tabbedPane.addTab("Scolling Text", textTabIcon, scrollPanel, "Scrolls a text message across the PIXEL");
@@ -155,6 +157,8 @@ public class PixelApp extends IOIOSwingApp
 	statusLabel = new JLabel("PIXEL Status: Searching...");
 	statusLabel.setHorizontalAlignment(SwingConstants.LEFT);
 	statusPanel.add(statusLabel);
+	
+	JMenuBar menuBar = createMenuBar();
 	
 	frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);	
 	frame.setLayout( new BorderLayout() );
@@ -218,8 +222,7 @@ public class PixelApp extends IOIOSwingApp
 
 /*	
 	menu = new JMenu("Plugins");
-	menu.setMnemonic(KeyEvent.VK_N);
-	menu.getAccessibleContext().setAccessibleDescription("This menu does nothing");
+	menu.getAccessibleContext().setAccessibleDescription("default plugins menu message");
 	menuBar.add(menu);
 */
 	
@@ -373,6 +376,11 @@ public class PixelApp extends IOIOSwingApp
     {
 	public void actionPerformed(ActionEvent e)
 	{
+	    String key = PixelPcPreferences.userImagesDirectory;
+	    File directory = userTilePanel.getImageDirectory();
+	    String path = directory.getAbsolutePath();
+	    preferences.put(key, path);
+	    
 	    System.exit(1);
 	}
     }
@@ -453,4 +461,3 @@ public class PixelApp extends IOIOSwingApp
     }
     
 }
-

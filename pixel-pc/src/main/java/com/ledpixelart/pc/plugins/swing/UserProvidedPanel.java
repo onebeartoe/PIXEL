@@ -47,6 +47,11 @@ public class UserProvidedPanel extends ImageTilePanel
         add(userButton, BorderLayout.SOUTH);
     }
 
+    public File getImageDirectory() 
+    {	
+	return imageDirectory;
+    }
+    
     @Override
     protected ImageIcon getImageIcon(String path) 
     {
