@@ -7,6 +7,7 @@ import com.ledpixelart.pc.plugins.swing.ImageTilePanel;
 import com.ledpixelart.pc.plugins.swing.PixelPanel;
 import com.ledpixelart.pc.plugins.swing.PixelTilePanel;
 import com.ledpixelart.pc.plugins.swing.ScrollingTextPanel;
+import com.ledpixelart.pc.plugins.swing.UserProvidedPanel;
 import ioio.lib.api.AnalogInput;
 import ioio.lib.api.DigitalOutput;
 import ioio.lib.api.IOIO;
@@ -30,6 +31,7 @@ import java.awt.event.KeyEvent;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferByte;
 import java.awt.image.WritableRaster;
+import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -101,39 +103,40 @@ public class PixelApp extends IOIOSwingApp
 	
 	String path = "/tab_icons/apple_small.png";
 	URL url = getClass().getResource(path);
-        ImageIcon imagesTab_icon = new ImageIcon(url);
+        ImageIcon imagesTabIcon = new ImageIcon(url);
 
 	String path2 = "/tab_icons/ship_small.png";
 	URL url2 = getClass().getResource(path2);
-	ImageIcon animationsTab_icon = new ImageIcon(url2);
+	ImageIcon animationsTabIcon = new ImageIcon(url2);
     
 	String path3 = "/tab_icons/text_small.png";
 	URL url3 = getClass().getResource(path3);
-	ImageIcon textTab_icon = new ImageIcon(url3);
+	ImageIcon textTabIcon = new ImageIcon(url3);
 	
 	PixelTilePanel imagesPanelReal = new ImageTilePanel(pixel.KIND);
 	imagesPanelReal.populate();
 	imagePanels.add(imagesPanelReal);
-	tabbedPane.addTab("Images", imagesTab_icon, imagesPanelReal, "Load built-in images.");
+	tabbedPane.addTab("Images", imagesTabIcon, imagesPanelReal, "Load built-in images.");
         
 	final PixelTilePanel animationsPanel = new AnimationsPanel(pixel.KIND);
 	animationsPanel.populate();
 	imagePanels.add(animationsPanel);
-        tabbedPane.addTab("Animations", animationsTab_icon, animationsPanel, "Load built-in animations.");
+        tabbedPane.addTab("Animations", animationsTabIcon, animationsPanel, "Load built-in animations.");
         tabbedPane.setMnemonicAt(1, KeyEvent.VK_2);
-    
-    // temp commented out this tab until working    
-	//String path = System.getProperty("user.home");
-    //File homeDirectory = new File(path);
-	//userTilePanel = new UserProvidedPanel(pixel.KIND, homeDirectory);
-	//userTilePanel.populate();
-	//imagePanels.add(userTilePanel);
-    //tabbedPane.addTab("User Defined", icon, userTilePanel, "Does nothing at all");
-    //tabbedPane.setMnemonicAt(2, KeyEvent.VK_4);
-        
+
+/*	
+	String userpath = System.getProperty("user.home");
+	File homeDirectory = new File(userpath);
+	userTilePanel = new UserProvidedPanel(pixel.KIND, homeDirectory);
+	userTilePanel.populate();
+	imagePanels.add(userTilePanel);
+	tabbedPane.addTab("User Defined", icon, userTilePanel, "Does nothing at all");
+	tabbedPane.setMnemonicAt(2, KeyEvent.VK_4);
+*/
+	
         PixelPanel scrollPanel = new ScrollingTextPanel(pixel.KIND);
         imagePanels.add(scrollPanel);
-        tabbedPane.addTab("Scolling Text", textTab_icon, scrollPanel, "Scrolls a text message across the PIXEL");
+        tabbedPane.addTab("Scolling Text", textTabIcon, scrollPanel, "Scrolls a text message across the PIXEL");
         
         //The following line enables to use scrolling tabs.
         tabbedPane.setTabLayoutPolicy(JTabbedPane.SCROLL_TAB_LAYOUT);
