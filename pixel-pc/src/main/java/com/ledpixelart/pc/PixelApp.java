@@ -17,7 +17,6 @@ import ioio.lib.util.IOIOLooper;
 import ioio.lib.util.pc.IOIOSwingApp;
 import java.awt.BorderLayout;
 import java.awt.Component;
-import java.awt.Dimension;
 import java.awt.Window;
 
 import javax.swing.UIManager;
@@ -74,7 +73,7 @@ public class PixelApp extends IOIOSwingApp
     
     private static RgbLedMatrix.Matrix KIND = ioio.lib.api.RgbLedMatrix.Matrix.SEEEDSTUDIO_32x32;
      
-   public static final Pixel pixel = new Pixel(KIND);
+    public static final Pixel pixel = new Pixel(KIND);
     
     public PixelApp()
     {
@@ -82,8 +81,6 @@ public class PixelApp extends IOIOSwingApp
 	
 	imagePanels = new ArrayList();	
     }
-
-
 
     @Override
     protected Window createMainWindow(String args[]) 
@@ -140,30 +137,12 @@ public class PixelApp extends IOIOSwingApp
         
         //The following line enables to use scrolling tabs.
         tabbedPane.setTabLayoutPolicy(JTabbedPane.SCROLL_TAB_LAYOUT);
-        tabbedPane.addChangeListener( new ChangeListener() 
-        {
-// move this to a non-anonymous class	    
-            public void stateChanged(ChangeEvent e) 
-            {
-		for(PixelPanel panel : imagePanels)
-		{
-		    panel.stopPixelActivity();
-		}
-		
-		// start the selected panel/tab's PIXEL activity
-		Object o = e.getSource();
-		JTabbedPane tabs = (JTabbedPane) o;
-		Component c = tabs.getSelectedComponent();		
-		PixelPanel p = (PixelPanel) c;
-		p.startPixelActivity();
-            }
-        });
+        tabbedPane.addChangeListener( new TabChangeListener() );
 
 	frame = new JFrame("PIXEL");
 	
 	JPanel statusPanel = new JPanel();
 	statusPanel.setBorder(new BevelBorder(BevelBorder.LOWERED));
-//	statusPanel.setPreferredSize(new Dimension(frame.getWidth(), 16));
 	statusPanel.setLayout(new BoxLayout(statusPanel, BoxLayout.X_AXIS));
 	statusLabel = new JLabel("PIXEL Status: Searching...");
 	statusLabel.setHorizontalAlignment(SwingConstants.LEFT);
@@ -201,14 +180,7 @@ public class PixelApp extends IOIOSwingApp
 	menu = new JMenu("Help");
 	menu.setMnemonic(KeyEvent.VK_A);
 	menu.getAccessibleContext().setAccessibleDescription("update with accessible description");
-	menuBar.add(menu);
-	
-	String path = "/images/apple.png";
-	URL url = getClass().getResource(path);
-	ImageIcon menuIcon = new ImageIcon(url);
-
-	// a group of JMenuItems
-//	menuItem = new JMenuItem("About", menuIcon);
+	menuBar.add(menu);	
 	
 	menuItem = new JMenuItem("Instructions");
 	KeyStroke instructionsKeyStroke = KeyStroke.getKeyStroke(KeyEvent.VK_1, ActionEvent.ALT_MASK);
@@ -216,7 +188,6 @@ public class PixelApp extends IOIOSwingApp
 	menuItem.getAccessibleContext().setAccessibleDescription("update with accessible description");
 	menuItem.addActionListener( new InstructionsListener() );
 	menu.add(menuItem);
-
 	
 	menuItem = new JMenuItem("About");
 	KeyStroke aboutKeyStroke = KeyStroke.getKeyStroke(KeyEvent.VK_2, ActionEvent.ALT_MASK);
@@ -224,14 +195,12 @@ public class PixelApp extends IOIOSwingApp
 	menuItem.getAccessibleContext().setAccessibleDescription("update with accessible description");
 	menuItem.addActionListener( new AboutListener() );
 	menu.add(menuItem);
-
 	
 	//menuItem = new JMenuItem("Exit", menuIcon);
 	menuItem = new JMenuItem("Exit");
 	KeyStroke keyStroke = KeyStroke.getKeyStroke(KeyEvent.VK_3, ActionEvent.ALT_MASK);
 	menuItem.setAccelerator(keyStroke);
 	menuItem.addActionListener( new QuitListener() );
-//	menuItem.setMnemonic(KeyEvent.VK_B);
 	menuItem.getAccessibleContext().setAccessibleDescription("update with accessible description");
 	menu.add(menuItem);
 
@@ -239,47 +208,6 @@ public class PixelApp extends IOIOSwingApp
 	menuItem.setMnemonic(KeyEvent.VK_D);
 	menu.add(menuItem);
 
-/*	
-	// a group of radio button menu items
-	menu.addSeparator();
-	ButtonGroup group = new ButtonGroup();
-	rbMenuItem = new JRadioButtonMenuItem("A radio button menu item");
-	rbMenuItem.setSelected(true);
-	rbMenuItem.setMnemonic(KeyEvent.VK_R);
-	group.add(rbMenuItem);
-	menu.add(rbMenuItem);
-
-	rbMenuItem = new JRadioButtonMenuItem("Another one");
-	rbMenuItem.setMnemonic(KeyEvent.VK_O);
-	group.add(rbMenuItem);
-	menu.add(rbMenuItem);
-
-	// a group of check box menu items
-	menu.addSeparator();
-	cbMenuItem = new JCheckBoxMenuItem("A check box menu item");
-	cbMenuItem.setMnemonic(KeyEvent.VK_C);
-	menu.add(cbMenuItem);
-
-	cbMenuItem = new JCheckBoxMenuItem("Another one");
-	cbMenuItem.setMnemonic(KeyEvent.VK_H);
-	menu.add(cbMenuItem);
-
-	//a submenu
-	menu.addSeparator();
-	submenu = new JMenu("A submenu");
-	submenu.setMnemonic(KeyEvent.VK_S);
-
-	menuItem = new JMenuItem("An item in the submenu");
-	menuItem.setAccelerator(KeyStroke.getKeyStroke(
-		KeyEvent.VK_2, ActionEvent.ALT_MASK));
-	submenu.add(menuItem);
-
-	menuItem = new JMenuItem("Another item");
-	submenu.add(menuItem);
-	menu.add(submenu);
-*/
-	
-	//Build second menu in the menu bar.
 /*	
 	menu = new JMenu("Plugins");
 	menu.setMnemonic(KeyEvent.VK_N);
@@ -299,19 +227,6 @@ public class PixelApp extends IOIOSwingApp
 	return (data.getData());
     }    
 
-/*    
-    protected ImageIcon createImageIcon(String path) 
-    {
-        java.net.URL imgURL = PixelApp.class.getResource(path);
-        if (imgURL != null) {
-            return new ImageIcon(imgURL);
-        } else {
-            System.err.println("Couldn't find file: " + path);
-            return null;
-        }
-    }
-*/
-
     @Override
     public IOIOLooper createIOIOLooper(String connectionType, Object extra) 
     {
@@ -329,11 +244,8 @@ public class PixelApp extends IOIOSwingApp
 		System.out.println("Found PIXEL: " + pixel.matrix + "\n");
 		System.out.println("You may now interact with the PIXEL\n");
 		
-		//TODO: Load something on startup
+//TODO: Load something on startup
 
-	//	String message = "PIXEL connection successful: Click an image or animation";
-// Use PixelApp.this instead of frame.		
-	//	JOptionPane.showMessageDialog(frame, message);
 		searchTimer.stop(); //need to stop the timer so we don't still display the pixel searching message
 		String message = "PIXEL Status: Connected";
 	    PixelApp.this.statusLabel.setText(message);
@@ -489,7 +401,6 @@ public class PixelApp extends IOIOSwingApp
 	    if(dotCount > 10)
 	    {
 		label = new StringBuilder(message);
-		//label.insert(0, "<html><body>");
 		label.insert(0, "<html><body><h2>");
 		
 		dotCount = 0;
@@ -499,8 +410,7 @@ public class PixelApp extends IOIOSwingApp
 		label.append('.');
 	    }
 	    dotCount++;
-//	    label.insert(0, "<html><body><h2>");
-//	    label.append("</h2></body></html>");
+
 	    PixelApp.this.statusLabel.setText( label.toString() );
 	    
 	    Date d = new Date();
@@ -517,6 +427,24 @@ public class PixelApp extends IOIOSwingApp
 		    JOptionPane.showMessageDialog(frame, message, title, JOptionPane.INFORMATION_MESSAGE);
 		}
 	    }
+	}
+    }
+
+    private class TabChangeListener implements ChangeListener
+    {
+	public void stateChanged(ChangeEvent e) 
+	{
+	    for(PixelPanel panel : imagePanels)
+	    {
+		panel.stopPixelActivity();
+	    }
+
+	    // start the selected panel/tab's PIXEL activity
+	    Object o = e.getSource();
+	    JTabbedPane tabs = (JTabbedPane) o;
+	    Component c = tabs.getSelectedComponent();		
+	    PixelPanel p = (PixelPanel) c;
+	    p.startPixelActivity();
 	}
     }
     
