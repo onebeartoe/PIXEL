@@ -39,6 +39,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.prefs.Preferences;
 import javax.swing.BoxLayout;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JLabel;
@@ -59,29 +60,31 @@ import javax.swing.event.ChangeListener;
 public class PixelApp extends IOIOSwingApp
 {    
     
-    private final Logger logger;   
+    private final Logger logger;
     
-    private PixelTilePanel userTilePanel;
-    
-    private List<PixelPanel> imagePanels;
-    
-    private static IOIO ioiO;
-    
-    private JFrame frame;
-    
-    private JLabel statusLabel;
+    private Preferences preferences;
     
     private Timer searchTimer;
+    
+    private static IOIO ioiO;
     
     private static RgbLedMatrix.Matrix KIND = ioio.lib.api.RgbLedMatrix.Matrix.SEEEDSTUDIO_32x32;
      
     public static final Pixel pixel = new Pixel(KIND);
     
+    private PixelTilePanel userTilePanel;
+    
+    private List<PixelPanel> pixelPanels;
+    
+    private JFrame frame;
+    
+    private JLabel statusLabel;
+    
     public PixelApp()
     {
 	logger = Logger.getLogger(PixelApp.class.getName());
 	
-	imagePanels = new ArrayList();	
+	pixelPanels = new ArrayList();	
     }
 
     @Override
@@ -115,12 +118,12 @@ public class PixelApp extends IOIOSwingApp
 	
 	PixelTilePanel imagesPanelReal = new ImageTilePanel(pixel.KIND);
 	imagesPanelReal.populate();
-	imagePanels.add(imagesPanelReal);
+	pixelPanels.add(imagesPanelReal);
 	tabbedPane.addTab("Images", imagesTabIcon, imagesPanelReal, "Load built-in images.");
         
 	final PixelTilePanel animationsPanel = new AnimationsPanel(pixel.KIND);
 	animationsPanel.populate();
-	imagePanels.add(animationsPanel);
+	pixelPanels.add(animationsPanel);
         tabbedPane.addTab("Animations", animationsTabIcon, animationsPanel, "Load built-in animations.");
         tabbedPane.setMnemonicAt(1, KeyEvent.VK_2);
 
@@ -132,12 +135,12 @@ public class PixelApp extends IOIOSwingApp
 	File homeDirectory = new File(userpath);
 	userTilePanel = new UserProvidedPanel(pixel.KIND, homeDirectory);
 	userTilePanel.populate();
-	imagePanels.add(userTilePanel);
+	pixelPanels.add(userTilePanel);
 	tabbedPane.addTab("Local Images", userTabIcon, userTilePanel, "This panel displays images from your local hard drive.");
 	tabbedPane.setMnemonicAt(2, KeyEvent.VK_4);
 	
         PixelPanel scrollPanel = new ScrollingTextPanel(pixel.KIND);
-        imagePanels.add(scrollPanel);
+        pixelPanels.add(scrollPanel);
         tabbedPane.addTab("Scolling Text", textTabIcon, scrollPanel, "Scrolls a text message across the PIXEL");
         
         //The following line enables to use scrolling tabs.
@@ -303,7 +306,7 @@ public class PixelApp extends IOIOSwingApp
     
     private void setPixelFound()
     {
-	for(PixelPanel panel : imagePanels)
+	for(PixelPanel panel : pixelPanels)
 	{
 	    panel.setPixelFound(true);
 	}
@@ -435,7 +438,7 @@ public class PixelApp extends IOIOSwingApp
     {
 	public void stateChanged(ChangeEvent e) 
 	{
-	    for(PixelPanel panel : imagePanels)
+	    for(PixelPanel panel : pixelPanels)
 	    {
 		panel.stopPixelActivity();
 	    }
