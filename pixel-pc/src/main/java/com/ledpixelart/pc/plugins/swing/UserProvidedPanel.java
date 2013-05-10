@@ -100,14 +100,13 @@ public class UserProvidedPanel extends ImageTilePanel
     @Override
     public void actionPerformed(ActionEvent event) 
     {
-	String command = event.getActionCommand();
-	System.out.println("image comamand: " + command);	
+	String imagePath = event.getActionCommand();
+	System.out.println("image comamand: " + imagePath);	
   
-	String framestring = command;
         try 
         {
-            System.out.println("Attemping to load User image: " + framestring);
-	    File infile = new File(framestring);	    
+            System.out.println("Attemping to load User image: " + imagePath);
+	    File infile = new File(imagePath);
 	    BufferedImage originalImage = ImageIO.read(infile);
 	    PixelApp.pixel.writeImagetoMatrix(originalImage);
         } 

@@ -27,6 +27,7 @@ import javax.swing.ImageIcon;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
+import java.awt.event.WindowEvent;
 
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferByte;
@@ -39,6 +40,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.prefs.BackingStoreException;
 import java.util.prefs.Preferences;
 import javax.swing.BoxLayout;
 import javax.swing.JCheckBoxMenuItem;
@@ -72,8 +74,7 @@ public class PixelApp extends IOIOSwingApp
      
     public static final Pixel pixel = new Pixel(KIND);
     
-// rename to localImagePanel
-    private UserProvidedPanel userTilePanel;
+    private UserProvidedPanel localImagesPanel;
     
     private List<PixelPanel> pixelPanels;
     
@@ -126,15 +127,17 @@ public class PixelApp extends IOIOSwingApp
         tabbedPane.setMnemonicAt(1, KeyEvent.VK_2);
 
 	// user images tab
-	String userPath = "/tab_icons/ship_small.png";
-	URL userUrl = getClass().getResource(userPath);
+	String userIconPath = "/tab_icons/ship_small.png";
+	URL userUrl = getClass().getResource(userIconPath);
 	ImageIcon userTabIcon = new ImageIcon(userUrl);
-	String userpath = System.getProperty("user.home");
-	File homeDirectory = new File(userpath);
-	userTilePanel = new UserProvidedPanel(pixel.KIND, homeDirectory);
-	userTilePanel.populate();
-	pixelPanels.add(userTilePanel);
-	tabbedPane.addTab("Local Images", userTabIcon, userTilePanel, "This panel displays images from your local hard drive.");
+	String userHome = System.getProperty("user.home");
+	String key = PixelPcPreferences.userImagesDirectory;
+	String localUserPath = preferences.get(key, userHome);
+	File localUserDirectory = new File(localUserPath);
+	localImagesPanel = new UserProvidedPanel(pixel.KIND, localUserDirectory);
+	localImagesPanel.populate();
+	pixelPanels.add(localImagesPanel);
+	tabbedPane.addTab("Local Images", userTabIcon, localImagesPanel, "This panel displays images from your local hard drive.");
 	tabbedPane.setMnemonicAt(2, KeyEvent.VK_4);
 	
 	// scrolling text panel
@@ -159,7 +162,8 @@ public class PixelApp extends IOIOSwingApp
 	statusPanel.add(statusLabel);
 	
 	JMenuBar menuBar = createMenuBar();
-	
+
+	frame.addWindowListener(this);
 	frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);	
 	frame.setLayout( new BorderLayout() );
 	frame.setJMenuBar(menuBar);
@@ -220,6 +224,7 @@ public class PixelApp extends IOIOSwingApp
 	menuItem.setMnemonic(KeyEvent.VK_D);
 	menu.add(menuItem);
 
+// Keep this around just a little longer.	
 /*	
 	menu = new JMenu("Plugins");
 	menu.getAccessibleContext().setAccessibleDescription("default plugins menu message");
@@ -321,7 +326,18 @@ public class PixelApp extends IOIOSwingApp
 	SearchTimer worker = new SearchTimer();
 	searchTimer = new Timer(delay, worker);
 	searchTimer.start();
-    }   
+    }
+    
+    @Override
+    public void windowClosed(WindowEvent event)
+    {
+	searchTimer.stop();
+	
+	QuitListener quitListener = new QuitListener();
+	quitListener.actionPerformed(null);
+	
+	System.exit(1);
+    }
     
     public static AnalogInput getAnalogInput1() 
     {
@@ -374,12 +390,23 @@ public class PixelApp extends IOIOSwingApp
     
     private class QuitListener implements ActionListener
     {
-	public void actionPerformed(ActionEvent e)
+	@Override
+	public void actionPerformed(ActionEvent e) 
 	{
-	    String key = PixelPcPreferences.userImagesDirectory;
-	    File directory = userTilePanel.getImageDirectory();
-	    String path = directory.getAbsolutePath();
-	    preferences.put(key, path);
+	    try 
+	    {
+		String key = PixelPcPreferences.userImagesDirectory;
+		File directory = localImagesPanel.getImageDirectory();
+		String path = directory.getAbsolutePath();
+		preferences.put(key, path);
+		
+		preferences.sync();
+	    } 
+	    catch (BackingStoreException ex) 
+	    {
+		String message = "The app preferences could not be saved.";
+		Logger.getLogger(PixelApp.class.getName()).log(Level.SEVERE, message, ex);
+	    }
 	    
 	    System.exit(1);
 	}
