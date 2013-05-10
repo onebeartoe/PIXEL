@@ -30,25 +30,27 @@ public class UserProvidedPanel extends ImageTilePanel
 	
     private File imageDirectory;
     
+    private List<File> singleImages;
+    
     public UserProvidedPanel(RgbLedMatrix.Matrix KIND, File imageDirectory)
     {
 	super(KIND);
         this.imageDirectory = imageDirectory;
 	
-	userDirectoryChooser = new JFileChooser(this.imageDirectory);
-    userDirectoryChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-	//userDirectoryChooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);  //get a crash when picking a single file
+	userDirectoryChooser = new JFileChooser(this.imageDirectory);	
+	userDirectoryChooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
+	
+	singleImages = new ArrayList();
 		
-	JButton userButton = new JButton("Browse");
+	JButton userButton = new JButton("Browse for a single image or a folder of images.");
         userButton.addActionListener( new UserButtonListener() );
-        add(userButton, BorderLayout.NORTH);
+        add(userButton, BorderLayout.SOUTH);
     }
 
     @Override
     protected ImageIcon getImageIcon(String path) 
     {
-	String url = imagePath() + "/" + path;
-	File file = new File(url);
+	File file = new File(path);
 	URL iconUrl;	
 	ImageIcon icon = null;
 	try 
@@ -68,11 +70,18 @@ public class UserProvidedPanel extends ImageTilePanel
     protected List<String> imageNames() throws Exception 
     {
         List<String> images = new ArrayList();
-        String [] files = imageDirectory.list(ImageFilters.stills);
-        for(String image : files)
+        File [] files = imageDirectory.listFiles(ImageFilters.stills);
+        for(File image : files)
         {
-            images.add(image);
+	    String path = image.getAbsolutePath();
+            images.add(path);
         }
+	
+	for(File image : singleImages)
+	{
+	    String path = image.getAbsolutePath();
+	    images.add(path);
+	}
         
         return images;
     }
@@ -88,9 +97,8 @@ public class UserProvidedPanel extends ImageTilePanel
     {
 	String command = event.getActionCommand();
 	System.out.println("image comamand: " + command);	
-        
-        String framestring = imageDirectory.getAbsolutePath() + "/" + command;
-       //String framestring = imageDirectory.getAbsolutePath() + "/" + command + ".png";
+  
+	String framestring = command;
         try 
         {
             System.out.println("Attemping to load User image: " + framestring);
@@ -117,8 +125,16 @@ public class UserProvidedPanel extends ImageTilePanel
                     System.out.println("laters");   
                 }
                 else
-                {                    
-		    imageDirectory = directory;
+                {
+		    if( directory.isDirectory() )
+		    {
+			imageDirectory = directory;
+		    }
+		    else
+		    {
+			singleImages.add(directory);
+		    }		    
+		    
 		    buttonsPanel.removeAll();
 		    populate();
                 }

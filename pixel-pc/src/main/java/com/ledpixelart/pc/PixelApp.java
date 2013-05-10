@@ -124,15 +124,17 @@ public class PixelApp extends IOIOSwingApp
         tabbedPane.addTab("Animations", animationsTabIcon, animationsPanel, "Load built-in animations.");
         tabbedPane.setMnemonicAt(1, KeyEvent.VK_2);
 
-/*	
+	// user images tab
+	String userPath = "/tab_icons/ship_small.png";
+	URL userUrl = getClass().getResource(userPath);
+	ImageIcon userTabIcon = new ImageIcon(userUrl);
 	String userpath = System.getProperty("user.home");
 	File homeDirectory = new File(userpath);
 	userTilePanel = new UserProvidedPanel(pixel.KIND, homeDirectory);
 	userTilePanel.populate();
 	imagePanels.add(userTilePanel);
-	tabbedPane.addTab("User Defined", icon, userTilePanel, "Does nothing at all");
+	tabbedPane.addTab("Local Images", userTabIcon, userTilePanel, "This panel displays images from your local hard drive.");
 	tabbedPane.setMnemonicAt(2, KeyEvent.VK_4);
-*/
 	
         PixelPanel scrollPanel = new ScrollingTextPanel(pixel.KIND);
         imagePanels.add(scrollPanel);
@@ -338,7 +340,6 @@ public class PixelApp extends IOIOSwingApp
 
     private class AboutListener implements ActionListener
     {
-
 	public void actionPerformed(ActionEvent e) 
 	{
 	    String path = "/images/";
@@ -349,12 +350,10 @@ public class PixelApp extends IOIOSwingApp
 	    AboutPixelPc about = new AboutPixelPc();
 	    JOptionPane.showMessageDialog(frame, about, message, JOptionPane.INFORMATION_MESSAGE, imageIcon);
 	}
-	
     }
     
     private class InstructionsListener implements ActionListener
     {
-
 	public void actionPerformed(ActionEvent e) 
 	{
 	    String path = "/images/";
@@ -365,7 +364,6 @@ public class PixelApp extends IOIOSwingApp
 	    InstructionsPixelPc about = new InstructionsPixelPc();
 	    JOptionPane.showMessageDialog(frame, about, message, JOptionPane.INFORMATION_MESSAGE, imageIcon);
 	}
-	
     }
     
     private class QuitListener implements ActionListener
