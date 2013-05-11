@@ -234,6 +234,15 @@ public class PixelApp extends IOIOSwingApp
 	return menuBar;
     }
     
+    private void exit()
+    {
+	searchTimer.stop();
+	
+	savePreferences();
+	
+	System.exit(0);
+    }
+    
     public byte[] extractBytes(BufferedImage image) throws IOException 
     {
 	// get DataBufferBytes from Raster
@@ -312,6 +321,24 @@ public class PixelApp extends IOIOSwingApp
 	app.go(args);		
     }
     
+    private void savePreferences()
+    {
+        try 
+        {
+            String key = PixelPcPreferences.userImagesDirectory;
+            File directory = localImagesPanel.getImageDirectory();
+            String path = directory.getAbsolutePath();
+            preferences.put(key, path);
+
+            preferences.sync();
+        } 
+        catch (BackingStoreException ex) 
+        {
+            String message = "The app preferences could not be saved.";
+            Logger.getLogger(PixelApp.class.getName()).log(Level.SEVERE, message, ex);
+        }
+    }
+    
     private void setPixelFound()
     {
 	for(PixelPanel panel : pixelPanels)
@@ -329,14 +356,9 @@ public class PixelApp extends IOIOSwingApp
     }
     
     @Override
-    public void windowClosed(WindowEvent event)
+    public void windowClosing(WindowEvent event)
     {
-	searchTimer.stop();
-	
-	QuitListener quitListener = new QuitListener();
-	quitListener.actionPerformed(null);
-	
-	System.exit(1);
+        exit();
     }
     
     public static AnalogInput getAnalogInput1() 
@@ -393,22 +415,7 @@ public class PixelApp extends IOIOSwingApp
 	@Override
 	public void actionPerformed(ActionEvent e) 
 	{
-	    try 
-	    {
-		String key = PixelPcPreferences.userImagesDirectory;
-		File directory = localImagesPanel.getImageDirectory();
-		String path = directory.getAbsolutePath();
-		preferences.put(key, path);
-		
-		preferences.sync();
-	    } 
-	    catch (BackingStoreException ex) 
-	    {
-		String message = "The app preferences could not be saved.";
-		Logger.getLogger(PixelApp.class.getName()).log(Level.SEVERE, message, ex);
-	    }
-	    
-	    System.exit(1);
+            exit();
 	}
     }
     
