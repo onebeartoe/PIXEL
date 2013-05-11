@@ -78,7 +78,7 @@ public class BuildTest extends TestCase
 	    File outfile = new File(resourcesPath + "/" + "images.text");
 	    System.out.println("outputing to: " + outfile.getAbsolutePath() );
 	    Path outpath = outfile.toPath();
-	    BufferedWriter writer = Files.newBufferedWriter(outpath, charset, StandardOpenOption.CREATE);
+	    BufferedWriter writer = Files.newBufferedWriter(outpath, charset, StandardOpenOption.TRUNCATE_EXISTING);
 	    writer.write( text.toString() );
 	    writer.close();
 	} 
