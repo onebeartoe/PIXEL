@@ -2,6 +2,7 @@
 package com.ledpixelart.pc;
 
 import com.ledpixelart.hardware.Pixel;
+import com.ledpixelart.pc.plugins.PixelPlugin;
 import com.ledpixelart.pc.plugins.swing.AnimationsPanel;
 import com.ledpixelart.pc.plugins.swing.ImageTilePanel;
 import com.ledpixelart.pc.plugins.swing.PixelPanel;
@@ -36,6 +37,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.logging.Level;
@@ -58,6 +60,14 @@ import javax.swing.Timer;
 import javax.swing.border.BevelBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+import org.clapper.util.classutil.AbstractClassFilter;
+import org.clapper.util.classutil.AndClassFilter;
+import org.clapper.util.classutil.ClassFilter;
+import org.clapper.util.classutil.ClassFinder;
+import org.clapper.util.classutil.ClassInfo;
+import org.clapper.util.classutil.InterfaceOnlyClassFilter;
+import org.clapper.util.classutil.NotClassFilter;
+import org.clapper.util.classutil.SubclassClassFilter;
 
 public class PixelApp extends IOIOSwingApp
 {    
@@ -175,6 +185,8 @@ public class PixelApp extends IOIOSwingApp
 	frame.setLocationRelativeTo(null); 
 	
 	startSearchTimer();
+        
+        searchForPlugins();
 	
 	frame.setVisible(true);
 	
@@ -325,10 +337,20 @@ public class PixelApp extends IOIOSwingApp
     {
         try 
         {
+            // local user images tab
             String key = PixelPcPreferences.userImagesDirectory;
             File directory = localImagesPanel.getImageDirectory();
             String path = directory.getAbsolutePath();
             preferences.put(key, path);
+            List<File> singleImages = localImagesPanel.getSingleImages();
+            int i = 0;
+            for(File image : singleImages)
+            {
+                key = PixelPcPreferences.singleImage + i;
+                path = image.getAbsolutePath();
+                preferences.put(key, path);
+                i++;                
+            }
 
             preferences.sync();
         } 
@@ -337,6 +359,33 @@ public class PixelApp extends IOIOSwingApp
             String message = "The app preferences could not be saved.";
             Logger.getLogger(PixelApp.class.getName()).log(Level.SEVERE, message, ex);
         }
+    }
+    
+    private void searchForPlugins()
+    {
+        ClassFinder finder = new ClassFinder();
+        String path = "/home/rmarquez/owner/github/PIXEL/pixel-pc/target/pixel-pc-1.0-SNAPSHOT.jar";
+        File jar = new File(path);
+        finder.add(jar);
+
+         ClassFilter filter =
+             new AndClassFilter
+                 // Must not be an interface
+                 (new NotClassFilter (new InterfaceOnlyClassFilter()),
+
+                 // Must implement the ClassFilter interface
+                 new SubclassClassFilter (PixelPanel.class),
+
+                 // Must not be abstract
+                 new NotClassFilter (new AbstractClassFilter()));
+
+         Collection<ClassInfo> foundClasses = new ArrayList<ClassInfo>();
+         finder.findClasses (foundClasses, filter);
+
+         for (ClassInfo classInfo : foundClasses)
+         {
+             System.out.println ("Found " + classInfo.getClassName());
+         }
     }
     
     private void setPixelFound()

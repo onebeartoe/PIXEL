@@ -31,6 +31,8 @@ public class UserProvidedPanel extends ImageTilePanel
     private File imageDirectory;
     
     private List<File> singleImages;
+
+
     
     public UserProvidedPanel(RgbLedMatrix.Matrix KIND, File imageDirectory)
     {
@@ -69,6 +71,11 @@ public class UserProvidedPanel extends ImageTilePanel
 	}	
 	
 	return icon;
+    }
+    
+    public List<File> getSingleImages() 
+    {
+        return singleImages;
     }
 
     @Override
