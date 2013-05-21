@@ -454,7 +454,7 @@ public class PixelApp extends IOIOSwingApp
 	    URL resource = getClass().getResource(iconPath);
 	    ImageIcon imageIcon = new ImageIcon(resource);
 	    String message = "PIXEL Instructions";
-	    InstructionsPixelPc about = new InstructionsPixelPc();
+	    InstructionsPanel about = new InstructionsPanel();
 	    JOptionPane.showMessageDialog(frame, about, message, JOptionPane.INFORMATION_MESSAGE, imageIcon);
 	}
     }

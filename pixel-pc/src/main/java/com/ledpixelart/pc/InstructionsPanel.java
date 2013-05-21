@@ -19,7 +19,7 @@ import javax.swing.JPanel;
  */
 
 // rename this to InstructionsPanel
-public class InstructionsPixelPc extends JPanel
+public class InstructionsPanel extends JPanel
 {
     
     private final String developmentUrl = "http://ledpixelart.com/";
@@ -27,7 +27,7 @@ public class InstructionsPixelPc extends JPanel
     
     private JLabel developmentLabel;
     
-    public InstructionsPixelPc()
+    public InstructionsPanel()
     {
 	String version = "0.5";
 	String text = "PIXEL Instructions";
@@ -66,7 +66,7 @@ public class InstructionsPixelPc extends JPanel
 	    {
 		Logger.getLogger(AboutPanel.class.getName()).log(Level.SEVERE, null, ex);
 		String message = "Please visit " + developmentUrl + "for more information";
-		JOptionPane.showMessageDialog(InstructionsPixelPc.this, message);
+		JOptionPane.showMessageDialog(InstructionsPanel.this, message);
 	    }    
         }
 	
