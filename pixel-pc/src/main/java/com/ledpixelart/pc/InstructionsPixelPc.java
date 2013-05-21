@@ -64,7 +64,7 @@ public class InstructionsPixelPc extends JPanel
 	    } 
 	    catch (Exception ex) 
 	    {
-		Logger.getLogger(AboutPixelPc.class.getName()).log(Level.SEVERE, null, ex);
+		Logger.getLogger(AboutPanel.class.getName()).log(Level.SEVERE, null, ex);
 		String message = "Please visit " + developmentUrl + "for more information";
 		JOptionPane.showMessageDialog(InstructionsPixelPc.this, message);
 	    }    

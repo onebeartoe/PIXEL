@@ -19,7 +19,7 @@ import javax.swing.JPanel;
  */
 
 // rename this to AboutPanel
-public class AboutPixelPc extends JPanel
+public class AboutPanel extends JPanel
 {
     
     private final String developmentUrl = "http://electronics.onebeartoe.org/";
@@ -27,7 +27,7 @@ public class AboutPixelPc extends JPanel
     
     private JLabel developmentLabel;
     
-    public AboutPixelPc()
+    public AboutPanel()
     {
 	String version = "0.5.1";
 	String text = "PIXEL PC Beta Version " + version;
@@ -64,9 +64,9 @@ public class AboutPixelPc extends JPanel
 	    } 
 	    catch (Exception ex) 
 	    {
-		Logger.getLogger(AboutPixelPc.class.getName()).log(Level.SEVERE, null, ex);
+		Logger.getLogger(AboutPanel.class.getName()).log(Level.SEVERE, null, ex);
 		String message = "Please visit " + developmentUrl + "for more information";
-		JOptionPane.showMessageDialog(AboutPixelPc.this, message);
+		JOptionPane.showMessageDialog(AboutPanel.this, message);
 	    }    
         }
 	
