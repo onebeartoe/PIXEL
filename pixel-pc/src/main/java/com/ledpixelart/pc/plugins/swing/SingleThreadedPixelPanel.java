@@ -51,5 +51,5 @@ public abstract class SingleThreadedPixelPanel extends PixelPanel
         }
     }
     
-    abstract ActionListener getActionListener();
+    protected abstract ActionListener getActionListener();
 }

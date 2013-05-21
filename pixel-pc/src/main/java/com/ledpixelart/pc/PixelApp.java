@@ -2,12 +2,12 @@
 package com.ledpixelart.pc;
 
 import com.ledpixelart.hardware.Pixel;
-import com.ledpixelart.pc.plugins.PixelPlugin;
 import com.ledpixelart.pc.plugins.swing.AnimationsPanel;
 import com.ledpixelart.pc.plugins.swing.ImageTilePanel;
 import com.ledpixelart.pc.plugins.swing.PixelPanel;
 import com.ledpixelart.pc.plugins.swing.PixelTilePanel;
 import com.ledpixelart.pc.plugins.swing.ScrollingTextPanel;
+import com.ledpixelart.pc.plugins.swing.SingleThreadedPixelPanel;
 import com.ledpixelart.pc.plugins.swing.UserProvidedPanel;
 import ioio.lib.api.AnalogInput;
 import ioio.lib.api.DigitalOutput;
@@ -364,28 +364,58 @@ public class PixelApp extends IOIOSwingApp
     private void searchForPlugins()
     {
         ClassFinder finder = new ClassFinder();
-        String path = "/home/rmarquez/owner/github/PIXEL/pixel-pc/target/pixel-pc-1.0-SNAPSHOT.jar";
+	
+//	String path = "/home/rmarquez/Workspace/PIXEL/pixel-pc-0.6.jar";
+	String path = "/home/rmarquez/Workspace/PIXEL/pixel-weather.jar";	
+//      String path = "/home/rmarquez/owner/github/PIXEL/pixel-pc/target/pixel-pc-0.6.jar";
+//	String path = "/home/rmarquez/owner/github/PIXEL/pixel-weather/target/pixel-weather-1.0-SNAPSHOT.jar";
+//	String path = "/home/rmarquez/owner/github/PIXEL/pixel-touch-pc/target/pixel-touch-pc-1.0-SNAPSHOT.jar";
+	
+//      String path = "target/pixel-pc-0.6.jar";	
+//	String path = "target/pixel-weather-1.0-SNAPSHOT.jar";
         File jar = new File(path);
-        finder.add(jar);
+	if( !jar.exists() || !jar.canRead() )
+	{
+	    System.out.println("The jar exists: " + jar.exists() + "\nThe jar is readable: " + jar.canRead() );
+	}
+	else
+	{
+	    finder.add(jar);
 
-         ClassFilter filter =
-             new AndClassFilter
-                 // Must not be an interface
-                 (new NotClassFilter (new InterfaceOnlyClassFilter()),
+//	    Class c = ClassFinder.class;
+//	    ClassFinder.class
+	    
+	    ClassFilter filter =
+		new AndClassFilter(
+		    // Must not be an interface
+                    new NotClassFilter ( new InterfaceOnlyClassFilter() ),
 
-                 // Must implement the ClassFilter interface
-                 new SubclassClassFilter (PixelPanel.class),
+		    // Must implement the PixelPanel interface
+//		    new SubclassClassFilter(Object.class)
+//		    new SubclassClassFilter(ActionListener.class),
+		    new SubclassClassFilter(SingleThreadedPixelPanel.class),
+//		    new SubclassClassFilter(PixelPanel.class),
 
-                 // Must not be abstract
-                 new NotClassFilter (new AbstractClassFilter()));
+		    // Must not be abstract
+                    new NotClassFilter( new AbstractClassFilter() )
+		    );
 
-         Collection<ClassInfo> foundClasses = new ArrayList<ClassInfo>();
-         finder.findClasses (foundClasses, filter);
+	    Collection<ClassInfo> foundClasses = new ArrayList<ClassInfo>();
+//	    finder.findClasses(foundClasses);
+	    finder.findClasses(foundClasses, filter);
 
-         for (ClassInfo classInfo : foundClasses)
-         {
-             System.out.println ("Found " + classInfo.getClassName());
-         }
+	    if( foundClasses.isEmpty() )
+	    {
+		System.out.println("No plugins were found.");
+	    }
+	    else
+	    {
+		for (ClassInfo classInfo : foundClasses)	    
+		{
+		    System.out.println ("Found " + classInfo.getClassName());
+		}
+	    }
+	}        
     }
     
     private void setPixelFound()

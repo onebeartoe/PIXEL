@@ -1,48 +1,46 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<?xml version="1.0"?>
 
-    <modelVersion>4.0.0</modelVersion>
-
-    <parent>
-	    <groupId>org.onebeartoe</groupId>
-	    <artifactId>pixel</artifactId>
-	    <version>0.0.1-SNAPSHOT</version>
-    </parent>
-
-    <groupId>org.onebeartoe.pixel</groupId>
+<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
     
-    <artifactId>pixel-pc</artifactId>
+  <modelVersion>4.0.0</modelVersion>
+  
+  <parent>
+    <groupId>org.onebeartoe</groupId>
+    <artifactId>pixel</artifactId>
+    <version>0.0.1-SNAPSHOT</version>
+  </parent>
+  
+  <groupId>org.onebeartoe.pixel</groupId>
+  <artifactId>pixel-weather</artifactId>
+  <version>1.0-SNAPSHOT</version>
+  
+  <name>pixel-weather</name>
+  
+  <url>http://maven.apache.org</url>
+  
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>    
+    <slf4j.version>1.6.1</slf4j.version>
+  </properties>
+  
+  <dependencies>
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>3.8.1</version>
+      <scope>test</scope>
+    </dependency>
     
-    <version>0.6</version>
-    
-    <name>pixel-pc</name>
-
-    <packaging>jar</packaging>        
-    
-    <organization>
-        <name>onebeartoe.org</name>
-    </organization>
-
-    <properties>            
-	<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-	<slf4j.version>1.6.1</slf4j.version>
-    </properties>
-    
-    <repositories>
-        <repository>
-            <releases>
-              <enabled>true</enabled>
-              <updatePolicy>always</updatePolicy>
-              <checksumPolicy>warn</checksumPolicy>
-            </releases>
-            <id>clapper-org-maven-repo</id>
-            <name>org.clapper Maven Repo</name>
-            <url>http://maven.clapper.org/</url>
-            <layout>default</layout>
-        </repository>
-    </repositories>
-    
-    <build>
+    <dependency>
+	<groupId>org.onebeartoe</groupId>
+	<artifactId>pixel-pc</artifactId>
+	<version>0.6</version>
+    </dependency>
+  </dependencies>
+  
+      
+<build>
         <plugins>
 
             <plugin>
@@ -107,28 +105,6 @@
       </plugin> 
 
         </plugins>
-    </build>
-    
-    <dependencies>   
-
-	<dependency>
-	    <groupId>junit</groupId>
-	    <artifactId>junit</artifactId>
-	    <version>3.8.1</version>
-	    <scope>test</scope>
-	</dependency>
-
-        <dependency>
-          <groupId>org.clapper</groupId>
-          <artifactId>javautil</artifactId>
-          <version>3.1.1</version>
-        </dependency>
-
-	<dependency>
-	    <groupId>org.ioio</groupId>
-	    <artifactId>pc</artifactId>
-	    <version>1.0-SNAPSHOT</version>
-	</dependency>
-    </dependencies>
-
+    </build>  
+  
 </project>
