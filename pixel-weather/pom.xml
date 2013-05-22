@@ -33,7 +33,7 @@
     </dependency>
     
     <dependency>
-	<groupId>org.onebeartoe</groupId>
+	<groupId>org.onebeartoe.pixel</groupId>
 	<artifactId>pixel-pc</artifactId>
 	<version>0.6</version>
     </dependency>
