@@ -20,9 +20,9 @@ import org.clapper.util.classutil.SubclassClassFilter;
 /**
  * Unit test for simple App.
  */
-public class PluginSearchTest 
-    extends TestCase
+public class PluginSearchTest extends TestCase
 {
+    private final String weatherJarPath = "../pixel-weather/target/pixel-weather-1.0-SNAPSHOT.jar";
     /**
      * Create the test case
      *
@@ -61,11 +61,10 @@ public class PluginSearchTest
     public void testPixelWeatherJar()
     {
 	System.out.println("\n\n\nTesting pixel-weather JAR:");
-	
-	String jarPath = "../pixel-pc/target/pixel-weather-1.0-SNAPSHOT.jar";
+		
 	boolean useFilter = true;
 	
-	int count = searchForPlugins(jarPath, useFilter);
+	int count = searchForPlugins(weatherJarPath, useFilter);
 	
 	boolean foundPlugins = count > 0;
 	
@@ -75,11 +74,11 @@ public class PluginSearchTest
     public void testPixelWeatherJarNoFilter()
     {
 	System.out.println("\n\n\nTesting pixel-weather JAR, with no filter:");
-	
-	String jarPath = "../pixel-pc/target/pixel-weather-1.0-SNAPSHOT.jar";
+		
 	boolean useFilter = false;
 	
-	int count = searchForPlugins(jarPath, useFilter);
+	int count = searchForPlugins(weatherJarPath, useFilter);
+	System.out.println("\n\n");
 	
 	boolean foundPlugins = count > 0;
 	
