@@ -35,7 +35,9 @@ import java.awt.image.DataBufferByte;
 import java.awt.image.WritableRaster;
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Constructor;
 import java.net.URL;
+import java.net.URLClassLoader;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -185,8 +187,18 @@ public class PixelApp extends IOIOSwingApp
 	frame.setLocationRelativeTo(null); 
 	
 	startSearchTimer();
-        
-        searchForPlugins();
+	try 
+	{
+	    List<PixelPanel> plugins = searchForPlugins();
+	    for(PixelPanel panel : plugins)
+	    {
+		tabbedPane.addTab("Weather", animationsTabIcon, panel, "A weather app for internal and external temps.");
+	    }
+	} 
+	catch (Exception ex) 
+	{
+	    Logger.getLogger(PixelApp.class.getName()).log(Level.SEVERE, null, ex);
+	}
 	
 	frame.setVisible(true);
 	
@@ -361,18 +373,11 @@ public class PixelApp extends IOIOSwingApp
         }
     }
     
-    private void searchForPlugins()
+    private List<PixelPanel> searchForPlugins() throws Exception
     {
-        ClassFinder finder = new ClassFinder();
+	List<PixelPanel> foundClasses = new ArrayList();
 	
-//	String path = "/home/rmarquez/Workspace/PIXEL/pixel-pc-0.6.jar";
-	String path = "/home/rmarquez/Workspace/PIXEL/pixel-weather.jar";	
-//      String path = "/home/rmarquez/owner/github/PIXEL/pixel-pc/target/pixel-pc-0.6.jar";
-//	String path = "/home/rmarquez/owner/github/PIXEL/pixel-weather/target/pixel-weather-1.0-SNAPSHOT.jar";
-//	String path = "/home/rmarquez/owner/github/PIXEL/pixel-touch-pc/target/pixel-touch-pc-1.0-SNAPSHOT.jar";
-	
-//      String path = "target/pixel-pc-0.6.jar";	
-//	String path = "target/pixel-weather-1.0-SNAPSHOT.jar";
+	String path = "../pixel-weather/target/pixel-weather-1.0-SNAPSHOT.jar";
         File jar = new File(path);
 	if( !jar.exists() || !jar.canRead() )
 	{
@@ -380,29 +385,18 @@ public class PixelApp extends IOIOSwingApp
 	}
 	else
 	{
-	    finder.add(jar);
-
-//	    Class c = ClassFinder.class;
-//	    ClassFinder.class
+	    URL url = jar.toURI().toURL();
+	    URL [] urls = new URL[1];
+	    urls[0] = url;
+	    URLClassLoader classLoader = new URLClassLoader(urls);
+	    String className = "com.ledpixelart.pc.plugins.swing.WeatherByWoeid";
+	    Class<?> clazz = classLoader.loadClass(className);
 	    
-	    ClassFilter filter =
-		new AndClassFilter(
-		    // Must not be an interface
-                    new NotClassFilter ( new InterfaceOnlyClassFilter() ),
-
-		    // Must implement the PixelPanel interface
-//		    new SubclassClassFilter(Object.class)
-//		    new SubclassClassFilter(ActionListener.class),
-		    new SubclassClassFilter(SingleThreadedPixelPanel.class),
-//		    new SubclassClassFilter(PixelPanel.class),
-
-		    // Must not be abstract
-                    new NotClassFilter( new AbstractClassFilter() )
-		    );
-
-	    Collection<ClassInfo> foundClasses = new ArrayList<ClassInfo>();
-//	    finder.findClasses(foundClasses);
-	    finder.findClasses(foundClasses, filter);
+	    Constructor<?> constructor = clazz.getConstructor(RgbLedMatrix.Matrix.class);
+	    Object o = constructor.newInstance(KIND);
+	    PixelPanel plugin = (PixelPanel) o;
+	    
+	    foundClasses.add(plugin);
 
 	    if( foundClasses.isEmpty() )
 	    {
@@ -410,12 +404,14 @@ public class PixelApp extends IOIOSwingApp
 	    }
 	    else
 	    {
-		for (ClassInfo classInfo : foundClasses)	    
+		for (PixelPanel classInfo : foundClasses)	    
 		{
-		    System.out.println ("Found " + classInfo.getClassName());
+		    System.out.println ("Found " + classInfo.getClass());
 		}
 	    }
 	}        
+	
+	return foundClasses;
     }
     
     private void setPixelFound()
