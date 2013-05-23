@@ -3,6 +3,8 @@ package com.ledpixelart.pc.plugins.swing;
 
 import ioio.lib.api.RgbLedMatrix;
 import java.awt.event.ActionListener;
+import java.net.URL;
+import javax.swing.ImageIcon;
 import javax.swing.Timer;
 
 /**
@@ -23,7 +25,7 @@ public abstract class SingleThreadedPixelPanel extends PixelPanel
 	
 	// set the IOIO loop delay to half a second, by default  (was 150)
 //	tickDelay = 150;
-    }
+    }        
 
     @Override
     public void setPixelFound(boolean found) 
@@ -51,5 +53,6 @@ public abstract class SingleThreadedPixelPanel extends PixelPanel
         }
     }
     
+    //TODO: this needs a better name
     protected abstract ActionListener getActionListener();
 }

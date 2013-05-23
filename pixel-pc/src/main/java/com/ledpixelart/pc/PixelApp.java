@@ -7,7 +7,6 @@ import com.ledpixelart.pc.plugins.swing.ImageTilePanel;
 import com.ledpixelart.pc.plugins.swing.PixelPanel;
 import com.ledpixelart.pc.plugins.swing.PixelTilePanel;
 import com.ledpixelart.pc.plugins.swing.ScrollingTextPanel;
-import com.ledpixelart.pc.plugins.swing.SingleThreadedPixelPanel;
 import com.ledpixelart.pc.plugins.swing.UserProvidedPanel;
 import ioio.lib.api.AnalogInput;
 import ioio.lib.api.DigitalOutput;
@@ -39,7 +38,6 @@ import java.lang.reflect.Constructor;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.logging.Level;
@@ -62,21 +60,16 @@ import javax.swing.Timer;
 import javax.swing.border.BevelBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
-import org.clapper.util.classutil.AbstractClassFilter;
-import org.clapper.util.classutil.AndClassFilter;
-import org.clapper.util.classutil.ClassFilter;
-import org.clapper.util.classutil.ClassFinder;
-import org.clapper.util.classutil.ClassInfo;
-import org.clapper.util.classutil.InterfaceOnlyClassFilter;
-import org.clapper.util.classutil.NotClassFilter;
-import org.clapper.util.classutil.SubclassClassFilter;
+import org.onebeartoe.pixel.preferences.JavaPreferencesService;
+import org.onebeartoe.pixel.preferences.PreferencesService;
 
 public class PixelApp extends IOIOSwingApp
 {    
     
     private final Logger logger;
     
-    private Preferences preferences;
+    private PreferencesService preferenceService;
+//    private Preferences preferences;
     
     private Timer searchTimer;
     
@@ -99,7 +92,8 @@ public class PixelApp extends IOIOSwingApp
 	String className = PixelApp.class.getName();
 	logger = Logger.getLogger(className);
 	
-	preferences = Preferences.userNodeForPackage(PixelApp.class);
+	preferenceService = new JavaPreferencesService();
+//	preferences = Preferences.userNodeForPackage(PixelApp.class);
 	
 	pixelPanels = new ArrayList();	
     }
@@ -141,10 +135,12 @@ public class PixelApp extends IOIOSwingApp
 	// user images tab
 	String userIconPath = "/tab_icons/ship_small.png";
 	URL userUrl = getClass().getResource(userIconPath);
-	ImageIcon userTabIcon = new ImageIcon(userUrl);
-	String userHome = System.getProperty("user.home");
-	String key = PixelPcPreferences.userImagesDirectory;
-	String localUserPath = preferences.get(key, userHome);
+	ImageIcon userTabIcon = new ImageIcon(userUrl);	
+	String key = PixelPcPreferences.userImagesDirectory;	
+	String defaultValue = System.getProperty("user.home");
+	String localUserPath = preferenceService.get(key, defaultValue);
+//	String localUserPath = preferences.get(key, userHome);
+	
 	File localUserDirectory = new File(localUserPath);
 	localImagesPanel = new UserProvidedPanel(pixel.KIND, localUserDirectory);
 	localImagesPanel.populate();
@@ -192,7 +188,8 @@ public class PixelApp extends IOIOSwingApp
 	    List<PixelPanel> plugins = searchForPlugins();
 	    for(PixelPanel panel : plugins)
 	    {
-		tabbedPane.addTab("Weather", animationsTabIcon, panel, "A weather app for internal and external temps.");
+		ImageIcon icon = panel.getTabIcon();
+		tabbedPane.addTab("Weather", icon, panel, "A weather app for internal and external temps.");
 	    }
 	} 
 	catch (Exception ex) 
@@ -208,10 +205,11 @@ public class PixelApp extends IOIOSwingApp
     private JMenuBar createMenuBar()	    
     {
 	JMenuBar menuBar;
-	JMenu menu, submenu;
+	JMenu menu;
+//	JMenu submenu;
 	JMenuItem menuItem;
-	JRadioButtonMenuItem rbMenuItem;
-	JCheckBoxMenuItem cbMenuItem;
+//	JRadioButtonMenuItem rbMenuItem;
+//	JCheckBoxMenuItem cbMenuItem;
 
 	// Create the menu bar.
 	menuBar = new JMenuBar();
@@ -247,13 +245,10 @@ public class PixelApp extends IOIOSwingApp
 	menuItem = new JMenuItem(new ImageIcon("images/middle.gif"));
 	menuItem.setMnemonic(KeyEvent.VK_D);
 	menu.add(menuItem);
-
-// Keep this around just a little longer.	
-/*	
+	
 	menu = new JMenu("Plugins");
 	menu.getAccessibleContext().setAccessibleDescription("default plugins menu message");
 	menuBar.add(menu);
-*/
 	
 	return menuBar;
     }
@@ -347,30 +342,8 @@ public class PixelApp extends IOIOSwingApp
     
     private void savePreferences()
     {
-        try 
-        {
-            // local user images tab
-            String key = PixelPcPreferences.userImagesDirectory;
-            File directory = localImagesPanel.getImageDirectory();
-            String path = directory.getAbsolutePath();
-            preferences.put(key, path);
-            List<File> singleImages = localImagesPanel.getSingleImages();
-            int i = 0;
-            for(File image : singleImages)
-            {
-                key = PixelPcPreferences.singleImage + i;
-                path = image.getAbsolutePath();
-                preferences.put(key, path);
-                i++;                
-            }
-
-            preferences.sync();
-        } 
-        catch (BackingStoreException ex) 
-        {
-            String message = "The app preferences could not be saved.";
-            Logger.getLogger(PixelApp.class.getName()).log(Level.SEVERE, message, ex);
-        }
+	preferenceService.saveWindowPreferences(frame);
+	preferenceService.saveBuiltInPluginsPreferences(localImagesPanel);
     }
     
     private List<PixelPanel> searchForPlugins() throws Exception
@@ -381,7 +354,9 @@ public class PixelApp extends IOIOSwingApp
         File jar = new File(path);
 	if( !jar.exists() || !jar.canRead() )
 	{
-	    System.out.println("The jar exists: " + jar.exists() + "\nThe jar is readable: " + jar.canRead() );
+	    System.out.println("\n\nThere is a problem with the specified JAR.");
+	    System.out.println("The jar exists: " + jar.exists() );
+	    System.out.println("The jar is readable: " + jar.canRead() );
 	}
 	else
 	{
@@ -389,7 +364,10 @@ public class PixelApp extends IOIOSwingApp
 	    URL [] urls = new URL[1];
 	    urls[0] = url;
 	    URLClassLoader classLoader = new URLClassLoader(urls);
-	    String className = "com.ledpixelart.pc.plugins.swing.WeatherByWoeid";
+	    
+//	    String className = "com.ledpixelart.pc.plugins.swing.WeatherByWoeid";
+	    String className = "org.onebeartoe.pixel.plugins.weather.WeatherByWoeid";
+	    
 	    Class<?> clazz = classLoader.loadClass(className);
 	    
 	    Constructor<?> constructor = clazz.getConstructor(RgbLedMatrix.Matrix.class);
