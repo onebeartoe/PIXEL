@@ -4,7 +4,7 @@ package org.onebeartoe.pixel.preferences;
 /**
  * @author rmarquez
  */
-public class PixelPcPreferences
+public class PixelPreferencesKeys
 {
     public static final String userImagesDirectory = "UserImagesDirectory";
     

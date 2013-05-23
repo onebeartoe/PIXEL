@@ -37,7 +37,7 @@ public class JavaPreferencesService implements PreferencesService
 	try 
         {
             // local user images tab
-            String key = PixelPcPreferences.userImagesDirectory;
+            String key = PixelPreferencesKeys.userImagesDirectory;
             File directory = localImagesPanel.getImageDirectory();
             String path = directory.getAbsolutePath();
             preferences.put(key, path);
@@ -45,7 +45,7 @@ public class JavaPreferencesService implements PreferencesService
             int i = 0;
             for(File image : singleImages)
             {
-                key = PixelPcPreferences.singleImage + i;
+                key = PixelPreferencesKeys.singleImage + i;
                 path = image.getAbsolutePath();
                 preferences.put(key, path);
                 i++;                

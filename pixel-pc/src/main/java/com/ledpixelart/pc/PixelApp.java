@@ -1,7 +1,7 @@
 
 package com.ledpixelart.pc;
 
-import org.onebeartoe.pixel.preferences.PixelPcPreferences;
+import org.onebeartoe.pixel.preferences.PixelPreferencesKeys;
 import com.ledpixelart.hardware.Pixel;
 import com.ledpixelart.pc.plugins.swing.AnimationsPanel;
 import com.ledpixelart.pc.plugins.swing.ImageTilePanel;
@@ -137,7 +137,7 @@ public class PixelApp extends IOIOSwingApp
 	String userIconPath = "/tab_icons/ship_small.png";
 	URL userUrl = getClass().getResource(userIconPath);
 	ImageIcon userTabIcon = new ImageIcon(userUrl);	
-	String key = PixelPcPreferences.userImagesDirectory;	
+	String key = PixelPreferencesKeys.userImagesDirectory;	
 	String defaultValue = System.getProperty("user.home");
 	String localUserPath = preferenceService.get(key, defaultValue);
 //	String localUserPath = preferences.get(key, userHome);
