@@ -63,7 +63,12 @@ public class JavaPreferencesService implements PreferencesService
     @Override
     public void saveWindowPreferences(JFrame window)
     {
+	int x = window.getX();
 	
+	int width = window.getWidth();
+	
+	String key = PixelPreferencesKeys.windowWidth;	
+	preferences.putInt(key, width);
     }
     
 }

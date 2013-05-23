@@ -8,5 +8,8 @@ public class PixelPreferencesKeys
 {
     public static final String userImagesDirectory = "UserImagesDirectory";
     
-    public static final String singleImage = "SingleImage";    
+    public static final String singleImage = "SingleImage";
+    
+    
+    public static final String windowWidth = "windowWidth";
 }
