@@ -1,5 +1,5 @@
 
-package com.ledpixelart.pc;
+package org.onebeartoe.pixel.preferences;
 
 /**
  * @author rmarquez

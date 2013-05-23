@@ -1,6 +1,7 @@
 
 package com.ledpixelart.pc;
 
+import org.onebeartoe.pixel.preferences.PixelPcPreferences;
 import com.ledpixelart.hardware.Pixel;
 import com.ledpixelart.pc.plugins.swing.AnimationsPanel;
 import com.ledpixelart.pc.plugins.swing.ImageTilePanel;

@@ -2,7 +2,6 @@
 package org.onebeartoe.pixel.preferences;
 
 import com.ledpixelart.pc.PixelApp;
-import com.ledpixelart.pc.PixelPcPreferences;
 import com.ledpixelart.pc.plugins.swing.UserProvidedPanel;
 import java.io.File;
 import java.util.List;
