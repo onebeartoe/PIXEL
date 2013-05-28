@@ -19,6 +19,8 @@ import ioio.lib.util.IOIOLooper;
 import ioio.lib.util.pc.IOIOSwingApp;
 import java.awt.BorderLayout;
 import java.awt.Component;
+import java.awt.Dimension;
+import java.awt.Point;
 import java.awt.Window;
 
 import javax.swing.UIManager;
@@ -43,17 +45,13 @@ import java.util.Date;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.prefs.BackingStoreException;
-import java.util.prefs.Preferences;
 import javax.swing.BoxLayout;
-import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.JRadioButtonMenuItem;
 import javax.swing.JTabbedPane;
 import javax.swing.KeyStroke;
 import javax.swing.SwingConstants;
@@ -111,9 +109,7 @@ public class PixelApp extends IOIOSwingApp
 	    String message = "An error occured while setting the native look and feel.";
 	    logger.log(Level.SEVERE, message, ex);	
 	}
-	
-	JTabbedPane tabbedPane = new JTabbedPane();
-	
+
 	// images tab
 	String path = "/tab_icons/apple_small.png";
 	URL url = getClass().getResource(path);
@@ -121,7 +117,6 @@ public class PixelApp extends IOIOSwingApp
 	PixelTilePanel imagesPanelReal = new ImageTilePanel(pixel.KIND);
 	imagesPanelReal.populate();
 	pixelPanels.add(imagesPanelReal);
-	tabbedPane.addTab("Images", imagesTabIcon, imagesPanelReal, "Load built-in images.");
 
 	// animations tab
 	String path2 = "/tab_icons/ship_small.png";
@@ -130,8 +125,6 @@ public class PixelApp extends IOIOSwingApp
 	final PixelTilePanel animationsPanel = new AnimationsPanel(pixel.KIND);
 	animationsPanel.populate();
 	pixelPanels.add(animationsPanel);
-        tabbedPane.addTab("Animations", animationsTabIcon, animationsPanel, "Load built-in animations.");
-        tabbedPane.setMnemonicAt(1, KeyEvent.VK_2);
 
 	// user images tab
 	String userIconPath = "/tab_icons/ship_small.png";
@@ -140,26 +133,18 @@ public class PixelApp extends IOIOSwingApp
 	String key = PixelPreferencesKeys.userImagesDirectory;	
 	String defaultValue = System.getProperty("user.home");
 	String localUserPath = preferenceService.get(key, defaultValue);
-//	String localUserPath = preferences.get(key, userHome);
 	
 	File localUserDirectory = new File(localUserPath);
 	localImagesPanel = new UserProvidedPanel(pixel.KIND, localUserDirectory);
 	localImagesPanel.populate();
 	pixelPanels.add(localImagesPanel);
-	tabbedPane.addTab("Local Images", userTabIcon, localImagesPanel, "This panel displays images from your local hard drive.");
-	tabbedPane.setMnemonicAt(2, KeyEvent.VK_4);
 	
 	// scrolling text panel
 	String path3 = "/tab_icons/text_small.png";
 	URL url3 = getClass().getResource(path3);
 	ImageIcon textTabIcon = new ImageIcon(url3);
         PixelPanel scrollPanel = new ScrollingTextPanel(pixel.KIND);
-        pixelPanels.add(scrollPanel);
-        tabbedPane.addTab("Scolling Text", textTabIcon, scrollPanel, "Scrolls a text message across the PIXEL");
-        
-        //The following line enables to use scrolling tabs.
-        tabbedPane.setTabLayoutPolicy(JTabbedPane.SCROLL_TAB_LAYOUT);
-        tabbedPane.addChangeListener( new TabChangeListener() );
+        pixelPanels.add(scrollPanel);        
 
 	frame = new JFrame("PIXEL");
 	
@@ -171,18 +156,47 @@ public class PixelApp extends IOIOSwingApp
 	statusPanel.add(statusLabel);
 	
 	JMenuBar menuBar = createMenuBar();
-
+	
+	JTabbedPane tabbedPane = new JTabbedPane();
+	tabbedPane.setTabLayoutPolicy(JTabbedPane.SCROLL_TAB_LAYOUT);
+        tabbedPane.addChangeListener( new TabChangeListener() );
+	tabbedPane.addTab("Images", imagesTabIcon, imagesPanelReal, "Load built-in images.");
+        tabbedPane.addTab("Animations", animationsTabIcon, animationsPanel, "Load built-in animations.");
+        tabbedPane.setMnemonicAt(1, KeyEvent.VK_2);
+	tabbedPane.addTab("Local Images", userTabIcon, localImagesPanel, "This panel displays images from your local hard drive.");
+	tabbedPane.setMnemonicAt(2, KeyEvent.VK_4);
+	tabbedPane.addTab("Scolling Text", textTabIcon, scrollPanel, "Scrolls a text message across the PIXEL");
+	
+	Dimension demension;
+	try 
+	{
+	    demension = preferenceService.restoreWindowDimension();
+	} 
+	catch (Exception ex) 
+	{
+	    demension = new Dimension(450, 600);	    
+	}
+	
+	Point location = preferenceService.restoreWindowLocation();
+	
 	frame.addWindowListener(this);
 	frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);	
 	frame.setLayout( new BorderLayout() );
 	frame.setJMenuBar(menuBar);
 	frame.add(tabbedPane, BorderLayout.CENTER);	
 	frame.add(statusPanel, BorderLayout.SOUTH);
-	frame.setSize(450, 600);		
+	frame.setSize(demension);		
 		
-	// center it
-	frame.setLocationRelativeTo(null); 
-	
+	if(location == null)
+	{
+	    // center it
+	    frame.setLocationRelativeTo(null); 		
+	}
+	else
+	{
+	    frame.setLocation(location);
+	}
+
 	startSearchTimer();
 	try 
 	{
@@ -207,10 +221,7 @@ public class PixelApp extends IOIOSwingApp
     {
 	JMenuBar menuBar;
 	JMenu menu;
-//	JMenu submenu;
 	JMenuItem menuItem;
-//	JRadioButtonMenuItem rbMenuItem;
-//	JCheckBoxMenuItem cbMenuItem;
 
 	// Create the menu bar.
 	menuBar = new JMenuBar();
@@ -366,7 +377,6 @@ public class PixelApp extends IOIOSwingApp
 	    urls[0] = url;
 	    URLClassLoader classLoader = new URLClassLoader(urls);
 	    
-//	    String className = "com.ledpixelart.pc.plugins.swing.WeatherByWoeid";
 	    String className = "org.onebeartoe.pixel.plugins.weather.WeatherByWoeid";
 	    
 	    Class<?> clazz = classLoader.loadClass(className);

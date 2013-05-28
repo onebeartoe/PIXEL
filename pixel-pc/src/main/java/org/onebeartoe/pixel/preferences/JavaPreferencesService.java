@@ -3,6 +3,8 @@ package org.onebeartoe.pixel.preferences;
 
 import com.ledpixelart.pc.PixelApp;
 import com.ledpixelart.pc.plugins.swing.UserProvidedPanel;
+import java.awt.Dimension;
+import java.awt.Point;
 import java.io.File;
 import java.util.List;
 import java.util.logging.Level;
@@ -29,6 +31,41 @@ public class JavaPreferencesService implements PreferencesService
 	String value = preferences.get(key, defaultValue);
 	
 	return value;
+    }
+    
+    public Dimension restoreWindowDimension() 
+    {
+	int errorValue = -1;
+	String key = PixelPreferencesKeys.windowWidth;
+	int x = preferences.getInt(key, errorValue);
+	
+	defaultValue = 450;
+	key = PixelPreferencesKeys.windowWidth;
+	int width = preferences.getInt(key, defaultValue);
+	
+	WindowPreferences windowPreferences = new WindowPreferences();
+	windowPreferences.x = x;
+	windowPreferences.width = width;
+	
+	return windowPreferences;
+    }
+    
+    @Override
+    public Point restoreWindowLocation() 
+    {
+	int defaultValue = 10;
+	String key = PixelPreferencesKeys.windowWidth;
+	int x = preferences.getInt(key, defaultValue);		
+	
+	defaultValue = 450;
+	key = PixelPreferencesKeys.windowWidth;
+	int width = preferences.getInt(key, defaultValue);
+	
+	WindowPreferences windowPreferences = new WindowPreferences();
+	windowPreferences.x = x;
+	windowPreferences.width = width;
+	
+	return windowPreferences;
     }
     
     @Override
@@ -64,10 +101,11 @@ public class JavaPreferencesService implements PreferencesService
     public void saveWindowPreferences(JFrame window)
     {
 	int x = window.getX();
+	String key = PixelPreferencesKeys.windowWidth;
+	preferences.putInt(key, x);
 	
-	int width = window.getWidth();
-	
-	String key = PixelPreferencesKeys.windowWidth;	
+	int width = window.getWidth();	
+	key = PixelPreferencesKeys.windowWidth;
 	preferences.putInt(key, width);
     }
     

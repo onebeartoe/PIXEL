@@ -2,6 +2,8 @@
 package org.onebeartoe.pixel.preferences;
 
 import com.ledpixelart.pc.plugins.swing.UserProvidedPanel;
+import java.awt.Dimension;
+import java.awt.Point;
 import javax.swing.JFrame;
 
 /**
@@ -9,9 +11,13 @@ import javax.swing.JFrame;
  */
 public interface PreferencesService
 {
+    String get(String key, String defaultValue);
+    
     void saveBuiltInPluginsPreferences(UserProvidedPanel localImagesPanel);
     
-    void saveWindowPreferences(JFrame window);
+    Dimension restoreWindowDimension() throws Exception;
     
-    String get(String key, String defaultValue);
+    Point restoreWindowLocation();
+    
+    void saveWindowPreferences(JFrame window);
 }
