@@ -68,7 +68,6 @@ public class PixelApp extends IOIOSwingApp
     private final Logger logger;
     
     private PreferencesService preferenceService;
-//    private Preferences preferences;
     
     private Timer searchTimer;
     
@@ -85,6 +84,10 @@ public class PixelApp extends IOIOSwingApp
     private JFrame frame;
     
     private JLabel statusLabel;
+    
+    public static final int DEFAULT_HEIGHT = 600;
+    
+    public static final int DEFAULT_WIDTH = 450;    
     
     public PixelApp()
     {
@@ -174,10 +177,18 @@ public class PixelApp extends IOIOSwingApp
 	} 
 	catch (Exception ex) 
 	{
-	    demension = new Dimension(450, 600);	    
+	    demension = new Dimension(DEFAULT_WIDTH, DEFAULT_HEIGHT);
 	}
 	
-	Point location = preferenceService.restoreWindowLocation();
+	Point location = null;
+	try 
+	{
+	    location = preferenceService.restoreWindowLocation();
+	} 
+	catch (Exception ex) 
+	{
+	    logger.log(Level.INFO, ex.getMessage(), ex);
+	}
 	
 	frame.addWindowListener(this);
 	frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);	

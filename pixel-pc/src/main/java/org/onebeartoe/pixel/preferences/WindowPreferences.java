@@ -2,8 +2,10 @@
 package org.onebeartoe.pixel.preferences;
 
 /**
+ * Remove this class.
  * @author rmarquez
  */
+@Deprecated
 public class WindowPreferences 
 {
     public int x;

@@ -34,38 +34,39 @@ public class JavaPreferencesService implements PreferencesService
     }
     
     public Dimension restoreWindowDimension() 
-    {
-	int errorValue = -1;
+    {	
+	int defaultValue = 450;
 	String key = PixelPreferencesKeys.windowWidth;
-	int x = preferences.getInt(key, errorValue);
-	
-	defaultValue = 450;
-	key = PixelPreferencesKeys.windowWidth;
 	int width = preferences.getInt(key, defaultValue);
 	
-	WindowPreferences windowPreferences = new WindowPreferences();
-	windowPreferences.x = x;
-	windowPreferences.width = width;
+	key = PixelPreferencesKeys.windowHeight;
+	int height = preferences.getInt(key, PixelApp.DEFAULT_HEIGHT);
 	
-	return windowPreferences;
+	Dimension demension = new Dimension(width, height);
+	
+	return demension;
     }
     
     @Override
-    public Point restoreWindowLocation() 
+    public Point restoreWindowLocation() throws Exception
     {
-	int defaultValue = 10;
-	String key = PixelPreferencesKeys.windowWidth;
-	int x = preferences.getInt(key, defaultValue);		
+	int errorValue = -1;
+	String key = PixelPreferencesKeys.windowX;
+	int x = preferences.getInt(key, errorValue);
+
+	key = PixelPreferencesKeys.windowY;
+	int y = preferences.getInt(key, errorValue);
 	
-	defaultValue = 450;
-	key = PixelPreferencesKeys.windowWidth;
-	int width = preferences.getInt(key, defaultValue);
+	if(x == errorValue || y == errorValue)
+	{
+	    // The window location hasn't been saved, yet.
+	    
+	    throw new Exception();
+	}
 	
-	WindowPreferences windowPreferences = new WindowPreferences();
-	windowPreferences.x = x;
-	windowPreferences.width = width;
+	Point point = new Point(x,y);
 	
-	return windowPreferences;
+	return point;
     }
     
     @Override
@@ -101,12 +102,20 @@ public class JavaPreferencesService implements PreferencesService
     public void saveWindowPreferences(JFrame window)
     {
 	int x = window.getX();
-	String key = PixelPreferencesKeys.windowWidth;
+	String key = PixelPreferencesKeys.windowX;
 	preferences.putInt(key, x);
+	
+	int y = window.getY();
+	key = PixelPreferencesKeys.windowY;
+	preferences.putInt(key, y);
 	
 	int width = window.getWidth();	
 	key = PixelPreferencesKeys.windowWidth;
 	preferences.putInt(key, width);
+	
+	int height = window.getHeight();
+	key = PixelPreferencesKeys.windowHeight;
+	preferences.putInt(key, height);
     }
     
 }

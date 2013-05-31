@@ -17,7 +17,7 @@ public interface PreferencesService
     
     Dimension restoreWindowDimension() throws Exception;
     
-    Point restoreWindowLocation();
+    Point restoreWindowLocation() throws Exception;
     
     void saveWindowPreferences(JFrame window);
 }
