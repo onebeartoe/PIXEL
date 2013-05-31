@@ -373,7 +373,7 @@ public class PixelApp extends IOIOSwingApp
     {
 	List<PixelPanel> foundClasses = new ArrayList();
 	
-	String path = "../pixel-weather/target/pixel-weather-1.0-SNAPSHOT.jar";
+	String path = "../pixel-weather/target/pixel-weather-1.0-SNAPSHOT-jar-with-dependencies.jar";
         File jar = new File(path);
 	if( !jar.exists() || !jar.canRead() )
 	{
