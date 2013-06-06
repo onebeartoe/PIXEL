@@ -136,7 +136,7 @@ extends ImageTilePanel
     {
 	System.out.println("Starting PIXEL activity in " + getClass().getSimpleName() + ".");
 	
-	proximitySensor  = PixelApp.getAnalogInput1();
+	proximitySensor = PixelApp.getAnalogInput1();
 	
 	timer = new Timer(1000, proximityListener);
 	timer.start();

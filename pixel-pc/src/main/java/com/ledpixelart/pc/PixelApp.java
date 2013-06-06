@@ -209,6 +209,7 @@ public class PixelApp extends IOIOSwingApp
 	}
 
 	startSearchTimer();
+	
 	try 
 	{
 	    List<PixelPanel> plugins = searchForPlugins();
@@ -216,6 +217,7 @@ public class PixelApp extends IOIOSwingApp
 	    {
 		ImageIcon icon = panel.getTabIcon();
 		tabbedPane.addTab("Weather", icon, panel, "A weather app for internal and external temps.");
+		pixelPanels.add(panel);
 	    }
 	} 
 	catch (Exception ex) 
@@ -356,6 +358,31 @@ public class PixelApp extends IOIOSwingApp
         
         return pixel.matrix;
     }
+
+    private PixelPanel loadPlugin(String jarPath, String className) throws Exception
+    {	
+        File jar = new File(jarPath);
+	if( !jar.exists() || !jar.canRead() )
+	{
+	    System.out.println("\n\nThere is a problem with the specified JAR.");
+	    System.out.println("The jar exists: " + jar.exists() );
+	    System.out.println("The jar is readable: " + jar.canRead() );
+	}
+	
+	
+	URL url = jar.toURI().toURL();
+	URL [] urls = new URL[1];
+	urls[0] = url;
+	URLClassLoader classLoader = new URLClassLoader(urls);
+
+	Class<?> clazz = classLoader.loadClass(className);
+
+	Constructor<?> constructor = clazz.getConstructor(RgbLedMatrix.Matrix.class);
+	Object o = constructor.newInstance(KIND);
+	PixelPanel plugin = (PixelPanel) o;
+	    
+	return plugin;
+    }    
     
     public static void main(String[] args) throws Exception 
     {		
@@ -373,44 +400,28 @@ public class PixelApp extends IOIOSwingApp
     {
 	List<PixelPanel> foundClasses = new ArrayList();
 	
-	String path = "../pixel-weather/target/pixel-weather-1.0-SNAPSHOT-jar-with-dependencies.jar";
-        File jar = new File(path);
-	if( !jar.exists() || !jar.canRead() )
+	String path = "../pixel-weather/target/pixel-weather-1.0-SNAPSHOT-jar-with-dependencies.jar";        
+	String className = "org.onebeartoe.pixel.plugins.weather.WeatherByWoeid";
+	PixelPanel plugin = loadPlugin(path, className);
+	foundClasses.add(plugin);
+
+	path = "../pixel-games/target/pixel-games-1.0-SNAPSHOT.jar";
+	className = "org.onebeartoe.games.pixel.press.your.button.PressYourButtonPanel";
+	plugin = loadPlugin(path, className);
+	foundClasses.add(plugin);
+	
+	if( foundClasses.isEmpty() )
 	{
-	    System.out.println("\n\nThere is a problem with the specified JAR.");
-	    System.out.println("The jar exists: " + jar.exists() );
-	    System.out.println("The jar is readable: " + jar.canRead() );
+	    System.out.println("No plugins were found.");
 	}
 	else
 	{
-	    URL url = jar.toURI().toURL();
-	    URL [] urls = new URL[1];
-	    urls[0] = url;
-	    URLClassLoader classLoader = new URLClassLoader(urls);
-	    
-	    String className = "org.onebeartoe.pixel.plugins.weather.WeatherByWoeid";
-	    
-	    Class<?> clazz = classLoader.loadClass(className);
-	    
-	    Constructor<?> constructor = clazz.getConstructor(RgbLedMatrix.Matrix.class);
-	    Object o = constructor.newInstance(KIND);
-	    PixelPanel plugin = (PixelPanel) o;
-	    
-	    foundClasses.add(plugin);
-
-	    if( foundClasses.isEmpty() )
+	    for (PixelPanel classInfo : foundClasses)	    
 	    {
-		System.out.println("No plugins were found.");
+		System.out.println ("Found " + classInfo.getClass());
 	    }
-	    else
-	    {
-		for (PixelPanel classInfo : foundClasses)	    
-		{
-		    System.out.println ("Found " + classInfo.getClass());
-		}
-	    }
-	}        
-	
+	}
+	        
 	return foundClasses;
     }
     
@@ -435,16 +446,16 @@ public class PixelApp extends IOIOSwingApp
     {
         exit();
     }
-    
-    public static AnalogInput getAnalogInput1() 
+
+    private static AnalogInput getAnalogInput(int pinNumber) 
     {
-        if (pixel.analogInput1 == null) 
-	{
+//        if (pixel.analogInput1 == null) 
+//	{
 	    if(ioiO != null)
 	    {
 		try 
 		{
-		    pixel.analogInput1 = ioiO.openAnalogInput(32);
+		    pixel.analogInput1 = ioiO.openAnalogInput(pinNumber);
 		} 
 		catch (ConnectionLostException ex) 
 		{
@@ -452,9 +463,29 @@ public class PixelApp extends IOIOSwingApp
 		    Logger.getLogger(PixelApp.class.getName()).log(Level.SEVERE, message, ex);
 		}		
 	    }
+//        }
+        
+        return pixel.analogInput1;
+    }
+    
+    public static AnalogInput getAnalogInput1() 
+    {
+        if (pixel.analogInput1 == null) 
+	{
+	    pixel.analogInput1 = getAnalogInput(31);			    
         }
         
         return pixel.analogInput1;
+    }
+    
+    public static AnalogInput getAnalogInput2() 
+    {
+        if (pixel.analogInput2 == null) 
+	{
+	    pixel.analogInput2 = getAnalogInput(32);
+        }
+        
+        return pixel.analogInput2;
     }
 
     private class AboutListener implements ActionListener

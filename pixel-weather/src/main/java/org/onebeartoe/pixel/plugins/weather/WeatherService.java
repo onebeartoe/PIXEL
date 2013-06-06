@@ -30,7 +30,14 @@ public class WeatherService {
 		weather.condition = doc.valueOf("/rss/channel/item/y:condition/@text") ;
 		weather.temp = doc.valueOf("/rss/channel/item/y:condition/@temp") ;
 		weather.chill = doc.valueOf("/rss/channel/y:wind/@chill") ;
-		weather.humidity = doc.valueOf("/rss/channel/y:atmosphere/@humidity") ;
+		weather.humidity = doc.valueOf("/rss/channel/y:atmosphere/@humidity") ;		
+		weather.htmlDescription = doc.valueOf("/rss/channel/item/description");
+		
+		String target = "<img src=\"";
+		int i = weather.htmlDescription.indexOf(target);
+		int start = i + target.length();
+		int end = weather.htmlDescription.indexOf("\"", start);
+		weather.imageUrl = weather.htmlDescription.substring(start, end);
 		
 		return weather;
 	}
@@ -58,9 +65,17 @@ public class WeatherService {
 	    buf.append(weather.city + ", " + weather.region + ", " + weather.condition);
 	    buf.append("\n");
 	    buf.append("Temperature: " + weather.temp);
+	    buf.append("\n");
 	    buf.append("Condition: " + weather.condition);
+	    buf.append("\n");
 	    buf.append("Humidity: " + weather.humidity);
+	    buf.append("\n");
 	    buf.append("Wind Chill: " + weather.chill);
+	    buf.append("\n");
+	    buf.append("Image: " + weather.imageUrl);
+	    buf.append("\n");
+	    buf.append("HTML Description:\n" + weather.htmlDescription);
+	    buf.append("\n");
 	    buf.append("-----------------------------------");
 	    buf.append("</pre>");
 	    

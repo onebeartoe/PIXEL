@@ -38,18 +38,18 @@ public abstract class SingleThreadedPixelPanel extends PixelPanel
     {
 	System.out.println("Starting PIXEL activity in " + getClass().getSimpleName() + ".");		
 	ActionListener listener = getActionListener();
-//	int defaultDelay = 150;
 	timer = new Timer(tickDelay, listener);
-//	timer = new Timer(defaultDelay, listener);
 	timer.start();
     }
    
     @Override
     public void stopPixelActivity()
     {	
-        if(timer != null && timer.isRunning() )
+	String className = getClass().getSimpleName();
+	System.out.println("Preparing to stoping PIXEL activity in " + className + ".");
+        if(timer != null)// && timer.isRunning() )
         {            
-	    System.out.println("Stoping PIXEL activity in " + getClass().getSimpleName() + ".");
+	    System.out.println("Stoping PIXEL activity in " + className + ".");
             timer.stop();
         }
     }

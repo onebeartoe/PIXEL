@@ -25,6 +25,7 @@
 		<module>pixel-touch-android</module>
 -->
     <module>pixel-weather</module>
+    <module>pixel-games</module>
     <module>pixel-plugin-tests</module>
   </modules>
 

@@ -10,6 +10,8 @@ public class Weather
     public String temp;
     public String chill;
     public String humidity;
+    public String imageUrl;
+    public String htmlDescription;
     
     public Weather() {}
 
