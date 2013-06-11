@@ -21,6 +21,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Random;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.ImageIcon;
@@ -39,36 +40,58 @@ public class PressYourButtonPanel extends SingleThreadedPixelPanel
     
     private List<BoardPanel> boardPanels;
     
+    private BoardPanel curentPointPanel;
+    
     protected List<Point> boardPanelLocations;
     
     private PreviewPanel previewPanel;
     
+    private NewGamePanel newGamePanel;
+    
     private AnalogInput analogInput1;
     
-    private GameStates gameState;
+    volatile GameStates gameState;
+    
+    private Game currentGame;
+    
+    private Random locationRandom;
     
     public PressYourButtonPanel(Matrix m)
     {
 	super(m);
 	
-	tickDelay = 1900;  // milliseconds 
+//	tickDelay = 1900;  // milliseconds 
 	
 	worker = new PressYourButtonWorker();
 	
 	gameState = GameStates.NEW_GAME_CONFIG;
-	
+		
 	setupBoardPanels();
 	
 	setupBoardPanelLocations();
+	
+	locationRandom = new Random();
 	
 	setLayout( new BorderLayout() );
 	
 	JLabel label = new JLabel("Weather Panel");
 	
-	previewPanel = new PreviewPanel();	
+	newGamePanel = new NewGamePanel(this);
+	previewPanel = new PreviewPanel();
 	
 	add(label, BorderLayout.NORTH);
-	add(previewPanel, BorderLayout.CENTER);
+	add(newGamePanel, BorderLayout.CENTER);
+    }
+    
+    private void endOfTurn()
+    {
+	
+/*
+  not at this point
+ 
+	Player player = currentGame.players.get(currentGame.currentPlayer);
+	player.score += curentPointPanel.amount;
+*/	 
     }
     
     @Override
@@ -90,11 +113,16 @@ public class PressYourButtonPanel extends SingleThreadedPixelPanel
     
     private void newGameConfiguration()
     {
-	
+	tickDelay = 1900;  // milliseconds 
     }
     
+    /**
+     * this animates the PIXEL with moving point panels and a selected panel
+     */
     private void nextPlayersTurn()
     {
+	tickDelay = 940;  // milliseconds 
+	
 	int boardWidth = 128;
 	int boardHeight = 128;
 
@@ -113,15 +141,30 @@ public class PressYourButtonPanel extends SingleThreadedPixelPanel
 
 	g2d.setFont(font);
 
+	int rl = locationRandom.nextInt( boardPanelLocations.size() );
+	
 	int i = 0;
 	Collections.shuffle(boardPanels);
 	for(Point location : boardPanelLocations)
 	{
-	    BoardPanel panel = boardPanels.get(i);
-	    panel.draw(g2d, location);
+	    curentPointPanel = boardPanels.get(i);
+	    
+	    Color foreground;
+	    if(i == rl)
+	    {
+		
+		foreground = Color.BLACK;
+	    }
+	    else
+	    {
+		foreground = Color.WHITE;
+	    }
+	    
+	    curentPointPanel.draw(g2d, location, foreground);
+		
 	    i++;
 	}
-
+	
 	g2d.dispose();
 
 	previewPanel.setImage(img);
@@ -140,7 +183,7 @@ public class PressYourButtonPanel extends SingleThreadedPixelPanel
 	    try 
 	    {              
 		PixelApp.pixel.writeImagetoMatrix(img);
-	    } 
+	    }
 	    catch (ConnectionLostException ex) 
 	    {
 		Logger.getLogger(ScrollingTextPanel.class.getName()).log(Level.SEVERE, null, ex);
@@ -148,6 +191,14 @@ public class PressYourButtonPanel extends SingleThreadedPixelPanel
 	}	    
     }
     
+    public void setCurrentGame(Game game)
+    {
+	currentGame = game;
+	
+	remove(newGamePanel);
+	add(previewPanel, BorderLayout.CENTER);
+    }
+	    
     private void setupBoardPanelLocations()
     {	
 	boardPanelLocations = new ArrayList();
@@ -259,6 +310,8 @@ public class PressYourButtonPanel extends SingleThreadedPixelPanel
 			int signal = (int) a1;
 			if(signal == 1)
 			{
+			    gameState = GameStates.END_OF_TURN;
+			    
 			    pressCount++;
 			
 			    System.out.println("Analog 1: " + a1 + " - press count: " + pressCount);
@@ -285,6 +338,11 @@ public class PressYourButtonPanel extends SingleThreadedPixelPanel
 		case NEXT_PLAYERS_TURN:
 		{
 		    nextPlayersTurn();
+		    break;
+		}
+		case END_OF_TURN:
+		{
+		    endOfTurn();
 		    break;
 		}
 		default:

@@ -9,7 +9,7 @@ import java.awt.Point;
 
 public class MoneyPanel extends BoardPanel
 {
-    private int amount;
+//    private int amount;
 
     private Font font;
 
@@ -25,11 +25,11 @@ public class MoneyPanel extends BoardPanel
 
 
     @Override
-    protected void draw(Graphics2D g2d, Point location) 
+    protected void draw(Graphics2D g2d, Point location, Color foreground) 
     {
-	super.draw(g2d, location);
+	super.draw(g2d, location, foreground);
 
-	g2d.setColor(Color.WHITE);
+	g2d.setColor(foreground);
 
 	FontMetrics fm = g2d.getFontMetrics();   
 

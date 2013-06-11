@@ -13,6 +13,8 @@ public abstract class BoardPanel
     protected Dimension dimension;
 
     protected Point location;
+    
+    protected int amount;
 
     public BoardPanel(Color backgroundColor)
     {
@@ -22,7 +24,7 @@ public abstract class BoardPanel
 //	this.dimension = new Dimension(32,32);
     }
 
-    protected void draw(Graphics2D g2d, Point location)
+    protected void draw(Graphics2D g2d, Point location, Color foreground)
     {
 	g2d.setColor(backgroundColor);
 	g2d.fillRect(location.x, location.y, dimension.width, dimension.height);
