@@ -45,7 +45,7 @@ public class PressYourButtonPanel extends SingleThreadedPixelPanel
     
     private AnalogInput analogInput1;
     
-//    private AnalogInput analogInput2;
+    private GameStates gameState;
     
     public PressYourButtonPanel(Matrix m)
     {
@@ -53,7 +53,9 @@ public class PressYourButtonPanel extends SingleThreadedPixelPanel
 	
 	tickDelay = 1900;  // milliseconds 
 	
-	worker = new PressYourButtonWorker();		
+	worker = new PressYourButtonWorker();
+	
+	gameState = GameStates.NEW_GAME_CONFIG;
 	
 	setupBoardPanels();
 	
@@ -84,6 +86,66 @@ public class PressYourButtonPanel extends SingleThreadedPixelPanel
         ImageIcon imagesTabIcon = new ImageIcon(url);
 	
 	return imagesTabIcon;
+    }
+    
+    private void newGameConfiguration()
+    {
+	
+    }
+    
+    private void nextPlayersTurn()
+    {
+	int boardWidth = 128;
+	int boardHeight = 128;
+
+	BufferedImage img = new BufferedImage(boardWidth, boardHeight, BufferedImage.TYPE_INT_ARGB);	    
+
+	Graphics2D g2d = img.createGraphics();
+
+	g2d.setPaint(Color.BLACK);
+	g2d.fillRect(0,0, boardWidth, boardHeight);
+
+	Color textColor = Color.GREEN;	    
+	g2d.setPaint(textColor);
+
+	String fontFamily = "Arial";            
+	Font font = new Font(fontFamily, Font.PLAIN, 32);
+
+	g2d.setFont(font);
+
+	int i = 0;
+	Collections.shuffle(boardPanels);
+	for(Point location : boardPanelLocations)
+	{
+	    BoardPanel panel = boardPanels.get(i);
+	    panel.draw(g2d, location);
+	    i++;
+	}
+
+	g2d.dispose();
+
+	previewPanel.setImage(img);
+
+	SwingUtilities.invokeLater( new Runnable() 
+	{
+	    public void run() 
+	    {
+		previewPanel.invalidate();
+		previewPanel.updateUI();
+	    }
+	});	    
+
+	if(PixelApp.pixel != null)
+	{
+	    try 
+	    {              
+		PixelApp.pixel.writeImagetoMatrix(img);
+	    } 
+	    catch (ConnectionLostException ex) 
+	    {
+		Logger.getLogger(ScrollingTextPanel.class.getName()).log(Level.SEVERE, null, ex);
+	    }
+	}	    
     }
     
     private void setupBoardPanelLocations()
@@ -218,57 +280,18 @@ public class PressYourButtonPanel extends SingleThreadedPixelPanel
 	@Override
 	public void actionPerformed(ActionEvent e) 
 	{
-	    int w = 128;
-            int h = 128;
-	    
-            BufferedImage img = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);	    
-	    
-            Graphics2D g2d = img.createGraphics();
-	    
-	    g2d.setPaint(Color.BLACK);
-	    g2d.fillRect(0,0, w, h);
-	    
-	    Color textColor = Color.GREEN;	    
-            g2d.setPaint(textColor);
-            
-            String fontFamily = "Arial";            
-            Font font = new Font(fontFamily, Font.PLAIN, 32);
-            
-            g2d.setFont(font);
-                        
-	    int i = 0;
-	    Collections.shuffle(boardPanels);
-	    for(Point location : boardPanelLocations)
+	    switch(gameState)
 	    {
-		BoardPanel panel = boardPanels.get(i);
-		panel.draw(g2d, location);
-		i++;
+		case NEXT_PLAYERS_TURN:
+		{
+		    nextPlayersTurn();
+		    break;
+		}
+		default:
+		{
+		    newGameConfiguration();
+		}
 	    }
-	    
-            g2d.dispose();
-	    
-	    previewPanel.setImage(img);
-	    
-	    SwingUtilities.invokeLater( new Runnable() 
-	    {
-		public void run() 
-		{
-		    previewPanel.invalidate();
-		    previewPanel.updateUI();
-		}
-	    });	    
-	    
-	    if(PixelApp.pixel != null)
-	    {
-		try 
-		{              
-		    PixelApp.pixel.writeImagetoMatrix(img);
-		} 
-		catch (ConnectionLostException ex) 
-		{
-		    Logger.getLogger(ScrollingTextPanel.class.getName()).log(Level.SEVERE, null, ex);
-		}
-	    }	    
 	}
     }
     
