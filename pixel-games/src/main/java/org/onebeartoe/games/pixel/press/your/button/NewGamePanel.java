@@ -24,9 +24,9 @@ public class NewGamePanel extends JPanel implements ActionListener
     
     private JButton startButton;
     
-    private PressYourButtonPanel parent;
+    private PressYourButton parent;
     
-    public NewGamePanel(PressYourButtonPanel parent)
+    public NewGamePanel(PressYourButton parent)
     {
 	this.parent = parent;
 	

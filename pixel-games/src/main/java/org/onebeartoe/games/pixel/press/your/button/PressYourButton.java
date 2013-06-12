@@ -9,60 +9,61 @@ import ioio.lib.api.RgbLedMatrix.Matrix;
 import ioio.lib.api.exception.ConnectionLostException;
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Font;
-import java.awt.Graphics;
 import java.awt.Graphics2D;
-import java.awt.Image;
 import java.awt.Point;
-import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.Random;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
-import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
 /**
- *
+ * This is a plugin for the PIXEL PC app.  It show a board with moving point and 
+ * whammy panels.  A button will stop the board.  If the user lands on a point panel 
+ * the points are added the users score.  Landing on a whammy will zero out their 
+ * score.
  */
-public class PressYourButtonPanel extends SingleThreadedPixelPanel
+public class PressYourButton extends SingleThreadedPixelPanel
 {
-    private ActionListener worker = new PressYourButtonWorker();
+    private ActionListener worker = new PressYourButtonWorker(this);
     
     private Thread bigButtonThread;
     
     private List<BoardPanel> boardPanels;
     
-    private BoardPanel curentPointPanel;
+    volatile MoneyPanel curentPointPanel;
     
     protected List<Point> boardPanelLocations;
     
     private PreviewPanel previewPanel;
     
+    private EndOfTurnPanel endOfTurnPanel;
+    
     private NewGamePanel newGamePanel;
     
-    private AnalogInput analogInput1;
+    AnalogInput analogInput1;
     
     volatile GameStates gameState;
     
-    private Game currentGame;
+    volatile Game currentGame;
     
     private Random locationRandom;
     
-    public PressYourButtonPanel(Matrix m)
+    public PressYourButton(Matrix m)
     {
-	super(m);
+	super(m);	
 	
-//	tickDelay = 1900;  // milliseconds 
-	
-	worker = new PressYourButtonWorker();
+	worker = new PressYourButtonWorker(this);
 	
 	gameState = GameStates.NEW_GAME_CONFIG;
 		
@@ -77,15 +78,18 @@ public class PressYourButtonPanel extends SingleThreadedPixelPanel
 	JLabel label = new JLabel("Weather Panel");
 	
 	newGamePanel = new NewGamePanel(this);
-	previewPanel = new PreviewPanel();
+	
+	previewPanel = new PreviewPanel(this);
+	previewPanel.setAlignmentX(Component.CENTER_ALIGNMENT);
+	
+	endOfTurnPanel = new EndOfTurnPanel(this, previewPanel);
 	
 	add(label, BorderLayout.NORTH);
 	add(newGamePanel, BorderLayout.CENTER);
     }
     
-    private void endOfTurn()
+    public void endOfTurn()
     {
-	
 /*
   not at this point
  
@@ -111,17 +115,17 @@ public class PressYourButtonPanel extends SingleThreadedPixelPanel
 	return imagesTabIcon;
     }
     
-    private void newGameConfiguration()
+    public void newGameConfiguration()
     {
-	tickDelay = 1900;  // milliseconds 
+	timer.setDelay(1900);  // milliseconds 
     }
     
     /**
      * this animates the PIXEL with moving point panels and a selected panel
      */
-    private void nextPlayersTurn()
+    public void nextPlayersTurn()
     {
-	tickDelay = 940;  // milliseconds 
+	timer.setDelay(940);  // milliseconds 
 	
 	int boardWidth = 128;
 	int boardHeight = 128;
@@ -147,23 +151,28 @@ public class PressYourButtonPanel extends SingleThreadedPixelPanel
 	Collections.shuffle(boardPanels);
 	for(Point location : boardPanelLocations)
 	{
-	    curentPointPanel = boardPanels.get(i);
+	    BoardPanel panel = boardPanels.get(i);
 	    
 	    Color foreground;
 	    if(i == rl)
 	    {
-		
-		foreground = Color.BLACK;
+		curentPointPanel = (MoneyPanel) panel;
+		foreground = Color.RED;
 	    }
 	    else
 	    {
 		foreground = Color.WHITE;
 	    }
 	    
-	    curentPointPanel.draw(g2d, location, foreground);
+	    panel.draw(g2d, location, foreground);
 		
 	    i++;
 	}
+	
+	Point labelLocation = new Point(43,43);
+	String label = "P" + (currentGame.currentPlayer + 1);
+	BoardPanel playerLabel = new PlayerLabelPanel(label);
+	playerLabel.draw(g2d, labelLocation, Color.RED);
 	
 	g2d.dispose();
 
@@ -178,17 +187,7 @@ public class PressYourButtonPanel extends SingleThreadedPixelPanel
 	    }
 	});	    
 
-	if(PixelApp.pixel != null)
-	{
-	    try 
-	    {              
-		PixelApp.pixel.writeImagetoMatrix(img);
-	    }
-	    catch (ConnectionLostException ex) 
-	    {
-		Logger.getLogger(ScrollingTextPanel.class.getName()).log(Level.SEVERE, null, ex);
-	    }
-	}	    
+	writeImageToPixel(img);
     }
     
     public void setCurrentGame(Game game)
@@ -196,7 +195,8 @@ public class PressYourButtonPanel extends SingleThreadedPixelPanel
 	currentGame = game;
 	
 	remove(newGamePanel);
-	add(previewPanel, BorderLayout.CENTER);
+	add(endOfTurnPanel, BorderLayout.CENTER);
+//	add(previewPanel, BorderLayout.CENTER);
     }
 	    
     private void setupBoardPanelLocations()
@@ -227,12 +227,55 @@ public class PressYourButtonPanel extends SingleThreadedPixelPanel
 	boardPanelLocations.add(p8);
     }
     
+    public void showScore()
+    {
+	timer.setDelay(1500);  // milliseconds 
+	
+	int width = 128;
+	int height = 128;
+
+	BufferedImage img = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);	    
+
+	Graphics2D g2d = img.createGraphics();
+
+	g2d.setPaint(Color.BLUE);
+//	g2d.fillRect(0,0, width, height);
+
+	Color textColor = Color.WHITE;
+	g2d.setPaint(textColor);
+
+	String fontFamily = "Arial";            
+	Font font = new Font(fontFamily, Font.PLAIN, 34);
+
+	g2d.setFont(font);
+	
+System.out.println( currentGame.toString() );
+//g2d.fillRect(0,0, width/2, height/2);	
+	
+	
+	int verticalGap = 42;
+	int i = 0;
+	for(Player p : currentGame.players)
+	{
+	    String s = "P" + (i+1) + " " + p.score;
+	    int x = 10;
+	    int y = 25 + i * verticalGap;
+System.out.println("drawing " + s + " at " + x + ", " + y + " at " + new Date());	    
+	    g2d.drawString(s, x, y);
+	    i++;
+	}
+	
+	g2d.dispose();
+
+	writeImageToPixel(img);
+    }
+    
     private void setupBoardPanels()
     {	
 	BoardPanel p1 = new MoneyPanel(Color.YELLOW, 10);
 	BoardPanel p2 = new MoneyPanel(Color.BLUE, 20);
 	BoardPanel p3 = new MoneyPanel(Color.GREEN, 30);
-	BoardPanel p4 = new MoneyPanel(Color.RED, 40);
+	BoardPanel p4 = new MoneyPanel(Color.LIGHT_GRAY, 40);
 	BoardPanel p5 = new MoneyPanel(Color.CYAN, 50);
 	BoardPanel p6 = new MoneyPanel(Color.DARK_GRAY, 60);
 	BoardPanel p7 = new MoneyPanel(Color.MAGENTA, 70);
@@ -269,12 +312,10 @@ public class PressYourButtonPanel extends SingleThreadedPixelPanel
 	} 
 	catch (ConnectionLostException ex) 
 	{
-	    Logger.getLogger(PressYourButtonPanel.class.getName()).log(Level.SEVERE, null, ex);
+	    Logger.getLogger(PressYourButton.class.getName()).log(Level.SEVERE, null, ex);
 	}
 	
-//	analogInput2 = PixelApp.getAnalogInput2();
-	
-	bigButtonThread = new Thread( new BigButtonListener() );
+	bigButtonThread = new Thread( new BigButtonListener(this) );
 	bigButtonThread.start();
     }   
     
@@ -289,91 +330,19 @@ public class PressYourButtonPanel extends SingleThreadedPixelPanel
 	}
     }
     
-    private class BigButtonListener implements Runnable
+    private void writeImageToPixel(BufferedImage image)
     {
-	private int pressCount = 0;
-	
-	public void run() 
+	if(PixelApp.pixel != null)
 	{
-	    while(true)
-	    {		
-		try 
-		{	
-		    if(analogInput1 == null )//|| analogInput2 == null)
-		    {
-			System.out.println("\nAnalog 1: " + analogInput1);						
-		    }
-		    else
-		    {
-			float a1 = analogInput1.readBuffered();
-			
-			int signal = (int) a1;
-			if(signal == 1)
-			{
-			    gameState = GameStates.END_OF_TURN;
-			    
-			    pressCount++;
-			
-			    System.out.println("Analog 1: " + a1 + " - press count: " + pressCount);
-			}    
-		    }
-		    
-		    Thread.sleep(60);
-		} 
-		catch (Exception ex) 
-		{
-		    Logger.getLogger(PressYourButtonPanel.class.getName()).log(Level.SEVERE, null, ex);
-		}
+	    try 
+	    {              
+		PixelApp.pixel.writeImagetoMatrix(image);
 	    }
-	}
-    }
-    
-    private class PressYourButtonWorker implements ActionListener
-    {
-	@Override
-	public void actionPerformed(ActionEvent e) 
-	{
-	    switch(gameState)
+	    catch (ConnectionLostException ex) 
 	    {
-		case NEXT_PLAYERS_TURN:
-		{
-		    nextPlayersTurn();
-		    break;
-		}
-		case END_OF_TURN:
-		{
-		    endOfTurn();
-		    break;
-		}
-		default:
-		{
-		    newGameConfiguration();
-		}
+		Logger.getLogger(ScrollingTextPanel.class.getName()).log(Level.SEVERE, null, ex);
 	    }
-	}
-    }
-    
-    private class PreviewPanel extends JPanel    
-    {
-	
-	private Image image;
-	
-	@Override
-        public void paintComponent(Graphics g) 
-	{
-            super.paintComponent(g);
-	    
-	    if(image != null)
-	    {
-		g.drawImage(image, 0, 0, PressYourButtonPanel.this);
-	    }
-        }
-	
-	public void setImage(Image image)
-	{
-	    this.image = image;
 	}
     }
     
 }
-

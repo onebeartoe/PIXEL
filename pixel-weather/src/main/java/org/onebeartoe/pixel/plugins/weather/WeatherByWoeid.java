@@ -1,5 +1,4 @@
 
-//package com.ledpixelart.pc.plugins.swing;
 package org.onebeartoe.pixel.plugins.weather;
 
 import com.ledpixelart.pc.plugins.swing.SingleThreadedPixelPanel;
@@ -7,16 +6,13 @@ import ioio.lib.api.RgbLedMatrix.Matrix;
 import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.BufferedReader;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.net.URL;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.ImageIcon;
 import javax.swing.JEditorPane;
 import javax.swing.JLabel;
-
 
 /**
  *
@@ -29,7 +25,7 @@ public class WeatherByWoeid extends SingleThreadedPixelPanel
     {
 	super(m);
 	
-	tickDelay = 5000;
+	timer.setDelay(5000);
 	
 	worker = new WeatherWorker();
 	
@@ -113,6 +109,3 @@ public class WeatherByWoeid extends SingleThreadedPixelPanel
     }
     
 }
-
-
-

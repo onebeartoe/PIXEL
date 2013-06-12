@@ -17,14 +17,14 @@ public abstract class SingleThreadedPixelPanel extends PixelPanel
     
     protected boolean pixelFound;
     
-    protected int tickDelay;
+//    protected volatile int tickDelay;
     
     public SingleThreadedPixelPanel(RgbLedMatrix.Matrix KIND)
     {
         super(KIND);
 	
-	// set the IOIO loop delay to half a second, by default  (was 150)
-	tickDelay = 150;
+	
+	
     }        
 
     @Override
@@ -38,7 +38,11 @@ public abstract class SingleThreadedPixelPanel extends PixelPanel
     {
 	System.out.println("Starting PIXEL activity in " + getClass().getSimpleName() + ".");		
 	ActionListener listener = getActionListener();
-	timer = new Timer(tickDelay, listener);
+	
+	// set the IOIO loop delay to half a second, by default
+	int delay = 500; // milliseconds
+	timer = new Timer(delay, listener);
+	
 	timer.start();
     }
    

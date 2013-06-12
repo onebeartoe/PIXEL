@@ -83,11 +83,15 @@ public class UserProvidedPanel extends ImageTilePanel
     {
         List<String> images = new ArrayList();
         File [] files = imageDirectory.listFiles(ImageFilters.stills);
-        for(File image : files)
-        {
-	    String path = image.getAbsolutePath();
-            images.add(path);
-        }
+	
+	if(files != null)
+	{
+	    for(File image : files)
+	    {
+		String path = image.getAbsolutePath();
+		images.add(path);
+	    }
+	}        
 	
 	for(File image : singleImages)
 	{

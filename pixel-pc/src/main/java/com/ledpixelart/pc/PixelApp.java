@@ -95,7 +95,6 @@ public class PixelApp extends IOIOSwingApp
 	logger = Logger.getLogger(className);
 	
 	preferenceService = new JavaPreferencesService();
-//	preferences = Preferences.userNodeForPackage(PixelApp.class);
 	
 	pixelPanels = new ArrayList();	
     }
@@ -406,7 +405,7 @@ public class PixelApp extends IOIOSwingApp
 //	foundClasses.add(plugin);
 
 	path = "../pixel-games/target/pixel-games-1.0-SNAPSHOT.jar";
-	className = "org.onebeartoe.games.pixel.press.your.button.PressYourButtonPanel";
+	className = "org.onebeartoe.games.pixel.press.your.button.PressYourButton";
 	PixelPanel plugin = loadPlugin(path, className);
 	foundClasses.add(plugin);
 	
@@ -449,21 +448,18 @@ public class PixelApp extends IOIOSwingApp
 
     private static AnalogInput getAnalogInput(int pinNumber) 
     {
-//        if (pixel.analogInput1 == null) 
-//	{
-	    if(ioiO != null)
+	if(ioiO != null)
+	{
+	    try 
 	    {
-		try 
-		{
-		    pixel.analogInput1 = ioiO.openAnalogInput(pinNumber);
-		} 
-		catch (ConnectionLostException ex) 
-		{
-		    String message = "The IOIO connection was lost.";
-		    Logger.getLogger(PixelApp.class.getName()).log(Level.SEVERE, message, ex);
-		}		
-	    }
-//        }
+		pixel.analogInput1 = ioiO.openAnalogInput(pinNumber);
+	    } 
+	    catch (ConnectionLostException ex) 
+	    {
+		String message = "The IOIO connection was lost.";
+		Logger.getLogger(PixelApp.class.getName()).log(Level.SEVERE, message, ex);
+	    }		
+	}
         
         return pixel.analogInput1;
     }
