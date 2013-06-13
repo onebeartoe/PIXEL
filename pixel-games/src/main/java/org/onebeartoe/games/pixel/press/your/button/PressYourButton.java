@@ -1,6 +1,11 @@
 
 package org.onebeartoe.games.pixel.press.your.button;
 
+import org.onebeartoe.games.pixel.press.your.button.board.PlayerLabelPanel;
+import org.onebeartoe.games.pixel.press.your.button.board.PointPanel;
+import org.onebeartoe.games.pixel.press.your.button.screens.NewGamePanel;
+import org.onebeartoe.games.pixel.press.your.button.screens.EndOfTurnPanel;
+import org.onebeartoe.games.pixel.press.your.button.board.BoardPanel;
 import com.ledpixelart.pc.PixelApp;
 import com.ledpixelart.pc.plugins.swing.ScrollingTextPanel;
 import com.ledpixelart.pc.plugins.swing.SingleThreadedPixelPanel;
@@ -53,9 +58,9 @@ public class PressYourButton extends SingleThreadedPixelPanel
     
     AnalogInput analogInput1;
     
-    volatile GameStates gameState;
+    volatile public GameStates gameState;
     
-    volatile Game currentGame;
+    volatile public Game currentGame;
     
     private Random locationRandom;
     

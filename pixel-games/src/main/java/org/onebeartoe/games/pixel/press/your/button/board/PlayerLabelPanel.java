@@ -1,6 +1,7 @@
 
-package org.onebeartoe.games.pixel.press.your.button;
+package org.onebeartoe.games.pixel.press.your.button.board;
 
+import org.onebeartoe.games.pixel.press.your.button.board.BoardPanel;
 import java.awt.Color;
 
 /**

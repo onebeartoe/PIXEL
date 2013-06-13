@@ -1,5 +1,5 @@
 
-package org.onebeartoe.games.pixel.press.your.button;
+package org.onebeartoe.games.pixel.press.your.button.screens;
 
 import java.awt.BorderLayout;
 import java.awt.GridLayout;
@@ -7,6 +7,9 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import javax.swing.JButton;
 import javax.swing.JPanel;
+import org.onebeartoe.games.pixel.press.your.button.GameStates;
+import org.onebeartoe.games.pixel.press.your.button.PressYourButton;
+import org.onebeartoe.games.pixel.press.your.button.PreviewPanel;
 
 /**
  * @author rmarquez

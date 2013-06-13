@@ -1,5 +1,5 @@
 
-package org.onebeartoe.games.pixel.press.your.button;
+package org.onebeartoe.games.pixel.press.your.button.board;
 
 import java.awt.Color;
 import java.awt.Dimension;
@@ -28,7 +28,7 @@ public abstract class BoardPanel
 	font = new Font(fontFamily, Font.PLAIN, 32);
     }
 
-    protected void draw(Graphics2D g2d, Point location, Color foreground)
+    public void draw(Graphics2D g2d, Point location, Color foreground)
     {
 	g2d.setColor(backgroundColor);
 	g2d.fillRect(location.x, location.y, dimension.width, dimension.height);
