@@ -41,7 +41,7 @@ public class PressYourButton extends SingleThreadedPixelPanel
     
     private List<BoardPanel> boardPanels;
     
-    volatile MoneyPanel curentPointPanel;
+    volatile PointPanel curentPointPanel;
     
     protected List<Point> boardPanelLocations;
     
@@ -156,7 +156,7 @@ public class PressYourButton extends SingleThreadedPixelPanel
 	    Color foreground;
 	    if(i == rl)
 	    {
-		curentPointPanel = (MoneyPanel) panel;
+		curentPointPanel = (PointPanel) panel;
 		foreground = Color.RED;
 	    }
 	    else
@@ -272,18 +272,18 @@ System.out.println("drawing " + s + " at " + x + ", " + y + " at " + new Date())
     
     private void setupBoardPanels()
     {	
-	BoardPanel p1 = new MoneyPanel(Color.YELLOW, 10);
-	BoardPanel p2 = new MoneyPanel(Color.BLUE, 20);
-	BoardPanel p3 = new MoneyPanel(Color.GREEN, 30);
-	BoardPanel p4 = new MoneyPanel(Color.LIGHT_GRAY, 40);
-	BoardPanel p5 = new MoneyPanel(Color.CYAN, 50);
-	BoardPanel p6 = new MoneyPanel(Color.DARK_GRAY, 60);
-	BoardPanel p7 = new MoneyPanel(Color.MAGENTA, 70);
-	BoardPanel p8 = new MoneyPanel(Color.ORANGE, 80);
-	BoardPanel p9 = new MoneyPanel(Color.PINK, 90);
-	BoardPanel p10 = new MoneyPanel(Color.YELLOW, 10);
-	BoardPanel p11 = new MoneyPanel(Color.orange, 20);
-	BoardPanel p12 = new MoneyPanel(Color.BLUE, 30);
+	BoardPanel p1 = new PointPanel(Color.YELLOW, 10);
+	BoardPanel p2 = new PointPanel(Color.BLUE, 20);
+	BoardPanel p3 = new PointPanel(Color.GREEN, 30);
+	BoardPanel p4 = new PointPanel(Color.LIGHT_GRAY, 40);
+	BoardPanel p5 = new PointPanel(Color.CYAN, 50);
+	BoardPanel p6 = new PointPanel(Color.DARK_GRAY, 60);
+	BoardPanel p7 = new PointPanel(Color.MAGENTA, 70);
+	BoardPanel p8 = new PointPanel(Color.ORANGE, 80);
+	BoardPanel p9 = new PointPanel(Color.PINK, 90);
+	BoardPanel p10 = new PointPanel(Color.YELLOW, 10);
+	BoardPanel p11 = new PointPanel(Color.orange, 20);
+	BoardPanel p12 = new PointPanel(Color.BLUE, 30);
 	
 	boardPanels = new ArrayList();
 	boardPanels.add(p1);

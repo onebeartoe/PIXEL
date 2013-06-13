@@ -3,11 +3,11 @@ package org.onebeartoe.games.pixel.press.your.button;
 
 import java.awt.Color;
 
-public class MoneyPanel extends BoardPanel
+public class PointPanel extends BoardPanel
 {
     protected int amount;    
 
-    public MoneyPanel(Color backgroundColor, int amount) 
+    public PointPanel(Color backgroundColor, int amount) 
     {
 	super(backgroundColor);
 
