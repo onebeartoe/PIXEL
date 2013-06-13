@@ -5,7 +5,10 @@ import java.awt.BorderLayout;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import javax.swing.Box;
+import javax.swing.BoxLayout;
 import javax.swing.JButton;
+import javax.swing.JComponent;
 import javax.swing.JPanel;
 import org.onebeartoe.games.pixel.press.your.button.GameStates;
 import org.onebeartoe.games.pixel.press.your.button.PressYourButton;
@@ -26,6 +29,16 @@ public class EndOfTurnPanel extends JPanel
 	this.plugin = plugin;
 	this.previewPanel = previewPanel;
 	
+	JButton stopButton = new JButton("Stop");
+	stopButton.addActionListener( new StopButtonListener() );
+	
+	Box box = new Box(BoxLayout.Y_AXIS);
+        box.setAlignmentX(JComponent.CENTER_ALIGNMENT);
+        box.add(Box.createVerticalGlue());
+        box.add(this.previewPanel);
+        box.add(stopButton );
+	box.add(Box.createVerticalGlue());
+	
 	JButton newGameButton = new JButton("New Game");
 	
 	JButton showScoreButton = new JButton("Show Score");
@@ -41,18 +54,16 @@ public class EndOfTurnPanel extends JPanel
 	
 	setLayout( new BorderLayout() );
 	
-	add(previewPanel, BorderLayout.CENTER);
+	add(box, BorderLayout.CENTER);
 	add(buttonPanel, BorderLayout.SOUTH);
     }
 
     private class ShowScoreListener implements ActionListener
     {
-
 	public void actionPerformed(ActionEvent e) 
 	{
 	    plugin.gameState = GameStates.SHOW_SCORE;
 	}	
-	
     }
     
     private class NextPlayerListener implements ActionListener
@@ -68,6 +79,17 @@ public class EndOfTurnPanel extends JPanel
 			
 	    plugin.gameState = GameStates.NEXT_PLAYERS_TURN;
 	}	
+    }
+    
+    private class StopButtonListener implements ActionListener
+    {
+	public void actionPerformed(ActionEvent e) 
+	{
+	    if(plugin.gameState == GameStates.NEXT_PLAYERS_TURN)
+	    {
+		plugin.turnIsOver();
+	    }
+	}
     }
     
 }

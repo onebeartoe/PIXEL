@@ -16,6 +16,14 @@ public class PressYourButtonWorker implements ActionListener
 	this.plugin = plugin;
     }
 
+    /**
+     * Every time the application communicates with the PIXEL/IOIO, this method 
+     * is called.
+     * 
+     * The frequency can be adjusted with calls to ...
+     * 
+     * @param e 
+     */
     @Override
     public void actionPerformed(ActionEvent e) 
     {
@@ -24,6 +32,11 @@ public class PressYourButtonWorker implements ActionListener
 	    case NEXT_PLAYERS_TURN:
 	    {
 		plugin.nextPlayersTurn();
+		break;
+	    }
+	    case END_OF_GAME:
+	    {
+		plugin.endOfGame();
 		break;
 	    }
 	    case END_OF_TURN:

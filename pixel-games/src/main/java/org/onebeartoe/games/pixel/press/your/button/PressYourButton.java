@@ -93,14 +93,14 @@ public class PressYourButton extends SingleThreadedPixelPanel
 	add(newGamePanel, BorderLayout.CENTER);
     }
     
+    public void endOfGame()
+    {
+	
+    }
+    
     public void endOfTurn()
     {
-/*
-  not at this point
- 
-	Player player = currentGame.players.get(currentGame.currentPlayer);
-	player.score += curentPointPanel.amount;
-*/	 
+
     }
     
     @Override
@@ -131,10 +131,10 @@ public class PressYourButton extends SingleThreadedPixelPanel
     public void nextPlayersTurn()
     {
 	timer.setDelay(940);  // milliseconds 
-	
-	int boardWidth = 128;
-	int boardHeight = 128;
 
+	int boardWidth = previewPanel.borardDimension.width;
+	int boardHeight = previewPanel.borardDimension.height;
+	
 	BufferedImage img = new BufferedImage(boardWidth, boardHeight, BufferedImage.TYPE_INT_ARGB);	    
 
 	Graphics2D g2d = img.createGraphics();
@@ -313,15 +313,22 @@ System.out.println("drawing " + s + " at " + x + ", " + y + " at " + new Date())
 	analogInput1 = PixelApp.getAnalogInput1();
 	try 
 	{
-	    analogInput1.setBuffer(1);
+	    if(analogInput1 == null)
+	    {
+		System.out.println("Analong input 1 is not available.");
+	    }
+	    else
+	    {
+		analogInput1.setBuffer(1);
+		
+		bigButtonThread = new Thread( new BigButtonListener(this) );
+		bigButtonThread.start();
+	    }
 	} 
 	catch (ConnectionLostException ex) 
 	{
 	    Logger.getLogger(PressYourButton.class.getName()).log(Level.SEVERE, null, ex);
 	}
-	
-	bigButtonThread = new Thread( new BigButtonListener(this) );
-	bigButtonThread.start();
     }   
     
     @Override
@@ -333,6 +340,21 @@ System.out.println("drawing " + s + " at " + x + ", " + y + " at " + new Date())
 	{
 	    bigButtonThread.stop();
 	}
+    }
+    
+    public void turnIsOver()
+    {
+	Player player = currentGame.players.get(currentGame.currentPlayer);
+	player.score += curentPointPanel.amount;
+
+	if(player.score >= currentGame.targetScore)
+	{
+	    gameState = GameStates.END_OF_GAME;
+	}
+	else
+	{
+	    gameState = GameStates.END_OF_TURN;
+	}	
     }
     
     private void writeImageToPixel(BufferedImage image)

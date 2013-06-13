@@ -31,16 +31,13 @@ class BigButtonListener implements Runnable
 		{
 		    float a1 = plugin.analogInput1.readBuffered();
 		    int signal = (int) a1;
-		    if (signal == 1 && plugin.gameState == GameStates.NEXT_PLAYERS_TURN) 
+		    if (signal == 1 && plugin.gameState == GameStates.NEXT_PLAYERS_TURN)
 		    {
-			Player player = plugin.currentGame.players.get(plugin.currentGame.currentPlayer);
-			player.score += plugin.curentPointPanel.amount;
-			
-			plugin.gameState = GameStates.END_OF_TURN;
-			pressCount++;
-			
+			plugin.turnIsOver();
+									
+			pressCount++;			
 			System.out.println("Analog 1: " + a1 + " - press count: " + pressCount);
-			
+			Player player = plugin.currentGame.players.get(plugin.currentGame.currentPlayer);
 			System.out.println("current player: " + plugin.currentGame.currentPlayer + " - score: " + player.score);
 			System.out.println("current panel score: " + plugin.curentPointPanel.amount);			
 		    }
