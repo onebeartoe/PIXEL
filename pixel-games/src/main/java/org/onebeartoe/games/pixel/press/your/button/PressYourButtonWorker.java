@@ -46,7 +46,7 @@ public class PressYourButtonWorker implements ActionListener
 	    }
 	    case SHOW_SCORE:
 	    {
-		plugin.showScore();
+		plugin.drawScore();
 		break;
 	    }
 	    default:

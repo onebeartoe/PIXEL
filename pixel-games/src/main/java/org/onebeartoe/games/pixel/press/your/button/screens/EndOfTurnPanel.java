@@ -2,6 +2,7 @@
 package org.onebeartoe.games.pixel.press.your.button.screens;
 
 import java.awt.BorderLayout;
+import java.awt.Component;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -9,6 +10,7 @@ import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JComponent;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import org.onebeartoe.games.pixel.press.your.button.GameStates;
 import org.onebeartoe.games.pixel.press.your.button.PressYourButton;
@@ -23,21 +25,17 @@ public class EndOfTurnPanel extends JPanel
     private final PressYourButton plugin;
     
     private final PreviewPanel previewPanel;
+    
+    private JOptionPane messageDialog;
 
     public EndOfTurnPanel(final PressYourButton plugin, PreviewPanel previewPanel) 
     {
 	this.plugin = plugin;
 	this.previewPanel = previewPanel;
 	
-	JButton stopButton = new JButton("Stop");
-	stopButton.addActionListener( new StopButtonListener() );
+	messageDialog = new JOptionPane();		
 	
-	Box box = new Box(BoxLayout.Y_AXIS);
-        box.setAlignmentX(JComponent.CENTER_ALIGNMENT);
-        box.add(Box.createVerticalGlue());
-        box.add(this.previewPanel);
-        box.add(stopButton );
-	box.add(Box.createVerticalGlue());
+	Box box = createCenteredBox(this.previewPanel);
 	
 	JButton newGameButton = new JButton("New Game");
 	
@@ -57,12 +55,36 @@ public class EndOfTurnPanel extends JPanel
 	add(box, BorderLayout.CENTER);
 	add(buttonPanel, BorderLayout.SOUTH);
     }
+    
+    private Box createCenteredBox(Component c)
+    {
+	JButton stopButton = new JButton("Stop");
+	stopButton.addActionListener( new StopButtonListener() );
+	
+	Box box = new Box(BoxLayout.Y_AXIS);
+        box.setAlignmentX(JComponent.CENTER_ALIGNMENT);
+        box.add(Box.createVerticalGlue());
+        box.add(c);
+        box.add(stopButton );
+	box.add(Box.createVerticalGlue());
+	
+	return box;
+    }
 
     private class ShowScoreListener implements ActionListener
     {
 	public void actionPerformed(ActionEvent e) 
 	{
-	    plugin.gameState = GameStates.SHOW_SCORE;
+	    if(plugin.gameState == GameStates.END_OF_TURN)
+	    {
+		plugin.switchToScoreView(true);
+		plugin.gameState = GameStates.SHOW_SCORE;
+	    }
+	    else
+	    {
+		String message = "The score cannot be shown during a players turn.";
+		JOptionPane.showMessageDialog(plugin, message);
+	    }
 	}	
     }
     
@@ -78,6 +100,8 @@ public class EndOfTurnPanel extends JPanel
 	    }
 			
 	    plugin.gameState = GameStates.NEXT_PLAYERS_TURN;
+	    
+	    plugin.boardSound.loop();
 	}	
     }
     

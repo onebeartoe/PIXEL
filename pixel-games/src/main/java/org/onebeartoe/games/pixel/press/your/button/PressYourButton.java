@@ -12,6 +12,8 @@ import com.ledpixelart.pc.plugins.swing.SingleThreadedPixelPanel;
 import ioio.lib.api.AnalogInput;
 import ioio.lib.api.RgbLedMatrix.Matrix;
 import ioio.lib.api.exception.ConnectionLostException;
+import java.applet.Applet;
+import java.applet.AudioClip;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
@@ -20,6 +22,7 @@ import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
+import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -31,6 +34,8 @@ import java.util.logging.Logger;
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 import javax.swing.SwingUtilities;
+import sun.audio.AudioPlayer;
+import sun.audio.ContinuousAudioDataStream;
 
 /**
  * This is a plugin for the PIXEL PC app.  It show a board with moving point and 
@@ -64,6 +69,8 @@ public class PressYourButton extends SingleThreadedPixelPanel
     
     private Random locationRandom;
     
+    public AudioClip boardSound;
+    
     public PressYourButton(Matrix m)
     {
 	super(m);	
@@ -75,6 +82,8 @@ public class PressYourButton extends SingleThreadedPixelPanel
 	setupBoardPanels();
 	
 	setupBoardPanelLocations();
+	
+	loadSounds();
 	
 	locationRandom = new Random();
 	
@@ -112,12 +121,18 @@ public class PressYourButton extends SingleThreadedPixelPanel
     @Override
     public ImageIcon getTabIcon()
     {
-	System.out.println("\n\n\nusing a custom tab\n");
 	String path = "tab-icon.png";
 	URL url = getClass().getResource(path);
         ImageIcon imagesTabIcon = new ImageIcon(url);
 	
 	return imagesTabIcon;
+    }
+    
+    private void loadSounds() //throws Exception
+    {
+	String path = "spin20.wav";
+	URL url = getClass().getResource(path);
+	boardSound = Applet.newAudioClip(url);
     }
     
     public void newGameConfiguration()
@@ -232,7 +247,7 @@ public class PressYourButton extends SingleThreadedPixelPanel
 	boardPanelLocations.add(p8);
     }
     
-    public void showScore()
+    public void drawScore()
     {
 	timer.setDelay(1500);  // milliseconds 
 	
@@ -342,8 +357,16 @@ System.out.println("drawing " + s + " at " + x + ", " + y + " at " + new Date())
 	}
     }
     
+    public void switchToScoreView(boolean haveWinner)
+    {
+// watch for infinit loop	
+	endOfTurnPanel.switchToScoreView(haveWinner);
+    }
+    
     public void turnIsOver()
     {
+	boardSound.stop();
+	
 	Player player = currentGame.players.get(currentGame.currentPlayer);
 	player.score += curentPointPanel.amount;
 
@@ -354,7 +377,10 @@ System.out.println("drawing " + s + " at " + x + ", " + y + " at " + new Date())
 	else
 	{
 	    gameState = GameStates.END_OF_TURN;
-	}	
+	}
+	
+	System.out.println("current player: " + currentGame.currentPlayer + " - score: " + player.score);
+	System.out.println("current panel score: " + curentPointPanel.amount);
     }
     
     private void writeImageToPixel(BufferedImage image)

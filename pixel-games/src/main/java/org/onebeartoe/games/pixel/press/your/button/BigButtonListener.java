@@ -37,9 +37,6 @@ class BigButtonListener implements Runnable
 									
 			pressCount++;			
 			System.out.println("Analog 1: " + a1 + " - press count: " + pressCount);
-			Player player = plugin.currentGame.players.get(plugin.currentGame.currentPlayer);
-			System.out.println("current player: " + plugin.currentGame.currentPlayer + " - score: " + player.score);
-			System.out.println("current panel score: " + plugin.curentPointPanel.amount);			
 		    }
 		}
 		Thread.sleep(60);

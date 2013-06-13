@@ -13,7 +13,7 @@ import javax.swing.Timer;
 public abstract class SingleThreadedPixelPanel extends PixelPanel
 {
     
-    protected Timer timer;
+    volatile protected Timer timer;
     
     protected boolean pixelFound;
     

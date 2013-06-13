@@ -28,11 +28,11 @@ public class NewGamePanel extends JPanel implements ActionListener
     
     private JButton startButton;
     
-    private PressYourButton parent;
+    private PressYourButton plugin;
     
     public NewGamePanel(PressYourButton parent)
     {
-	this.parent = parent;
+	this.plugin = parent;
 	
 	Integer [] values = {1,2,3};
 	playerCountDropdown = new JComboBox(values);
@@ -74,7 +74,9 @@ public class NewGamePanel extends JPanel implements ActionListener
 	game.players = players;
 	game.targetScore = targetScore;
 	
-	parent.setCurrentGame(game);
-	parent.gameState = GameStates.NEXT_PLAYERS_TURN;
+	plugin.setCurrentGame(game);
+	plugin.gameState = GameStates.NEXT_PLAYERS_TURN;
+	
+	plugin.boardSound.loop();
     }    
 }
