@@ -16,6 +16,8 @@ public abstract class BoardPanel
 
     protected Point location;
     
+    public int amount;
+    
     private Font font;
 
     public BoardPanel(Color backgroundColor)

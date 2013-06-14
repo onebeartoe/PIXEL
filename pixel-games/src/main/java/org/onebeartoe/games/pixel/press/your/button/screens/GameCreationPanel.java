@@ -21,7 +21,7 @@ import org.onebeartoe.games.pixel.press.your.button.PressYourButton;
 /**
  * @author rmarquez
  */
-public class NewGamePanel extends JPanel implements ActionListener
+public class GameCreationPanel extends JPanel implements ActionListener
 {
     private JComboBox<Integer> playerCountDropdown;
     
@@ -31,7 +31,7 @@ public class NewGamePanel extends JPanel implements ActionListener
     
     private PressYourButton plugin;
     
-    public NewGamePanel(PressYourButton parent)
+    public GameCreationPanel(PressYourButton parent)
     {
 	this.plugin = parent;
 	

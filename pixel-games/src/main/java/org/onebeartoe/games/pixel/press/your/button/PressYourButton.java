@@ -3,8 +3,8 @@ package org.onebeartoe.games.pixel.press.your.button;
 
 import org.onebeartoe.games.pixel.press.your.button.board.PlayerLabelPanel;
 import org.onebeartoe.games.pixel.press.your.button.board.PointPanel;
-import org.onebeartoe.games.pixel.press.your.button.screens.NewGamePanel;
-import org.onebeartoe.games.pixel.press.your.button.screens.EndOfTurnPanel;
+import org.onebeartoe.games.pixel.press.your.button.screens.GameCreationPanel;
+import org.onebeartoe.games.pixel.press.your.button.screens.GameControlPanel;
 import org.onebeartoe.games.pixel.press.your.button.board.BoardPanel;
 import com.ledpixelart.pc.PixelApp;
 import com.ledpixelart.pc.plugins.swing.ScrollingTextPanel;
@@ -34,6 +34,7 @@ import java.util.logging.Logger;
 import javax.swing.ImageIcon;
 import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
+import org.onebeartoe.games.pixel.press.your.button.board.WhammyPanel;
 
 /**
  * This is a plugin for the PIXEL PC app.  It show a board with moving point and 
@@ -49,7 +50,7 @@ public class PressYourButton extends SingleThreadedPixelPanel
     
     private List<BoardPanel> boardPanels;
     
-    volatile PointPanel curentPointPanel;
+    volatile BoardPanel curentPointPanel;
     
     protected List<Point> boardPanelLocations;
     
@@ -57,9 +58,9 @@ public class PressYourButton extends SingleThreadedPixelPanel
     
     private PreviewPanel scoreBoardPanel;
     
-    public EndOfTurnPanel endOfTurnPanel;
+    public GameControlPanel endOfTurnPanel;
     
-    public NewGamePanel newGamePanel;
+    public GameCreationPanel newGamePanel;
     
     AnalogInput analogInput1;
     
@@ -70,6 +71,8 @@ public class PressYourButton extends SingleThreadedPixelPanel
     private Random locationRandom;
     
     public AudioClip boardSound;
+    
+    public AudioClip whammySound;
     
     public PressYourButton(Matrix m)
     {
@@ -89,7 +92,7 @@ public class PressYourButton extends SingleThreadedPixelPanel
 	
 	setLayout( new BorderLayout() );
 	
-	newGamePanel = new NewGamePanel(this);
+	newGamePanel = new GameCreationPanel(this);
 	
 	Dimension scoreBoardDimension = new Dimension(128,128);
 	scoreBoardPanel = new PreviewPanel(this, scoreBoardDimension);
@@ -99,7 +102,7 @@ public class PressYourButton extends SingleThreadedPixelPanel
 	gameBoardPanel = new PreviewPanel(this, boardDimension);
 	gameBoardPanel.setAlignmentX(Component.CENTER_ALIGNMENT);
 	
-	endOfTurnPanel = new EndOfTurnPanel(this, gameBoardPanel, scoreBoardPanel);
+	endOfTurnPanel = new GameControlPanel(this, gameBoardPanel, scoreBoardPanel);
 	
 	add(newGamePanel, BorderLayout.CENTER);
     }
@@ -138,9 +141,13 @@ public class PressYourButton extends SingleThreadedPixelPanel
     
     private void loadSounds() //throws Exception
     {
-	String path = "spin20.wav";
+	String path = "big_board.wav";
 	URL url = getClass().getResource(path);
 	boardSound = Applet.newAudioClip(url);
+	
+	path = "stop_at_a_whammy.wav";
+	url = getClass().getResource(path);
+	whammySound = Applet.newAudioClip(url);
     }
     
     public void newGame()
@@ -203,7 +210,7 @@ public class PressYourButton extends SingleThreadedPixelPanel
 	    Color foreground;
 	    if(i == rl)
 	    {
-		curentPointPanel = (PointPanel) panel;
+		curentPointPanel = panel;
 		foreground = Color.RED;
 	    }
 	    else
@@ -342,6 +349,11 @@ System.out.println("drawing " + s + " at " + x + ", " + y + " at " + new Date())
 	BoardPanel p11 = new PointPanel(Color.orange, 20);
 	BoardPanel p12 = new PointPanel(Color.BLUE, 30);
 	
+	BoardPanel w1 = new WhammyPanel();
+	BoardPanel w2 = new WhammyPanel();
+	BoardPanel w3 = new WhammyPanel();
+	BoardPanel w4 = new WhammyPanel();
+	
 	boardPanels = new ArrayList();
 	boardPanels.add(p1);
 	boardPanels.add(p2);	
@@ -355,6 +367,11 @@ System.out.println("drawing " + s + " at " + x + ", " + y + " at " + new Date())
 	boardPanels.add(p10);
 	boardPanels.add(p11);
 	boardPanels.add(p12);
+	
+	boardPanels.add(w1);
+	boardPanels.add(w2);
+	boardPanels.add(w3);
+	boardPanels.add(w4);
     }
     
     @Override
@@ -407,7 +424,15 @@ System.out.println("switching to score view");
 	
 	if(curentPointPanel != null)
 	{
-	    player.score += curentPointPanel.amount;
+	    if(curentPointPanel.amount < 0)
+	    {
+		player.score = 0;
+		whammySound.play();
+	    }
+	    else
+	    {
+		player.score += curentPointPanel.amount;
+	    }
 	}
 
 	if(player.score >= currentGame.targetScore)

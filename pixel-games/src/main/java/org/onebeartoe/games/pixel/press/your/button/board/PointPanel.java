@@ -1,12 +1,11 @@
 
 package org.onebeartoe.games.pixel.press.your.button.board;
 
-import org.onebeartoe.games.pixel.press.your.button.board.BoardPanel;
 import java.awt.Color;
 
 public class PointPanel extends BoardPanel
 {
-    public int amount;    
+//    public int amount;
 
     public PointPanel(Color backgroundColor, int amount) 
     {

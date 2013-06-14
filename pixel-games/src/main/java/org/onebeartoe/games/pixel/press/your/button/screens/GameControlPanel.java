@@ -21,12 +21,12 @@ import org.onebeartoe.games.pixel.press.your.button.PreviewPanel;
 /**
  * @author rmarquez
  */
-public class EndOfTurnPanel extends JPanel
+public class GameControlPanel extends JPanel
 {
     
     private final PressYourButton plugin;
 
-    public EndOfTurnPanel(final PressYourButton plugin, PreviewPanel gameBoardPanel, PreviewPanel scoreBoardPanel) 
+    public GameControlPanel(final PressYourButton plugin, PreviewPanel gameBoardPanel, PreviewPanel scoreBoardPanel) 
     {
 	this.plugin = plugin;
 	
@@ -122,7 +122,7 @@ System.out.println("in new game listener, game state is " + plugin.gameState);
 			plugin.gameState == GameStates.SHOW_SCORE)
 	    {
 		String message = "Are you sure you want to end the current game?";
-		int result = JOptionPane.showConfirmDialog(EndOfTurnPanel.this, message);
+		int result = JOptionPane.showConfirmDialog(GameControlPanel.this, message);
 		if(result == JOptionPane.OK_OPTION)
 		{
 		    newGame();		    
@@ -145,12 +145,12 @@ System.out.println("in next listener, game state is " + plugin.gameState);
 	    if(plugin.gameState == GameStates.END_OF_GAME)
 	    {
 		String message = "This game is over, please click the 'New Game' button.";
-		JOptionPane.showMessageDialog(EndOfTurnPanel.this, message);
+		JOptionPane.showMessageDialog(GameControlPanel.this, message);
 	    }
 	    else if(plugin.gameState == GameStates.PLAYERS_TURN)
 	    {
 		String message = "The current player cannot be skipped.  Try the 'New Game' button, if you are done with is game.";
-		JOptionPane.showMessageDialog(EndOfTurnPanel.this, message);
+		JOptionPane.showMessageDialog(GameControlPanel.this, message);
 	    }
 	    else if(plugin.gameState == GameStates.END_OF_TURN)
 	    {
