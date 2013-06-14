@@ -17,6 +17,7 @@ import java.applet.AudioClip;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Graphics2D;
 import java.awt.Point;
@@ -55,7 +56,9 @@ public class PressYourButton extends SingleThreadedPixelPanel
     
     protected List<Point> boardPanelLocations;
     
-    private PreviewPanel previewPanel;
+    private PreviewPanel gameBoardPanel;
+    
+    private PreviewPanel scoreBoardPanel;
     
     private EndOfTurnPanel endOfTurnPanel;
     
@@ -93,10 +96,15 @@ public class PressYourButton extends SingleThreadedPixelPanel
 	
 	newGamePanel = new NewGamePanel(this);
 	
-	previewPanel = new PreviewPanel(this);
-	previewPanel.setAlignmentX(Component.CENTER_ALIGNMENT);
+	Dimension scoreBoardDimension = new Dimension(128,128);
+	scoreBoardPanel = new PreviewPanel(this, scoreBoardDimension);
+	scoreBoardPanel.setAlignmentX(Component.CENTER_ALIGNMENT);
 	
-	endOfTurnPanel = new EndOfTurnPanel(this, previewPanel);
+	Dimension boardDimension = new Dimension(128,128);
+	gameBoardPanel = new PreviewPanel(this, boardDimension);
+	gameBoardPanel.setAlignmentX(Component.CENTER_ALIGNMENT);
+	
+	endOfTurnPanel = new EndOfTurnPanel(this, gameBoardPanel);
 	
 	add(label, BorderLayout.NORTH);
 	add(newGamePanel, BorderLayout.CENTER);
@@ -143,12 +151,12 @@ public class PressYourButton extends SingleThreadedPixelPanel
     /**
      * this animates the PIXEL with moving point panels and a selected panel
      */
-    public void nextPlayersTurn()
+    public void drawBoardForPlayersTurn()
     {
 	timer.setDelay(940);  // milliseconds 
 
-	int boardWidth = previewPanel.borardDimension.width;
-	int boardHeight = previewPanel.borardDimension.height;
+	int boardWidth = gameBoardPanel.borardDimension.width;
+	int boardHeight = gameBoardPanel.borardDimension.height;
 	
 	BufferedImage img = new BufferedImage(boardWidth, boardHeight, BufferedImage.TYPE_INT_ARGB);	    
 
@@ -196,14 +204,14 @@ public class PressYourButton extends SingleThreadedPixelPanel
 	
 	g2d.dispose();
 
-	previewPanel.setImage(img);
+	gameBoardPanel.setImage(img);
 
 	SwingUtilities.invokeLater( new Runnable() 
 	{
 	    public void run() 
 	    {
-		previewPanel.invalidate();
-		previewPanel.updateUI();
+		gameBoardPanel.invalidate();
+		gameBoardPanel.updateUI();
 	    }
 	});	    
 
@@ -216,7 +224,6 @@ public class PressYourButton extends SingleThreadedPixelPanel
 	
 	remove(newGamePanel);
 	add(endOfTurnPanel, BorderLayout.CENTER);
-//	add(previewPanel, BorderLayout.CENTER);
     }
 	    
     private void setupBoardPanelLocations()
@@ -258,8 +265,8 @@ public class PressYourButton extends SingleThreadedPixelPanel
 
 	Graphics2D g2d = img.createGraphics();
 
-	g2d.setPaint(Color.BLUE);
-//	g2d.fillRect(0,0, width, height);
+	g2d.setPaint(Color.BLACK);
+	g2d.fillRect(0,0, width, height);
 
 	Color textColor = Color.WHITE;
 	g2d.setPaint(textColor);
@@ -287,6 +294,17 @@ System.out.println("drawing " + s + " at " + x + ", " + y + " at " + new Date())
 	
 	g2d.dispose();
 
+	scoreBoardPanel.setImage(img);
+
+	SwingUtilities.invokeLater( new Runnable() 
+	{
+	    public void run() 
+	    {
+		scoreBoardPanel.invalidate();
+		scoreBoardPanel.updateUI();
+	    }
+	});
+	
 	writeImageToPixel(img);
     }
     
@@ -359,8 +377,9 @@ System.out.println("drawing " + s + " at " + x + ", " + y + " at " + new Date())
     
     public void switchToScoreView(boolean haveWinner)
     {
-// watch for infinit loop	
-	endOfTurnPanel.switchToScoreView(haveWinner);
+System.out.println("switching to score view");	
+	endOfTurnPanel.remove(gameBoardPanel);
+	endOfTurnPanel.add(scoreBoardPanel, BorderLayout.CENTER);
     }
     
     public void turnIsOver()

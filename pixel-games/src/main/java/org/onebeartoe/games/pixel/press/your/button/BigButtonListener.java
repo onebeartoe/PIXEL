@@ -31,7 +31,7 @@ class BigButtonListener implements Runnable
 		{
 		    float a1 = plugin.analogInput1.readBuffered();
 		    int signal = (int) a1;
-		    if (signal == 1 && plugin.gameState == GameStates.NEXT_PLAYERS_TURN)
+		    if (signal == 1 && plugin.gameState == GameStates.PLAYERS_TURN)
 		    {
 			plugin.turnIsOver();
 									

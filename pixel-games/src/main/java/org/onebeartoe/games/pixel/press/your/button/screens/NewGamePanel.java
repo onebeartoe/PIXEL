@@ -75,7 +75,7 @@ public class NewGamePanel extends JPanel implements ActionListener
 	game.targetScore = targetScore;
 	
 	plugin.setCurrentGame(game);
-	plugin.gameState = GameStates.NEXT_PLAYERS_TURN;
+	plugin.gameState = GameStates.PLAYERS_TURN;
 	
 	plugin.boardSound.loop();
     }    

@@ -17,11 +17,13 @@ public class PreviewPanel extends JPanel
     
     private final PressYourButton plugin;
     
-    public final Dimension borardDimension = new Dimension(128,128);
+    public Dimension borardDimension;
 
-    public PreviewPanel(final PressYourButton plugin) 
+    public PreviewPanel(final PressYourButton plugin, Dimension borardDimension) 
     {
 	this.plugin = plugin;
+	this.borardDimension = borardDimension;
+	
 	setAlignmentX(Component.CENTER_ALIGNMENT);
     }
     

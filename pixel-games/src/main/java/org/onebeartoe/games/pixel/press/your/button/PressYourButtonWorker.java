@@ -29,9 +29,9 @@ public class PressYourButtonWorker implements ActionListener
     {
 	switch (plugin.gameState) 
 	{
-	    case NEXT_PLAYERS_TURN:
+	    case PLAYERS_TURN:
 	    {
-		plugin.nextPlayersTurn();
+		plugin.drawBoardForPlayersTurn();
 		break;
 	    }
 	    case END_OF_GAME:

@@ -26,14 +26,14 @@ public class EndOfTurnPanel extends JPanel
     
     private final PreviewPanel previewPanel;
     
-    private JOptionPane messageDialog;
+//    private JOptionPane messageDialog;
 
     public EndOfTurnPanel(final PressYourButton plugin, PreviewPanel previewPanel) 
     {
 	this.plugin = plugin;
 	this.previewPanel = previewPanel;
 	
-	messageDialog = new JOptionPane();		
+//	messageDialog = new JOptionPane();		
 	
 	Box box = createCenteredBox(this.previewPanel);
 	
@@ -75,7 +75,9 @@ public class EndOfTurnPanel extends JPanel
     {
 	public void actionPerformed(ActionEvent e) 
 	{
-	    if(plugin.gameState == GameStates.END_OF_TURN)
+	    if(plugin.gameState == GameStates.END_OF_TURN || 
+		    plugin.gameState == GameStates.SHOW_SCORE ||
+			plugin.gameState == GameStates.END_OF_GAME)
 	    {
 		plugin.switchToScoreView(true);
 		plugin.gameState = GameStates.SHOW_SCORE;
@@ -83,6 +85,7 @@ public class EndOfTurnPanel extends JPanel
 	    else
 	    {
 		String message = "The score cannot be shown during a players turn.";
+		System.out.println(message + "  state: " + plugin.gameState);
 		JOptionPane.showMessageDialog(plugin, message);
 	    }
 	}	
@@ -99,7 +102,7 @@ public class EndOfTurnPanel extends JPanel
 		plugin.currentGame.currentPlayer = 0;
 	    }
 			
-	    plugin.gameState = GameStates.NEXT_PLAYERS_TURN;
+	    plugin.gameState = GameStates.PLAYERS_TURN;
 	    
 	    plugin.boardSound.loop();
 	}	
@@ -109,7 +112,7 @@ public class EndOfTurnPanel extends JPanel
     {
 	public void actionPerformed(ActionEvent e) 
 	{
-	    if(plugin.gameState == GameStates.NEXT_PLAYERS_TURN)
+	    if(plugin.gameState == GameStates.PLAYERS_TURN)
 	    {
 		plugin.turnIsOver();
 	    }

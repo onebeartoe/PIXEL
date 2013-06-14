@@ -6,9 +6,11 @@ package org.onebeartoe.games.pixel.press.your.button;
  */
 public enum GameStates 
 {
-    NEW_GAME_CONFIG,
-    NEXT_PLAYERS_TURN,
+  
+    END_OF_GAME,
     END_OF_TURN,
-    SHOW_SCORE,
-    END_OF_GAME
+    NEW_GAME_CONFIG,
+    PLAYERS_TURN,
+    SHOW_SCORE
+    
 }
