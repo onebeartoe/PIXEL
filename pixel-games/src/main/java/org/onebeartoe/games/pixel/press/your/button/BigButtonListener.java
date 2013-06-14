@@ -33,7 +33,7 @@ class BigButtonListener implements Runnable
 		    int signal = (int) a1;
 		    if (signal == 1 && plugin.gameState == GameStates.PLAYERS_TURN)
 		    {
-			plugin.turnIsOver();
+			plugin.endCurrentPlayersTurn();
 									
 			pressCount++;			
 			System.out.println("Analog 1: " + a1 + " - press count: " + pressCount);

@@ -7,4 +7,9 @@ package org.onebeartoe.games.pixel.press.your.button;
 public class Player 
 {
     public int score;
+    
+    public Player()
+    {
+	score = 0;
+    }
 }

@@ -1,6 +1,7 @@
 
 package org.onebeartoe.games.pixel.press.your.button.screens;
 
+import java.awt.BorderLayout;
 import java.awt.GridLayout;
 import java.awt.LayoutManager;
 import java.awt.event.ActionEvent;
@@ -59,6 +60,25 @@ public class NewGamePanel extends JPanel implements ActionListener
 
     public void actionPerformed(ActionEvent e) 
     {
+	plugin.invalidate();
+	plugin.updateUI();
+	    
+	Game game = createNewGame();
+	
+	plugin.currentGame = game;
+	
+	plugin.remove(plugin.newGamePanel);
+	plugin.add(plugin.endOfTurnPanel, BorderLayout.CENTER);
+	
+	plugin.newGame();
+	
+	plugin.gameState = GameStates.PLAYERS_TURN;
+	
+	plugin.boardSound.loop();
+    }
+    
+    public Game createNewGame()
+    {
 	Integer count = (Integer) playerCountDropdown.getSelectedItem();
 	Integer targetScore = (Integer) targetScoreDropdown.getSelectedItem();
 	
@@ -74,9 +94,7 @@ public class NewGamePanel extends JPanel implements ActionListener
 	game.players = players;
 	game.targetScore = targetScore;
 	
-	plugin.setCurrentGame(game);
-	plugin.gameState = GameStates.PLAYERS_TURN;
-	
-	plugin.boardSound.loop();
-    }    
+	return game;
+    }
+    
 }

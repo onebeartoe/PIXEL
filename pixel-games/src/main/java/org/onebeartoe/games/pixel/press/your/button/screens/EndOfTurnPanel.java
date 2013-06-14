@@ -3,6 +3,7 @@ package org.onebeartoe.games.pixel.press.your.button.screens;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
+import java.awt.FlowLayout;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -12,6 +13,7 @@ import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import org.onebeartoe.games.pixel.press.your.button.Game;
 import org.onebeartoe.games.pixel.press.your.button.GameStates;
 import org.onebeartoe.games.pixel.press.your.button.PressYourButton;
 import org.onebeartoe.games.pixel.press.your.button.PreviewPanel;
@@ -23,21 +25,28 @@ public class EndOfTurnPanel extends JPanel
 {
     
     private final PressYourButton plugin;
-    
-    private final PreviewPanel previewPanel;
-    
-//    private JOptionPane messageDialog;
 
-    public EndOfTurnPanel(final PressYourButton plugin, PreviewPanel previewPanel) 
+    public EndOfTurnPanel(final PressYourButton plugin, PreviewPanel gameBoardPanel, PreviewPanel scoreBoardPanel) 
     {
 	this.plugin = plugin;
-	this.previewPanel = previewPanel;
 	
-//	messageDialog = new JOptionPane();		
+	JButton stopButton = new JButton("Stop");
+	stopButton.addActionListener( new StopButtonListener() );	
 	
-	Box box = createCenteredBox(this.previewPanel);
+	JPanel panels = new JPanel( new FlowLayout(FlowLayout.CENTER) );
+	panels.add(scoreBoardPanel);
+	panels.add(gameBoardPanel);
+	panels.add(stopButton);
+	
+	Box box = new Box(BoxLayout.Y_AXIS);
+        box.setAlignmentX(JComponent.CENTER_ALIGNMENT);
+        box.add(Box.createVerticalGlue());
+        box.add(panels);        
+	box.add(Box.createVerticalGlue());
+//	Box box = createCenteredBox(this.gameBoardPanel);
 	
 	JButton newGameButton = new JButton("New Game");
+	newGameButton.addActionListener( new NewGameListener() );
 	
 	JButton showScoreButton = new JButton("Show Score");
 	showScoreButton.addActionListener( new ShowScoreListener() );
@@ -55,7 +64,8 @@ public class EndOfTurnPanel extends JPanel
 	add(box, BorderLayout.CENTER);
 	add(buttonPanel, BorderLayout.SOUTH);
     }
-    
+
+/*    
     private Box createCenteredBox(Component c)
     {
 	JButton stopButton = new JButton("Stop");
@@ -70,7 +80,16 @@ public class EndOfTurnPanel extends JPanel
 	
 	return box;
     }
-
+*/
+    
+    private void newGame()
+    {
+	plugin.remove(plugin.endOfTurnPanel);
+	plugin.add(plugin.newGamePanel, BorderLayout.CENTER);
+	plugin.newGame();
+	plugin.gameState = GameStates.NEW_GAME_CONFIG;
+    }
+    
     private class ShowScoreListener implements ActionListener
     {
 	public void actionPerformed(ActionEvent e) 
@@ -91,20 +110,61 @@ public class EndOfTurnPanel extends JPanel
 	}	
     }
     
+
+    private class NewGameListener implements ActionListener
+    {
+	public void actionPerformed(ActionEvent e) 
+	{	    
+System.out.println("in new game listener, game state is " + plugin.gameState);
+
+	    if(plugin.gameState == GameStates.PLAYERS_TURN ||
+		    plugin.gameState == GameStates.END_OF_TURN ||
+			plugin.gameState == GameStates.SHOW_SCORE)
+	    {
+		String message = "Are you sure you want to end the current game?";
+		int result = JOptionPane.showConfirmDialog(EndOfTurnPanel.this, message);
+		if(result == JOptionPane.OK_OPTION)
+		{
+		    newGame();		    
+		}
+	    }
+	    else if(plugin.gameState == GameStates.END_OF_GAME)
+	    {
+		newGame();
+		
+	    }
+	}
+	
+    }
+    
     private class NextPlayerListener implements ActionListener
     {
 	public void actionPerformed(ActionEvent e) 
 	{
-	    plugin.currentGame.currentPlayer++;
-		    
-	    if(plugin.currentGame.currentPlayer == plugin.currentGame.players.size() )
+System.out.println("in next listener, game state is " + plugin.gameState);	    
+	    if(plugin.gameState == GameStates.END_OF_GAME)
 	    {
-		plugin.currentGame.currentPlayer = 0;
+		String message = "This game is over, please click the 'New Game' button.";
+		JOptionPane.showMessageDialog(EndOfTurnPanel.this, message);
 	    }
-			
-	    plugin.gameState = GameStates.PLAYERS_TURN;
-	    
-	    plugin.boardSound.loop();
+	    else if(plugin.gameState == GameStates.PLAYERS_TURN)
+	    {
+		String message = "The current player cannot be skipped.  Try the 'New Game' button, if you are done with is game.";
+		JOptionPane.showMessageDialog(EndOfTurnPanel.this, message);
+	    }
+	    else if(plugin.gameState == GameStates.END_OF_TURN)
+	    {
+		plugin.currentGame.currentPlayer++;
+		    
+		if(plugin.currentGame.currentPlayer == plugin.currentGame.players.size() )
+		{
+		    plugin.currentGame.currentPlayer = 0;
+		}
+
+		plugin.gameState = GameStates.PLAYERS_TURN;
+
+		plugin.boardSound.loop();
+	    }	    
 	}	
     }
     
@@ -114,7 +174,7 @@ public class EndOfTurnPanel extends JPanel
 	{
 	    if(plugin.gameState == GameStates.PLAYERS_TURN)
 	    {
-		plugin.turnIsOver();
+		plugin.endCurrentPlayersTurn();
 	    }
 	}
     }

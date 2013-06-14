@@ -23,7 +23,6 @@ import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
-import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -33,10 +32,8 @@ import java.util.Random;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.ImageIcon;
-import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
-import sun.audio.AudioPlayer;
-import sun.audio.ContinuousAudioDataStream;
 
 /**
  * This is a plugin for the PIXEL PC app.  It show a board with moving point and 
@@ -60,9 +57,9 @@ public class PressYourButton extends SingleThreadedPixelPanel
     
     private PreviewPanel scoreBoardPanel;
     
-    private EndOfTurnPanel endOfTurnPanel;
+    public EndOfTurnPanel endOfTurnPanel;
     
-    private NewGamePanel newGamePanel;
+    public NewGamePanel newGamePanel;
     
     AnalogInput analogInput1;
     
@@ -92,8 +89,6 @@ public class PressYourButton extends SingleThreadedPixelPanel
 	
 	setLayout( new BorderLayout() );
 	
-	JLabel label = new JLabel("Weather Panel");
-	
 	newGamePanel = new NewGamePanel(this);
 	
 	Dimension scoreBoardDimension = new Dimension(128,128);
@@ -104,17 +99,22 @@ public class PressYourButton extends SingleThreadedPixelPanel
 	gameBoardPanel = new PreviewPanel(this, boardDimension);
 	gameBoardPanel.setAlignmentX(Component.CENTER_ALIGNMENT);
 	
-	endOfTurnPanel = new EndOfTurnPanel(this, gameBoardPanel);
+	endOfTurnPanel = new EndOfTurnPanel(this, gameBoardPanel, scoreBoardPanel);
 	
-	add(label, BorderLayout.NORTH);
 	add(newGamePanel, BorderLayout.CENTER);
     }
     
+    /**
+     * draw method
+     */
     public void endOfGame()
     {
 	
     }
     
+    /**
+     * draw method
+     */
     public void endOfTurn()
     {
 
@@ -143,6 +143,25 @@ public class PressYourButton extends SingleThreadedPixelPanel
 	boardSound = Applet.newAudioClip(url);
     }
     
+    public void newGame()
+    {
+	invalidate();
+	updateUI();
+
+	Game game = newGamePanel.createNewGame();
+	currentGame = game;
+	
+	if(curentPointPanel != null)
+	{
+	    curentPointPanel.amount = 0;
+	}
+
+	endCurrentPlayersTurn();
+    }
+    
+    /**
+     * draw method for a new game
+     */
     public void newGameConfiguration()
     {
 	timer.setDelay(1900);  // milliseconds 
@@ -153,7 +172,7 @@ public class PressYourButton extends SingleThreadedPixelPanel
      */
     public void drawBoardForPlayersTurn()
     {
-	timer.setDelay(940);  // milliseconds 
+	timer.setDelay(740);  // milliseconds 
 
 	int boardWidth = gameBoardPanel.borardDimension.width;
 	int boardHeight = gameBoardPanel.borardDimension.height;
@@ -217,7 +236,8 @@ public class PressYourButton extends SingleThreadedPixelPanel
 
 	writeImageToPixel(img);
     }
-    
+
+/*    
     public void setCurrentGame(Game game)
     {
 	currentGame = game;
@@ -225,7 +245,8 @@ public class PressYourButton extends SingleThreadedPixelPanel
 	remove(newGamePanel);
 	add(endOfTurnPanel, BorderLayout.CENTER);
     }
-	    
+*/
+    
     private void setupBoardPanelLocations()
     {	
 	boardPanelLocations = new ArrayList();
@@ -254,13 +275,11 @@ public class PressYourButton extends SingleThreadedPixelPanel
 	boardPanelLocations.add(p8);
     }
     
-    public void drawScore()
+    private BufferedImage drawScoreBoard()
     {
-	timer.setDelay(1500);  // milliseconds 
-	
 	int width = 128;
 	int height = 128;
-
+	
 	BufferedImage img = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);	    
 
 	Graphics2D g2d = img.createGraphics();
@@ -277,35 +296,35 @@ public class PressYourButton extends SingleThreadedPixelPanel
 	g2d.setFont(font);
 	
 System.out.println( currentGame.toString() );
-//g2d.fillRect(0,0, width/2, height/2);	
 	
-	
-	int verticalGap = 42;
+	int verticalGap = 40;
 	int i = 0;
 	for(Player p : currentGame.players)
 	{
 	    String s = "P" + (i+1) + " " + p.score;
-	    int x = 10;
-	    int y = 25 + i * verticalGap;
+	    int x = 5;
+	    int y = 30 + i * verticalGap;
 System.out.println("drawing " + s + " at " + x + ", " + y + " at " + new Date());	    
 	    g2d.drawString(s, x, y);
 	    i++;
 	}
 	
 	g2d.dispose();
+	
+	return img;
+    }
+    
+    public void drawScoreBoardOnPixel()
+    {	
+	BufferedImage img = drawScoreBoard();
 
 	scoreBoardPanel.setImage(img);
 
-	SwingUtilities.invokeLater( new Runnable() 
-	{
-	    public void run() 
-	    {
-		scoreBoardPanel.invalidate();
-		scoreBoardPanel.updateUI();
-	    }
-	});
+	updateScoreBoardPane();	
 	
 	writeImageToPixel(img);
+	
+	timer.setDelay(5000);  // milliseconds 	
     }
     
     private void setupBoardPanels()
@@ -377,29 +396,54 @@ System.out.println("drawing " + s + " at " + x + ", " + y + " at " + new Date())
     
     public void switchToScoreView(boolean haveWinner)
     {
-System.out.println("switching to score view");	
-	endOfTurnPanel.remove(gameBoardPanel);
-	endOfTurnPanel.add(scoreBoardPanel, BorderLayout.CENTER);
+System.out.println("switching to score view");
     }
     
-    public void turnIsOver()
+    public void endCurrentPlayersTurn()
     {
-	boardSound.stop();
+	boardSound.stop();	
 	
 	Player player = currentGame.players.get(currentGame.currentPlayer);
-	player.score += curentPointPanel.amount;
+	
+	if(curentPointPanel != null)
+	{
+	    player.score += curentPointPanel.amount;
+	}
 
 	if(player.score >= currentGame.targetScore)
 	{
 	    gameState = GameStates.END_OF_GAME;
+	    
+	    String message = "Player " + (currentGame.currentPlayer + 1) + " is the of this game!";
+	    JOptionPane.showMessageDialog(this, message);
 	}
 	else
 	{
 	    gameState = GameStates.END_OF_TURN;
 	}
 	
+	BufferedImage scoreBoard = drawScoreBoard();
+	scoreBoardPanel.setImage(scoreBoard);
+	updateScoreBoardPane();
+	
 	System.out.println("current player: " + currentGame.currentPlayer + " - score: " + player.score);
-	System.out.println("current panel score: " + curentPointPanel.amount);
+	if(curentPointPanel != null)
+	{
+	    System.out.println("current panel score: " + curentPointPanel.amount);
+	}
+    }
+    
+    public void updateScoreBoardPane()
+    {
+	SwingUtilities.invokeLater( new Runnable() 
+	{
+	    public void run() 
+	    {
+System.out.println("updating the score board pane");		
+		scoreBoardPanel.invalidate();
+		scoreBoardPanel.updateUI();
+	    }
+	});
     }
     
     private void writeImageToPixel(BufferedImage image)

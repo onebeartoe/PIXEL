@@ -215,7 +215,7 @@ public class PixelApp extends IOIOSwingApp
 	    for(PixelPanel panel : plugins)
 	    {
 		ImageIcon icon = panel.getTabIcon();
-		tabbedPane.addTab("Weather", icon, panel, "A weather app for internal and external temps.");
+		tabbedPane.addTab("Press Your Button", icon, panel, "A weather app for internal and external temps.");
 		pixelPanels.add(panel);
 	    }
 	} 
