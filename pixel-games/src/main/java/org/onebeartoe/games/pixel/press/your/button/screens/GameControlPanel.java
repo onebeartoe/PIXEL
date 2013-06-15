@@ -152,7 +152,8 @@ System.out.println("in next listener, game state is " + plugin.gameState);
 		String message = "The current player cannot be skipped.  Try the 'New Game' button, if you are done with is game.";
 		JOptionPane.showMessageDialog(GameControlPanel.this, message);
 	    }
-	    else if(plugin.gameState == GameStates.END_OF_TURN)
+	    else if(plugin.gameState == GameStates.END_OF_TURN ||
+                        plugin.gameState == GameStates.SHOW_SCORE)
 	    {
 		plugin.currentGame.currentPlayer++;
 		    
