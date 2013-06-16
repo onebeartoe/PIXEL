@@ -123,7 +123,7 @@ public class PixelApp extends IOIOSwingApp
 	final PixelTilePanel animationsPanel = new AnimationsPanel(pixel.KIND);
 	animationsPanel.populate();
 	pixelPanels.add(animationsPanel);
-        tabbedPane.addTab("Animations", animationsTabIcon, animationsPanel, "Load built-in animations.");
+       tabbedPane.addTab("Animations", animationsTabIcon, animationsPanel, "Load built-in animations.");
         tabbedPane.setMnemonicAt(1, KeyEvent.VK_2);
 
 	// user images tab
