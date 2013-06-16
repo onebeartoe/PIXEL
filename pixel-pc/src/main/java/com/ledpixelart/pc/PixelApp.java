@@ -1,6 +1,7 @@
 
 package com.ledpixelart.pc;
 
+import org.onebeartoe.pixel.preferences.PixelPreferencesKeys;
 import com.ledpixelart.hardware.Pixel;
 import com.ledpixelart.pc.plugins.swing.AnimationsPanel;
 import com.ledpixelart.pc.plugins.swing.ImageTilePanel;
@@ -18,6 +19,8 @@ import ioio.lib.util.IOIOLooper;
 import ioio.lib.util.pc.IOIOSwingApp;
 import java.awt.BorderLayout;
 import java.awt.Component;
+import java.awt.Dimension;
+import java.awt.Point;
 import java.awt.Window;
 
 import javax.swing.UIManager;
@@ -34,23 +37,21 @@ import java.awt.image.DataBufferByte;
 import java.awt.image.WritableRaster;
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Constructor;
 import java.net.URL;
+import java.net.URLClassLoader;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.prefs.BackingStoreException;
-import java.util.prefs.Preferences;
 import javax.swing.BoxLayout;
-import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.JRadioButtonMenuItem;
 import javax.swing.JTabbedPane;
 import javax.swing.KeyStroke;
 import javax.swing.SwingConstants;
@@ -58,13 +59,15 @@ import javax.swing.Timer;
 import javax.swing.border.BevelBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+import org.onebeartoe.pixel.preferences.JavaPreferencesService;
+import org.onebeartoe.pixel.preferences.PreferencesService;
 
 public class PixelApp extends IOIOSwingApp
 {    
     
     private final Logger logger;
     
-    private Preferences preferences;
+    private PreferencesService preferenceService;
     
     private Timer searchTimer;
     
@@ -82,12 +85,16 @@ public class PixelApp extends IOIOSwingApp
     
     private JLabel statusLabel;
     
+    public static final int DEFAULT_HEIGHT = 600;
+    
+    public static final int DEFAULT_WIDTH = 450;    
+    
     public PixelApp()
     {
 	String className = PixelApp.class.getName();
 	logger = Logger.getLogger(className);
 	
-	preferences = Preferences.userNodeForPackage(PixelApp.class);
+	preferenceService = new JavaPreferencesService();
 	
 	pixelPanels = new ArrayList();	
     }
@@ -104,9 +111,7 @@ public class PixelApp extends IOIOSwingApp
 	    String message = "An error occured while setting the native look and feel.";
 	    logger.log(Level.SEVERE, message, ex);	
 	}
-	
-	JTabbedPane tabbedPane = new JTabbedPane();
-	
+
 	// images tab
 	String path = "/tab_icons/apple_small.png";
 	URL url = getClass().getResource(path);
@@ -114,7 +119,6 @@ public class PixelApp extends IOIOSwingApp
 	PixelTilePanel imagesPanelReal = new ImageTilePanel(pixel.KIND);
 	imagesPanelReal.populate();
 	pixelPanels.add(imagesPanelReal);
-	tabbedPane.addTab("Images", imagesTabIcon, imagesPanelReal, "Load built-in images.");
 
 	// animations tab
 	String path2 = "/tab_icons/ship_small.png";
@@ -123,34 +127,26 @@ public class PixelApp extends IOIOSwingApp
 	final PixelTilePanel animationsPanel = new AnimationsPanel(pixel.KIND);
 	animationsPanel.populate();
 	pixelPanels.add(animationsPanel);
-       tabbedPane.addTab("Animations", animationsTabIcon, animationsPanel, "Load built-in animations.");
-        tabbedPane.setMnemonicAt(1, KeyEvent.VK_2);
 
 	// user images tab
 	String userIconPath = "/tab_icons/ship_small.png";
 	URL userUrl = getClass().getResource(userIconPath);
-	ImageIcon userTabIcon = new ImageIcon(userUrl);
-	String userHome = System.getProperty("user.home");
-	String key = PixelPcPreferences.userImagesDirectory;
-	String localUserPath = preferences.get(key, userHome);
+	ImageIcon userTabIcon = new ImageIcon(userUrl);	
+	String key = PixelPreferencesKeys.userImagesDirectory;	
+	String defaultValue = System.getProperty("user.home");
+	String localUserPath = preferenceService.get(key, defaultValue);
+	
 	File localUserDirectory = new File(localUserPath);
 	localImagesPanel = new UserProvidedPanel(pixel.KIND, localUserDirectory);
 	localImagesPanel.populate();
 	pixelPanels.add(localImagesPanel);
-	tabbedPane.addTab("Local Images", userTabIcon, localImagesPanel, "This panel displays images from your local hard drive.");
-	tabbedPane.setMnemonicAt(2, KeyEvent.VK_4);
 	
 	// scrolling text panel
 	String path3 = "/tab_icons/text_small.png";
 	URL url3 = getClass().getResource(path3);
 	ImageIcon textTabIcon = new ImageIcon(url3);
         PixelPanel scrollPanel = new ScrollingTextPanel(pixel.KIND);
-        pixelPanels.add(scrollPanel);
-        tabbedPane.addTab("Scolling Text", textTabIcon, scrollPanel, "Scrolls a text message across the PIXEL");
-        
-        //The following line enables to use scrolling tabs.
-        tabbedPane.setTabLayoutPolicy(JTabbedPane.SCROLL_TAB_LAYOUT);
-        tabbedPane.addChangeListener( new TabChangeListener() );
+        pixelPanels.add(scrollPanel);        
 
 	frame = new JFrame("PIXEL");
 	
@@ -162,19 +158,71 @@ public class PixelApp extends IOIOSwingApp
 	statusPanel.add(statusLabel);
 	
 	JMenuBar menuBar = createMenuBar();
-
+	
+	JTabbedPane tabbedPane = new JTabbedPane();
+	tabbedPane.setTabLayoutPolicy(JTabbedPane.SCROLL_TAB_LAYOUT);
+        tabbedPane.addChangeListener( new TabChangeListener() );
+	tabbedPane.addTab("Images", imagesTabIcon, imagesPanelReal, "Load built-in images.");
+        tabbedPane.addTab("Animations", animationsTabIcon, animationsPanel, "Load built-in animations.");
+        tabbedPane.setMnemonicAt(1, KeyEvent.VK_2);
+	tabbedPane.addTab("Local Images", userTabIcon, localImagesPanel, "This panel displays images from your local hard drive.");
+	tabbedPane.setMnemonicAt(2, KeyEvent.VK_4);
+	tabbedPane.addTab("Scolling Text", textTabIcon, scrollPanel, "Scrolls a text message across the PIXEL");
+	
+	Dimension demension;
+	try 
+	{
+	    demension = preferenceService.restoreWindowDimension();
+	} 
+	catch (Exception ex) 
+	{
+	    demension = new Dimension(DEFAULT_WIDTH, DEFAULT_HEIGHT);
+	}
+	
+	Point location = null;
+	try 
+	{
+	    location = preferenceService.restoreWindowLocation();
+	} 
+	catch (Exception ex) 
+	{
+	    logger.log(Level.INFO, ex.getMessage(), ex);
+	}
+	
 	frame.addWindowListener(this);
 	frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);	
 	frame.setLayout( new BorderLayout() );
 	frame.setJMenuBar(menuBar);
 	frame.add(tabbedPane, BorderLayout.CENTER);	
 	frame.add(statusPanel, BorderLayout.SOUTH);
-	frame.setSize(450, 600);		
+	frame.setSize(demension);		
 		
-	// center it
-	frame.setLocationRelativeTo(null); 
-	
+	if(location == null)
+	{
+	    // center it
+	    frame.setLocationRelativeTo(null); 		
+	}
+	else
+	{
+	    frame.setLocation(location);
+	}
+
 	startSearchTimer();
+	
+	try 
+	{
+	    List<PixelPanel> plugins = searchForPlugins();
+	    for(PixelPanel panel : plugins)
+	    {
+		ImageIcon icon = panel.getTabIcon();
+		tabbedPane.addTab("Press Your Button", icon, panel, "A weather app for internal and external temps.");
+		pixelPanels.add(panel);
+	    }
+	} 
+	catch (Exception ex) 
+	{
+	    Logger.getLogger(PixelApp.class.getName()).log(Level.SEVERE, null, ex);
+	}
 	
 	frame.setVisible(true);
 	
@@ -184,10 +232,8 @@ public class PixelApp extends IOIOSwingApp
     private JMenuBar createMenuBar()	    
     {
 	JMenuBar menuBar;
-	JMenu menu, submenu;
+	JMenu menu;
 	JMenuItem menuItem;
-	JRadioButtonMenuItem rbMenuItem;
-	JCheckBoxMenuItem cbMenuItem;
 
 	// Create the menu bar.
 	menuBar = new JMenuBar();
@@ -223,15 +269,21 @@ public class PixelApp extends IOIOSwingApp
 	menuItem = new JMenuItem(new ImageIcon("images/middle.gif"));
 	menuItem.setMnemonic(KeyEvent.VK_D);
 	menu.add(menuItem);
-
-// Keep this around just a little longer.	
-/*	
+	
 	menu = new JMenu("Plugins");
 	menu.getAccessibleContext().setAccessibleDescription("default plugins menu message");
 	menuBar.add(menu);
-*/
 	
 	return menuBar;
+    }
+    
+    private void exit()
+    {
+	searchTimer.stop();
+	
+	savePreferences();
+	
+	System.exit(0);
     }
     
     public byte[] extractBytes(BufferedImage image) throws IOException 
@@ -305,11 +357,71 @@ public class PixelApp extends IOIOSwingApp
         
         return pixel.matrix;
     }
+
+    private PixelPanel loadPlugin(String jarPath, String className) throws Exception
+    {	
+        File jar = new File(jarPath);
+	if( !jar.exists() || !jar.canRead() )
+	{
+	    System.out.println("\n\nThere is a problem with the specified JAR.");
+	    System.out.println("The jar exists: " + jar.exists() );
+	    System.out.println("The jar is readable: " + jar.canRead() );
+	}
+	
+	
+	URL url = jar.toURI().toURL();
+	URL [] urls = new URL[1];
+	urls[0] = url;
+	URLClassLoader classLoader = new URLClassLoader(urls);
+
+	Class<?> clazz = classLoader.loadClass(className);
+
+	Constructor<?> constructor = clazz.getConstructor(RgbLedMatrix.Matrix.class);
+	Object o = constructor.newInstance(KIND);
+	PixelPanel plugin = (PixelPanel) o;
+	    
+	return plugin;
+    }    
     
     public static void main(String[] args) throws Exception 
     {		
 	PixelApp app = new PixelApp();
 	app.go(args);		
+    }
+    
+    private void savePreferences()
+    {
+	preferenceService.saveWindowPreferences(frame);
+	preferenceService.saveBuiltInPluginsPreferences(localImagesPanel);
+    }
+    
+    private List<PixelPanel> searchForPlugins() throws Exception
+    {
+	List<PixelPanel> foundClasses = new ArrayList();
+	
+	String path = "../pixel-weather/target/pixel-weather-1.0-SNAPSHOT-jar-with-dependencies.jar";        
+	String className = "org.onebeartoe.pixel.plugins.weather.WeatherByWoeid";
+//	PixelPanel plugin = loadPlugin(path, className);
+//	foundClasses.add(plugin);
+
+	path = "../pixel-games/target/pixel-games-1.0-SNAPSHOT.jar";
+	className = "org.onebeartoe.games.pixel.press.your.button.PressYourButton";
+	PixelPanel plugin = loadPlugin(path, className);
+	foundClasses.add(plugin);
+	
+	if( foundClasses.isEmpty() )
+	{
+	    System.out.println("No plugins were found.");
+	}
+	else
+	{
+	    for (PixelPanel classInfo : foundClasses)	    
+	    {
+		System.out.println ("Found " + classInfo.getClass());
+	    }
+	}
+	        
+	return foundClasses;
     }
     
     private void setPixelFound()
@@ -329,35 +441,47 @@ public class PixelApp extends IOIOSwingApp
     }
     
     @Override
-    public void windowClosed(WindowEvent event)
+    public void windowClosing(WindowEvent event)
     {
-	searchTimer.stop();
-	
-	QuitListener quitListener = new QuitListener();
-	quitListener.actionPerformed(null);
-	
-	System.exit(1);
+        exit();
+    }
+
+    private static AnalogInput getAnalogInput(int pinNumber) 
+    {
+	if(ioiO != null)
+	{
+	    try 
+	    {
+		pixel.analogInput1 = ioiO.openAnalogInput(pinNumber);
+	    } 
+	    catch (ConnectionLostException ex) 
+	    {
+		String message = "The IOIO connection was lost.";
+		Logger.getLogger(PixelApp.class.getName()).log(Level.SEVERE, message, ex);
+	    }		
+	}
+        
+        return pixel.analogInput1;
     }
     
     public static AnalogInput getAnalogInput1() 
     {
         if (pixel.analogInput1 == null) 
 	{
-	    if(ioiO != null)
-	    {
-		try 
-		{
-		    pixel.analogInput1 = ioiO.openAnalogInput(32);
-		} 
-		catch (ConnectionLostException ex) 
-		{
-		    String message = "The IOIO connection was lost.";
-		    Logger.getLogger(PixelApp.class.getName()).log(Level.SEVERE, message, ex);
-		}		
-	    }
+	    pixel.analogInput1 = getAnalogInput(31);			    
         }
         
         return pixel.analogInput1;
+    }
+    
+    public static AnalogInput getAnalogInput2() 
+    {
+        if (pixel.analogInput2 == null) 
+	{
+	    pixel.analogInput2 = getAnalogInput(32);
+        }
+        
+        return pixel.analogInput2;
     }
 
     private class AboutListener implements ActionListener
@@ -369,7 +493,7 @@ public class PixelApp extends IOIOSwingApp
 	    URL resource = getClass().getResource(iconPath);
 	    ImageIcon imageIcon = new ImageIcon(resource);
 	    String message = "About PIXEL";
-	    AboutPixelPc about = new AboutPixelPc();
+	    AboutPanel about = new AboutPanel();
 	    JOptionPane.showMessageDialog(frame, about, message, JOptionPane.INFORMATION_MESSAGE, imageIcon);
 	}
     }
@@ -383,7 +507,7 @@ public class PixelApp extends IOIOSwingApp
 	    URL resource = getClass().getResource(iconPath);
 	    ImageIcon imageIcon = new ImageIcon(resource);
 	    String message = "PIXEL Instructions";
-	    InstructionsPixelPc about = new InstructionsPixelPc();
+	    InstructionsPanel about = new InstructionsPanel();
 	    JOptionPane.showMessageDialog(frame, about, message, JOptionPane.INFORMATION_MESSAGE, imageIcon);
 	}
     }
@@ -393,22 +517,7 @@ public class PixelApp extends IOIOSwingApp
 	@Override
 	public void actionPerformed(ActionEvent e) 
 	{
-	    try 
-	    {
-		String key = PixelPcPreferences.userImagesDirectory;
-		File directory = localImagesPanel.getImageDirectory();
-		String path = directory.getAbsolutePath();
-		preferences.put(key, path);
-		
-		preferences.sync();
-	    } 
-	    catch (BackingStoreException ex) 
-	    {
-		String message = "The app preferences could not be saved.";
-		Logger.getLogger(PixelApp.class.getName()).log(Level.SEVERE, message, ex);
-	    }
-	    
-	    System.exit(1);
+            exit();
 	}
     }
     

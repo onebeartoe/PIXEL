@@ -29,6 +29,8 @@ public class Pixel
     
     public AnalogInput analogInput1;
     
+    public AnalogInput analogInput2;
+    
     protected byte[] BitmapBytes;
     
     protected InputStream BitmapInputStream;
@@ -85,7 +87,10 @@ public class Pixel
 	}
 
         matrix = PixelApp.getMatrix();
-	matrix.frame(frame_);
+	if(matrix != null)
+	{
+	    matrix.frame(frame_);
+	}
     }
     
     public void writeImagetoMatrix(BufferedImage originalImage) throws ConnectionLostException     

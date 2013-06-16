@@ -3,6 +3,8 @@ package com.ledpixelart.pc.plugins.swing;
 
 import ioio.lib.api.RgbLedMatrix;
 import java.awt.event.ActionListener;
+import java.net.URL;
+import javax.swing.ImageIcon;
 import javax.swing.Timer;
 
 /**
@@ -11,7 +13,7 @@ import javax.swing.Timer;
 public abstract class SingleThreadedPixelPanel extends PixelPanel
 {
     
-    protected Timer timer;
+    volatile protected Timer timer;
     
     protected boolean pixelFound;
     
@@ -21,9 +23,9 @@ public abstract class SingleThreadedPixelPanel extends PixelPanel
     {
         super(KIND);
 	
-	// set the IOIO loop delay to half a second, by default  (was 150)
-//	tickDelay = 150;
-    }
+	
+	
+    }        
 
     @Override
     public void setPixelFound(boolean found) 
@@ -36,20 +38,26 @@ public abstract class SingleThreadedPixelPanel extends PixelPanel
     {
 	System.out.println("Starting PIXEL activity in " + getClass().getSimpleName() + ".");		
 	ActionListener listener = getActionListener();
-	int defaultDelay = 150;
-	timer = new Timer(defaultDelay, listener);
+	
+	// set the IOIO loop delay to half a second, by default
+	int delay = 500; // milliseconds
+	timer = new Timer(delay, listener);
+	
 	timer.start();
     }
    
     @Override
     public void stopPixelActivity()
     {	
-        if(timer != null && timer.isRunning() )
+	String className = getClass().getSimpleName();
+	System.out.println("Preparing to stoping PIXEL activity in " + className + ".");
+        if(timer != null)// && timer.isRunning() )
         {            
-	    System.out.println("Stoping PIXEL activity in " + getClass().getSimpleName() + ".");
+	    System.out.println("Stoping PIXEL activity in " + className + ".");
             timer.stop();
         }
     }
     
-    abstract ActionListener getActionListener();
+//TODO: this needs a better name
+    protected abstract ActionListener getActionListener();
 }

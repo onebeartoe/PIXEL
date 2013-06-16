@@ -18,36 +18,36 @@ import javax.swing.JPanel;
  * @author rmarquez
  */
 
-// rename this to AboutPanel
-public class AboutPixelPc extends JPanel
+// rename this to InstructionsPanel
+public class InstructionsPanel extends JPanel
 {
     
-    private final String developmentUrl = "http://electronics.onebeartoe.org/";
+    private final String developmentUrl = "http://ledpixelart.com/";
     private final String pixelURL = "http://ledpixelart.com/";
     
     private JLabel developmentLabel;
     
-    public AboutPixelPc()
+    public InstructionsPanel()
     {
-	String version = "0.5.1";
-	String text = "PIXEL PC Beta Version " + version;
-	String html = "<html><body><h2>" + text + "</h2></body></html>";
+	String version = "0.5";
+	String text = "PIXEL Instructions";
+	String html = "<html><body><h1>" + text + "</h1></body></html>";
 	JLabel productLabel = new JLabel(html, JLabel.CENTER);
 	
-	String developmentHtml = "<html><body><h3>" + "Sofware Development<br/><br/>" + developmentUrl + "</h3></body></html>";
+	String developmentHtml = "<html><body>" + "Before this application will function, you must first Bluetooth pair PIXEL to your Android device<br/><br/>PIXEL will show up in Bluetooth settings as “PIXEL”, use pairing code 4545<br/><br/>If this application does not find PIXEL: power off and on PIXEL, Bluetooth pair again, and then re-run this application<br/><br/>More info at http://ledpixelart.com" + "</body></html>";
 	developmentLabel = new JLabel(developmentHtml);
 	developmentLabel.addMouseListener(new DevelopmentLabelListener() );
 	
-	String projectHtml = "<html><body><h3>PIXEL Home Page<br/><br/>" + pixelURL + "</h3></body></html>";
-	JLabel projectLabel = new JLabel(projectHtml);
-	projectLabel.addMouseListener(new DevelopmentLabelListener() );
+	//String projectHtml = "<html><body><h3>PIXEL Home Page<br/><br/>" + pixelURL + "</h3></body></html>";
+	//JLabel projectLabel = new JLabel(projectHtml);
+	//projectLabel.addMouseListener(new DevelopmentLabelListener() );
 	
 	GridLayout layout = new GridLayout(3, 1, 6, 6);
 	setLayout(layout);
 	
 	add(productLabel);
 	add(developmentLabel);
-	add(projectLabel);
+	//add(projectLabel);
     }
     
     private class DevelopmentLabelListener extends MouseAdapter
@@ -64,9 +64,9 @@ public class AboutPixelPc extends JPanel
 	    } 
 	    catch (Exception ex) 
 	    {
-		Logger.getLogger(AboutPixelPc.class.getName()).log(Level.SEVERE, null, ex);
+		Logger.getLogger(AboutPanel.class.getName()).log(Level.SEVERE, null, ex);
 		String message = "Please visit " + developmentUrl + "for more information";
-		JOptionPane.showMessageDialog(AboutPixelPc.this, message);
+		JOptionPane.showMessageDialog(InstructionsPanel.this, message);
 	    }    
         }
 	

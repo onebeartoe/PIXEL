@@ -31,6 +31,8 @@ public class UserProvidedPanel extends ImageTilePanel
     private File imageDirectory;
     
     private List<File> singleImages;
+
+
     
     public UserProvidedPanel(RgbLedMatrix.Matrix KIND, File imageDirectory)
     {
@@ -70,17 +72,26 @@ public class UserProvidedPanel extends ImageTilePanel
 	
 	return icon;
     }
+    
+    public List<File> getSingleImages() 
+    {
+        return singleImages;
+    }
 
     @Override
     protected List<String> imageNames() throws Exception 
     {
         List<String> images = new ArrayList();
         File [] files = imageDirectory.listFiles(ImageFilters.stills);
-        for(File image : files)
-        {
-	    String path = image.getAbsolutePath();
-            images.add(path);
-        }
+	
+	if(files != null)
+	{
+	    for(File image : files)
+	    {
+		String path = image.getAbsolutePath();
+		images.add(path);
+	    }
+	}        
 	
 	for(File image : singleImages)
 	{
