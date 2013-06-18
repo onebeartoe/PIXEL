@@ -139,6 +139,12 @@ public class PressYourButton extends SingleThreadedPixelPanel
 	return imagesTabIcon;
     }
     
+    @Override
+    public String getTabTitle()
+    {
+	return "Press Your Button";
+    }
+    
     private void loadSounds() //throws Exception
     {
 	String path = "big_board.wav";

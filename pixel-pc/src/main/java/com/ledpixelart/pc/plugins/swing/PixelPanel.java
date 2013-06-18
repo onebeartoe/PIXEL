@@ -31,4 +31,9 @@ public abstract class PixelPanel extends JPanel implements PixelPlugin
 	
 	return imagesTabIcon;
     }
+    
+    public String getTabTitle()
+    {
+	return "Default Tab Title";
+    }
 }
