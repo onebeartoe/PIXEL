@@ -119,6 +119,19 @@ public class PixelApp extends IOIOSwingApp
 	PixelTilePanel imagesPanelReal = new ImageTilePanel(pixel.KIND);
 	imagesPanelReal.populate();
 	pixelPanels.add(imagesPanelReal);
+	
+	// user images tab
+		String userIconPath = "/tab_icons/my_small.png";
+		URL userUrl = getClass().getResource(userIconPath);
+		ImageIcon userTabIcon = new ImageIcon(userUrl);	
+		String key = PixelPreferencesKeys.userImagesDirectory;	
+		String defaultValue = System.getProperty("user.home");
+		String localUserPath = preferenceService.get(key, defaultValue);
+		
+		File localUserDirectory = new File(localUserPath);
+		localImagesPanel = new UserProvidedPanel(pixel.KIND, localUserDirectory);
+		localImagesPanel.populate();
+		pixelPanels.add(localImagesPanel);
 
 	// animations tab
 	String path2 = "/tab_icons/ship_small.png";
@@ -128,18 +141,7 @@ public class PixelApp extends IOIOSwingApp
 	animationsPanel.populate();
 	pixelPanels.add(animationsPanel);
 
-	// user images tab
-	String userIconPath = "/tab_icons/ship_small.png";
-	URL userUrl = getClass().getResource(userIconPath);
-	ImageIcon userTabIcon = new ImageIcon(userUrl);	
-	String key = PixelPreferencesKeys.userImagesDirectory;	
-	String defaultValue = System.getProperty("user.home");
-	String localUserPath = preferenceService.get(key, defaultValue);
 	
-	File localUserDirectory = new File(localUserPath);
-	localImagesPanel = new UserProvidedPanel(pixel.KIND, localUserDirectory);
-	localImagesPanel.populate();
-	pixelPanels.add(localImagesPanel);
 	
 	// scrolling text panel
 	String path3 = "/tab_icons/text_small.png";
@@ -163,9 +165,10 @@ public class PixelApp extends IOIOSwingApp
 	tabbedPane.setTabLayoutPolicy(JTabbedPane.SCROLL_TAB_LAYOUT);
         tabbedPane.addChangeListener( new TabChangeListener() );
 	tabbedPane.addTab("Images", imagesTabIcon, imagesPanelReal, "Load built-in images.");
+	tabbedPane.addTab("My Images", userTabIcon, localImagesPanel, "This panel displays images from your local hard drive.");
         tabbedPane.addTab("Animations", animationsTabIcon, animationsPanel, "Load built-in animations.");
         tabbedPane.setMnemonicAt(1, KeyEvent.VK_2);
-	tabbedPane.addTab("Local Images", userTabIcon, localImagesPanel, "This panel displays images from your local hard drive.");
+	
 	tabbedPane.setMnemonicAt(2, KeyEvent.VK_4);
 	tabbedPane.addTab("Scolling Text", textTabIcon, scrollPanel, "Scrolls a text message across the PIXEL");
 	
@@ -270,9 +273,9 @@ public class PixelApp extends IOIOSwingApp
 	menuItem.setMnemonic(KeyEvent.VK_D);
 	menu.add(menuItem);
 	
-	menu = new JMenu("Plugins");
-	menu.getAccessibleContext().setAccessibleDescription("default plugins menu message");
-	menuBar.add(menu);
+	//menu = new JMenu("Plugins");
+	//menu.getAccessibleContext().setAccessibleDescription("default plugins menu message");
+	//menuBar.add(menu);
 	
 	return menuBar;
     }
@@ -322,7 +325,7 @@ public class PixelApp extends IOIOSwingApp
 	    @Override
 	    public void disconnected() 
 	    {
-		String message = "The IOIO was disconected.";
+		String message = "PIXEL was disconected";
 		System.out.println(message);
 		statusLabel.setText(message);
 	    }
@@ -330,7 +333,7 @@ public class PixelApp extends IOIOSwingApp
 	    @Override
 	    public void incompatible() 
 	    {
-		String message = "The IOIO is incompatible.";
+		String message = "Incompatible firmware detected";
 		System.out.println(message);
 		statusLabel.setText(message);
 	    }
