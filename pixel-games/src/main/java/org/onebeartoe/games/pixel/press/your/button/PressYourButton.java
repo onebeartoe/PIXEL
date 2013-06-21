@@ -74,6 +74,8 @@ public class PressYourButton extends SingleThreadedPixelPanel
     
     public AudioClip whammySound;
     
+    public AudioClip winnerSound;
+    
     public PressYourButton(Matrix m)
     {
 	super(m);	
@@ -154,6 +156,10 @@ public class PressYourButton extends SingleThreadedPixelPanel
 	path = "stop_at_a_whammy.wav";
 	url = getClass().getResource(path);
 	whammySound = Applet.newAudioClip(url);
+	
+	path = "winner.wav";
+	url = getClass().getResource(path);
+	winnerSound = Applet.newAudioClip(url);
     }
     
     public void newGame()
@@ -249,16 +255,6 @@ public class PressYourButton extends SingleThreadedPixelPanel
 
 	writeImageToPixel(img);
     }
-
-/*    
-    public void setCurrentGame(Game game)
-    {
-	currentGame = game;
-	
-	remove(newGamePanel);
-	add(endOfTurnPanel, BorderLayout.CENTER);
-    }
-*/
     
     private void setupBoardPanelLocations()
     {	
@@ -444,6 +440,8 @@ System.out.println("switching to score view");
 	if(player.score >= currentGame.targetScore)
 	{
 	    gameState = GameStates.END_OF_GAME;
+	    
+	    winnerSound.loop();
 	    
 	    String message = "Player " + (currentGame.currentPlayer + 1) + " is the of this game!";
 	    JOptionPane.showMessageDialog(this, message);
