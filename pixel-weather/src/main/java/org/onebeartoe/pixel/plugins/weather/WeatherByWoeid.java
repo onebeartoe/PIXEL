@@ -99,12 +99,6 @@ public class WeatherByWoeid extends SingleThreadedPixelPanel
 	return imagesTabIcon;
     }
     
-    @Override
-    public String getTabTitle()
-    {
-	return "Weather";
-    }
-    
     public class WeatherWorker implements ActionListener
     {
 	@Override
