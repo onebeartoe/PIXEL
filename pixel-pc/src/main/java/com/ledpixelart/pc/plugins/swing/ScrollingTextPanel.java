@@ -113,12 +113,18 @@ public class ScrollingTextPanel extends SingleThreadedPixelPanel
         return listener;
     }
     
+    public String getText()
+    {
+	return textField.getText();
+    }
+    
     private class TextScroller implements ActionListener
     {
         public void actionPerformed(ActionEvent e) 
         {
 	    int delay = scrollSpeedSlider.getValue();	
-	    delay = 710 - delay;                            //al linke: added this so the higher slider value means faster scrolling
+	    delay = 710 - delay;                            // al linke: added this so the higher slider value means faster scrolling
+	    
 	    ScrollingTextPanel.this.timer.setDelay(delay);
 	    
             int w = 64;
@@ -142,7 +148,7 @@ public class ScrollingTextPanel extends SingleThreadedPixelPanel
             
             g2d.setFont(font);
             
-            String message = textField.getText();
+            String message = getText();
             
             FontMetrics fm = g2d.getFontMetrics();
             

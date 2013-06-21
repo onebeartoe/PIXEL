@@ -27,6 +27,7 @@
     <module>pixel-weather</module>
     <module>pixel-games</module>
     <module>pixel-plugin-tests</module>
+    <module>pixel-pc-twitter</module>
   </modules>
 
  <build>
