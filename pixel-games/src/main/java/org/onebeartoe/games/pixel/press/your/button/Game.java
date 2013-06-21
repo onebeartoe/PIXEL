@@ -14,6 +14,15 @@ public class Game
     
     public int targetScore;
     
+    public boolean targetReached()
+    {
+	Player player = players.get(currentPlayer);
+	
+	boolean reached = player.score > targetScore;
+	
+	return reached;
+    }
+    
     @Override
     public String toString()
     {

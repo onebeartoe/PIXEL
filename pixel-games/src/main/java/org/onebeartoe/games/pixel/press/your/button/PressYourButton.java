@@ -185,7 +185,7 @@ public class PressYourButton extends SingleThreadedPixelPanel
      */
     public void drawBoardForPlayersTurn()
     {
-	timer.setDelay(740);  // milliseconds 
+	timer.setDelay(690);  // milliseconds 
 
 	int boardWidth = gameBoardPanel.borardDimension.width;
 	int boardHeight = gameBoardPanel.borardDimension.height;
@@ -422,7 +422,7 @@ System.out.println("switching to score view");
 	{
 	    if(curentPointPanel.amount < 0)
 	    {
-		player.score = 0;
+		player.score = player.score / 2;
 		whammySound.play();
 	    }
 	    else

@@ -40,32 +40,8 @@ public class WeatherByWoeid extends SingleThreadedPixelPanel
 	int end = -1;
 	try 
 	{
-/*	    
-	    URL url = new URL(uri);
-	    InputStream instream = url.openStream();
-	    InputStreamReader inputStreamReader = new InputStreamReader(instream);
-	    BufferedReader in = new BufferedReader(inputStreamReader);
-	    StringBuilder feed = new StringBuilder();
-	    String inputLine = in.readLine();
-	    while (inputLine != null)
-	    {
-		feed.append(inputLine);
-		inputLine = in.readLine();
-	    }
-	    in.close();	    	    	    
-	    
-	    System.out.println("Here is the feed: " + feed.toString() );
-	    
-	    start = feed.indexOf("<![CDATA[");
-	    
-	    end = feed.indexOf("]]>");
-	    String description = feed.substring(start, end);
-	    
-	    webView.setText(description);
-*/
 	    InputStream dataIn = new WeatherService().retrieve( uri );
 	    
-	
 	    // Parse Data
 	    Weather weather = new WeatherService().parse( dataIn );
 	    

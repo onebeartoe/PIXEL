@@ -96,13 +96,13 @@ public class ScrollingTextPanel extends SingleThreadedPixelPanel
 	textPanel.setBorder( BorderFactory.createTitledBorder("Text") );	
 	
 	scrollSpeedSlider = new JSlider(200, 709);
-	JPanel xPanel = new JPanel();
-	xPanel.add(scrollSpeedSlider);
-	xPanel.setBorder( BorderFactory.createTitledBorder("Scroll Speed") );
+	JPanel speedPanel = new JPanel();
+	speedPanel.add(scrollSpeedSlider);
+	speedPanel.setBorder( BorderFactory.createTitledBorder("Scroll Speed") );
         
         setLayout(new BorderLayout());
         add(textPanel, BorderLayout.CENTER);
-	add(xPanel, BorderLayout.SOUTH);
+	add(speedPanel, BorderLayout.SOUTH);
     }
 
     @Override

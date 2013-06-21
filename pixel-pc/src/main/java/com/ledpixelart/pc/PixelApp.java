@@ -121,17 +121,17 @@ public class PixelApp extends IOIOSwingApp
 	pixelPanels.add(imagesPanelReal);
 	
 	// user images tab
-		String userIconPath = "/tab_icons/my_small.png";
-		URL userUrl = getClass().getResource(userIconPath);
-		ImageIcon userTabIcon = new ImageIcon(userUrl);	
-		String key = PixelPreferencesKeys.userImagesDirectory;	
-		String defaultValue = System.getProperty("user.home");
-		String localUserPath = preferenceService.get(key, defaultValue);
-		
-		File localUserDirectory = new File(localUserPath);
-		localImagesPanel = new UserProvidedPanel(pixel.KIND, localUserDirectory);
-		localImagesPanel.populate();
-		pixelPanels.add(localImagesPanel);
+	String userIconPath = "/tab_icons/my_small.png";
+	URL userUrl = getClass().getResource(userIconPath);
+	ImageIcon userTabIcon = new ImageIcon(userUrl);	
+	String key = PixelPreferencesKeys.userImagesDirectory;	
+	String defaultValue = System.getProperty("user.home");
+	String localUserPath = preferenceService.get(key, defaultValue);
+
+	File localUserDirectory = new File(localUserPath);
+	localImagesPanel = new UserProvidedPanel(pixel.KIND, localUserDirectory);
+	localImagesPanel.populate();
+	pixelPanels.add(localImagesPanel);
 
 	// animations tab
 	String path2 = "/tab_icons/ship_small.png";
@@ -141,8 +141,6 @@ public class PixelApp extends IOIOSwingApp
 	animationsPanel.populate();
 	pixelPanels.add(animationsPanel);
 
-	
-	
 	// scrolling text panel
 	String path3 = "/tab_icons/text_small.png";
 	URL url3 = getClass().getResource(path3);
@@ -404,13 +402,13 @@ public class PixelApp extends IOIOSwingApp
 	
 	String path = "../pixel-weather/target/pixel-weather-1.0-SNAPSHOT-jar-with-dependencies.jar";        
 	String className = "org.onebeartoe.pixel.plugins.weather.WeatherByWoeid";
-//	PixelPanel plugin = loadPlugin(path, className);
-//	foundClasses.add(plugin);
+	PixelPanel plugin = loadPlugin(path, className);
+	foundClasses.add(plugin);
 
 	path = "../pixel-games/target/pixel-games-1.0-SNAPSHOT.jar";
 	className = "org.onebeartoe.games.pixel.press.your.button.PressYourButton";
-	PixelPanel plugin = loadPlugin(path, className);
-	foundClasses.add(plugin);
+	PixelPanel gamePlugin = loadPlugin(path, className);
+	foundClasses.add(gamePlugin);
 	
 	if( foundClasses.isEmpty() )
 	{

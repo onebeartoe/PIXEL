@@ -2,7 +2,6 @@
 package org.onebeartoe.games.pixel.press.your.button.screens;
 
 import java.awt.BorderLayout;
-import java.awt.Component;
 import java.awt.FlowLayout;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
@@ -13,7 +12,6 @@ import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import org.onebeartoe.games.pixel.press.your.button.Game;
 import org.onebeartoe.games.pixel.press.your.button.GameStates;
 import org.onebeartoe.games.pixel.press.your.button.PressYourButton;
 import org.onebeartoe.games.pixel.press.your.button.PreviewPanel;
@@ -84,6 +82,8 @@ public class GameControlPanel extends JPanel
     
     private void newGame()
     {
+	plugin.winnerSound.stop();
+		    
 	plugin.remove(plugin.endOfTurnPanel);
 	plugin.add(plugin.newGamePanel, BorderLayout.CENTER);
 	plugin.newGame();
@@ -115,6 +115,7 @@ public class GameControlPanel extends JPanel
     {
 	public void actionPerformed(ActionEvent e) 
 	{	    
+//	    plugin.winnerSound.stop();
 System.out.println("in new game listener, game state is " + plugin.gameState);
 
 	    if(plugin.gameState == GameStates.PLAYERS_TURN ||
@@ -153,7 +154,8 @@ System.out.println("in next listener, game state is " + plugin.gameState);
 		JOptionPane.showMessageDialog(GameControlPanel.this, message);
 	    }
 	    else if(plugin.gameState == GameStates.END_OF_TURN ||
-                        plugin.gameState == GameStates.SHOW_SCORE)
+                        (plugin.gameState == GameStates.SHOW_SCORE && !plugin.currentGame.targetReached() )
+		    )
 	    {
 		plugin.currentGame.currentPlayer++;
 		    
