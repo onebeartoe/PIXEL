@@ -35,17 +35,24 @@ import java.awt.event.WindowEvent;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferByte;
 import java.awt.image.WritableRaster;
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.lang.reflect.Constructor;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
 import javax.swing.BoxLayout;
+import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
@@ -81,22 +88,33 @@ public class PixelApp extends IOIOSwingApp
     
     private List<PixelPanel> pixelPanels;
     
+    private List<PixelPanel> userPluginPanels;
+    
     private JFrame frame;
+    
+    private JTabbedPane tabbedPane;
+    
+    private JFileChooser pluginChooser;
     
     private JLabel statusLabel;
     
     public static final int DEFAULT_HEIGHT = 600;
     
-    public static final int DEFAULT_WIDTH = 450;    
+    public static final int DEFAULT_WIDTH = 450;
     
     public PixelApp()
     {
 	String className = PixelApp.class.getName();
 	logger = Logger.getLogger(className);
 	
+	pluginChooser = new JFileChooser();
+	pluginChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+	
 	preferenceService = new JavaPreferencesService();
 	
-	pixelPanels = new ArrayList();	
+	pixelPanels = new ArrayList();
+	
+	userPluginPanels = new ArrayList();
     }
 
     @Override
@@ -159,7 +177,7 @@ public class PixelApp extends IOIOSwingApp
 	
 	JMenuBar menuBar = createMenuBar();
 	
-	JTabbedPane tabbedPane = new JTabbedPane();
+	tabbedPane = new JTabbedPane();
 	tabbedPane.setTabLayoutPolicy(JTabbedPane.SCROLL_TAB_LAYOUT);
         tabbedPane.addChangeListener( new TabChangeListener() );
 	tabbedPane.addTab("Images", imagesTabIcon, imagesPanelReal, "Load built-in images.");
@@ -190,6 +208,8 @@ public class PixelApp extends IOIOSwingApp
 	    logger.log(Level.INFO, ex.getMessage(), ex);
 	}
 	
+	preferenceService.restore
+	
 	frame.addWindowListener(this);
 	frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);	
 	frame.setLayout( new BorderLayout() );
@@ -212,12 +232,10 @@ public class PixelApp extends IOIOSwingApp
 	
 	try 
 	{
-	    List<PixelPanel> plugins = searchForPlugins();
+	    List<PixelPanel> plugins = loadPluginPreferences();
 	    for(PixelPanel panel : plugins)
-	    {
-		ImageIcon icon = panel.getTabIcon();
-		tabbedPane.addTab("Press Your Button", icon, panel, "A weather app for internal and external temps.");
-		pixelPanels.add(panel);
+	    {		
+		displayPlugin(panel);		
 	    }
 	} 
 	catch (Exception ex) 
@@ -232,50 +250,59 @@ public class PixelApp extends IOIOSwingApp
     
     private JMenuBar createMenuBar()	    
     {
-	JMenuBar menuBar;
-	JMenu menu;
 	JMenuItem menuItem;
-
-	// Create the menu bar.
-	menuBar = new JMenuBar();
-
-	// Build the first menu.
-	menu = new JMenu("Help");
-	menu.setMnemonic(KeyEvent.VK_A);
-	menu.getAccessibleContext().setAccessibleDescription("update with accessible description");
-	menuBar.add(menu);	
+	
+	JMenu helpMenu = new JMenu("Help");
+	helpMenu.setMnemonic(KeyEvent.VK_A);
+	helpMenu.getAccessibleContext().setAccessibleDescription("update with accessible description");
 	
 	menuItem = new JMenuItem("Instructions");
 	KeyStroke instructionsKeyStroke = KeyStroke.getKeyStroke(KeyEvent.VK_1, ActionEvent.ALT_MASK);
 	menuItem.setAccelerator(instructionsKeyStroke);
 	menuItem.getAccessibleContext().setAccessibleDescription("update with accessible description");
 	menuItem.addActionListener( new InstructionsListener() );
-	menu.add(menuItem);
+	helpMenu.add(menuItem);
 	
 	menuItem = new JMenuItem("About");
 	KeyStroke aboutKeyStroke = KeyStroke.getKeyStroke(KeyEvent.VK_2, ActionEvent.ALT_MASK);
 	menuItem.setAccelerator(aboutKeyStroke);
 	menuItem.getAccessibleContext().setAccessibleDescription("update with accessible description");
 	menuItem.addActionListener( new AboutListener() );
-	menu.add(menuItem);
+	helpMenu.add(menuItem);
 	
-	//menuItem = new JMenuItem("Exit", menuIcon);
 	menuItem = new JMenuItem("Exit");
 	KeyStroke keyStroke = KeyStroke.getKeyStroke(KeyEvent.VK_3, ActionEvent.ALT_MASK);
 	menuItem.setAccelerator(keyStroke);
 	menuItem.addActionListener( new QuitListener() );
 	menuItem.getAccessibleContext().setAccessibleDescription("update with accessible description");
-	menu.add(menuItem);
+	helpMenu.add(menuItem);
 
 	menuItem = new JMenuItem(new ImageIcon("images/middle.gif"));
 	menuItem.setMnemonic(KeyEvent.VK_D);
-	menu.add(menuItem);
+	helpMenu.add(menuItem);
 	
-	//menu = new JMenu("Plugins");
-	//menu.getAccessibleContext().setAccessibleDescription("default plugins menu message");
-	//menuBar.add(menu);
+	JMenuItem loadPluginsOption = new JMenuItem("Load");
+	loadPluginsOption.addActionListener( new LoadPluginListener() );
+	JMenuItem clearPluginsOption = new JMenuItem("Clear");
+	clearPluginsOption.addActionListener( new ClearPluginsListener() );
+	JMenu pluginsMenu = new JMenu("Plugins");
+	pluginsMenu.add(loadPluginsOption);
+	pluginsMenu.add(clearPluginsOption);
+	pluginsMenu.getAccessibleContext().setAccessibleDescription("default plugins menu message");
+	
+	JMenuBar menuBar = new JMenuBar();
+	menuBar.add(helpMenu);
+	menuBar.add(pluginsMenu);
 	
 	return menuBar;
+    }
+    
+    private void displayPlugin(PixelPanel panel)
+    {
+	ImageIcon icon = panel.getTabIcon();
+	String title = panel.getTabTitle();
+	tabbedPane.addTab(title, icon, panel, "A weather app for internal and external temps.");
+	pixelPanels.add(panel);
     }
     
     private void exit()
@@ -396,19 +423,19 @@ public class PixelApp extends IOIOSwingApp
 	preferenceService.saveBuiltInPluginsPreferences(localImagesPanel);
     }
     
-    private List<PixelPanel> searchForPlugins() throws Exception
+    private List<PixelPanel> loadPluginPreferences() throws Exception
     {
 	List<PixelPanel> foundClasses = new ArrayList();
 	
 	String path = "../pixel-weather/target/pixel-weather-1.0-SNAPSHOT-jar-with-dependencies.jar";        
 	String className = "org.onebeartoe.pixel.plugins.weather.WeatherByWoeid";
-	PixelPanel plugin = loadPlugin(path, className);
-	foundClasses.add(plugin);
+//	PixelPanel plugin = loadPlugin(path, className);
+//	foundClasses.add(plugin);
 
 	path = "../pixel-games/target/pixel-games-1.0-SNAPSHOT.jar";
 	className = "org.onebeartoe.games.pixel.press.your.button.PressYourButton";
-	PixelPanel gamePlugin = loadPlugin(path, className);
-	foundClasses.add(gamePlugin);
+//	PixelPanel gamePlugin = loadPlugin(path, className);
+//	foundClasses.add(gamePlugin);
 	
 	if( foundClasses.isEmpty() )
 	{
@@ -487,6 +514,7 @@ public class PixelApp extends IOIOSwingApp
 
     private class AboutListener implements ActionListener
     {
+	@Override
 	public void actionPerformed(ActionEvent e) 
 	{
 	    String path = "/images/";
@@ -497,6 +525,16 @@ public class PixelApp extends IOIOSwingApp
 	    AboutPanel about = new AboutPanel();
 	    JOptionPane.showMessageDialog(frame, about, message, JOptionPane.INFORMATION_MESSAGE, imageIcon);
 	}
+    }
+    
+    private class ClearPluginsListener implements ActionListener
+    {
+	@Override
+	public void actionPerformed(ActionEvent e) 
+	{
+	    
+	}
+	
     }
     
     private class InstructionsListener implements ActionListener
@@ -511,6 +549,72 @@ public class PixelApp extends IOIOSwingApp
 	    InstructionsPanel about = new InstructionsPanel();
 	    JOptionPane.showMessageDialog(frame, about, message, JOptionPane.INFORMATION_MESSAGE, imageIcon);
 	}
+    }
+    
+    private class LoadPluginListener implements ActionListener
+    {
+	@Override
+	public void actionPerformed(ActionEvent e) 
+	{
+	    int result = pluginChooser.showDialog(frame, "Select");
+	    if(result == JFileChooser.APPROVE_OPTION)
+	    {
+		File jar = pluginChooser.getSelectedFile();
+		
+		String path = jar.getAbsolutePath();
+			
+		try 
+		{
+		    List<String> classNames = loadPluginNames(jar);
+		    for(String qualifiedClassName : classNames)
+		    {
+			PixelPanel plugin;
+			try 
+			{
+			    plugin = loadPlugin(path, qualifiedClassName);
+			    displayPlugin(plugin);
+			} 
+			catch (Exception ex) 
+			{
+			    String message = "A problem occured while loading plugin: " + qualifiedClassName;
+			    logger.log(Level.SEVERE, message, ex);
+			}
+		    }
+		} 
+		catch (Exception ex) 
+		{
+		    String message = "A problem occured while loading plugin class names.";
+		    logger.log(Level.SEVERE, message, ex);
+		}
+	    }
+	}
+	
+	private List<String> loadPluginNames(File jarfile) throws Exception
+	{
+	    List<String> classNames = new ArrayList();
+	    	    
+	    ZipFile zipfile = new ZipFile(jarfile);
+	    
+	    String entryPath = "plugins.manifest";
+	    ZipEntry entry = zipfile.getEntry(entryPath);
+	    InputStream inputStream = zipfile.getInputStream(entry);
+	    
+	    BufferedReader br = new BufferedReader(new InputStreamReader(inputStream));
+	    String line = br.readLine();  	
+	    while (line != null)
+	    {
+		if( !line.trim().equals("") )
+		{
+		    classNames.add(line);
+		}
+		
+		line = br.readLine();
+	    }	
+	    inputStream.close(); 		
+	    
+	    return classNames;
+	}
+	
     }
     
     private class QuitListener implements ActionListener

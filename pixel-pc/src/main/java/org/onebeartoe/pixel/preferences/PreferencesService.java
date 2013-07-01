@@ -13,11 +13,15 @@ public interface PreferencesService
 {
     String get(String key, String defaultValue);
     
-    void saveBuiltInPluginsPreferences(UserProvidedPanel localImagesPanel);
+    void restoreUserPluginPreferences() throws Exception;
     
     Dimension restoreWindowDimension() throws Exception;
     
     Point restoreWindowLocation() throws Exception;
+    
+    void saveBuiltInPluginsPreferences(UserProvidedPanel localImagesPanel);
+    
+    void saveUserPluginPreferences();
     
     void saveWindowPreferences(JFrame window);
 }

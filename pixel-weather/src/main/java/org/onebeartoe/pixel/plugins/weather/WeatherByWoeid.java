@@ -25,7 +25,7 @@ public class WeatherByWoeid extends SingleThreadedPixelPanel
     {
 	super(m);
 	
-	timer.setDelay(5000);
+//	timer.setDelay(5000);
 	
 	worker = new WeatherWorker();
 	
@@ -80,6 +80,7 @@ public class WeatherByWoeid extends SingleThreadedPixelPanel
 	@Override
 	public void actionPerformed(ActionEvent e) 
 	{
+	    timer.setDelay(5000);
 	    System.out.println("weather works great");
 	}
     }

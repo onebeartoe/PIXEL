@@ -33,6 +33,11 @@ public class JavaPreferencesService implements PreferencesService
 	return value;
     }
     
+    public void restoreUserPluginPreferences() throws Exception 
+    {
+	f
+    }
+	
     public Dimension restoreWindowDimension() 
     {	
 	int defaultValue = 450;
@@ -98,6 +103,11 @@ public class JavaPreferencesService implements PreferencesService
         }
     }
 
+    public void saveUserPluginPreferences() 
+    {
+	l
+    }
+    
     @Override
     public void saveWindowPreferences(JFrame window)
     {
@@ -117,5 +127,7 @@ public class JavaPreferencesService implements PreferencesService
 	key = PixelPreferencesKeys.windowHeight;
 	preferences.putInt(key, height);
     }
+
+
     
 }
