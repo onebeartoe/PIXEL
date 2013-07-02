@@ -207,8 +207,15 @@ public class PixelApp extends IOIOSwingApp
 	{
 	    logger.log(Level.INFO, ex.getMessage(), ex);
 	}
-	
-	preferenceService.restore
+        
+        try 
+        {
+            preferenceService.restoreUserPluginPreferences();
+        } 
+        catch (Exception ex) 
+        {
+            Logger.getLogger(PixelApp.class.getName()).log(Level.SEVERE, null, ex);
+        }
 	
 	frame.addWindowListener(this);
 	frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);	

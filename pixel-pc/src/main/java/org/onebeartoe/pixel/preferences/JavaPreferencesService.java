@@ -35,7 +35,7 @@ public class JavaPreferencesService implements PreferencesService
     
     public void restoreUserPluginPreferences() throws Exception 
     {
-	f
+	return;
     }
 	
     public Dimension restoreWindowDimension() 
@@ -105,7 +105,7 @@ public class JavaPreferencesService implements PreferencesService
 
     public void saveUserPluginPreferences() 
     {
-	l
+	return;
     }
     
     @Override
