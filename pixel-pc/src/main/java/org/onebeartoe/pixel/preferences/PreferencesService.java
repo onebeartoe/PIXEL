@@ -1,9 +1,13 @@
 
 package org.onebeartoe.pixel.preferences;
 
+import com.ledpixelart.pc.plugins.PluginConfigEntry;
+import com.ledpixelart.pc.plugins.swing.PixelPanel;
 import com.ledpixelart.pc.plugins.swing.UserProvidedPanel;
+import ioio.lib.api.RgbLedMatrix;
 import java.awt.Dimension;
 import java.awt.Point;
+import java.util.List;
 import javax.swing.JFrame;
 
 /**
@@ -13,7 +17,9 @@ public interface PreferencesService
 {
     String get(String key, String defaultValue);
     
-    void restoreUserPluginPreferences() throws Exception;
+    PixelPanel loadPlugin(String jarPath, String className, RgbLedMatrix.Matrix KIND) throws Exception;
+    
+    List<PixelPanel> restoreUserPluginPreferences(RgbLedMatrix.Matrix KIND) throws Exception;
     
     Dimension restoreWindowDimension() throws Exception;
     
@@ -21,7 +27,7 @@ public interface PreferencesService
     
     void saveBuiltInPluginsPreferences(UserProvidedPanel localImagesPanel);
     
-    void saveUserPluginPreferences();
+    void saveUserPluginPreferences(List<PluginConfigEntry> userPluginConfiguration);
     
     void saveWindowPreferences(JFrame window);
 }

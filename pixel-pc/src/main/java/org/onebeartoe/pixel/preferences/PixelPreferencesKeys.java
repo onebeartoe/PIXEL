@@ -6,9 +6,13 @@ package org.onebeartoe.pixel.preferences;
  */
 public class PixelPreferencesKeys
 {
+    public static final String singleImage = "SingleImage";
+ 
     public static final String userImagesDirectory = "UserImagesDirectory";
     
-    public static final String singleImage = "SingleImage";
+    public static final String userPlugin = "UserPlugin";
+    
+    public static final String userPluginCount = "UserPluginCount";
     
     public static final String windowHeight = "windowHeight";
     

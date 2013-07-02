@@ -3,6 +3,7 @@ package com.ledpixelart.pc;
 
 import org.onebeartoe.pixel.preferences.PixelPreferencesKeys;
 import com.ledpixelart.hardware.Pixel;
+import com.ledpixelart.pc.plugins.PluginConfigEntry;
 import com.ledpixelart.pc.plugins.swing.AnimationsPanel;
 import com.ledpixelart.pc.plugins.swing.ImageTilePanel;
 import com.ledpixelart.pc.plugins.swing.PixelPanel;
@@ -43,7 +44,6 @@ import java.io.InputStreamReader;
 import java.lang.reflect.Constructor;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -90,6 +90,8 @@ public class PixelApp extends IOIOSwingApp
     
     private List<PixelPanel> userPluginPanels;
     
+    private List<PluginConfigEntry> userPluginConfiguration;
+    
     private JFrame frame;
     
     private JTabbedPane tabbedPane;
@@ -111,7 +113,9 @@ public class PixelApp extends IOIOSwingApp
 	pluginChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
 	
 	preferenceService = new JavaPreferencesService();
-	
+
+        userPluginConfiguration = new ArrayList();
+        
 	pixelPanels = new ArrayList();
 	
 	userPluginPanels = new ArrayList();
@@ -210,7 +214,7 @@ public class PixelApp extends IOIOSwingApp
         
         try 
         {
-            preferenceService.restoreUserPluginPreferences();
+            loadPluginPreferences();
         } 
         catch (Exception ex) 
         {
@@ -236,20 +240,7 @@ public class PixelApp extends IOIOSwingApp
 	}
 
 	startSearchTimer();
-	
-	try 
-	{
-	    List<PixelPanel> plugins = loadPluginPreferences();
-	    for(PixelPanel panel : plugins)
-	    {		
-		displayPlugin(panel);		
-	    }
-	} 
-	catch (Exception ex) 
-	{
-	    Logger.getLogger(PixelApp.class.getName()).log(Level.SEVERE, null, ex);
-	}
-	
+		
 	frame.setVisible(true);
 	
 	return frame;
@@ -391,31 +382,6 @@ public class PixelApp extends IOIOSwingApp
         }
         
         return pixel.matrix;
-    }
-
-    private PixelPanel loadPlugin(String jarPath, String className) throws Exception
-    {	
-        File jar = new File(jarPath);
-	if( !jar.exists() || !jar.canRead() )
-	{
-	    System.out.println("\n\nThere is a problem with the specified JAR.");
-	    System.out.println("The jar exists: " + jar.exists() );
-	    System.out.println("The jar is readable: " + jar.canRead() );
-	}
-	
-	
-	URL url = jar.toURI().toURL();
-	URL [] urls = new URL[1];
-	urls[0] = url;
-	URLClassLoader classLoader = new URLClassLoader(urls);
-
-	Class<?> clazz = classLoader.loadClass(className);
-
-	Constructor<?> constructor = clazz.getConstructor(RgbLedMatrix.Matrix.class);
-	Object o = constructor.newInstance(KIND);
-	PixelPanel plugin = (PixelPanel) o;
-	    
-	return plugin;
     }    
     
     public static void main(String[] args) throws Exception 
@@ -432,8 +398,11 @@ public class PixelApp extends IOIOSwingApp
     
     private List<PixelPanel> loadPluginPreferences() throws Exception
     {
-	List<PixelPanel> foundClasses = new ArrayList();
-	
+	List<PixelPanel> foundClasses = preferenceService.restoreUserPluginPreferences(KIND);
+        
+        
+        
+/*	
 	String path = "../pixel-weather/target/pixel-weather-1.0-SNAPSHOT-jar-with-dependencies.jar";        
 	String className = "org.onebeartoe.pixel.plugins.weather.WeatherByWoeid";
 //	PixelPanel plugin = loadPlugin(path, className);
@@ -443,16 +412,19 @@ public class PixelApp extends IOIOSwingApp
 	className = "org.onebeartoe.games.pixel.press.your.button.PressYourButton";
 //	PixelPanel gamePlugin = loadPlugin(path, className);
 //	foundClasses.add(gamePlugin);
-	
+*/
+        
 	if( foundClasses.isEmpty() )
 	{
 	    System.out.println("No plugins were found.");
 	}
 	else
 	{
-	    for (PixelPanel classInfo : foundClasses)	    
+	    for (PixelPanel panel : foundClasses)	    
 	    {
-		System.out.println ("Found " + classInfo.getClass());
+		System.out.println ("Found " + panel.getClass());
+                userPluginPanels.add(panel);
+		displayPlugin(panel);	
 	    }
 	}
 	        
@@ -539,9 +511,9 @@ public class PixelApp extends IOIOSwingApp
 	@Override
 	public void actionPerformed(ActionEvent e) 
 	{
-	    
+            List<PluginConfigEntry> userPluginConfigurations = new ArrayList();
+	    preferenceService.saveUserPluginPreferences(userPluginConfigurations);
 	}
-	
     }
     
     private class InstructionsListener implements ActionListener
@@ -578,8 +550,15 @@ public class PixelApp extends IOIOSwingApp
 			PixelPanel plugin;
 			try 
 			{
-			    plugin = loadPlugin(path, qualifiedClassName);
+			    plugin = preferenceService.loadPlugin(path, qualifiedClassName, KIND);
 			    displayPlugin(plugin);
+                            
+                            PluginConfigEntry entry = new PluginConfigEntry();
+                            entry.jarPath = path;
+                            entry.qualifiedClassName = qualifiedClassName;
+                            userPluginConfiguration.add(entry);
+                            
+                            preferenceService.saveUserPluginPreferences(userPluginConfiguration);
 			} 
 			catch (Exception ex) 
 			{
