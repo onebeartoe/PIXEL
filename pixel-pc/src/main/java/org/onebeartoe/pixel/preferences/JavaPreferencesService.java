@@ -70,7 +70,7 @@ public class JavaPreferencesService implements PreferencesService
     }
     
     @Override
-    public List<PixelPanel> restoreUserPluginPreferences(RgbLedMatrix.Matrix KIND) throws Exception 
+    public List<PixelPanel> restoreUserPluginPreferences(RgbLedMatrix.Matrix KIND, List<PluginConfigEntry> userPluginConfiguration) throws Exception 
     {
         List<PixelPanel> plugins = new ArrayList();
         
@@ -92,6 +92,11 @@ public class JavaPreferencesService implements PreferencesService
                 String [] classNames = classes.split(PluginConfigEntry.JAR_CLASS_SEPARATOR);
                 for(String name : classNames)
                 {
+		    PluginConfigEntry entry = new PluginConfigEntry();
+		    entry.jarPath = jarPath;
+		    entry.qualifiedClassName = name;
+		    userPluginConfiguration.add(entry);
+		    
                     PixelPanel plugin = loadPlugin(jarPath, name, KIND);
                     plugins.add(plugin);
                 }

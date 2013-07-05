@@ -19,7 +19,7 @@ public interface PreferencesService
     
     PixelPanel loadPlugin(String jarPath, String className, RgbLedMatrix.Matrix KIND) throws Exception;
     
-    List<PixelPanel> restoreUserPluginPreferences(RgbLedMatrix.Matrix KIND) throws Exception;
+    List<PixelPanel> restoreUserPluginPreferences(RgbLedMatrix.Matrix KIND, List<PluginConfigEntry> userPluginConfiguration) throws Exception;
     
     Dimension restoreWindowDimension() throws Exception;
     

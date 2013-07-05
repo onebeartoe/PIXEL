@@ -398,7 +398,7 @@ public class PixelApp extends IOIOSwingApp
     
     private List<PixelPanel> loadPluginPreferences() throws Exception
     {
-	List<PixelPanel> foundClasses = preferenceService.restoreUserPluginPreferences(KIND);
+	List<PixelPanel> foundClasses = preferenceService.restoreUserPluginPreferences(KIND, userPluginConfiguration);
         
         
         
@@ -423,6 +423,9 @@ public class PixelApp extends IOIOSwingApp
 	    for (PixelPanel panel : foundClasses)	    
 	    {
 		System.out.println ("Found " + panel.getClass());
+		
+		
+		
                 userPluginPanels.add(panel);
 		displayPlugin(panel);	
 	    }
@@ -511,8 +514,13 @@ public class PixelApp extends IOIOSwingApp
 	@Override
 	public void actionPerformed(ActionEvent e) 
 	{
-            List<PluginConfigEntry> userPluginConfigurations = new ArrayList();
-	    preferenceService.saveUserPluginPreferences(userPluginConfigurations);
+            userPluginConfiguration.clear();
+	    preferenceService.saveUserPluginPreferences(userPluginConfiguration);
+	    
+	    for(PixelPanel panel : userPluginPanels)
+	    {
+		tabbedPane.remove(panel);
+	    }
 	}
     }
     
@@ -551,12 +559,13 @@ public class PixelApp extends IOIOSwingApp
 			try 
 			{
 			    plugin = preferenceService.loadPlugin(path, qualifiedClassName, KIND);
+			    userPluginPanels.add(plugin);
 			    displayPlugin(plugin);
                             
                             PluginConfigEntry entry = new PluginConfigEntry();
                             entry.jarPath = path;
                             entry.qualifiedClassName = qualifiedClassName;
-                            userPluginConfiguration.add(entry);
+                            userPluginConfiguration.add(entry);			    			    
                             
                             preferenceService.saveUserPluginPreferences(userPluginConfiguration);
 			} 
