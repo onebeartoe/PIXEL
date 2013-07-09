@@ -32,8 +32,6 @@ public class UserProvidedPanel extends ImageTilePanel
     
     private List<File> singleImages;
 
-
-    
     public UserProvidedPanel(RgbLedMatrix.Matrix KIND, File imageDirectory)
     {
 	super(KIND);

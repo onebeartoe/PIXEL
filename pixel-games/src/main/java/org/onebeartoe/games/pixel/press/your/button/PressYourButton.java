@@ -6,9 +6,6 @@ import org.onebeartoe.games.pixel.press.your.button.board.PointPanel;
 import org.onebeartoe.games.pixel.press.your.button.screens.GameCreationPanel;
 import org.onebeartoe.games.pixel.press.your.button.screens.GameControlPanel;
 import org.onebeartoe.games.pixel.press.your.button.board.BoardPanel;
-import com.ledpixelart.pc.PixelApp;
-import com.ledpixelart.pc.plugins.swing.ScrollingTextPanel;
-import com.ledpixelart.pc.plugins.swing.SingleThreadedPixelPanel;
 import ioio.lib.api.AnalogInput;
 import ioio.lib.api.RgbLedMatrix.Matrix;
 import ioio.lib.api.exception.ConnectionLostException;
@@ -35,6 +32,9 @@ import javax.swing.ImageIcon;
 import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 import org.onebeartoe.games.pixel.press.your.button.board.WhammyPanel;
+import org.onebeartoe.pixel.hardware.Pixel;
+import org.onebeartoe.pixel.plugins.swing.ScrollingTextPanel;
+import org.onebeartoe.pixel.plugins.swing.SingleThreadedPixelPanel;
 
 /**
  * This is a plugin for the PIXEL PC app.  It show a board with moving point and 
@@ -44,6 +44,7 @@ import org.onebeartoe.games.pixel.press.your.button.board.WhammyPanel;
  */
 public class PressYourButton extends SingleThreadedPixelPanel
 {
+    
     private ActionListener worker = new PressYourButtonWorker(this);
     
     private Thread bigButtonThread;
@@ -62,7 +63,7 @@ public class PressYourButton extends SingleThreadedPixelPanel
     
     public GameCreationPanel newGamePanel;
     
-    AnalogInput analogInput1;
+    public AnalogInput analogInput1;
     
     volatile public GameStates gameState;
     
@@ -381,7 +382,7 @@ System.out.println("drawing " + s + " at " + x + ", " + y + " at " + new Date())
     {
 	super.startPixelActivity();
 	
-	analogInput1 = PixelApp.getAnalogInput1();
+	analogInput1 = pixel.getAnalogInput1();
 	try 
 	{
 	    if(analogInput1 == null)
@@ -477,11 +478,11 @@ System.out.println("updating the score board pane");
     
     private void writeImageToPixel(BufferedImage image)
     {
-	if(PixelApp.pixel != null)
+	if(pixel != null)
 	{
 	    try 
 	    {              
-		PixelApp.pixel.writeImagetoMatrix(image);
+		pixel.writeImagetoMatrix(image);
 	    }
 	    catch (ConnectionLostException ex) 
 	    {

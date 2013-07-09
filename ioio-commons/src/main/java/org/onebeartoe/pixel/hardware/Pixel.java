@@ -4,6 +4,7 @@ package org.onebeartoe.pixel.hardware;
 //import com.ledpixelart.pc.PixelApp;
 
 import ioio.lib.api.AnalogInput;
+import ioio.lib.api.IOIO;
 import ioio.lib.api.RgbLedMatrix;
 
 import ioio.lib.api.exception.ConnectionLostException;
@@ -14,6 +15,8 @@ import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 
 /**
@@ -21,13 +24,15 @@ import java.util.Arrays;
  */
 public class Pixel 
 {
+    public static IOIO ioiO;
+    
     public RgbLedMatrix matrix;
     
     public final RgbLedMatrix.Matrix KIND;
     
-    public AnalogInput analogInput1;
+    public static AnalogInput analogInput1;
     
-    public AnalogInput analogInput2;
+    public static  AnalogInput analogInput2;
     
     protected byte[] BitmapBytes;
     
@@ -42,6 +47,44 @@ public class Pixel
 	BitmapBytes = new byte[KIND.width * KIND.height * 2]; //512 * 2 = 1024 or 1024 * 2 = 2048
 	
 	frame_ = new short[KIND.width * KIND.height];
+    }
+    
+        private static AnalogInput getAnalogInput(int pinNumber) 
+    {
+	if(ioiO != null)
+	{
+	    try 
+	    {
+		analogInput1 = ioiO.openAnalogInput(pinNumber);
+	    } 
+	    catch (ConnectionLostException ex) 
+	    {
+		String message = "The IOIO connection was lost.";
+		Logger.getLogger("Pixel").log(Level.SEVERE, message, ex);
+	    }		
+	}
+        
+        return analogInput1;
+    }
+    
+    public static AnalogInput getAnalogInput1() 
+    {
+        if (analogInput1 == null) 
+	{
+	    analogInput1 = getAnalogInput(31);			    
+        }
+        
+        return analogInput1;
+    }
+    
+    public static AnalogInput getAnalogInput2() 
+    {
+        if (analogInput2 == null) 
+	{
+	    analogInput2 = getAnalogInput(32);
+        }
+        
+        return analogInput2;
     }
 
     /**

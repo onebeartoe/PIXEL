@@ -1,11 +1,10 @@
 
-package com.ledpixelart.pc.plugins.swing;
+package org.onebeartoe.pixel.plugins.swing;
 
 import ioio.lib.api.RgbLedMatrix;
 import java.awt.event.ActionListener;
-import java.net.URL;
-import javax.swing.ImageIcon;
 import javax.swing.Timer;
+import org.onebeartoe.pixel.plugins.swing.PixelPanel;
 
 /**
  * @author rmarquez

@@ -24,9 +24,9 @@
     </dependency>
     
     <dependency>
-	<groupId>org.onebeartoe.pixel</groupId>
-	<artifactId>pixel-pc</artifactId>
-	<version>0.6</version>
+	<groupId>org.onebeartoe.pixel.plugins</groupId>
+	<artifactId>pixel-plugin</artifactId>
+	<version>0.1</version>
     </dependency>    
   </dependencies>
 </project>

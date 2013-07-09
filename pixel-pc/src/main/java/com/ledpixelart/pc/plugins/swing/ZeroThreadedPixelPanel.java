@@ -2,6 +2,7 @@
 package com.ledpixelart.pc.plugins.swing;
 
 import ioio.lib.api.RgbLedMatrix;
+import org.onebeartoe.pixel.plugins.swing.PixelPanel;
 
 /**
  * @author rmarquez

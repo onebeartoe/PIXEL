@@ -1,14 +1,13 @@
 
 package com.ledpixelart.pc;
 
-import org.onebeartoe.pixel.preferences.PixelPreferencesKeys;
 import com.ledpixelart.pc.plugins.PluginConfigEntry;
 import com.ledpixelart.pc.plugins.swing.AnimationsPanel;
 import com.ledpixelart.pc.plugins.swing.ImageTilePanel;
-//import com.ledpixelart.pc.plugins.swing.PixelPanel;
+
 import com.ledpixelart.pc.plugins.swing.PixelTilePanel;
-import com.ledpixelart.pc.plugins.swing.ScrollingTextPanel;
 import com.ledpixelart.pc.plugins.swing.UserProvidedPanel;
+
 import ioio.lib.api.AnalogInput;
 import ioio.lib.api.DigitalOutput;
 import ioio.lib.api.IOIO;
@@ -17,15 +16,12 @@ import ioio.lib.api.exception.ConnectionLostException;
 import ioio.lib.util.BaseIOIOLooper;
 import ioio.lib.util.IOIOLooper;
 import ioio.lib.util.pc.IOIOSwingApp;
+
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Point;
 import java.awt.Window;
-
-import javax.swing.UIManager;
-import javax.swing.JFrame;
-import javax.swing.ImageIcon;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -35,6 +31,7 @@ import java.awt.event.WindowEvent;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferByte;
 import java.awt.image.WritableRaster;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
@@ -48,8 +45,11 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
+
 import javax.swing.BoxLayout;
+import javax.swing.ImageIcon;
 import javax.swing.JFileChooser;
+import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
@@ -60,12 +60,16 @@ import javax.swing.JTabbedPane;
 import javax.swing.KeyStroke;
 import javax.swing.SwingConstants;
 import javax.swing.Timer;
+import javax.swing.UIManager;
 import javax.swing.border.BevelBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
-//import org.onebeartoe.pixel.hardware.Pixel;
+
+import org.onebeartoe.pixel.hardware.Pixel;
 import org.onebeartoe.pixel.plugins.swing.PixelPanel;
+import org.onebeartoe.pixel.plugins.swing.ScrollingTextPanel;
 import org.onebeartoe.pixel.preferences.JavaPreferencesService;
+import org.onebeartoe.pixel.preferences.PixelPreferencesKeys;
 import org.onebeartoe.pixel.preferences.PreferencesService;
 
 public class PixelApp extends IOIOSwingApp
@@ -333,6 +337,7 @@ public class PixelApp extends IOIOSwingApp
 		led_ = ioio_.openDigitalOutput(IOIO.LED_PIN, true);
                 PixelApp.this.ioiO = ioio_;
 		pixel.matrix = ioio_.openRgbLedMatrix(pixel.KIND);
+                pixel.ioiO = ioio_;
 		setPixelFound();
 		System.out.println("Found PIXEL: " + pixel.matrix + "\n");
 		System.out.println("You may now interact with the PIXEL\n");
@@ -341,7 +346,7 @@ public class PixelApp extends IOIOSwingApp
 
 		searchTimer.stop(); //need to stop the timer so we don't still display the pixel searching message
 		String message = "PIXEL Status: Connected";
-	    PixelApp.this.statusLabel.setText(message);
+                PixelApp.this.statusLabel.setText(message);
 	    }
 	    
 	    @Override
@@ -399,8 +404,6 @@ public class PixelApp extends IOIOSwingApp
     {
 	List<PixelPanel> foundClasses = preferenceService.restoreUserPluginPreferences(KIND, userPluginConfiguration);
         
-        
-        
 /*	
 	String path = "../pixel-weather/target/pixel-weather-1.0-SNAPSHOT-jar-with-dependencies.jar";        
 	String className = "org.onebeartoe.pixel.plugins.weather.WeatherByWoeid";
@@ -453,44 +456,6 @@ public class PixelApp extends IOIOSwingApp
     public void windowClosing(WindowEvent event)
     {
         exit();
-    }
-
-    private static AnalogInput getAnalogInput(int pinNumber) 
-    {
-	if(ioiO != null)
-	{
-	    try 
-	    {
-		pixel.analogInput1 = ioiO.openAnalogInput(pinNumber);
-	    } 
-	    catch (ConnectionLostException ex) 
-	    {
-		String message = "The IOIO connection was lost.";
-		Logger.getLogger(PixelApp.class.getName()).log(Level.SEVERE, message, ex);
-	    }		
-	}
-        
-        return pixel.analogInput1;
-    }
-    
-    public static AnalogInput getAnalogInput1() 
-    {
-        if (pixel.analogInput1 == null) 
-	{
-	    pixel.analogInput1 = getAnalogInput(31);			    
-        }
-        
-        return pixel.analogInput1;
-    }
-    
-    public static AnalogInput getAnalogInput2() 
-    {
-        if (pixel.analogInput2 == null) 
-	{
-	    pixel.analogInput2 = getAnalogInput(32);
-        }
-        
-        return pixel.analogInput2;
     }
 
     private class AboutListener implements ActionListener

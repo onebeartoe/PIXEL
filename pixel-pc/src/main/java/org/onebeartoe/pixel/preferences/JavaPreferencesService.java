@@ -3,7 +3,7 @@ package org.onebeartoe.pixel.preferences;
 
 import com.ledpixelart.pc.PixelApp;
 import com.ledpixelart.pc.plugins.PluginConfigEntry;
-import com.ledpixelart.pc.plugins.swing.PixelPanel;
+//import com.ledpixelart.pc.plugins.swing.PixelPanel;
 import com.ledpixelart.pc.plugins.swing.UserProvidedPanel;
 import ioio.lib.api.RgbLedMatrix;
 import java.awt.Dimension;
@@ -22,6 +22,7 @@ import java.util.logging.Logger;
 import java.util.prefs.BackingStoreException;
 import java.util.prefs.Preferences;
 import javax.swing.JFrame;
+import org.onebeartoe.pixel.plugins.swing.PixelPanel;
 
 /**
  * @author rmarquez

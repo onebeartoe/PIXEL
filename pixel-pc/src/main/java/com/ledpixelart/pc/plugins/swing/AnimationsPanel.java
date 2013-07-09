@@ -2,7 +2,6 @@
 package com.ledpixelart.pc.plugins.swing;
 
 import com.ledpixelart.pc.PixelApp;
-//import com.ledpixelart.pcpixelart.PixelAnimationsPC;
 import ioio.lib.api.RgbLedMatrix;
 import ioio.lib.api.exception.ConnectionLostException;
 import java.awt.event.ActionEvent;

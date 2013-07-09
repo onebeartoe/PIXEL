@@ -1,11 +1,11 @@
 
 package org.onebeartoe.pixel.plugins.swing;
 
-//import com.ledpixelart.pc.plugins.PixelPlugin;
 import ioio.lib.api.RgbLedMatrix;
 import java.net.URL;
 import javax.swing.ImageIcon;
 import javax.swing.JPanel;
+import org.onebeartoe.pixel.hardware.Pixel;
 import org.onebeartoe.pixel.plugins.PixelPlugin;
 
 /**
@@ -13,6 +13,8 @@ import org.onebeartoe.pixel.plugins.PixelPlugin;
  */
 public abstract class PixelPanel extends JPanel implements PixelPlugin 
 {
+    protected static Pixel pixel;
+    
     protected RgbLedMatrix matrix_;
     
     protected RgbLedMatrix.Matrix KIND;    

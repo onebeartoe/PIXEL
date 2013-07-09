@@ -12,10 +12,10 @@
   </parent>
   
   <groupId>org.onebeartoe.pixel.plugins</groupId>
-  <artifactId>pixel-plugins</artifactId>
-  <version>1.0-SNAPSHOT</version>
+  <artifactId>pixel-plugin</artifactId>
+  <version>0.1</version>
   
-  <name>pixel-plugins</name>
+  <name>pixel-plugin</name>
   
   <url>http://maven.apache.org</url>
   

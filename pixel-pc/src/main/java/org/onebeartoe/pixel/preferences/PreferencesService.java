@@ -2,13 +2,13 @@
 package org.onebeartoe.pixel.preferences;
 
 import com.ledpixelart.pc.plugins.PluginConfigEntry;
-import com.ledpixelart.pc.plugins.swing.PixelPanel;
 import com.ledpixelart.pc.plugins.swing.UserProvidedPanel;
 import ioio.lib.api.RgbLedMatrix;
 import java.awt.Dimension;
 import java.awt.Point;
 import java.util.List;
 import javax.swing.JFrame;
+import org.onebeartoe.pixel.plugins.swing.PixelPanel;
 
 /**
  * @author rmarquez
