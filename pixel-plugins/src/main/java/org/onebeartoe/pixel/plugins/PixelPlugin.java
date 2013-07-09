@@ -1,5 +1,5 @@
 
-package com.ledpixelart.pc.plugins;
+package org.onebeartoe.pixel.plugins;
 
 /**
  * @author rmarquez

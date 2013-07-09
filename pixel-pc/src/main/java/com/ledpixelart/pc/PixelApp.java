@@ -5,7 +5,7 @@ import org.onebeartoe.pixel.preferences.PixelPreferencesKeys;
 import com.ledpixelart.pc.plugins.PluginConfigEntry;
 import com.ledpixelart.pc.plugins.swing.AnimationsPanel;
 import com.ledpixelart.pc.plugins.swing.ImageTilePanel;
-import com.ledpixelart.pc.plugins.swing.PixelPanel;
+//import com.ledpixelart.pc.plugins.swing.PixelPanel;
 import com.ledpixelart.pc.plugins.swing.PixelTilePanel;
 import com.ledpixelart.pc.plugins.swing.ScrollingTextPanel;
 import com.ledpixelart.pc.plugins.swing.UserProvidedPanel;
@@ -63,7 +63,8 @@ import javax.swing.Timer;
 import javax.swing.border.BevelBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
-import org.onebeartoe.pixel.hardware.Pixel;
+//import org.onebeartoe.pixel.hardware.Pixel;
+import org.onebeartoe.pixel.plugins.swing.PixelPanel;
 import org.onebeartoe.pixel.preferences.JavaPreferencesService;
 import org.onebeartoe.pixel.preferences.PreferencesService;
 

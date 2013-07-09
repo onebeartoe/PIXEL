@@ -1,10 +1,11 @@
 
 package org.onebeartoe.pixel.plugins;
 
-import com.ledpixelart.pc.plugins.swing.PixelPanel;
+//import com.ledpixelart.pc.plugins.swing.PixelPanel;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import org.onebeartoe.pixel.plugins.swing.PixelPanel;
 
 /**
  * @author rmarquez
@@ -12,6 +13,7 @@ import java.util.List;
 public class JarPluginService implements PluginService
 {
 
+    
     public List<PixelPanel> load(URL url) 
     {
 	List<PixelPanel> plugins = new ArrayList();
