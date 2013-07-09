@@ -1,7 +1,7 @@
 
-package com.ledpixelart.hardware;
+package org.onebeartoe.pixel.hardware;
 
-import com.ledpixelart.pc.PixelApp;
+//import com.ledpixelart.pc.PixelApp;
 
 import ioio.lib.api.AnalogInput;
 import ioio.lib.api.RgbLedMatrix;
@@ -18,11 +18,9 @@ import java.util.Arrays;
 
 /**
  * @author rmarquez
- * @deprecated use the version in org.ioio-commons
  */
 public class Pixel 
 {
-
     public RgbLedMatrix matrix;
     
     public final RgbLedMatrix.Matrix KIND;
@@ -53,7 +51,8 @@ public class Pixel
      */
     public void loadRGB565(String raw565ImagePath) throws ConnectionLostException 
     {
-	BitmapInputStream = PixelApp.class.getClassLoader().getResourceAsStream(raw565ImagePath);
+	BitmapInputStream = getClass().getClassLoader().getResourceAsStream(raw565ImagePath);
+//	BitmapInputStream = PixelApp.class.getClassLoader().getResourceAsStream(raw565ImagePath);
 
 	try 
 	{   
@@ -73,7 +72,7 @@ public class Pixel
 	    frame_[f] = (short) (((short) BitmapBytes[y] & 0xFF) | (((short) BitmapBytes[y + 1] & 0xFF) << 8));
 	    y = y + 2;
 	}
-        matrix = PixelApp.getMatrix();
+//        matrix = PixelApp.getMatrix();
 	matrix.frame(frame_);
     }
     
@@ -86,7 +85,7 @@ public class Pixel
 	    y = y + 2;
 	}
 
-        matrix = PixelApp.getMatrix();
+//        matrix = PixelApp.getMatrix();
 	if(matrix != null)
 	{
 	    matrix.frame(frame_);

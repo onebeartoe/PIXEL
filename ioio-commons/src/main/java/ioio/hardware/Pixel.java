@@ -14,6 +14,7 @@ import java.util.Arrays;
 
 /**
  * @author rmarquez
+ * @deprecated use the version in org.onebeartoe.pixel.hardware
  */
 public class Pixel 
 {
