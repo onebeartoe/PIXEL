@@ -36,6 +36,8 @@ public class ScrollingTextPanel extends SingleThreadedPixelPanel
     
     private JComboBox<String> fontFamilyChooser;
     
+    protected JPanel textPanel;
+    
     final JPanel colorPanel;
     
     private JSlider scrollSpeedSlider;
@@ -57,10 +59,9 @@ public class ScrollingTextPanel extends SingleThreadedPixelPanel
 	colorChooser = new JColorChooser();
         
         textField = new JTextField("Type Something Here");
-        
-        JPanel inputSubPanel = new JPanel( new BorderLayout() );
+        JPanel inputSubPanel = new JPanel( new BorderLayout() );        
+        inputSubPanel.add(textField, BorderLayout.CENTER);
         JPanel inputPanel = new JPanel( new BorderLayout() );
-        inputSubPanel.add(textField, BorderLayout.CENTER);        
         inputPanel.add(inputSubPanel, BorderLayout.NORTH);              
         
         String [] fontNames = GraphicsEnvironment.getLocalGraphicsEnvironment().getAvailableFontFamilyNames();
@@ -89,7 +90,7 @@ public class ScrollingTextPanel extends SingleThreadedPixelPanel
         configurationPanel.add(fontPanel);
 	configurationPanel.add(colorComponents);
 	
-	JPanel textPanel = new JPanel( new BorderLayout());
+	textPanel = new JPanel( new BorderLayout());
 	textPanel.add(configurationPanel, BorderLayout.NORTH);
 	textPanel.setPreferredSize( new Dimension(250, 1) );
 	textPanel.setBorder( BorderFactory.createTitledBorder("Text") );	
@@ -102,6 +103,24 @@ public class ScrollingTextPanel extends SingleThreadedPixelPanel
         setLayout(new BorderLayout());
         add(textPanel, BorderLayout.CENTER);
 	add(speedPanel, BorderLayout.SOUTH);
+    }
+    
+    /**
+     * Override this to perform any additional foreground drawing on the image that get sent to the PIXEL
+     * @param g2d 
+     */
+    protected void additionalBackgroundDrawing(Graphics2D g2d) throws Exception
+    {
+        
+    }    
+    
+    /**
+     * Override this to perform any additional foreground drawing on the image that get sent to the PIXEL
+     * @param g2d 
+     */
+    protected void additionalForegroundDrawing(Graphics2D g2d) throws Exception
+    {
+        
     }
 
     @Override
@@ -153,7 +172,26 @@ public class ScrollingTextPanel extends SingleThreadedPixelPanel
             
             int y = fm.getHeight();            
 
+            try 
+            {
+                additionalBackgroundDrawing(g2d);
+            } 
+            catch (Exception ex) 
+            {
+                Logger.getLogger(ScrollingTextPanel.class.getName()).log(Level.SEVERE, null, ex);
+            }
+            
             g2d.drawString(message, x, y);
+            
+            try 
+            {
+                additionalForegroundDrawing(g2d);
+            } 
+            catch (Exception ex) 
+            {
+                Logger.getLogger(ScrollingTextPanel.class.getName()).log(Level.SEVERE, null, ex);
+            }
+            
             g2d.dispose();
 
             try 

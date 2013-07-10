@@ -3,36 +3,34 @@ package org.onebeartoe.pixel.plugins.weather;
 
 import ioio.lib.api.RgbLedMatrix.Matrix;
 import java.awt.BorderLayout;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import java.awt.Graphics2D;
+import java.awt.image.BufferedImage;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
 import javax.swing.JEditorPane;
-import javax.swing.JLabel;
 import javax.swing.JScrollPane;
-import org.onebeartoe.pixel.plugins.swing.SingleThreadedPixelPanel;
+import javax.swing.SwingUtilities;
+import org.onebeartoe.pixel.plugins.swing.ScrollingTextPanel;
 
 /**
  *
  */
-public class WeatherByWoeid extends SingleThreadedPixelPanel
+public class WeatherByWoeid extends ScrollingTextPanel
 {
-    private ActionListener worker = new WeatherWorker();
     
+    private Weather weather;
+    
+    BufferedImage icon;
+            
     public WeatherByWoeid(Matrix m)
     {
 	super(m);
 	
-//	timer.setDelay(5000);
-	
-	worker = new WeatherWorker();
-	
-	setLayout( new BorderLayout() );
-	
-	JLabel label = new JLabel("Weather Panel");
+//	setLayout( new BorderLayout() );
 	
 	JEditorPane webView = new JEditorPane();
 	webView.setContentType("text/html");
@@ -44,8 +42,23 @@ public class WeatherByWoeid extends SingleThreadedPixelPanel
             WeatherService weatherService = new WeatherService();
 	    InputStream dataIn = weatherService.retrieve( uri );
 	    
-	    // Parse Data
-	    Weather weather = weatherService.parse( dataIn );
+	    weather = weatherService.parse( dataIn );
+            
+            SwingUtilities.invokeLater( new Runnable() 
+            {
+                public void run() 
+                {
+                    try 
+                    {
+                        URL url = new URL(weather.imageUrl);
+                        icon = ImageIO.read(url);
+                    } 
+                    catch(Exception ex) 
+                    {
+                        Logger.getLogger(WeatherByWoeid.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                }
+            });
 	    
 	    String description = weatherService.format( weather );
             
@@ -57,15 +70,25 @@ public class WeatherByWoeid extends SingleThreadedPixelPanel
 	    Logger.getLogger(WeatherByWoeid.class.getName()).log(Level.SEVERE, message, ex);
 	}
         JScrollPane webviewScroller = new JScrollPane(webView, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-	
-	add(label, BorderLayout.NORTH);
-	add(webviewScroller, BorderLayout.CENTER);
+
+System.out.println("text panel removed");
+        remove(textPanel);
+        
+        add(textPanel, BorderLayout.CENTER);
+	add(webviewScroller, BorderLayout.SOUTH);
     }
     
     @Override
-    public ActionListener getActionListener() 
-    {        
-        return worker;
+    protected void additionalBackgroundDrawing(Graphics2D g2d) throws Exception
+    {
+        if(icon == null)
+        {
+            System.err.println("The weather image is not available.");
+        }
+        else
+        {
+            g2d.drawImage(icon, 0, 0, this);
+        }
     }
     
     @Override
@@ -78,15 +101,12 @@ public class WeatherByWoeid extends SingleThreadedPixelPanel
 	
 	return imagesTabIcon;
     }
-    
-    public class WeatherWorker implements ActionListener
+
+    @Override    
+    public String getText()
     {
-	@Override
-	public void actionPerformed(ActionEvent e) 
-	{
-	    timer.setDelay(5000);
-	    System.out.println("weather works great");
-	}
+        String text = weather.toString().replaceAll("\n", "");
+	return text;
     }
     
 }
