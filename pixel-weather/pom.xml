@@ -45,10 +45,17 @@
     </dependency>
     
     <dependency>
+	<groupId>org.onebeartoe.pixel.plugins</groupId>
+	<artifactId>pixel-plugin</artifactId>
+	<version>0.1</version>
+    </dependency>
+    
+    <!--dependency>
 	<groupId>org.onebeartoe.pixel</groupId>
 	<artifactId>pixel-pc</artifactId>
 	<version>0.6</version>
-    </dependency>
+    </dependency-->
+    
 <!--    
     <dependency>
       <groupId>velocity</groupId>
@@ -56,6 +63,7 @@
       <version>1.5</version>
     </dependency>
     -->
+    
   </dependencies>
   
       

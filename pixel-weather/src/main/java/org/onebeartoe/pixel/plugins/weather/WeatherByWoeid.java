@@ -12,6 +12,7 @@ import java.util.logging.Logger;
 import javax.swing.ImageIcon;
 import javax.swing.JEditorPane;
 import javax.swing.JLabel;
+import javax.swing.JScrollPane;
 import org.onebeartoe.pixel.plugins.swing.SingleThreadedPixelPanel;
 
 /**
@@ -40,12 +41,14 @@ public class WeatherByWoeid extends SingleThreadedPixelPanel
 	int end = -1;
 	try 
 	{
-	    InputStream dataIn = new WeatherService().retrieve( uri );
+            WeatherService weatherService = new WeatherService();
+	    InputStream dataIn = weatherService.retrieve( uri );
 	    
 	    // Parse Data
-	    Weather weather = new WeatherService().parse( dataIn );
+	    Weather weather = weatherService.parse( dataIn );
 	    
-	    String description = new WeatherService().format( weather );
+	    String description = weatherService.format( weather );
+            
 	    webView.setText(description);
 	} 
 	catch (Exception ex) 
@@ -53,9 +56,10 @@ public class WeatherByWoeid extends SingleThreadedPixelPanel
 	    String message = "start: " + start + "  -   end: " + end;
 	    Logger.getLogger(WeatherByWoeid.class.getName()).log(Level.SEVERE, message, ex);
 	}
+        JScrollPane webviewScroller = new JScrollPane(webView, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 	
 	add(label, BorderLayout.NORTH);
-	add(webView, BorderLayout.CENTER);
+	add(webviewScroller, BorderLayout.CENTER);
     }
     
     @Override
