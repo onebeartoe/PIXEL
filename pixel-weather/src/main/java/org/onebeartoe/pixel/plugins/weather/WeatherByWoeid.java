@@ -1,7 +1,6 @@
 
 package org.onebeartoe.pixel.plugins.weather;
 
-import com.ledpixelart.pc.plugins.swing.SingleThreadedPixelPanel;
 import ioio.lib.api.RgbLedMatrix.Matrix;
 import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
@@ -13,6 +12,7 @@ import java.util.logging.Logger;
 import javax.swing.ImageIcon;
 import javax.swing.JEditorPane;
 import javax.swing.JLabel;
+import org.onebeartoe.pixel.plugins.swing.SingleThreadedPixelPanel;
 
 /**
  *

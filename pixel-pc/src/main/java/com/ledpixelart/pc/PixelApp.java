@@ -89,7 +89,7 @@ public class PixelApp extends IOIOSwingApp
     
     private UserProvidedPanel localImagesPanel;
     
-    private List<PixelPanel> pixelPanels;
+    private List<PixelPanel> builtinPixelPanels;
     
     private List<PixelPanel> userPluginPanels;
     
@@ -119,7 +119,7 @@ public class PixelApp extends IOIOSwingApp
 
         userPluginConfiguration = new ArrayList();
         
-	pixelPanels = new ArrayList();
+	builtinPixelPanels = new ArrayList();
 	
 	userPluginPanels = new ArrayList();
     }
@@ -143,7 +143,7 @@ public class PixelApp extends IOIOSwingApp
         ImageIcon imagesTabIcon = new ImageIcon(url);
 	PixelTilePanel imagesPanelReal = new ImageTilePanel(pixel.KIND);
 	imagesPanelReal.populate();
-	pixelPanels.add(imagesPanelReal);
+	builtinPixelPanels.add(imagesPanelReal);
 	
 	// user images tab
 	String userIconPath = "/tab_icons/my_small.png";
@@ -156,7 +156,7 @@ public class PixelApp extends IOIOSwingApp
 	File localUserDirectory = new File(localUserPath);
 	localImagesPanel = new UserProvidedPanel(pixel.KIND, localUserDirectory);
 	localImagesPanel.populate();
-	pixelPanels.add(localImagesPanel);
+	builtinPixelPanels.add(localImagesPanel);
 
 	// animations tab
 	String path2 = "/tab_icons/ship_small.png";
@@ -164,14 +164,14 @@ public class PixelApp extends IOIOSwingApp
 	ImageIcon animationsTabIcon = new ImageIcon(url2);
 	final PixelTilePanel animationsPanel = new AnimationsPanel(pixel.KIND);
 	animationsPanel.populate();
-	pixelPanels.add(animationsPanel);
+	builtinPixelPanels.add(animationsPanel);
 
 	// scrolling text panel
 	String path3 = "/tab_icons/text_small.png";
 	URL url3 = getClass().getResource(path3);
 	ImageIcon textTabIcon = new ImageIcon(url3);
         PixelPanel scrollPanel = new ScrollingTextPanel(pixel.KIND);
-        pixelPanels.add(scrollPanel);        
+        builtinPixelPanels.add(scrollPanel);        
 
 	frame = new JFrame("PIXEL");
 	
@@ -303,7 +303,7 @@ public class PixelApp extends IOIOSwingApp
 	ImageIcon icon = panel.getTabIcon();
 	String title = panel.getTabTitle();
 	tabbedPane.addTab(title, icon, panel, "A weather app for internal and external temps.");
-	pixelPanels.add(panel);
+	builtinPixelPanels.add(panel);
     }
     
     private void exit()
@@ -338,6 +338,18 @@ public class PixelApp extends IOIOSwingApp
                 PixelApp.this.ioiO = ioio_;
 		pixel.matrix = ioio_.openRgbLedMatrix(pixel.KIND);
                 pixel.ioiO = ioio_;
+                
+                for(PixelPanel panel : userPluginPanels)
+                {
+//System.out.println("\nSetting pixel for panel: " + panel.getClass() + "\n");
+                    panel.pixel = pixel;
+                }
+                
+                for(PixelPanel panel : builtinPixelPanels)
+                {
+                    panel.pixel = pixel;
+                }
+                
 		setPixelFound();
 		System.out.println("Found PIXEL: " + pixel.matrix + "\n");
 		System.out.println("You may now interact with the PIXEL\n");
@@ -435,14 +447,16 @@ public class PixelApp extends IOIOSwingApp
 	        
 	return foundClasses;
     }
+
     
     private void setPixelFound()
     {
-	for(PixelPanel panel : pixelPanels)
+	for(PixelPanel panel : builtinPixelPanels)
 	{
-	    panel.setPixelFound(true);
+//	    panel.setPixelFound(true);
 	}
     }
+
     
     private void startSearchTimer()
     {
@@ -646,7 +660,7 @@ public class PixelApp extends IOIOSwingApp
     {
 	public void stateChanged(ChangeEvent e) 
 	{
-	    for(PixelPanel panel : pixelPanels)
+	    for(PixelPanel panel : builtinPixelPanels)
 	    {
 		panel.stopPixelActivity();
 	    }

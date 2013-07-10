@@ -1,7 +1,6 @@
 
 package org.onebeartoe.pixel.plugins.swing;
 
-//import com.ledpixelart.pc.PixelApp;
 import ioio.lib.api.RgbLedMatrix;
 import ioio.lib.api.exception.ConnectionLostException;
 import java.awt.BorderLayout;
@@ -25,7 +24,6 @@ import javax.swing.JComboBox;
 import javax.swing.JPanel;
 import javax.swing.JSlider;
 import javax.swing.JTextField;
-import org.onebeartoe.pixel.hardware.Pixel;
 
 /**
  * @author rmarquez
@@ -34,8 +32,6 @@ public class ScrollingTextPanel extends SingleThreadedPixelPanel
 {
     private static final long serialVersionUID = 1L;
     
-    public static Pixel pixel;
-
     private JTextField textField;
     
     private JComboBox<String> fontFamilyChooser;
@@ -161,7 +157,7 @@ public class ScrollingTextPanel extends SingleThreadedPixelPanel
             g2d.dispose();
 
             try 
-            {              
+            {  
                 pixel.writeImagetoMatrix(img);
             } 
             catch (ConnectionLostException ex) 

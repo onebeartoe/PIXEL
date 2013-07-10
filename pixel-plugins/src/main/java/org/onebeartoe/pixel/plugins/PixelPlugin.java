@@ -6,7 +6,7 @@ package org.onebeartoe.pixel.plugins;
  */
 public interface PixelPlugin 
 {
-    void setPixelFound(boolean found);
+//    void setPixelFound(boolean found);
 	    
     void startPixelActivity();
     

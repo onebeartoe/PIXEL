@@ -13,7 +13,7 @@ import org.onebeartoe.pixel.plugins.PixelPlugin;
  */
 public abstract class PixelPanel extends JPanel implements PixelPlugin 
 {
-    protected static Pixel pixel;
+    public Pixel pixel;
     
     protected RgbLedMatrix matrix_;
     

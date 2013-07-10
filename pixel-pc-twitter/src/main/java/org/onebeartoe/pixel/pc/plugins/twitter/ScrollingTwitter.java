@@ -1,8 +1,8 @@
 
 package org.onebeartoe.pixel.pc.plugins.twitter;
 
-import com.ledpixelart.pc.plugins.swing.ScrollingTextPanel;
 import ioio.lib.api.RgbLedMatrix;
+import org.onebeartoe.pixel.plugins.swing.ScrollingTextPanel;
 
 /**
  * @author rmarquez
