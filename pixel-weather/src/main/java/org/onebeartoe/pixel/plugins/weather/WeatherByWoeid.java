@@ -71,11 +71,12 @@ public class WeatherByWoeid extends ScrollingTextPanel
 	}
         JScrollPane webviewScroller = new JScrollPane(webView, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 
-System.out.println("text panel removed");
-        remove(textPanel);
+//System.out.println("text panel removed");
+//        remove(textPanel);
         
-        add(textPanel, BorderLayout.CENTER);
-	add(webviewScroller, BorderLayout.SOUTH);
+//        add(textPanel, BorderLayout.CENTER);
+	add(webviewScroller, BorderLayout.CENTER);
+//	add(webviewScroller, BorderLayout.SOUTH);
     }
     
     @Override

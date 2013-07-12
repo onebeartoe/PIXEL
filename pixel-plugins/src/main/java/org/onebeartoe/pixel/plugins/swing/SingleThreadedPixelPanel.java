@@ -4,7 +4,6 @@ package org.onebeartoe.pixel.plugins.swing;
 import ioio.lib.api.RgbLedMatrix;
 import java.awt.event.ActionListener;
 import javax.swing.Timer;
-import org.onebeartoe.pixel.plugins.swing.PixelPanel;
 
 /**
  * @author rmarquez
@@ -15,9 +14,7 @@ public abstract class SingleThreadedPixelPanel extends PixelPanel
     volatile protected Timer timer;
     
     protected boolean pixelFound;
-    
-//    protected volatile int tickDelay;
-    
+
     public SingleThreadedPixelPanel(RgbLedMatrix.Matrix KIND)
     {
         super(KIND);
@@ -25,12 +22,6 @@ public abstract class SingleThreadedPixelPanel extends PixelPanel
 	
 	
     }        
-
-//    @Override
-//    public void setPixelFound(boolean found) 
-//    {
-//	this.pixelFound = found;
-//    }    
 	
     @Override
     public void startPixelActivity()

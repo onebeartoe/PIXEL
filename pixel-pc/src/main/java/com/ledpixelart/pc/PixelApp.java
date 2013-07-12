@@ -189,9 +189,6 @@ public class PixelApp extends IOIOSwingApp
 	tabbedPane.addTab("Images", imagesTabIcon, imagesPanelReal, "Load built-in images.");
 	tabbedPane.addTab("My Images", userTabIcon, localImagesPanel, "This panel displays images from your local hard drive.");
         tabbedPane.addTab("Animations", animationsTabIcon, animationsPanel, "Load built-in animations.");
-        tabbedPane.setMnemonicAt(1, KeyEvent.VK_2);
-	
-	tabbedPane.setMnemonicAt(2, KeyEvent.VK_4);
 	tabbedPane.addTab("Scolling Text", textTabIcon, scrollPanel, "Scrolls a text message across the PIXEL");
 	
 	Dimension demension;

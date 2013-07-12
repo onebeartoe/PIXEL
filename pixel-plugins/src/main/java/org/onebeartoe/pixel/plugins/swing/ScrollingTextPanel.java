@@ -92,7 +92,7 @@ public class ScrollingTextPanel extends SingleThreadedPixelPanel
 	
 	textPanel = new JPanel( new BorderLayout());
 	textPanel.add(configurationPanel, BorderLayout.NORTH);
-	textPanel.setPreferredSize( new Dimension(250, 1) );
+//	textPanel.setPreferredSize( new Dimension(250, 1) );
 	textPanel.setBorder( BorderFactory.createTitledBorder("Text") );	
 	
 	scrollSpeedSlider = new JSlider(200, 709);
@@ -100,13 +100,23 @@ public class ScrollingTextPanel extends SingleThreadedPixelPanel
 	speedPanel.add(scrollSpeedSlider);
 	speedPanel.setBorder( BorderFactory.createTitledBorder("Scroll Speed") );
         
+        JPanel propertiesPanel = new JPanel( new GridLayout(2,1, 10,10) );
+        propertiesPanel.add(textPanel);
+	propertiesPanel.add(speedPanel);
+//        JPanel propertiesPanel = new JPanel( new BorderLayout() );
+//        propertiesPanel.add(textPanel, BorderLayout.CENTER);
+//	propertiesPanel.add(speedPanel, BorderLayout.SOUTH);
+        
         setLayout(new BorderLayout());
-        add(textPanel, BorderLayout.CENTER);
-	add(speedPanel, BorderLayout.SOUTH);
+	add(propertiesPanel, BorderLayout.SOUTH);
+//        add(propertiesPanel, BorderLayout.CENTER);
+        
+//        add(textPanel, BorderLayout.CENTER);
+//	add(speedPanel, BorderLayout.SOUTH);
     }
     
     /**
-     * Override this to perform any additional foreground drawing on the image that get sent to the PIXEL
+     * Override this to perform any additional background drawing on the image that get sent to the PIXEL
      * @param g2d 
      */
     protected void additionalBackgroundDrawing(Graphics2D g2d) throws Exception
