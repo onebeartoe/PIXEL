@@ -412,18 +412,6 @@ public class PixelApp extends IOIOSwingApp
     {
 	List<PixelPanel> foundClasses = preferenceService.restoreUserPluginPreferences(KIND, userPluginConfiguration);
         
-/*	
-	String path = "../pixel-weather/target/pixel-weather-1.0-SNAPSHOT-jar-with-dependencies.jar";        
-	String className = "org.onebeartoe.pixel.plugins.weather.WeatherByWoeid";
-//	PixelPanel plugin = loadPlugin(path, className);
-//	foundClasses.add(plugin);
-
-	path = "../pixel-games/target/pixel-games-1.0-SNAPSHOT.jar";
-	className = "org.onebeartoe.games.pixel.press.your.button.PressYourButton";
-//	PixelPanel gamePlugin = loadPlugin(path, className);
-//	foundClasses.add(gamePlugin);
-*/
-        
 	if( foundClasses.isEmpty() )
 	{
 	    System.out.println("No plugins were found.");
