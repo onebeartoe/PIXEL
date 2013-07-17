@@ -16,8 +16,9 @@ public class WeatherService {
 
 	private static Logger log = Logger.getLogger(WeatherService.class.getName());
 
-	public Weather parse(InputStream inputStream) throws Exception {
-		Weather weather = new Weather();
+	public WoeidLocation parse(InputStream inputStream) throws Exception 
+        {
+		WoeidLocation weather = new WoeidLocation();
 		
 		log.info( "Creating XML Reader" );
 		SAXReader xmlReader = createXmlReader();
@@ -42,19 +43,21 @@ public class WeatherService {
 		return weather;
 	}
 
-	private SAXReader createXmlReader() {
-		Map<String,String> uris = new HashMap<String,String>();
-        uris.put( "y", "http://xml.weather.yahoo.com/ns/rss/1.0" );
+	private SAXReader createXmlReader() 
+        {
+            Map<String,String> uris = new HashMap<String,String>();
+            uris.put( "y", "http://xml.weather.yahoo.com/ns/rss/1.0" );
         
-        DocumentFactory factory = new DocumentFactory();
-        factory.setXPathNamespaceURIs( uris );
+            DocumentFactory factory = new DocumentFactory();
+            factory.setXPathNamespaceURIs( uris );
         
-		SAXReader xmlReader = new SAXReader();
-		xmlReader.setDocumentFactory( factory );
-		return xmlReader;
+            SAXReader xmlReader = new SAXReader();
+            xmlReader.setDocumentFactory( factory );
+            
+            return xmlReader;
 	}
 
-	public String format(Weather weather)
+	public String format(WoeidLocation weather)
 	{
 	    StringBuilder buf = new StringBuilder();
 	    
@@ -62,9 +65,11 @@ public class WeatherService {
 	    buf.append("-----------------------------------");
 	    buf.append("\n");
 	    buf.append( weather.toString() );
-String text = "HTML Description:\n" + weather.htmlDescription;            
+            
+            String text = "HTML Description:\n" + weather.htmlDescription;            
 	    buf.append(text);
-System.out.println(text);
+            System.out.println(text);
+            
 	    buf.append("\n");
 	    buf.append("-----------------------------------");
 	    buf.append("</pre>");
@@ -72,14 +77,15 @@ System.out.println(text);
 	    return buf.toString();
 	}
 	
-	public InputStream retrieve(String zipcode) throws Exception {
-		log.info( "Retrieving Weather Data" );
-		
-		String url = zipcode;
-//		String url = "http://weather.yahooapis.com/forecastrss?p=" + zipcode;
-		
-		URLConnection conn = new URL(url).openConnection();
-		return conn.getInputStream();
+	public InputStream retrieve(String url) throws Exception 
+        {
+            log.info( "Retrieving Weather Data" );
+
+//          String url = "http://weather.yahooapis.com/forecastrss?p=" + zipcode;
+
+            URLConnection conn = new URL(url).openConnection();
+
+            return conn.getInputStream();
 	}	
 	
 }

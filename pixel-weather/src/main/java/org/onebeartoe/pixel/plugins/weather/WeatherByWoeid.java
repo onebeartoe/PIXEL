@@ -33,18 +33,21 @@ import org.onebeartoe.pixel.plugins.swing.ScrollingTextPanel;
 public class WeatherByWoeid extends ScrollingTextPanel
 {
     
-    private Weather weather;
+    private WoeidLocation weather;
     
     private BufferedImage icon;
     
-    private DefaultComboBoxModel<String> locationsModel;
+    private DefaultComboBoxModel<WoeidLocation> locationsModel;
             
     public WeatherByWoeid(Matrix m)
     {
 	super(m);
 	
-        locationsModel = new DefaultComboBoxModel<String>();
-        locationsModel.addElement("Paris");                
+        WoeidLocation location = new WoeidLocation();
+        location.city = "Paris";
+        location.locationId = "615702";
+        locationsModel = new DefaultComboBoxModel();        
+        locationsModel.addElement(location);
         JComboBox locationDropdown = new JComboBox(locationsModel);
         
         JRadioButton woeidRadio = new JRadioButton("WOEID");
@@ -85,15 +88,15 @@ public class WeatherByWoeid extends ScrollingTextPanel
 	
 	JEditorPane webView = new JEditorPane();
 	webView.setContentType("text/html");
-	String uri = "http://weather.yahooapis.com/forecastrss?w=615702";
+	String uri = "http://weather.yahooapis.com/forecastrss?" + location.toQueryString();
 	int start = -1;
 	int end = -1;
 	try 
 	{
             WeatherService weatherService = new WeatherService();
-	    InputStream dataIn = weatherService.retrieve( uri );
+	    InputStream instream = weatherService.retrieve( uri );
 	    
-	    weather = weatherService.parse( dataIn );
+	    weather = weatherService.parse(instream);
             
             SwingUtilities.invokeLater( new Runnable() 
             {

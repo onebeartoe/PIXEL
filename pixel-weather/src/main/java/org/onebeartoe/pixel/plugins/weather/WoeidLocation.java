@@ -1,7 +1,7 @@
 
 package org.onebeartoe.pixel.plugins.weather;
 
-public class Weather 
+public class WoeidLocation 
 {
     public String locationId;
     
@@ -15,9 +15,14 @@ public class Weather
     public String imageUrl;
     public String htmlDescription;
     
-    public Weather() 
+    public WoeidLocation() 
     {
         
+    }
+    
+    public String toQueryString()
+    {
+        return "w=" + locationId;
     }
     
     @Override
