@@ -196,13 +196,16 @@ public class ScrollingTextPanel extends SingleThreadedPixelPanel
             
             g2d.dispose();
 
-            try 
-            {  
-                pixel.writeImagetoMatrix(img);
-            } 
-            catch (ConnectionLostException ex) 
+            if(pixel != null)
             {
-                Logger.getLogger(ScrollingTextPanel.class.getName()).log(Level.SEVERE, null, ex);
+                try 
+                {  
+                    pixel.writeImagetoMatrix(img);
+                } 
+                catch (ConnectionLostException ex) 
+                {
+                    Logger.getLogger(ScrollingTextPanel.class.getName()).log(Level.SEVERE, null, ex);
+                }                
             }
                         
             int messageWidth = fm.stringWidth(message);            

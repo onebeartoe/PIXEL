@@ -3,16 +3,28 @@ package org.onebeartoe.pixel.plugins.weather;
 
 import ioio.lib.api.RgbLedMatrix.Matrix;
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Graphics2D;
+import java.awt.GridLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.imageio.ImageIO;
+import javax.swing.BorderFactory;
+import javax.swing.ButtonGroup;
+import javax.swing.DefaultComboBoxModel;
 import javax.swing.ImageIcon;
+import javax.swing.JButton;
+import javax.swing.JComboBox;
 import javax.swing.JEditorPane;
+import javax.swing.JPanel;
+import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
 import javax.swing.SwingUtilities;
 import org.onebeartoe.pixel.plugins.swing.ScrollingTextPanel;
 
@@ -24,13 +36,53 @@ public class WeatherByWoeid extends ScrollingTextPanel
     
     private Weather weather;
     
-    BufferedImage icon;
+    private BufferedImage icon;
+    
+    private DefaultComboBoxModel<String> locationsModel;
             
     public WeatherByWoeid(Matrix m)
     {
 	super(m);
 	
-//	setLayout( new BorderLayout() );
+        locationsModel = new DefaultComboBoxModel<String>();
+        locationsModel.addElement("Paris");                
+        JComboBox locationDropdown = new JComboBox(locationsModel);
+        
+        JRadioButton woeidRadio = new JRadioButton("WOEID");
+        JRadioButton usZipRadio = new JRadioButton("US ZIP Code");
+        ButtonGroup radioGroup = new ButtonGroup();
+        radioGroup.add(woeidRadio);
+        radioGroup.add(usZipRadio);
+        JPanel radioPanel = new JPanel( new GridLayout(1,2, 5, 5) );
+        radioPanel.add(woeidRadio);
+        radioPanel.add(usZipRadio);                        
+        final JTextArea locationIdField = new JTextArea();
+	JButton addLocationButton = new JButton("Add");
+	addLocationButton.addActionListener( new ActionListener() 
+	{
+	    public void actionPerformed(ActionEvent e) 
+	    {
+                String s = locationIdField.getText();
+                
+		int id = Integer.parseInt(s);
+                
+                
+		
+	    }
+	});	
+	JPanel addLocationPanel = new JPanel( new BorderLayout() );
+	addLocationPanel.add(locationIdField, BorderLayout.CENTER);
+	addLocationPanel.add(addLocationButton, BorderLayout.EAST);
+        
+        JPanel newlocationPanel = new JPanel( new GridLayout(2,1, 10, 10) );        
+        newlocationPanel.add(radioPanel);
+        newlocationPanel.add(addLocationPanel);
+        newlocationPanel.setBorder( BorderFactory.createTitledBorder("New Location") );
+        
+        JPanel locationPanel = new JPanel( new GridLayout(3,1, 10, 10) );
+        locationPanel.add(locationDropdown);
+        locationPanel.add(newlocationPanel);
+        locationPanel.setBorder( BorderFactory.createTitledBorder("Current Location") );
 	
 	JEditorPane webView = new JEditorPane();
 	webView.setContentType("text/html");
@@ -71,12 +123,8 @@ public class WeatherByWoeid extends ScrollingTextPanel
 	}
         JScrollPane webviewScroller = new JScrollPane(webView, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 
-//System.out.println("text panel removed");
-//        remove(textPanel);
-        
-//        add(textPanel, BorderLayout.CENTER);
+        add(locationPanel, BorderLayout.NORTH);
 	add(webviewScroller, BorderLayout.CENTER);
-//	add(webviewScroller, BorderLayout.SOUTH);
     }
     
     @Override
