@@ -3,7 +3,6 @@ package org.onebeartoe.pixel.plugins.weather;
 
 import ioio.lib.api.RgbLedMatrix.Matrix;
 import java.awt.BorderLayout;
-import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
