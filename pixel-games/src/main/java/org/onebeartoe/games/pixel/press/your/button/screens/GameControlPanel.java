@@ -41,7 +41,6 @@ public class GameControlPanel extends JPanel
         box.add(Box.createVerticalGlue());
         box.add(panels);        
 	box.add(Box.createVerticalGlue());
-//	Box box = createCenteredBox(this.gameBoardPanel);
 	
 	JButton newGameButton = new JButton("New Game");
 	newGameButton.addActionListener( new NewGameListener() );
@@ -62,23 +61,6 @@ public class GameControlPanel extends JPanel
 	add(box, BorderLayout.CENTER);
 	add(buttonPanel, BorderLayout.SOUTH);
     }
-
-/*    
-    private Box createCenteredBox(Component c)
-    {
-	JButton stopButton = new JButton("Stop");
-	stopButton.addActionListener( new StopButtonListener() );
-	
-	Box box = new Box(BoxLayout.Y_AXIS);
-        box.setAlignmentX(JComponent.CENTER_ALIGNMENT);
-        box.add(Box.createVerticalGlue());
-        box.add(c);
-        box.add(stopButton );
-	box.add(Box.createVerticalGlue());
-	
-	return box;
-    }
-*/
     
     private void newGame()
     {
@@ -110,13 +92,11 @@ public class GameControlPanel extends JPanel
 	}	
     }
     
-
     private class NewGameListener implements ActionListener
     {
 	public void actionPerformed(ActionEvent e) 
 	{	    
-//	    plugin.winnerSound.stop();
-System.out.println("in new game listener, game state is " + plugin.gameState);
+            System.out.println("in new game listener, game state is " + plugin.gameState);
 
 	    if(plugin.gameState == GameStates.PLAYERS_TURN ||
 		    plugin.gameState == GameStates.END_OF_TURN ||
@@ -134,15 +114,14 @@ System.out.println("in new game listener, game state is " + plugin.gameState);
 		newGame();
 		
 	    }
-	}
-	
+        }
     }
     
     private class NextPlayerListener implements ActionListener
     {
 	public void actionPerformed(ActionEvent e) 
 	{
-System.out.println("in next listener, game state is " + plugin.gameState);	    
+            System.out.println("in next listener, game state is " + plugin.gameState);	    
 	    if(plugin.gameState == GameStates.END_OF_GAME)
 	    {
 		String message = "This game is over, please click the 'New Game' button.";

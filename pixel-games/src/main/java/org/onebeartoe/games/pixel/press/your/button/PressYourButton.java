@@ -32,7 +32,6 @@ import javax.swing.ImageIcon;
 import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 import org.onebeartoe.games.pixel.press.your.button.board.WhammyPanel;
-import org.onebeartoe.pixel.hardware.Pixel;
 import org.onebeartoe.pixel.plugins.swing.ScrollingTextPanel;
 import org.onebeartoe.pixel.plugins.swing.SingleThreadedPixelPanel;
 
@@ -77,6 +76,10 @@ public class PressYourButton extends SingleThreadedPixelPanel
     
     public AudioClip winnerSound;
     
+    public static final int boardWidth = 128;
+    
+    public static final int gamePanelWidth = boardWidth / 3;
+    
     public PressYourButton(Matrix m)
     {
 	super(m);	
@@ -101,7 +104,7 @@ public class PressYourButton extends SingleThreadedPixelPanel
 	scoreBoardPanel = new PreviewPanel(this, scoreBoardDimension);
 	scoreBoardPanel.setAlignmentX(Component.CENTER_ALIGNMENT);
 	
-	Dimension boardDimension = new Dimension(128,128);
+	Dimension boardDimension = new Dimension(boardWidth, boardWidth);
 	gameBoardPanel = new PreviewPanel(this, boardDimension);
 	gameBoardPanel.setAlignmentX(Component.CENTER_ALIGNMENT);
 	
@@ -236,14 +239,33 @@ public class PressYourButton extends SingleThreadedPixelPanel
 	    i++;
 	}
 	
-	Point labelLocation = new Point(43,43);
+	Point labelLocation = new Point(gamePanelWidth, gamePanelWidth);
 	String label = "P" + (currentGame.currentPlayer + 1);
 	BoardPanel playerLabel = new PlayerLabelPanel(label);
 	playerLabel.draw(g2d, labelLocation, Color.RED);
 	
 	g2d.dispose();
 
-	gameBoardPanel.setImage(img);
+//        Image scaledInstance = img.getScaledInstance(128*2, 128*2, BufferedImage.TYPE_INT_ARGB);
+        
+/*        
+        Image scaledInstance = before.getScaledInstance(128*2, 128*2, BufferedImage.TYPE_INT_ARGB);
+        
+*/
+        
+/*        
+int w = before.getWidth();
+int h = before.getHeight();
+BufferedImage after = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
+AffineTransform at = new AffineTransform();
+at.scale(2.0, 2.0);
+AffineTransformOp scaleOp = new AffineTransformOp(at, AffineTransformOp.TYPE_BILINEAR);
+after = scaleOp.filter(before, after);
+
+*/        
+
+//        gameBoardPanel.setImage(scaledInstance);
+        gameBoardPanel.setImage(img);
 
 	SwingUtilities.invokeLater( new Runnable() 
 	{
@@ -263,17 +285,17 @@ public class PressYourButton extends SingleThreadedPixelPanel
 	
 	// top row
 	Point p1 = new Point(0,0);
-	Point p2 = new Point(43, 0);
-	Point p3 = new Point(86, 0);	
+	Point p2 = new Point(gamePanelWidth, 0);
+	Point p3 = new Point(gamePanelWidth*2, 0);	
 	
 	// middle row
-	Point p4 = new Point(0, 43);
-	Point p5 = new Point(86, 43);
+	Point p4 = new Point(0, gamePanelWidth);
+	Point p5 = new Point(gamePanelWidth*2, gamePanelWidth);
 	
 	// bottom row
-	Point p6 = new Point(0, 86);
-	Point p7 = new Point(43, 86);
-	Point p8 = new Point(86, 86);
+	Point p6 = new Point(0, gamePanelWidth*2);
+	Point p7 = new Point(gamePanelWidth, gamePanelWidth*2);
+	Point p8 = new Point(gamePanelWidth*2, gamePanelWidth*2);
 		
 	boardPanelLocations.add(p1);
 	boardPanelLocations.add(p2);
@@ -326,13 +348,13 @@ System.out.println("drawing " + s + " at " + x + ", " + y + " at " + new Date())
     
     public void drawScoreBoardOnPixel()
     {	
-	BufferedImage img = drawScoreBoard();
+	BufferedImage before = drawScoreBoard();
 
-	scoreBoardPanel.setImage(img);
+	scoreBoardPanel.setImage(before);
 
 	updateScoreBoardPane();	
 	
-	writeImageToPixel(img);
+	writeImageToPixel(before);
 	
 	timer.setDelay(5000);  // milliseconds 	
     }
