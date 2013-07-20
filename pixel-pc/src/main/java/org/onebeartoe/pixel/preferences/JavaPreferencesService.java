@@ -88,18 +88,21 @@ public class JavaPreferencesService implements PreferencesService
             else
             {
                 String [] strs = s.split(PluginConfigEntry.JAR_CLASS_SEPARATOR);
-                String jarPath = strs[0];
-                String classes = strs[1];
-                String [] classNames = classes.split(PluginConfigEntry.JAR_CLASS_SEPARATOR);
-                for(String name : classNames)
+                if(strs.length > 1)
                 {
-		    PluginConfigEntry entry = new PluginConfigEntry();
-		    entry.jarPath = jarPath;
-		    entry.qualifiedClassName = name;
-		    userPluginConfiguration.add(entry);
-		    
-                    PixelPanel plugin = loadPlugin(jarPath, name, KIND);
-                    plugins.add(plugin);
+                    String jarPath = strs[0];
+                    String classes = strs[1];
+                    String [] classNames = classes.split(PluginConfigEntry.JAR_CLASS_SEPARATOR);
+                    for(String name : classNames)
+                    {
+                        PluginConfigEntry entry = new PluginConfigEntry();
+                        entry.jarPath = jarPath;
+                        entry.qualifiedClassName = name;
+                        userPluginConfiguration.add(entry);
+
+                        PixelPanel plugin = loadPlugin(jarPath, name, KIND);
+                        plugins.add(plugin);
+                    }
                 }
             }
         }
