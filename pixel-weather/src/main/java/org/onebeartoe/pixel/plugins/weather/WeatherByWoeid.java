@@ -20,11 +20,14 @@ import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JEditorPane;
+import javax.swing.JFormattedTextField;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.SwingUtilities;
+import javax.swing.text.NumberFormatter;
 import org.onebeartoe.pixel.plugins.swing.ScrollingTextPanel;
 
 /**
@@ -58,7 +61,8 @@ public class WeatherByWoeid extends ScrollingTextPanel
         JPanel radioPanel = new JPanel( new GridLayout(1,2, 5, 5) );
         radioPanel.add(woeidRadio);
         radioPanel.add(usZipRadio);                        
-        final JTextArea locationIdField = new JTextArea();
+        final JFormattedTextField locationIdField = new JFormattedTextField( new NumberFormatter() );
+//        final JTextArea locationIdField = new JTextArea();
 	JButton addLocationButton = new JButton("Add");
 	addLocationButton.addActionListener( new ActionListener() 
 	{
@@ -66,10 +70,15 @@ public class WeatherByWoeid extends ScrollingTextPanel
 	    {
                 String s = locationIdField.getText();
                 
-		int id = Integer.parseInt(s);
-                
-                
-		
+                try
+                {
+                    int id = Integer.parseInt(s);
+                }
+                catch(NumberFormatException nfe)
+                {
+                    String message = "Please provide an all numeric ID.";
+                    JOptionPane.showMessageDialog(WeatherByWoeid.this, message);
+                }
 	    }
 	});	
 	JPanel addLocationPanel = new JPanel( new BorderLayout() );
