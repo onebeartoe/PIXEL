@@ -1,4 +1,5 @@
-package org.onebeartoe.pixel.android;
+
+package org.onebeartoe.pixel.android.art;
 
 import ioio.lib.api.exception.ConnectionLostException;
 import ioio.lib.util.BaseIOIOLooper;
@@ -17,6 +18,7 @@ import java.util.Arrays;
 import java.util.Random;
 
 import org.onebeartoe.pixel.android.R;
+import org.onebeartoe.pixel.android.Rescan;
 
 import alt.android.os.CountDownTimer;
 import android.app.AlertDialog;

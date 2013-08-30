@@ -1,5 +1,7 @@
 
-package org.onebeartoe.pixel.android;
+package org.onebeartoe.pixel.android.art;
+
+import org.onebeartoe.pixel.android.R;
 
 import android.os.Bundle;
 import android.preference.PreferenceActivity;

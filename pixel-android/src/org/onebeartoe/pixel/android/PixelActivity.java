@@ -4,7 +4,7 @@ package org.onebeartoe.pixel.android;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.onebeartoe.pixel.android.R;
+import org.onebeartoe.pixel.android.art.PixelArtActivity;
 
 import android.app.Activity;
 import android.content.Context;
