@@ -9,6 +9,8 @@ package org.onebeartoe.pixel.android;
 
 public final class R {
     public static final class array {
+        public static final int FPSOverride_options=0x7f060002;
+        public static final int FPSOverride_values=0x7f060003;
         public static final int matrix_options=0x7f060000;
         public static final int matrix_values=0x7f060001;
     }
@@ -33,37 +35,51 @@ public final class R {
         public static final int selectpic=0x7f02000a;
         public static final int splash=0x7f02000b;
         public static final int stills_tile=0x7f02000c;
+        public static final int zzzblank=0x7f02000d;
     }
     public static final class id {
-        public static final int countdown=0x7f0a0003;
-        public static final int detected_label=0x7f0a0002;
-        public static final int firstTimeInstructions=0x7f0a0005;
-        public static final int firstTimeSetup1=0x7f0a0004;
-        public static final int firstTimeSetup2=0x7f0a0006;
-        public static final int firstTimeSetupCounter=0x7f0a0007;
-        public static final int gridview=0x7f0a0000;
-        public static final int mainStatus=0x7f0a0001;
-        public static final int menu_about=0x7f0a000a;
-        public static final int menu_instructions=0x7f0a000b;
-        public static final int menu_prefs=0x7f0a0009;
-        public static final int menu_rescan=0x7f0a000c;
-        public static final int sdcard=0x7f0a0008;
+        public static final int countdown=0x7f0a0009;
+        public static final int detected_label=0x7f0a0008;
+        public static final int firstTimeInstructions=0x7f0a0003;
+        public static final int firstTimeSetup1=0x7f0a0001;
+        public static final int firstTimeSetup2=0x7f0a0002;
+        public static final int firstTimeSetupCounter=0x7f0a0004;
+        public static final int gifView=0x7f0a0000;
+        public static final int gridview=0x7f0a0006;
+        public static final int mainStatus=0x7f0a0007;
+        public static final int menu_about=0x7f0a000b;
+        public static final int menu_instructions=0x7f0a000c;
+        public static final int menu_prefs=0x7f0a000a;
+        public static final int menu_rescan=0x7f0a000d;
+        public static final int sdcard=0x7f0a0005;
     }
     public static final class layout {
-        public static final int pixel=0x7f030000;
-        public static final int rescan=0x7f030001;
-        public static final int sdcard=0x7f030002;
-        public static final int splash=0x7f030003;
+        public static final int animations=0x7f030000;
+        public static final int pixel=0x7f030001;
+        public static final int rescan=0x7f030002;
+        public static final int sdcard=0x7f030003;
+        public static final int splash=0x7f030004;
     }
     public static final class menu {
         public static final int mainmenu=0x7f090000;
     }
     public static final class raw {
         public static final int blank=0x7f050000;
-        public static final int selectpic=0x7f050001;
-        public static final int selectpic32=0x7f050002;
+        public static final int decoding16=0x7f050001;
+        public static final int decoding32=0x7f050002;
+        public static final int selectimage16=0x7f050003;
+        public static final int selectimage32=0x7f050004;
+        public static final int selectpic=0x7f050005;
+        public static final int selectpic32=0x7f050006;
     }
     public static final class string {
+        public static final int BootloaderVersionString=0x7f080031;
+        public static final int FPSOverrideDefault=0x7f080036;
+        public static final int FPSOverrideSummary=0x7f080038;
+        public static final int FPSOverrideTitle=0x7f080037;
+        public static final int FirmwareVersionString=0x7f080032;
+        public static final int HardwareVersionString=0x7f080034;
+        public static final int LibraryVersionString=0x7f080033;
         public static final int OKText=0x7f08002b;
         public static final int app_name=0x7f080000;
         public static final int bluetoothPairingString=0x7f08002a;
@@ -71,8 +87,10 @@ public final class R {
         public static final int bluetooth_pairSummary=0x7f080002;
         public static final int debugMode=0x7f080016;
         public static final int debugModeSummary=0x7f080018;
+        public static final int dialogTitleFPSOverride=0x7f080039;
         public static final int dialogTitleMatrix=0x7f080014;
         public static final int firstTime_instructions=0x7f080003;
+        public static final int fps_override=0x7f080035;
         public static final int hello=0x7f080004;
         public static final int imageDisplayDuration=0x7f08001b;
         public static final int imageDisplayDurationDefault=0x7f08001d;
@@ -116,6 +134,7 @@ public final class R {
     }
     public static final class xml {
         public static final int accessory_filter=0x7f040000;
-        public static final int art_preferences=0x7f040001;
+        public static final int animations_preferences=0x7f040001;
+        public static final int art_preferences=0x7f040002;
     }
 }

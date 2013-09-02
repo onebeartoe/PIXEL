@@ -1,7 +1,5 @@
 package org.onebeartoe.pixel.android;
 
-import org.onebeartoe.pixel.android.R;
-
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;

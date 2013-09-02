@@ -4,6 +4,7 @@ package org.onebeartoe.pixel.android;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.onebeartoe.pixel.android.animations.AnimationsActivity;
 import org.onebeartoe.pixel.android.art.PixelArtActivity;
 
 import android.app.Activity;
@@ -44,6 +45,7 @@ public class PixelActivity extends Activity
 	
 		Integer i = 0;
 		activitiesMap.put(i, PixelArtActivity.class);
+		activitiesMap.put(new Integer(1), AnimationsActivity.class);
 	}
 	
 	public class ImageAdapter extends BaseAdapter 
@@ -100,7 +102,8 @@ public class PixelActivity extends Activity
         {
         	if(position < activitiesMap.size() )
         	{
-        		Intent mainIntent = new Intent(PixelActivity.this, PixelArtActivity.class);
+        		Class c = activitiesMap.get(position);
+        		Intent mainIntent = new Intent(PixelActivity.this, c);
 				PixelActivity.this.startActivity(mainIntent);
         	}
         	else

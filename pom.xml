@@ -18,6 +18,7 @@
 		<module>ioio-android</module>
 		<module>ioio-bluetooth</module>
 		<module>ioio-pc</module>
+                <module>pixel-commons</module>
                 <module>pixel-jee</module>
 		<module>pixel-pc</module>
 <!--

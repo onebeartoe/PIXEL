@@ -3,7 +3,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
       package="org.onebeartoe.pixel.android"
       android:versionCode="1"
-      android:versionName="1.0">
+      android:versionName="1.01">
     
     <uses-sdk android:minSdkVersion="8" />
 
@@ -20,6 +20,19 @@
         <uses-library
             android:name="com.android.future.usb.accessory"
             android:required="false" />
+        
+        <activity
+            android:name=".animations.AnimationsActivity"
+            android:launchMode="singleTask"
+            android:screenOrientation="portrait" >
+            <intent-filter>
+                <action android:name="android.hardware.usb.action.USB_ACCESSORY_ATTACHED" />
+            </intent-filter>
+
+            <meta-data
+                android:name="android.hardware.usb.action.USB_ACCESSORY_ATTACHED"
+                android:resource="@xml/accessory_filter" />
+        </activity>
         
         <activity
             android:name=".PixelActivity"
@@ -63,6 +76,3 @@
     </application>
     
 </manifest> 
-
-
-

@@ -60,4 +60,16 @@
     <string name="slideShowStartVerbage">Starting Slide Show&#8230;</string>
     <string name="slideShowStopInstructions">Swipe from right to left to stop the Slide Show</string>
     <string name="slideShowStopVerbage">Slide Show Stopped</string>
+    
+    <string name="BootloaderVersionString">Bootloader Version</string> 
+    <string name="FirmwareVersionString">Firmware Version</string> 
+    <string name="LibraryVersionString">Library Version</string> 
+    <string name="HardwareVersionString">Hardware Version</string>
+    
+    <string name="fps_override">fps_override</string>
+    <string name="FPSOverrideDefault">0</string>
+    <string name="FPSOverrideTitle">Frames per Second</string>
+    <string name="FPSOverrideSummary">Normally you won\'t need to change this, only if you want to override the frames per second of the animations. Restart app after changing.</string>
+    <string name="dialogTitleFPSOverride">Frames per Second</string>
+    
 </resources>
