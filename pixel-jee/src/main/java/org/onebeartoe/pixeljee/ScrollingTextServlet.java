@@ -105,15 +105,21 @@ public class ScrollingTextServlet extends HttpServlet implements IOIOLooperProvi
     
     protected final void go(String[] args) throws Exception 
     {
+        System.out.println("initializeing the IOIO application helper");
         
         IOIOPcApplicationHelper helper = new IOIOPcApplicationHelper(this);
         helper.start();
-        try {
-                run(args);
-        } catch (Exception e) {
-                throw e;
-        } finally {
-                helper.stop();
+        try 
+        {            
+            run(args);
+        } 
+        catch (Exception e) 
+        {                
+            throw e;
+        } 
+        finally 
+        {                
+            helper.stop();
         }
     }
     
