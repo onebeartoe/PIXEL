@@ -8,6 +8,8 @@
         <title>JSP Page</title>
     </head>
     <body>
-        <h1>Hello World!</h1>
+        <h1>Hello E2 World!</h1>
+        <br/>
+        <a href="pixel-pc-0.6-jar-with-dependencies.jar">PIXEL PC</a>
     </body>
 </html>
