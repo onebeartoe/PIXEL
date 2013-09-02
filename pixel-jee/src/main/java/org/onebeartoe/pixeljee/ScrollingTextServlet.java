@@ -85,6 +85,8 @@ public class ScrollingTextServlet extends HttpServlet implements IOIOLooperProvi
     public void destroy()
     {
         searchTimer.stop();
+        
+        timer.stop();
     }
     
     @Override
