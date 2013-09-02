@@ -127,10 +127,17 @@ public class ScrollingTextServlet extends HttpServlet implements IOIOLooperProvi
 	timer.start();
     }
 
+    
+    
     @Override
-    public IOIOLooper createIOIOLooper(String connectionType, Object extra) {
+    public IOIOLooper createIOIOLooper(String connectionType, Object extra) 
+    {
+        System.out.println(getClass().getSimpleName() + " creating IOIO looper");
+        
 	return new BaseIOIOLooper() 
 	{
+            
+            
 	    private DigitalOutput led_;
 
 	    @Override
@@ -141,8 +148,6 @@ public class ScrollingTextServlet extends HttpServlet implements IOIOLooperProvi
 		pixel.matrix = ioio_.openRgbLedMatrix(pixel.KIND);
                 pixel.ioiO = ioio_;
                 
-                
-		
 		System.out.println("Found PIXEL: " + pixel.matrix + "\n");
 		System.out.println("You may now interact with the PIXEL\n");
 		
