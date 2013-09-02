@@ -96,47 +96,6 @@ public class ScrollingTextServlet extends HttpServlet implements IOIOLooperProvi
         response.getWriter().write(new Date().toString());
     }
     
-    public ActionListener getActionListener() 
-    {
-        ActionListener listener = new TextScroller();
-        
-        return listener;
-    }
-    
-    protected final void go(String[] args) throws Exception 
-    {
-        System.out.println("initializeing the IOIO application helper");
-        
-        IOIOPcApplicationHelper helper = new IOIOPcApplicationHelper(this);
-        helper.start();
-        try 
-        {            
-            run(args);
-        } 
-        catch (Exception e) 
-        {                
-            throw e;
-        } 
-        finally 
-        {                
-            helper.stop();
-        }
-    }
-    
-    protected void run(String[] args) throws Exception
-    {
-        System.out.println("Starting PIXEL activity in " + getClass().getSimpleName() + ".");		
-	ActionListener listener = getActionListener();
-	
-	// set the IOIO loop delay to half a second, by default
-	int delay = 500; // milliseconds
-	timer = new Timer(delay, listener);
-	
-	timer.start();
-    }
-
-    
-    
     @Override
     public IOIOLooper createIOIOLooper(String connectionType, Object extra) 
     {
@@ -144,8 +103,6 @@ public class ScrollingTextServlet extends HttpServlet implements IOIOLooperProvi
         
 	return new BaseIOIOLooper() 
 	{
-            
-            
 	    private DigitalOutput led_;
 
 	    @Override
@@ -180,6 +137,46 @@ public class ScrollingTextServlet extends HttpServlet implements IOIOLooperProvi
 		System.out.println(statusLabel);
 	    }
 	};
+    }
+    
+    public ActionListener getActionListener() 
+    {
+        ActionListener listener = new TextScroller();
+        
+        return listener;
+    }
+    
+    protected final void go(String[] args) throws Exception 
+    {
+        System.out.println("initializing the IOIO application helper");
+        
+        IOIOPcApplicationHelper helper = new IOIOPcApplicationHelper(this);
+        helper.start();
+        
+        try 
+        {            
+            run(args);
+        } 
+        catch (Exception e) 
+        {                
+            throw e;
+        } 
+        finally 
+        {                
+            helper.stop();
+        }
+    }
+    
+    protected void run(String[] args) throws Exception
+    {
+        System.out.println("Starting PIXEL activity in " + getClass().getSimpleName() + ".");		
+	ActionListener listener = getActionListener();
+	
+	// set the IOIO loop delay to half a second, by default
+	int delay = 500; // milliseconds
+        
+	timer = new Timer(delay, listener);	
+	timer.start();
     }
     
     private void startSearchTimer()
@@ -328,6 +325,8 @@ public class ScrollingTextServlet extends HttpServlet implements IOIOLooperProvi
             
             g2d.dispose();
 
+System.out.println(".")            ;
+            
             if(pixel != null)
             {
                 try 
