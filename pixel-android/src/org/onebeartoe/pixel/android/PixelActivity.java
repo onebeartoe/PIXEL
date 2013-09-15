@@ -6,6 +6,7 @@ import java.util.Map;
 
 import org.onebeartoe.pixel.android.animations.AnimationsActivity;
 import org.onebeartoe.pixel.android.art.PixelArtActivity;
+import org.onebeartoe.pixel.android.scrolling.text.ScrollingTextActivity;
 
 import android.app.Activity;
 import android.content.Context;
@@ -46,6 +47,7 @@ public class PixelActivity extends Activity
 		Integer i = 0;
 		activitiesMap.put(i, PixelArtActivity.class);
 		activitiesMap.put(new Integer(1), AnimationsActivity.class);
+		activitiesMap.put(new Integer(2), ScrollingTextActivity.class);
 	}
 	
 	public class ImageAdapter extends BaseAdapter 

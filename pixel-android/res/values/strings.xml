@@ -23,8 +23,6 @@
     <string name="setupInstructionsStringTitle">Instructions</string>    
     <string name="slideShowStartInstructions">Tap to display a single image or Swipe from left to right to start a Slide Show</string>
 
-
-
     <string name="noSleep">Disable Power Savings</string>    
     <string name="pref_noSleepDefault">false</string>
     <string name="noSleepSummary">Forces the app to be always on, your device will not go into power savings mode while this app is running. Good if using as a Kiosk for example. </string>
@@ -71,5 +69,16 @@
     <string name="FPSOverrideTitle">Frames per Second</string>
     <string name="FPSOverrideSummary">Normally you won\'t need to change this, only if you want to override the frames per second of the animations. Restart app after changing.</string>
     <string name="dialogTitleFPSOverride">Frames per Second</string>
+    
+    <string name="settings_bg_color_confirm">Saves battery life by dimming screen during the Slide Show</string>
+    <string name="settings_default_color_confirm">Saves battery life by dimming screen during the Slide Show</string>
+    <string name="settings_bg_color_dialog">Saves battery life by dimming screen during the Slide Show</string>
+    
+    <!-- scrolling text -->
+    <string name="defaultText">Type Text Here</string>
+    <string name="seekbar_label">Scrolling Speed:</string>
+    <string name="fontSpinner_title">Select Font</string>
+    <string name="textbox_label">Enter Scrolling Text:</string>
+    
     
 </resources>
