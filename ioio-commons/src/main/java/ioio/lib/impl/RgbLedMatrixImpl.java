@@ -1,17 +1,17 @@
 /*
  * Copyright 2012 Ytai Ben-Tsvi. All rights reserved.
- *  
- * 
+ *
+ *
  * Redistribution and use in source and binary forms, with or without modification, are
  * permitted provided that the following conditions are met:
- * 
+ *
  *    1. Redistributions of source code must retain the above copyright notice, this list of
  *       conditions and the following disclaimer.
- * 
+ *
  *    2. Redistributions in binary form must reproduce the above copyright notice, this list
  *       of conditions and the following disclaimer in the documentation and/or other materials
  *       provided with the distribution.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED "AS IS" AND ANY EXPRESS OR IMPLIED
  * WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND
  * FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL ARSHAN POURSOHI OR
@@ -21,17 +21,17 @@
  * ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- * 
+ *
  * The views and conclusions contained in the software and documentation are those of the
  * authors and should not be interpreted as representing official policies, either expressed
  * or implied.
  */
 package ioio.lib.impl;
 
-import java.io.IOException;
-
 import ioio.lib.api.RgbLedMatrix;
 import ioio.lib.api.exception.ConnectionLostException;
+
+import java.io.IOException;
 
 class RgbLedMatrixImpl extends AbstractResource implements RgbLedMatrix {
 	final Matrix kind_;
@@ -42,6 +42,42 @@ class RgbLedMatrixImpl extends AbstractResource implements RgbLedMatrix {
 		super(ioio);
 		kind_ = kind;
 		frame_ = new byte[getFrameSize(kind)];
+	}
+
+	synchronized public void beginFrame() throws ConnectionLostException {
+		try {
+			//ioio_.protocol_.rgbLedMatrixWriteFile();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+
+	@Override
+	synchronized public void writeFile(float fps) throws ConnectionLostException {
+		try {
+			ioio_.protocol_.rgbLedMatrixWriteFile(fps, getShifterLen(kind_));
+		} catch (IOException e) {
+			throw new ConnectionLostException(e);
+		}
+	}
+
+	@Override
+	synchronized public void interactive() throws ConnectionLostException {
+		try {
+			ioio_.protocol_.rgbLedMatrixEnable(getShifterLen(kind_));
+		} catch (IOException e) {
+			throw new ConnectionLostException(e);
+		}
+	}
+
+	@Override
+	synchronized public void playFile() throws ConnectionLostException {
+		try {
+			ioio_.protocol_.rgbLedMatrixEnable(0);
+		} catch (IOException e) {
+			throw new ConnectionLostException(e);
+		}
 	}
 
 	@Override
