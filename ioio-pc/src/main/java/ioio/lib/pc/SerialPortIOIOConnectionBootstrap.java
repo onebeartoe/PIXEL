@@ -56,7 +56,7 @@ public class SerialPortIOIOConnectionBootstrap implements
 					+ "and connect to a IOIO over each one.\n"
 					+ "To fix, add the -Dioio.SerialPorts=xyz argument to "
 					+ "the java command line, where xyz is a colon-separated "
-					+ "list of port identifiers, e.g. COM1:COM2.");
+					+ "list of port identifiers, e.g. COM1:COM2 for Windows or tty.usbmodem1421 for Mac.");
 			ports = getAllOpenablePorts();
 		}
 		for (final String port : ports) {

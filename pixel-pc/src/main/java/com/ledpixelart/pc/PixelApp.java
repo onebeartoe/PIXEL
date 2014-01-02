@@ -10,6 +10,7 @@ import com.ledpixelart.pc.plugins.swing.UserProvidedPanel;
 
 import ioio.lib.api.DigitalOutput;
 import ioio.lib.api.IOIO;
+import ioio.lib.api.IOIO.VersionType;
 import ioio.lib.api.RgbLedMatrix;
 import ioio.lib.api.exception.ConnectionLostException;
 import ioio.lib.util.BaseIOIOLooper;
@@ -104,7 +105,11 @@ public class PixelApp extends IOIOSwingApp
     
     public static final int DEFAULT_HEIGHT = 600;
     
-    public static final int DEFAULT_WIDTH = 450;
+    public static final int DEFAULT_WIDTH = 500;  //was 450
+    
+    public static String pixelFirmware = "Not Found";
+    
+    private static VersionType v;
     
     public PixelApp()
     {
@@ -330,14 +335,24 @@ public class PixelApp extends IOIOSwingApp
 	    @Override
 	    protected void setup() throws ConnectionLostException, InterruptedException
 	    {
-		led_ = ioio_.openDigitalOutput(IOIO.LED_PIN, true);
+		
+	    	System.out.println("went the IOIO setup");
+	    	
+	    	//**** let's get IOIO version info for the About Screen ****
+  			pixelFirmware = ioio_.getImplVersion(v.APP_FIRMWARE_VER);
+  			//pixelBootloader = ioio_.getImplVersion(v.BOOTLOADER_VER);
+  			//pixelHardwareID = ioio_.getImplVersion(v.HARDWARE_VER);
+  			//IOIOLibVersion = ioio_.getImplVersion(v.IOIOLIB_VER);
+  			//**********************************************************
+	    	
+	    	led_ = ioio_.openDigitalOutput(IOIO.LED_PIN, true);
                 PixelApp.this.ioiO = ioio_;
 		pixel.matrix = ioio_.openRgbLedMatrix(pixel.KIND);
                 pixel.ioiO = ioio_;
                 
                 for(PixelPanel panel : userPluginPanels)
                 {
-//System.out.println("\nSetting pixel for panel: " + panel.getClass() + "\n");
+System.out.println("\nSetting pixel for panel: " + panel.getClass() + "\n");
                     panel.pixel = pixel;
                 }
                 
@@ -349,11 +364,14 @@ public class PixelApp extends IOIOSwingApp
 		setPixelFound();
 		System.out.println("Found PIXEL: " + pixel.matrix + "\n");
 		System.out.println("You may now interact with the PIXEL\n");
+		String message = "PIXEL Status: Connected";
+        PixelApp.this.statusLabel.setText(message);
 		
 //TODO: Load something on startup
 
 		searchTimer.stop(); //need to stop the timer so we don't still display the pixel searching message
-		String message = "PIXEL Status: Connected";
+		
+		message = "PIXEL Status: Connected";
                 PixelApp.this.statusLabel.setText(message);
 	    }
 	    
@@ -437,7 +455,9 @@ public class PixelApp extends IOIOSwingApp
     {
 	for(PixelPanel panel : builtinPixelPanels)
 	{
-//	    panel.setPixelFound(true);
+	//   panel.setPixelFound(true);
+	  
+		
 	}
     }
 
@@ -625,17 +645,23 @@ public class PixelApp extends IOIOSwingApp
 	    
 	    Date d = new Date();
 	    long now = d.getTime();
+	    
 	    if(now > periodEnd)
 	    {
 		searchTimer.stop();
-		if(pixel.matrix == null)
-		{
-		    message = "A Bluetooth connection to PIXEL could not be established. \n\nPlease ensure you have Bluetooth paired your PC to PIXEL first using code: 4545 and then try again.";
-		    PixelApp.this.statusLabel.setText(message);
-		    System.out.println(message);
-		    String title = "PIXEL Connection Unsuccessful";
-		    JOptionPane.showMessageDialog(frame, message, title, JOptionPane.INFORMATION_MESSAGE);
-		}
+		
+			if(pixel.matrix == null)
+			{
+			    message = "A connection to PIXEL could not be established. \n\nPlease ensure you have Bluetooth paired using code 4545 for PIXEL V1 and code 0000 for PIXEL V2. Mac users: please connect to PIXEL over USB.";
+			    PixelApp.this.statusLabel.setText(message);
+			    System.out.println(message);
+			    String title = "PIXEL Connection Unsuccessful";
+			    JOptionPane.showMessageDialog(frame, message, title, JOptionPane.INFORMATION_MESSAGE);
+			}
+			else { //al added this, trying to debug connected message not always showing up
+				String message = "PIXEL Status: Connected";
+	            PixelApp.this.statusLabel.setText(message);
+			}
 	    }
 	}
     }

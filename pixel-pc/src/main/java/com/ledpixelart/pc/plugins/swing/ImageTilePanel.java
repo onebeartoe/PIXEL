@@ -3,6 +3,8 @@ package com.ledpixelart.pc.plugins.swing;
 
 import com.ledpixelart.pc.PixelApp;
 import ioio.lib.api.RgbLedMatrix;
+import ioio.lib.api.exception.ConnectionLostException;
+
 import java.awt.event.ActionEvent;
 import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
@@ -41,7 +43,20 @@ public class ImageTilePanel extends PixelTilePanel
 	    URL url = PixelApp.class.getClassLoader().getResource(imagePath);
 
 	    BufferedImage originalImage = ImageIO.read(url);
-            PixelApp.pixel.writeImagetoMatrix(originalImage);
+	    
+		if (PixelApp.pixelFirmware.equals("PIXL0003")) {
+				PixelApp.pixel.interactiveMode();
+				//send loading image
+				PixelApp.pixel.writeMode(10); //need to tell PIXEL the frames per second to use, how fast to play the animations
+				PixelApp.pixel.writeImagetoMatrix(originalImage);
+				PixelApp.pixel.playLocalMode(); //now tell PIXEL to play locally
+			}
+			else {
+				   //stopExistingTimer();
+				   //timer = new Timer(selectedFileDelay, AnimateTimer);
+				   //timer.start();
+				 PixelApp.pixel.writeImagetoMatrix(originalImage);
+			}
         } 
         catch (Exception e1) 
         {
@@ -79,6 +94,8 @@ public class ImageTilePanel extends PixelTilePanel
 	
 	return names;
     }       
+    
+ 
     
     @Override
     protected String imagePath() 

@@ -98,8 +98,11 @@ public class BluetoothIOIOConnection implements IOIOConnection {
 			// We're trying to create an insecure socket, which is only
 			// supported in API 10 and up. Otherwise, we try a secure socket
 			// which is in API 7 and up.
-			return device.createInsecureRfcommSocketToServiceRecord(UUID
+			return device.createRfcommSocketToServiceRecord(UUID
 					.fromString("00001101-0000-1000-8000-00805F9B34FB"));
+			
+			//return device.createInsecureRfcommSocketToServiceRecord(UUID  //was causing an error but I think this is not used for the PC app
+				//	.fromString("00001101-0000-1000-8000-00805F9B34FB"));
 			
 			
 		} else {

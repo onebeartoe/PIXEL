@@ -27,6 +27,18 @@ public class AnimationsPanel extends ImageTilePanel
     
     private static ActionListener AnimateTimer;
     
+    private static String selectedFileName;
+    
+  	private static String decodedDirPath;
+  	
+  	private static byte[] BitmapBytes;
+  	
+  	private static short[] frame_;
+  	
+  	private static String framestring;
+  	
+  	private static float fps = 0;
+    
     public AnimationsPanel(RgbLedMatrix.Matrix KIND)
     {
 	super(KIND);
@@ -99,7 +111,13 @@ System.out.println("corrected file name: " + selectedFileName);
 	    String[] fileAttribs2 = fileAttribs.split(fdelim);
 	    int selectedFileTotalFrames = Integer.parseInt(fileAttribs2[0].trim());
 
-	    int selectedFileDelay = Integer.parseInt(fileAttribs2[1].trim());	    
+	    int selectedFileDelay = Integer.parseInt(fileAttribs2[1].trim());	
+	    
+	    if (selectedFileDelay != 0) {  //then we're doing the FPS override which the user selected from settings
+    		fps = 1000.f / selectedFileDelay;
+		} else { 
+    		fps = 0;
+    	}
 
 	    //****** Now let's setup the animation ******
 	    
@@ -113,12 +131,53 @@ System.out.println("corrected file name: " + selectedFileName);
 	    // System.out.println("file delay: " + selectedFileDelay);
             
             stopExistingTimer();
+            
+            //**** old code here ****
+    	    // stopExistingTimer();
+    	  //  timer = new Timer(selectedFileDelay, AnimateTimer);
+    	  //  timer.start();
+    	   //***********************
+    	
+    			if (PixelApp.pixelFirmware.equals("PIXL0003")) {
+    					PixelApp.pixel.interactiveMode();
+    					//send loading image
+    					PixelApp.pixel.writeMode(fps); //need to tell PIXEL the frames per second to use, how fast to play the animations
+    					sendFramesToPIXEL(); //send all the frame to PIXEL
+    					PixelApp.pixel.playLocalMode(); //now tell PIXEL to play locally
+    			}
+    			else {
+    				   stopExistingTimer();
+    				   timer = new Timer(selectedFileDelay, AnimateTimer);
+    				   timer.start();
+    			}    
 
-	    timer = new Timer(selectedFileDelay, AnimateTimer);
-	    timer.start();
+	   // timer = new Timer(selectedFileDelay, AnimateTimer);
+	   // timer.start();
 	}
     }
 
+    private static void sendFramesToPIXEL() { 
+    	  int y;
+     	 
+    	  for (y=0;y<numFrames-1;y++) { //let's loop through and send frame to PIXEL with no delay
+  		
+  		framestring = "animations/decoded/" + animation_name + "/" + animation_name + y + ".rgb565";
+  		
+  			System.out.println("writing to PIXEL frame: " + framestring);
+
+  		try 
+  		{
+  		    PixelApp.pixel.loadRGB565(framestring);
+  		} 
+  		catch (ConnectionLostException e1) 
+  		{
+  		    // TODO Auto-generated catch block
+  		    e1.printStackTrace();
+  		}
+    	  } //end for loop
+      	 
+      }
+    
     @Override
     protected String imagePath() 
     {

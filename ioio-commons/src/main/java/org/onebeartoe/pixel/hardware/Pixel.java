@@ -135,6 +135,35 @@ public class Pixel
 	}
     }
     
+    //*** Al added, this code is to support the SD card and local animations
+    public void interactiveMode() {  //puts PIXEL into interactive mode
+    	try {
+			matrix.interactive();
+		} catch (ConnectionLostException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+    }
+    
+    public void writeMode(float frameDelay) {  //puts PIXEL into write mode
+    	try {
+    		 matrix.writeFile(frameDelay); //put PIXEL in write mode
+		} catch (ConnectionLostException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+    }
+    
+    public void playLocalMode() {  //tells PIXEL to play the local files
+    	try {
+    		matrix.playFile();
+		} catch (ConnectionLostException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+    }
+    //*******************************
+    
     public void writeImagetoMatrix(BufferedImage originalImage) throws ConnectionLostException     
     {        
 	//here we'll take a PNG, BMP, or whatever and convert it to RGB565 via a canvas, also we'll re-size the image if necessary
@@ -210,5 +239,7 @@ public class Pixel
 	    //frame_[i] = (short) (((short) 0xFFFFFFFF & 0xFF) | (((short) (short) 0xFFFFFFFF & 0xFF) << 8));  //all white
 	}
     }
+
+	
     
 }

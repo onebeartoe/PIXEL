@@ -73,6 +73,8 @@ public class Pixel
 	matrix.frame(frame_);
     }
     
+ 
+    
     private void loadRGB565PNG() throws ConnectionLostException 
     {
 	int y = 0;

@@ -44,7 +44,8 @@
       <groupId>com.sparetimelabs</groupId>
       <artifactId>purejavacomm</artifactId>
       <version>0.0.10</version>
-      <!--version>0.0.17</version-->
+      <!--version>0.0.10/version changed to 10 as it was more reliable at the time-->
+      <!--version>0.0.17</version  was originally 17-->
    </dependency>
   </dependencies>
   

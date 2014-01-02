@@ -16,13 +16,13 @@ public class ZeroThreadedPixelPanel extends PixelPanel
         super(KIND);
     }
     
-    protected boolean pixelFound;
+   protected boolean pixelFound;
 
-//    @Override
-    //public void setPixelFound(boolean found) 
+  //  @Override
+   // public void setPixelFound(boolean found) 
   //  {
-//	this.pixelFound = found;
-//    }    
+	//this.pixelFound = found;
+  //  }    
 	
     @Override
     public void startPixelActivity()
