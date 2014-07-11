@@ -503,7 +503,7 @@ class IOIOProtocol {
 	synchronized public void rgbLedMatrixEnable(int shifterLen32) throws IOException {
 		beginBatch();
 		writeByte(RGB_LED_MATRIX_ENABLE);
-		writeByte(shifterLen32 & 0x07);
+		writeByte(shifterLen32 & 0xFF);
 		endBatch();
 	}
 	
@@ -516,7 +516,7 @@ class IOIOProtocol {
 		writeByte(RGB_LED_MATRIX_WRITE_FILE);
 		writeByte(delay & 0xFF);
 		writeByte((delay >> 8) & 0xFF);
-		writeByte(shifterLen32 & 0x07);
+		writeByte(shifterLen32 & 0xFF);
 		endBatch();
 	}
 	

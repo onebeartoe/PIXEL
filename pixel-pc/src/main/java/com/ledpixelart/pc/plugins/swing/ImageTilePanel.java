@@ -44,7 +44,8 @@ public class ImageTilePanel extends PixelTilePanel
 
 	    BufferedImage originalImage = ImageIO.read(url);
 	    
-		if (PixelApp.pixelFirmware.equals("PIXL0003")) {
+	//	if (PixelApp.pixelFirmware.equals("PIXL0003")) {
+	    if (PixelApp.pixelHardwareID.substring(0,4).equals("PIXL")) { //then it's a PIXEL V2 unit that can write to the sd card, otherwise just stream
 				PixelApp.pixel.interactiveMode();
 				//send loading image
 				PixelApp.pixel.writeMode(10); //need to tell PIXEL the frames per second to use, how fast to play the animations

@@ -108,6 +108,7 @@ public class PixelApp extends IOIOSwingApp
     public static final int DEFAULT_WIDTH = 500;  //was 450
     
     public static String pixelFirmware = "Not Found";
+    public static String pixelHardwareID = "Not Found";
     
     private static VersionType v;
     
@@ -341,7 +342,7 @@ public class PixelApp extends IOIOSwingApp
 	    	//**** let's get IOIO version info for the About Screen ****
   			pixelFirmware = ioio_.getImplVersion(v.APP_FIRMWARE_VER);
   			//pixelBootloader = ioio_.getImplVersion(v.BOOTLOADER_VER);
-  			//pixelHardwareID = ioio_.getImplVersion(v.HARDWARE_VER);
+  			pixelHardwareID = ioio_.getImplVersion(v.HARDWARE_VER);
   			//IOIOLibVersion = ioio_.getImplVersion(v.IOIOLIB_VER);
   			//**********************************************************
 	    	
