@@ -61,7 +61,7 @@ public class Pixel
     
     private float fps;
     
-    private static String decodedDirPathExternal;
+    //private static String decodedDirPathExternal;
     
     public Pixel(RgbLedMatrix.Matrix KIND)
     {
@@ -685,7 +685,7 @@ public boolean GIFNeedsDecoding(String decodedDir, String gifName, int currentRe
 			}
 	}
     
-	public void decodeGIF(String currentDir, String gifName, int currentResolution, int pixelMatrix_width, int pixelMatrix_height) {  //pass the matrix type
+	public void decodeGIF(String decodedDir, String gifFilePath, int currentResolution, int pixelMatrix_width, int pixelMatrix_height) {  //pass the matrix type
 		
 		//we should add another flag here if we're decoding from the jar or user supplied gif
 		
@@ -693,16 +693,25 @@ public boolean GIFNeedsDecoding(String decodedDir, String gifName, int currentRe
 	    //we'll need to know the resolution of the currently selected matrix type: 16x32, 32x32, 32x64, or 64x64
 		//and then we will receive the gif accordingly as we decode
 		//we also need to get the original width and height of the gif which is easily done from the gif decoder class
-		gifName = FilenameUtils.removeExtension(gifName); //with no extension
+		//String gifName = FilenameUtils.removeExtension(gifName); //with no extension
 		
-		String gifNamePath = currentDir + "/" + gifName + ".gif";  //   ex. c:\animation\tree.gif
+	    String selectedFileName = FilenameUtils.getName(gifFilePath); 
+		String fileType = FilenameUtils.getExtension(gifFilePath);
+		String gifNameNoExt = FilenameUtils.removeExtension(selectedFileName); //with no extension
 		
-		File file = new File(gifNamePath);
+		System.out.println("User selected file name: " + selectedFileName);
+		System.out.println("User selected file type: " + fileType);
+		System.out.println("User selected file name no extension: " + gifNameNoExt);
+		
+		
+		//String gifNamePath = currentDir + "/" + gifName + ".gif";  //   ex. c:\animation\tree.gif
+		
+		File file = new File(gifFilePath);
 		if (file.exists()) {
 			
 			  //since we are decoding, we need to first make sure the .rgb565 and .txt decoded file is not there and delete if so.
-			  String gifName565Path = currentDir + "/decoded/" + gifName + ".rgb565";  //   ex. c:\animation\decoded\tree.rgb565
-			  String gifNameTXTPath = currentDir + "/decoded/" + gifName + ".txt";  //   ex. c:\animation\decoded\tree.txt
+			  String gifName565Path =  decodedDir + gifNameNoExt + ".rgb565";  //   ex. c:\animation\decoded\tree.rgb565
+			  String gifNameTXTPath = decodedDir + gifNameNoExt + ".txt";  //   ex. c:\animation\decoded\tree.txt
 			  
 			  //since we are decoding, we need to first make sure the .rgb565 and .txt decoded file is not there and delete if so.
 			//  String gifName565Path = decodedDir + gifName + ".rgb565";  //   ex. c:\animation\decoded\tree.rgb565
@@ -716,8 +725,8 @@ public boolean GIFNeedsDecoding(String decodedDir, String gifName, int currentRe
 			  //*******************************************************************************************
 			
 			  GifDecoder d = new GifDecoder();
-			  //d.read(gifNamePath);
-	          d.read(getClass().getClassLoader().getResourceAsStream("animations/" + gifName + ".gif")); //read the soruce gif from the jar
+			  d.read(gifFilePath);
+	         // d.read(getClass().getClassLoader().getResourceAsStream("animations/" + gifName + ".gif")); //read the soruce gif from the jar
 	          //InputStream stream = Pixel.class.getResourceAsStream("animations/" + jarGIFName); //TO DO maybe later we'll change this if we use pngs instead of gifs on the image tile
 	          int numFrames = d.getFrameCount(); 
 	          int frameDelay = d.getDelay(1); //even though gifs have a frame delay for each frmae, pixel doesn't support this so we'll take the frame rate of the second frame and use this for the whole animation. We take the second frame because often times the frame delay of the first frame in a gif is much longer than the rest of the frames
@@ -741,7 +750,7 @@ public boolean GIFNeedsDecoding(String decodedDir, String gifName, int currentRe
 	             //rotatedFrame = rotate90ToLeft(rotatedFrame);  //quick hack, same as above, have to rotate
 	              
 	    		 if (frameWidth != pixelMatrix_width || frameHeight != pixelMatrix_height) {
-	    			 System.out.println("Resizing and encoding " + gifNamePath + " frame " + i);
+	    			 System.out.println("Resizing and encoding " + selectedFileName + " frame " + i);
 	    			// rotatedFrame = Scalr.resize(rotatedFrame, pixelMatrix_width, pixelMatrix_height); //resize it, need to make sure we do not anti-alias
 	    			 
 	    			 try {
@@ -754,7 +763,7 @@ public boolean GIFNeedsDecoding(String decodedDir, String gifName, int currentRe
 	    			 
 	    		 }
 	    		 else {
-	    			 System.out.println("Encoding " + gifNamePath + " frame " + i);
+	    			 System.out.println("Encoding " + selectedFileName + " frame " + i);
 	    		 }
 	            
 	             //this code here to convert a java image to rgb565 taken from stack overflow http://stackoverflow.com/questions/8319770/java-image-conversion-to-rgb565/
@@ -802,9 +811,7 @@ public boolean GIFNeedsDecoding(String decodedDir, String gifName, int currentRe
 	                    }
 	                }
 			   		    
-			     decodedDirPathExternal = currentDir + "/decoded" ;   //  ex. c:\animations\decoded
-			   		    
-			   		 File decodeddir = new File(decodedDirPathExternal); //this could be gif, gif64, or usergif
+			   		 File decodeddir = new File(decodedDir); //this could be gif, gif64, or usergif
 					    if(decodeddir.exists() == false)
 			             {
 					    	decodeddir.mkdirs();
@@ -812,7 +819,7 @@ public boolean GIFNeedsDecoding(String decodedDir, String gifName, int currentRe
 					
 				   			try {
 							
-								appendWrite(BitmapBytes, decodedDirPathExternal + "/" + gifName + ".rgb565"); //this writes one big file instead of individual ones
+								appendWrite(BitmapBytes, decodedDir + gifNameNoExt + ".rgb565"); //this writes one big file instead of individual ones
 								
 								
 							} catch (IOException e1) {
@@ -832,7 +839,7 @@ public boolean GIFNeedsDecoding(String decodedDir, String gifName, int currentRe
 		   		
 		   		String filetag = String.valueOf(numFrames) + "," + String.valueOf(frameDelay) + "," + String.valueOf(currentResolution); //current resolution may need to change to led panel type
 		   				
-	     		   File myFile = new File(decodedDirPathExternal + "/" + gifName + ".txt");  				       
+	     		   File myFile = new File(decodedDir + gifNameNoExt + ".txt");  				       
 	     		   try {
 					myFile.createNewFile();
 					FileOutputStream fOut = null;
@@ -843,12 +850,12 @@ public boolean GIFNeedsDecoding(String decodedDir, String gifName, int currentRe
 					fOut.close();	
 				} catch (IOException e) {
 					// TODO Auto-generated catch block
-					System.out.println("ERROR, could not write " + gifName);
+					System.out.println("ERROR, could not write " + selectedFileName);
 					e.printStackTrace();
 				}
 		}
 		else {
-			System.out.println("ERROR  Could not write " + decodedDirPathExternal + "/" + gifName + ".txt");
+			System.out.println("ERROR  Could not write " + decodedDir + gifNameNoExt + ".txt");
 		}
 			
 	} 

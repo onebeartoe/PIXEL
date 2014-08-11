@@ -133,18 +133,11 @@ public class AnimationsPanel extends ImageTilePanel
     	  //  timer = new Timer(selectedFileDelay, AnimateTimer);
     	  //  timer.start();
     	   //***********************
-            writeMode = true;
+            writeMode = false;
             
              if (PixelApp.pixelHardwareID.substring(0,4).equals("PIXL") && writeMode == true) {  //change this to a double click event later
-    				/*	PixelApp.pixel.interactiveMode();
-    					//send loading image
-    					PixelApp.pixel.writeMode(fps); //need to tell PIXEL the frames per second to use, how fast to play the animations
-    					sendFramesToPIXEL(); //send all the frame to PIXEL
-    					PixelApp.pixel.playLocalMode(); //now tell PIXEL to play locally
-    				 */  
-    		
+    			
     					PixelApp.pixel.interactiveMode();
-    					//send loading image
     					PixelApp.pixel.writeMode(GIFfps); //need to tell PIXEL the frames per second to use, how fast to play the animations
     					System.out.println("Now writing to PIXEL's SD card, the screen will go blank until writing has been completed..."); 
     					  int y;
@@ -163,31 +156,8 @@ public class AnimationsPanel extends ImageTilePanel
     				   stopExistingTimer();
     				   timer = new Timer(GIFselectedFileDelay, AnimateTimer);
     				   timer.start();
-    			}    
-
+    			} 
 	}
-
-    /*private static void sendFramesToPIXEL() { 
-    	  int y;
-     	 
-    	  for (y=0;y<GIFnumFrames-1;y++) { //let's loop through and send frame to PIXEL with no delay
-  		
-  		framestring = "animations/decoded/" + animation_name + "/" + animation_name + y + ".rgb565";
-  		
-  			System.out.println("writing to PIXEL frame: " + framestring);
-
-  		try 
-  		{
-  		    PixelApp.pixel.loadRGB565(framestring);
-  		} 
-  		catch (ConnectionLostException e1) 
-  		{
-  		    // TODO Auto-generated catch block
-  		    e1.printStackTrace();
-  		}
-    	  } //end for loop
-      	 
-      }*/
     
     @Override
     protected String imagePath() 

@@ -131,6 +131,10 @@ public class PixelApp extends IOIOSwingApp
     public static final int DEFAULT_HEIGHT = 600;
     
     public static final int DEFAULT_WIDTH = 500;  //was 450
+    
+	public static String userHome = System.getProperty("user.home");
+  	
+  	public static String decodedDir = userHome + "/pixel/animations/decoded/";  //users/al/pixel/animations/decoded
    
     
     public PixelApp()

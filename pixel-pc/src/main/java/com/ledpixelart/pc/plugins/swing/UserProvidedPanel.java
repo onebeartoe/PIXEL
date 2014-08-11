@@ -19,6 +19,9 @@ import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
+import javax.swing.Timer;
+
+import org.apache.commons.io.FilenameUtils;
 
 /**
  * @author rmarquez
@@ -31,6 +34,24 @@ public class UserProvidedPanel extends ImageTilePanel
     private File imageDirectory;
     
     private List<File> singleImages;
+    
+    private volatile Timer timer;
+    
+    private static ActionListener AnimateTimer;
+    
+    private static boolean writeMode = false;
+    
+    private int i;
+    
+    private float GIFfps;
+    
+    private int GIFnumFrames;
+    
+    private int GIFselectedFileDelay;
+    
+    private int GIFresolution;
+    
+    private String animation_name;
 
     public UserProvidedPanel(RgbLedMatrix.Matrix KIND, File imageDirectory)
     {
@@ -45,7 +66,26 @@ public class UserProvidedPanel extends ImageTilePanel
 	JButton userButton = new JButton("Browse for a single image or a folder of images.");
         userButton.addActionListener( new UserButtonListener() );
         add(userButton, BorderLayout.SOUTH);
-    }
+        
+imageListPath = "/animations.text";
+        
+        AnimateTimer = new ActionListener() 
+	{
+	    public void actionPerformed(ActionEvent evt) 
+	    {
+		i++;
+
+		if (i >= GIFnumFrames - 1) 
+		{
+		    i = 0;
+		}
+			PixelApp.pixel.SendPixelDecodedFrame(PixelApp.decodedDir, animation_name, i, GIFnumFrames, GIFresolution, PixelApp.KIND.width,PixelApp.KIND.height);
+	    }
+	};
+    }    
+        
+        
+  //  }
 
     public File getImageDirectory() 
     {	
@@ -110,19 +150,97 @@ public class UserProvidedPanel extends ImageTilePanel
     public void actionPerformed(ActionEvent event) 
     {
 	String imagePath = event.getActionCommand();
-	System.out.println("image comamand: " + imagePath);	
+	System.out.println("user panel selected: " + imagePath);	
   
-        try 
+	//let's add a check here if the user supplied image is a PNG or a GIF, if it's a GIF then we'll decode and animate it
+	
+	String selectedFileName = FilenameUtils.getName(imagePath); 
+	String fileType = FilenameUtils.getExtension(imagePath);
+	String gifNameNoExt = FilenameUtils.removeExtension(selectedFileName); //with no extension
+	
+	System.out.println("User selected file name: " + selectedFileName);
+	System.out.println("User selected file type: " + fileType);
+	System.out.println("User selected file name no extension: " + gifNameNoExt);
+	
+	if (fileType.toLowerCase().contains("gif")) {
+		
+		 if (PixelApp.pixel.GIFNeedsDecoding(PixelApp.decodedDir, selectedFileName, PixelApp.currentResolution) == true) {
+		    	PixelApp.pixel.decodeGIF(PixelApp.decodedDir, imagePath, PixelApp.currentResolution, PixelApp.KIND.width, PixelApp.KIND.height);
+		    }
+
+			    //****** Now let's setup the animation ******
+			    
+			    animation_name = selectedFileName;
+			    
+			    GIFfps = PixelApp.pixel.getDecodedfps(PixelApp.decodedDir, animation_name); //get the fps //to do fix this later becaause we are getting from internal path
+			    GIFnumFrames = PixelApp.pixel.getDecodednumFrames(PixelApp.decodedDir, animation_name);
+			    GIFselectedFileDelay = PixelApp.pixel.getDecodedframeDelay(PixelApp.decodedDir, animation_name);
+			    GIFresolution = PixelApp.pixel.getDecodedresolution(PixelApp.decodedDir, animation_name);
+			    
+			    System.out.println("Selected GIF Resolution: " + GIFresolution);
+				System.out.println("Current LED Panel Resolution: " + PixelApp.currentResolution);
+				System.out.println("GIF Width: " + PixelApp.KIND.width);
+				System.out.println("GIF Height: " + PixelApp.KIND.height);
+				
+				  stopExistingTimer();
+		            
+		            //**** old code here ****
+		    	    // stopExistingTimer();
+		    	  //  timer = new Timer(selectedFileDelay, AnimateTimer);
+		    	  //  timer.start();
+		    	   //***********************
+		            writeMode = false;
+		            
+		             if (PixelApp.pixelHardwareID.substring(0,4).equals("PIXL") && writeMode == true) {  //change this to a double click event later
+		    			
+		    					PixelApp.pixel.interactiveMode();
+		    					PixelApp.pixel.writeMode(GIFfps); //need to tell PIXEL the frames per second to use, how fast to play the animations
+		    					System.out.println("Now writing to PIXEL's SD card, the screen will go blank until writing has been completed..."); 
+		    					  int y=0;
+		    				    	 
+		    				   	  //for (y=0;y<numFrames-1;y++) { //let's loop through and send frame to PIXEL with no delay
+		    				      for (y=0;y<GIFnumFrames;y++) { //Al removed the -1, make sure to test that!!!!!
+
+		    			    			System.out.println("Writing " + animation_name + " to PIXEL " + "frame " + y);
+		    				 		    PixelApp.pixel.SendPixelDecodedFrame(PixelApp.decodedDir, animation_name, y, GIFnumFrames, GIFresolution, PixelApp.KIND.width,PixelApp.KIND.height);
+		    				   	  } //end for loop
+		    					PixelApp.pixel.playLocalMode(); //now tell PIXEL to play locally
+		    					System.out.println("Writing " + animation_name + " to PIXEL complete, now displaying...");
+		    			
+		    			}
+		    			else {
+		    				   stopExistingTimer();
+		    				   timer = new Timer(GIFselectedFileDelay, AnimateTimer);
+		    				   timer.start();
+		    			} 
+		
+	}
+	
+	else {  //we have a static image
+		
+		stopExistingTimer();   //the timer could have been running if the user selected a gif first, need to kill it 
+		
+		try 
+	        {
+	        System.out.println("Attemping to load User image: " + imagePath);  //image path is something like /Users/al/Documents/pngs/aaagumball.png
+		    File infile = new File(imagePath);
+		    BufferedImage originalImage = ImageIO.read(infile);
+		    PixelApp.pixel.writeImagetoMatrix(originalImage);
+	        } 
+	        catch (Exception e1) 
+	        {
+	            e1.printStackTrace();
+	        }
+		}
+    }
+    
+    private void stopExistingTimer()
+    {
+        if(timer != null && timer.isRunning() )
         {
-            System.out.println("Attemping to load User image: " + imagePath);
-	    File infile = new File(imagePath);
-	    BufferedImage originalImage = ImageIO.read(infile);
-	    PixelApp.pixel.writeImagetoMatrix(originalImage);
-        } 
-        catch (Exception e1) 
-        {
-            e1.printStackTrace();
-        }
+            System.out.println("Stoping PIXEL activity in " + getClass().getSimpleName() + ".");
+            timer.stop();
+        }        
     }
     
     private class UserButtonListener implements ActionListener    
