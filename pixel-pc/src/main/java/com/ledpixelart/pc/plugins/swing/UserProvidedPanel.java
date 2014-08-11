@@ -146,7 +146,7 @@ imageListPath = "/animations.text";
 	return imageDirectory.getAbsolutePath();
     }
 
-    @Override
+    /*@Override
     public void actionPerformed(ActionEvent event) 
     {
 	String imagePath = event.getActionCommand();
@@ -232,7 +232,7 @@ imageListPath = "/animations.text";
 	            e1.printStackTrace();
 	        }
 		}
-    }
+    }*/
     
     private void stopExistingTimer()
     {

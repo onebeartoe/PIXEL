@@ -120,7 +120,7 @@ public class PixelApp extends IOIOSwingApp
     
     private List<PluginConfigEntry> userPluginConfiguration;
     
-    private JFrame frame;
+    public static JFrame frame;
     
     private JTabbedPane tabbedPane;
     

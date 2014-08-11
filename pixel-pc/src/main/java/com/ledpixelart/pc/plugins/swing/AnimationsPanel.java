@@ -6,6 +6,10 @@ import ioio.lib.api.RgbLedMatrix;
 import ioio.lib.api.exception.ConnectionLostException;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.InputEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -15,7 +19,7 @@ import javax.swing.Timer;
 /**
  * @author rmarquez
  */
-public class AnimationsPanel extends ImageTilePanel
+public class AnimationsPanel extends ImageTilePanel implements MouseListener
 {
     private int i;
     
@@ -61,6 +65,11 @@ public class AnimationsPanel extends ImageTilePanel
     {
 	super(KIND);
 	imageListPath = "/animations.text";
+	
+	//this.addMouseListener(this);
+	//addMouseListener(this);
+	//PixelApp.frame.addMouseListener(new MyMouseListener()); //this didn't work
+		
         
         AnimateTimer = new ActionListener() 
 	{
@@ -77,12 +86,56 @@ public class AnimationsPanel extends ImageTilePanel
 	};
     }
     
+    private class MyMouseListener extends MouseAdapter {
+    	  public void mouseClicked(MouseEvent evt) {
+    	    if (evt.getClickCount() == 3) {
+    	      System.out.println("triple-click");
+    	    } else if (evt.getClickCount() == 2) {
+    	      System.out.println("double-click");
+    	    }
+    	  }
+    }
     
-    @Override
+    public void mousePressed(MouseEvent e) {
+        saySomething("Mouse pressed; # of clicks: "
+                     + e.getClickCount(), e);
+     }
+
+     public void mouseReleased(MouseEvent e) {
+        saySomething("Mouse released; # of clicks: "
+                     + e.getClickCount(), e);
+     }
+
+     public void mouseEntered(MouseEvent e) {
+        saySomething("Mouse entered", e);
+     }
+
+     public void mouseExited(MouseEvent e) {
+        saySomething("Mouse exited", e);
+     }
+
+     public void mouseClicked(MouseEvent e) {
+        saySomething("Mouse clicked (# of clicks: "
+                     + e.getClickCount() + ")", e);
+        if (e.getClickCount() == 2)  
+            System.out.println( "  and it's a double click!");
+     }
+
+     void saySomething(String eventDescription, MouseEvent e) {
+    	
+    	 System.out.println(eventDescription + " detected on "
+                         + e.getComponent().getClass().getName()
+                         + "." + "\n");
+     }
+ //}
+  
+    
+    
+    /*@Override
     public void actionPerformed(ActionEvent event) 
     {
 	
-   /* 
+    
     let's first check if the decoded animation exists on the local user directory
     If it's not there, then we'll copy the gif to the source directory and decode it
     If it is there, then let's check if the resolution is correct
@@ -93,11 +146,11 @@ public class AnimationsPanel extends ImageTilePanel
     
     user home/pixel/animations/decoded/
     user home/pixel/animations/decoded/sourcegif/  not sure we need this one?
-    */
+    
     	
     String selectedFileName = event.getActionCommand();
     
-   /* if (PixelApp.pixel.GIFTxtExists(decodedDir,selectedFileName) == true && PixelApp.pixel.GIFRGB565Exists(decodedDir,selectedFileName) == true) {
+    if (PixelApp.pixel.GIFTxtExists(decodedDir,selectedFileName) == true && PixelApp.pixel.GIFRGB565Exists(decodedDir,selectedFileName) == true) {
     	System.out.println("This GIF was already decoded");
     }
     else {  //the text file is not there so we cannot continue and we must decode, let's first copy the file to home dir
@@ -106,7 +159,7 @@ public class AnimationsPanel extends ImageTilePanel
     	//PixelApp.pixel.decodeGIFJar(currentDir, gifName, currentResolution, pixelMatrix_width, pixelMatrix_height);
     	//d decodeGIFJar(String decodedDir, String gifName, int currentResolution, int pixelMatrix_width, int pixelMatrix_height) {  //pass the matrix type
     	PixelApp.pixel.decodeGIFJar(decodedDir, selectedFileName, PixelApp.currentResolution, KIND.width, KIND.height);
-    }*/
+    }
     
     if (PixelApp.pixel.GIFNeedsDecoding(decodedDir, selectedFileName, PixelApp.currentResolution) == true) {
     	PixelApp.pixel.decodeGIFJar(decodedDir, selectedFileName, PixelApp.currentResolution, PixelApp.KIND.width, PixelApp.KIND.height);
@@ -157,7 +210,7 @@ public class AnimationsPanel extends ImageTilePanel
     				   timer = new Timer(GIFselectedFileDelay, AnimateTimer);
     				   timer.start();
     			} 
-	}
+	}*/
     
     @Override
     protected String imagePath() 

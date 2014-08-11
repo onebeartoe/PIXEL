@@ -5,16 +5,27 @@ import com.ledpixelart.pc.PixelApp;
 import ioio.lib.api.RgbLedMatrix;
 import ioio.lib.api.exception.ConnectionLostException;
 
+import java.awt.Component;
+import java.awt.Point;
 import java.awt.event.ActionEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
+import java.awt.peer.ComponentPeer;
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.StringReader;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Properties;
+
 import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
+
+import org.apache.commons.io.FilenameUtils;
 
 /**
  * @author rmarquez
@@ -24,13 +35,17 @@ public class ImageTilePanel extends PixelTilePanel
        
     protected String imageListPath = "/images.text";
     
+    private String selectedFileName;
+    
+    private BufferedImage originalImage;
+    
     public ImageTilePanel(RgbLedMatrix.Matrix KIND)
     {
 	super(KIND);	
     }
     
-    @Override
-    public void actionPerformed(ActionEvent event) 
+   /* @Override
+    public void actionPerformed(ActionEvent event) //no longer using this one, we replaced it with mouselistener but keep it here just in case we need to go back
     {	
 	String command = event.getActionCommand();
 	System.out.println("image comamand: " + command);	
@@ -63,7 +78,7 @@ public class ImageTilePanel extends PixelTilePanel
         {
             e1.printStackTrace();
         }
-    }    
+    }    */
 	
     @Override
     protected ImageIcon getImageIcon(String pathName) 
@@ -103,5 +118,131 @@ public class ImageTilePanel extends PixelTilePanel
     {
 	return "/images";
     }
+
+	@Override
+	public void mouseClicked(MouseEvent e) {
+		
+		PixelApp.pixel.interactiveMode();
+		
+		 //System.out.println("image array test " +  PixelTilePanel.imagePathArray.get(2)); //didn't need this it turns out
+		//String command = e.getActionCommand(); //this was for actionevent which we're no longer using because it can't do a double click
+		Component command = e.getComponent();
+		String path = command.toString();
+		//System.out.println("image comamand: " + path);	
+		path = path.replaceAll(",", "\r\n");
+		Properties properties = new Properties();
+
+		//System.out.println(properties);
+		try {
+		    properties.load(new StringReader(path));
+		} catch (IOException e1) {
+		    // TODO Auto-generated catch block
+		    e1.printStackTrace();
+		}
+		//System.out.println(properties);
+
+		String requiredPropertyValue = properties.getProperty("defaultIcon");
+		System.out.println("Selected Image Path: "+requiredPropertyValue);
+		
+		selectedFileName = FilenameUtils.getName(requiredPropertyValue); //with no extension
+		System.out.println("Selected File Name: "+selectedFileName);
+		
+	       // String imagePath = "images/" + command;
+	        String imagePath = "images/" + selectedFileName;
+		
+	        try 
+	        {
+	            System.out.println("Attemping to load " + imagePath + " from the classpath.");
+		    URL url = PixelApp.class.getClassLoader().getResource(imagePath);
+
+		    originalImage = ImageIO.read(url);
+		
+	        } 
+	        catch (Exception e1) 
+	        {
+	            e1.printStackTrace();
+	        }
+		
+		if (e.getClickCount() == 3) {
+			
+	      System.out.println("User Triple Clicked...");
+	      if (PixelApp.pixelHardwareID.substring(0,4).equals("PIXL")) { //then it's a PIXEL V2 unit that can write to the sd card, otherwise just stream
+				PixelApp.pixel.interactiveMode();
+				//send loading image
+				PixelApp.pixel.writeMode(10); //need to tell PIXEL the frames per second to use, how fast to play the animations
+				try {
+					PixelApp.pixel.writeImagetoMatrix(originalImage);
+				} catch (ConnectionLostException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+				PixelApp.pixel.playLocalMode(); //now tell PIXEL to play locally
+			}
+	      else {  //they triple clicked but it's not a V2 unit so we can only stream
+		      try {
+					PixelApp.pixel.writeImagetoMatrix(originalImage);
+				} catch (ConnectionLostException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+      }
+	      
+	    } else if (e.getClickCount() == 2) {
+	      System.out.println("User Double Clicked...");
+	      if (PixelApp.pixelHardwareID.substring(0,4).equals("PIXL")) { //then it's a PIXEL V2 unit that can write to the sd card, otherwise just stream
+					PixelApp.pixel.interactiveMode();
+					//send loading image
+					PixelApp.pixel.writeMode(10); //need to tell PIXEL the frames per second to use, how fast to play the animations
+					try {
+						PixelApp.pixel.writeImagetoMatrix(originalImage);
+					} catch (ConnectionLostException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
+					PixelApp.pixel.playLocalMode(); //now tell PIXEL to play locally
+			}
+	      else {  //they double clicked but it's not a V2 unit so we can only stream
+			      try { 
+						PixelApp.pixel.writeImagetoMatrix(originalImage);
+					} catch (ConnectionLostException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
+	      }
+	    }
+	    else {   //then it must have been a single click so let's just stream the image
+	    	    
+	    		try {
+					PixelApp.pixel.writeImagetoMatrix(originalImage);
+				} catch (ConnectionLostException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+	    }
+	}
+
+	@Override
+	public void mousePressed(MouseEvent e) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void mouseReleased(MouseEvent e) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void mouseEntered(MouseEvent e) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void mouseExited(MouseEvent e) {
+		// TODO Auto-generated method stub
+		
+	}
     
 }
