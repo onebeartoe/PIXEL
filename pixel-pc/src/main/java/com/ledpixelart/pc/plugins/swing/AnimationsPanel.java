@@ -55,6 +55,8 @@ public class AnimationsPanel extends ImageTilePanel
     
     private static int GIFresolution;
     
+    private static boolean writeMode = false;
+    
     public AnimationsPanel(RgbLedMatrix.Matrix KIND)
     {
 	super(KIND);
@@ -70,27 +72,7 @@ public class AnimationsPanel extends ImageTilePanel
 		{
 		    i = 0;
 		}
-		//System.out.println("numFrames is: " + numFrames);
-		
-		
-		//System.out.println("Working Directory = " +
-	    //          System.getProperty("user.home"));
-		
-		//userHome = System.getProperty("user.home") + "/pixel/animations";
-		
-		//String framestring = currentDir + animation_name + ".rgb565";
-		
-		//System.out.println("framestring: " + framestring);
-		
-		/*System.out.println("selected resolution: " + GIFresolution);
-		System.out.println("current resolution: " + PixelApp.currentResolution);
-		System.out.println("KIND.width: " + PixelApp.KIND.width);
-		System.out.println("KIND.height: " + PixelApp.KIND.height);*/
-
-		//PixelApp.pixel.loadRGB565(framestring);
-		//int GIFresolution = PixelApp.selectedFileResolution;
-		//PixelApp.SendPixelDecodedFrame(currentDir, gifFileName_, i, GIFnumFrames, GIFresolution, KIND.width,KIND.height);
-		PixelApp.pixel.SendPixelDecodedFrame(decodedDir, animation_name, i, GIFnumFrames, GIFresolution, PixelApp.KIND.width,PixelApp.KIND.height);
+			PixelApp.pixel.SendPixelDecodedFrame(decodedDir, animation_name, i, GIFnumFrames, GIFresolution, PixelApp.KIND.width,PixelApp.KIND.height);
 	    }
 	};
     }
@@ -110,7 +92,7 @@ public class AnimationsPanel extends ImageTilePanel
     we'll use this directory structure
     
     user home/pixel/animations/decoded/
-    user home/pixel/animations/decoded/sourcegif/  not sure we needt this one?
+    user home/pixel/animations/decoded/sourcegif/  not sure we need this one?
     */
     	
     String selectedFileName = event.getActionCommand();
@@ -143,25 +125,6 @@ public class AnimationsPanel extends ImageTilePanel
 		System.out.println("Current LED Panel Resolution: " + PixelApp.currentResolution);
 		System.out.println("GIF Width: " + PixelApp.KIND.width);
 		System.out.println("GIF Height: " + PixelApp.KIND.height);
-	    
-	   /* numFrames = PixelApp.pixel.getDecodednumFrames(decodedDir, animation_name);
-	    //System.out.println("Num Frames: " + numFrames);
-	    selectedFileDelay = PixelApp.pixel.getDecodedframeDelay(decodedDir, animation_name);
-	   // System.out.println("File Delay: " + selectedFileDelay);
-	    if (selectedFileDelay != 0) {  //then we're doing the FPS override which the user selected from settings
-    		fps = 1000.f / selectedFileDelay;
-		} else { 
-    		fps = 0;
-    	}*/
-	    
-	    
-//	    i = 0;
-//	    String name = event.getActionCommand();	    	    		
-//	    int i = name.lastIndexOf(".");	    
-//	    animation_name = name.substring(0, i);	    
-	    
-	  //  numFrames = selectedFileTotalFrames;
-	    // System.out.println("file delay: " + selectedFileDelay);
             
             stopExistingTimer();
             
@@ -170,13 +133,31 @@ public class AnimationsPanel extends ImageTilePanel
     	  //  timer = new Timer(selectedFileDelay, AnimateTimer);
     	  //  timer.start();
     	   //***********************
-    	
-    			if (PixelApp.pixelFirmware.equals("PIXL0003")) {  //change this to a double click event later
-    					PixelApp.pixel.interactiveMode();
+            writeMode = true;
+            
+             if (PixelApp.pixelHardwareID.substring(0,4).equals("PIXL") && writeMode == true) {  //change this to a double click event later
+    				/*	PixelApp.pixel.interactiveMode();
     					//send loading image
     					PixelApp.pixel.writeMode(fps); //need to tell PIXEL the frames per second to use, how fast to play the animations
     					sendFramesToPIXEL(); //send all the frame to PIXEL
     					PixelApp.pixel.playLocalMode(); //now tell PIXEL to play locally
+    				 */  
+    		
+    					PixelApp.pixel.interactiveMode();
+    					//send loading image
+    					PixelApp.pixel.writeMode(GIFfps); //need to tell PIXEL the frames per second to use, how fast to play the animations
+    					System.out.println("Now writing to PIXEL's SD card, the screen will go blank until writing has been completed..."); 
+    					  int y;
+    				    	 
+    				   	  //for (y=0;y<numFrames-1;y++) { //let's loop through and send frame to PIXEL with no delay
+    				      for (y=0;y<GIFnumFrames;y++) { //Al removed the -1, make sure to test that!!!!!
+
+    			    			System.out.println("Writing " + animation_name + " to PIXEL " + "frame " + y);
+    				 		    PixelApp.pixel.SendPixelDecodedFrame(decodedDir, animation_name, y, GIFnumFrames, GIFresolution, PixelApp.KIND.width,PixelApp.KIND.height);
+    				   	  } //end for loop
+    					PixelApp.pixel.playLocalMode(); //now tell PIXEL to play locally
+    					System.out.println("Writing " + animation_name + " to PIXEL complete, now displaying...");
+    			
     			}
     			else {
     				   stopExistingTimer();
@@ -185,9 +166,8 @@ public class AnimationsPanel extends ImageTilePanel
     			}    
 
 	}
-  //  }
 
-    private static void sendFramesToPIXEL() { 
+    /*private static void sendFramesToPIXEL() { 
     	  int y;
      	 
     	  for (y=0;y<GIFnumFrames-1;y++) { //let's loop through and send frame to PIXEL with no delay
@@ -207,7 +187,7 @@ public class AnimationsPanel extends ImageTilePanel
   		}
     	  } //end for loop
       	 
-      }
+      }*/
     
     @Override
     protected String imagePath() 
