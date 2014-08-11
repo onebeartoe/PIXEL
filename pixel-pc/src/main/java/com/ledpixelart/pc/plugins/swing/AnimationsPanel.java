@@ -19,7 +19,9 @@ public class AnimationsPanel extends ImageTilePanel
 {
     private int i;
     
-    private static int numFrames = 0;
+  //  private static int numFrames = 0;
+    
+   // private static int selectedFileDelay = 0;
     
     private static String animation_name;
     
@@ -38,6 +40,20 @@ public class AnimationsPanel extends ImageTilePanel
   	private static String framestring;
   	
   	private static float fps = 0;
+  	
+  	private static String userHome = System.getProperty("user.home");
+  	
+  	private static String decodedDir = userHome + "/pixel/animations/decoded/";  //users/al/pixel/animations/decoded
+  	
+  	private static String soureGIFDir = userHome + "/pixel/animations/decoded/sourcegif/";  //users/al/pixel/animations/decoded
+  	
+    private static float GIFfps;
+    
+    private static int GIFnumFrames;
+    
+    private static int GIFselectedFileDelay;
+    
+    private static int GIFresolution;
     
     public AnimationsPanel(RgbLedMatrix.Matrix KIND)
     {
@@ -50,84 +66,101 @@ public class AnimationsPanel extends ImageTilePanel
 	    {
 		i++;
 
-		if (i >= numFrames - 1) 
+		if (i >= GIFnumFrames - 1) 
 		{
 		    i = 0;
 		}
+		//System.out.println("numFrames is: " + numFrames);
 		
-		String framestring = "animations/decoded/" + animation_name + "/" + animation_name + i + ".rgb565";
 		
-System.out.println("framestring: " + framestring);
+		//System.out.println("Working Directory = " +
+	    //          System.getProperty("user.home"));
+		
+		//userHome = System.getProperty("user.home") + "/pixel/animations";
+		
+		//String framestring = currentDir + animation_name + ".rgb565";
+		
+		//System.out.println("framestring: " + framestring);
+		
+		/*System.out.println("selected resolution: " + GIFresolution);
+		System.out.println("current resolution: " + PixelApp.currentResolution);
+		System.out.println("KIND.width: " + PixelApp.KIND.width);
+		System.out.println("KIND.height: " + PixelApp.KIND.height);*/
 
-		try 
-		{
-		    PixelApp.pixel.loadRGB565(framestring);
-		} 
-		catch (ConnectionLostException e1) 
-		{
-		    // TODO Auto-generated catch block
-		    e1.printStackTrace();
-		}
+		//PixelApp.pixel.loadRGB565(framestring);
+		//int GIFresolution = PixelApp.selectedFileResolution;
+		//PixelApp.SendPixelDecodedFrame(currentDir, gifFileName_, i, GIFnumFrames, GIFresolution, KIND.width,KIND.height);
+		PixelApp.pixel.SendPixelDecodedFrame(decodedDir, animation_name, i, GIFnumFrames, GIFresolution, PixelApp.KIND.width,PixelApp.KIND.height);
 	    }
 	};
     }
     
+    
     @Override
     public void actionPerformed(ActionEvent event) 
     {
-	String selectedFileName = event.getActionCommand();
-	String decodedDirPath = "animations/decoded";
-
-System.out.println("selected file name: " + selectedFileName);
-	int i = selectedFileName.lastIndexOf(".");
-	selectedFileName = selectedFileName.substring(0, i);
-System.out.println("corrected file name: " + selectedFileName);
-
-	String path = decodedDirPath + "/" + selectedFileName + "/" + selectedFileName + ".txt";
-
-	InputStream decodedFile = PixelApp.class.getClassLoader().getResourceAsStream(path);
-	//note can't use file operator here as you can't reference files from a jar file
-
-	if (decodedFile != null) 
-	{
-	    // ok good, now let's read it, we need to get the total numbers of frames and the frame speed
-
-	    String line = "";
-
-	    try 
-	    {
-		InputStreamReader streamReader = new InputStreamReader(decodedFile);
-		BufferedReader br = new BufferedReader(streamReader);
-		line = br.readLine();
-	    } 
-	    catch (IOException e) 
-	    {
-		//You'll need to add proper error handling here
-	    }
-
-	    String fileAttribs = line.toString();  //now convert to a string	 
-
-	    String fdelim = "[,]"; //now parse this string considering the comma split  ie, 32,60
-	    String[] fileAttribs2 = fileAttribs.split(fdelim);
-	    int selectedFileTotalFrames = Integer.parseInt(fileAttribs2[0].trim());
-
-	    int selectedFileDelay = Integer.parseInt(fileAttribs2[1].trim());	
-	    
-	    if (selectedFileDelay != 0) {  //then we're doing the FPS override which the user selected from settings
-    		fps = 1000.f / selectedFileDelay;
-		} else { 
-    		fps = 0;
-    	}
+	
+   /* 
+    let's first check if the decoded animation exists on the local user directory
+    If it's not there, then we'll copy the gif to the source directory and decode it
+    If it is there, then let's check if the resolution is correct
+    If wrong resolution, then we'll need to delete the file and decode
+    If it is there, then we're good and let's stream
+    
+    we'll use this directory structure
+    
+    user home/pixel/animations/decoded/
+    user home/pixel/animations/decoded/sourcegif/  not sure we needt this one?
+    */
+    	
+    String selectedFileName = event.getActionCommand();
+    
+   /* if (PixelApp.pixel.GIFTxtExists(decodedDir,selectedFileName) == true && PixelApp.pixel.GIFRGB565Exists(decodedDir,selectedFileName) == true) {
+    	System.out.println("This GIF was already decoded");
+    }
+    else {  //the text file is not there so we cannot continue and we must decode, let's first copy the file to home dir
+    	//PixelApp.pixel.copyJARGif(selectedFileName, soureGIFDir); //let's first copy the gif to home dir 
+    	//and now we need to decode it and create the RGB565 and txt files
+    	//PixelApp.pixel.decodeGIFJar(currentDir, gifName, currentResolution, pixelMatrix_width, pixelMatrix_height);
+    	//d decodeGIFJar(String decodedDir, String gifName, int currentResolution, int pixelMatrix_width, int pixelMatrix_height) {  //pass the matrix type
+    	PixelApp.pixel.decodeGIFJar(decodedDir, selectedFileName, PixelApp.currentResolution, KIND.width, KIND.height);
+    }*/
+    
+    if (PixelApp.pixel.GIFNeedsDecoding(decodedDir, selectedFileName, PixelApp.currentResolution) == true) {
+    	PixelApp.pixel.decodeGIFJar(decodedDir, selectedFileName, PixelApp.currentResolution, PixelApp.KIND.width, PixelApp.KIND.height);
+    }
 
 	    //****** Now let's setup the animation ******
 	    
 	    animation_name = selectedFileName;
+	    
+	    GIFfps = pixel.getDecodedfps(decodedDir, animation_name); //get the fps //to do fix this later becaause we are getting from internal path
+	    GIFnumFrames = PixelApp.pixel.getDecodednumFrames(decodedDir, animation_name);
+	    GIFselectedFileDelay = pixel.getDecodedframeDelay(decodedDir, animation_name);
+	    GIFresolution = pixel.getDecodedresolution(decodedDir, animation_name);
+	    
+	    System.out.println("Selected GIF Resolution: " + GIFresolution);
+		System.out.println("Current LED Panel Resolution: " + PixelApp.currentResolution);
+		System.out.println("GIF Width: " + PixelApp.KIND.width);
+		System.out.println("GIF Height: " + PixelApp.KIND.height);
+	    
+	   /* numFrames = PixelApp.pixel.getDecodednumFrames(decodedDir, animation_name);
+	    //System.out.println("Num Frames: " + numFrames);
+	    selectedFileDelay = PixelApp.pixel.getDecodedframeDelay(decodedDir, animation_name);
+	   // System.out.println("File Delay: " + selectedFileDelay);
+	    if (selectedFileDelay != 0) {  //then we're doing the FPS override which the user selected from settings
+    		fps = 1000.f / selectedFileDelay;
+		} else { 
+    		fps = 0;
+    	}*/
+	    
+	    
 //	    i = 0;
 //	    String name = event.getActionCommand();	    	    		
 //	    int i = name.lastIndexOf(".");	    
 //	    animation_name = name.substring(0, i);	    
 	    
-	    numFrames = selectedFileTotalFrames;
+	  //  numFrames = selectedFileTotalFrames;
 	    // System.out.println("file delay: " + selectedFileDelay);
             
             stopExistingTimer();
@@ -138,7 +171,7 @@ System.out.println("corrected file name: " + selectedFileName);
     	  //  timer.start();
     	   //***********************
     	
-    			if (PixelApp.pixelFirmware.equals("PIXL0003")) {
+    			if (PixelApp.pixelFirmware.equals("PIXL0003")) {  //change this to a double click event later
     					PixelApp.pixel.interactiveMode();
     					//send loading image
     					PixelApp.pixel.writeMode(fps); //need to tell PIXEL the frames per second to use, how fast to play the animations
@@ -147,19 +180,17 @@ System.out.println("corrected file name: " + selectedFileName);
     			}
     			else {
     				   stopExistingTimer();
-    				   timer = new Timer(selectedFileDelay, AnimateTimer);
+    				   timer = new Timer(GIFselectedFileDelay, AnimateTimer);
     				   timer.start();
     			}    
 
-	   // timer = new Timer(selectedFileDelay, AnimateTimer);
-	   // timer.start();
 	}
-    }
+  //  }
 
     private static void sendFramesToPIXEL() { 
     	  int y;
      	 
-    	  for (y=0;y<numFrames-1;y++) { //let's loop through and send frame to PIXEL with no delay
+    	  for (y=0;y<GIFnumFrames-1;y++) { //let's loop through and send frame to PIXEL with no delay
   		
   		framestring = "animations/decoded/" + animation_name + "/" + animation_name + y + ".rgb565";
   		

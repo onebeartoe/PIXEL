@@ -23,6 +23,6 @@
 		</attributes>
 	</classpathentry>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
-	<classpathentry kind="src" path="/IOIOLibPC"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/IOIOLibPC"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>

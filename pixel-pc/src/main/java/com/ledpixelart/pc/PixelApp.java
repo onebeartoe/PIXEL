@@ -1,6 +1,7 @@
 
 package com.ledpixelart.pc;
 
+
 import com.ledpixelart.pc.plugins.PluginConfigEntry;
 import com.ledpixelart.pc.plugins.swing.AnimationsPanel;
 import com.ledpixelart.pc.plugins.swing.ImageTilePanel;
@@ -81,11 +82,35 @@ public class PixelApp extends IOIOSwingApp
     
     private Timer searchTimer;
     
-    private static IOIO ioiO;
+    private static IOIO ioiO; 
+	 
+	public static RgbLedMatrix.Matrix KIND = ioio.lib.api.RgbLedMatrix.Matrix.SEEEDSTUDIO_32x32;
+	
+	//public static RgbLedMatrix.Matrix KIND;
+	
+	public static final Pixel pixel = new Pixel(KIND);
+	
+	private static int selectedFileResolution = 32; 
     
-    private static RgbLedMatrix.Matrix KIND = ioio.lib.api.RgbLedMatrix.Matrix.SEEEDSTUDIO_32x32;
-     
-    public static final Pixel pixel = new Pixel(KIND);
+    //private static IOIO ioiO;
+    
+    //public static RgbLedMatrix.Matrix KIND = ioio.lib.api.RgbLedMatrix.Matrix.SEEEDSTUDIO_32x32;
+    
+    //public static final Pixel pixel = new Pixel(KIND);
+	
+	//public static int selectedFileResolution = 32; 
+	
+	public static int frame_length;
+	    
+	public static int currentResolution;
+	    
+	public static int ledMatrixType = 3; //we'll default to PIXEL 32x32 and change this is a command line option is entered specifying otherwise
+	
+	public static String pixelFirmware = "Not Found";
+	 
+	public static String pixelHardwareID = "";
+	    
+	private static VersionType v;
     
     private UserProvidedPanel localImagesPanel;
     
@@ -106,11 +131,7 @@ public class PixelApp extends IOIOSwingApp
     public static final int DEFAULT_HEIGHT = 600;
     
     public static final int DEFAULT_WIDTH = 500;  //was 450
-    
-    public static String pixelFirmware = "Not Found";
-    public static String pixelHardwareID = "Not Found";
-    
-    private static VersionType v;
+   
     
     public PixelApp()
     {
@@ -341,19 +362,34 @@ public class PixelApp extends IOIOSwingApp
 	    	
 	    	//**** let's get IOIO version info for the About Screen ****
   			pixelFirmware = ioio_.getImplVersion(v.APP_FIRMWARE_VER);
-  			//pixelBootloader = ioio_.getImplVersion(v.BOOTLOADER_VER);
   			pixelHardwareID = ioio_.getImplVersion(v.HARDWARE_VER);
+  			//pixelBootloader = ioio_.getImplVersion(v.BOOTLOADER_VER);
   			//IOIOLibVersion = ioio_.getImplVersion(v.IOIOLIB_VER);
   			//**********************************************************
 	    	
 	    	led_ = ioio_.openDigitalOutput(IOIO.LED_PIN, true);
-                PixelApp.this.ioiO = ioio_;
-		pixel.matrix = ioio_.openRgbLedMatrix(pixel.KIND);
-                pixel.ioiO = ioio_;
+	    	
+	    	
+	    	PixelApp.this.ioiO = ioio_;
+				
+			setupEnvironment();  //here we set the PIXEL LED matrix type
+				
+            //pixel.matrix = ioio_.openRgbLedMatrix(pixel.KIND);   //AL could not make this work, did a quick hack, Roberto probably can change back to the right way
+            pixel.matrix = ioio_.openRgbLedMatrix(KIND);
+            pixel.ioiO = ioio_;
+            System.out.println("Found PIXEL: " + pixel.matrix + "\n");
+	    	
+            //PixelApp.this.ioiO = ioio_;
+            
+        	//setupEnvironment();  //here we set the PIXEL LED matrix type
+            
+            
+            //pixel.matrix = ioio_.openRgbLedMatrix(pixel.KIND);
+           // pixel.ioiO = ioio_;
                 
                 for(PixelPanel panel : userPluginPanels)
                 {
-System.out.println("\nSetting pixel for panel: " + panel.getClass() + "\n");
+                	System.out.println("\nSetting pixel for panel: " + panel.getClass() + "\n");
                     panel.pixel = pixel;
                 }
                 
@@ -413,7 +449,73 @@ System.out.println("\nSetting pixel for panel: " + panel.getClass() + "\n");
         }
         
         return pixel.matrix;
-    }    
+    } 
+    
+	 private static void setupEnvironment() {
+		 
+		 switch (ledMatrixType) { 
+		     case 0:
+		    	 KIND = ioio.lib.api.RgbLedMatrix.Matrix.SEEEDSTUDIO_32x16;
+		    	 frame_length = 1024;
+		    	 currentResolution = 16;
+		    	 break;
+		     case 1:
+		    	 KIND = ioio.lib.api.RgbLedMatrix.Matrix.ADAFRUIT_32x16;
+		    	 frame_length = 1024;
+		    	 currentResolution = 16;
+		    	 break;
+		     case 2:
+		    	 KIND = ioio.lib.api.RgbLedMatrix.Matrix.SEEEDSTUDIO_32x32_NEW; //an early version of the PIXEL LED panels, only used in a few early prototypes
+		    	 frame_length = 2048;
+		    	 currentResolution = 32;
+		    	 break;
+		     case 3:
+		    	 KIND = ioio.lib.api.RgbLedMatrix.Matrix.SEEEDSTUDIO_32x32; //the current version of PIXEL 32x32
+		    	 frame_length = 2048;
+		    	 currentResolution = 32;
+		    	 break;
+		     case 4:
+		    	 KIND = ioio.lib.api.RgbLedMatrix.Matrix.SEEEDSTUDIO_64x32;
+		    	 frame_length = 8192;
+		    	 currentResolution = 64; 
+		    	 break;
+		     case 5:
+		    	 KIND = ioio.lib.api.RgbLedMatrix.Matrix.SEEEDSTUDIO_32x64; 
+		    	 frame_length = 8192;
+		    	 currentResolution = 64; 
+		    	 break;	 
+		     case 6:
+		    	 KIND = ioio.lib.api.RgbLedMatrix.Matrix.SEEEDSTUDIO_2_MIRRORED; 
+		    	 frame_length = 8192;
+		    	 currentResolution = 64; 
+		    	 break;	 	 
+		     case 7:
+		    	 KIND = ioio.lib.api.RgbLedMatrix.Matrix.SEEEDSTUDIO_4_MIRRORED;
+		    	 frame_length = 8192;
+		    	 currentResolution = 128; 
+		     case 8:
+		    	 KIND = ioio.lib.api.RgbLedMatrix.Matrix.SEEEDSTUDIO_128x32; //horizontal
+		    	 frame_length = 8192;
+		    	 currentResolution = 128;  
+		    	 break;	 
+		     case 9:
+		    	 KIND = ioio.lib.api.RgbLedMatrix.Matrix.SEEEDSTUDIO_32x128; //vertical mount
+		    	 frame_length = 8192;
+		    	 currentResolution = 128; 
+		    	 break;	 
+		     case 10:
+		    	 KIND = ioio.lib.api.RgbLedMatrix.Matrix.SEEEDSTUDIO_64x64;
+		    	 frame_length = 8192;
+		    	 currentResolution = 128; 
+		    	 break;	 	 		 
+		     default:	    		 
+		    	 KIND = ioio.lib.api.RgbLedMatrix.Matrix.SEEEDSTUDIO_32x32; //v2 as the default
+		    	 frame_length = 2048;
+		    	 currentResolution = 32;
+	     }
+		 
+		 System.out.println("went to setup & currentResolution is: " + currentResolution + "\n");
+	 }
     
     public static void main(String[] args) throws Exception 
     {		
