@@ -126,7 +126,7 @@ public class PixelApp extends IOIOSwingApp
     
     private JFileChooser pluginChooser;
     
-    private JLabel statusLabel;
+    public static JLabel statusLabel;
     
     public static final int DEFAULT_HEIGHT = 600;
     
@@ -135,6 +135,8 @@ public class PixelApp extends IOIOSwingApp
 	public static String userHome = System.getProperty("user.home");
   	
   	public static String decodedDir = userHome + "/pixel/animations/decoded/";  //users/al/pixel/animations/decoded
+  	
+  	private static boolean pixelFound = false;
    
     
     public PixelApp()
@@ -147,11 +149,13 @@ public class PixelApp extends IOIOSwingApp
 	
 	preferenceService = new JavaPreferencesService();
 
-        userPluginConfiguration = new ArrayList();
+    userPluginConfiguration = new ArrayList();
         
 	builtinPixelPanels = new ArrayList();
 	
 	userPluginPanels = new ArrayList();
+	
+	
     }
 
     @Override
@@ -276,6 +280,10 @@ public class PixelApp extends IOIOSwingApp
 	return frame;
     }
     
+    public static boolean getPixelFound () { //we'll call this method from other classes to make sure pixel was found
+    	return pixelFound;
+    }
+    
     private JMenuBar createMenuBar()	    
     {
 	JMenuItem menuItem;
@@ -350,6 +358,8 @@ public class PixelApp extends IOIOSwingApp
 
 	return (data.getData());
     }    
+    
+   
 
     @Override
     public IOIOLooper createIOIOLooper(String connectionType, Object extra) 
@@ -403,6 +413,7 @@ public class PixelApp extends IOIOSwingApp
                 }
                 
 		setPixelFound();
+		pixelFound = true;
 		System.out.println("Found PIXEL: " + pixel.matrix + "\n");
 		System.out.println("You may now interact with the PIXEL\n");
 		String message = "PIXEL Status: Connected";
@@ -422,6 +433,7 @@ public class PixelApp extends IOIOSwingApp
 		String message = "PIXEL was disconected";
 		System.out.println(message);
 		statusLabel.setText(message);
+		pixelFound = false;
 	    }
 
 	    @Override
@@ -562,7 +574,7 @@ public class PixelApp extends IOIOSwingApp
     {
 	for(PixelPanel panel : builtinPixelPanels)
 	{
-	//   panel.setPixelFound(true);
+	  //panel.setPixelFound(true);
 	  
 		
 	}
@@ -576,6 +588,8 @@ public class PixelApp extends IOIOSwingApp
 	searchTimer = new Timer(delay, worker);
 	searchTimer.start();
     }
+    
+   
     
     @Override
     public void windowClosing(WindowEvent event)
