@@ -122,32 +122,19 @@ public class ImageTilePanel extends PixelTilePanel
 	@Override
 	public void mouseClicked(MouseEvent e) {
 		
+     if (PixelApp.getPixelFound() == true) { //let's make sure pixel is found before proceeding or we'll get a crash
+		
 		PixelApp.pixel.interactiveMode();
 		
 		 //System.out.println("image array test " +  PixelTilePanel.imagePathArray.get(2)); //didn't need this it turns out
 		//String command = e.getActionCommand(); //this was for actionevent which we're no longer using because it can't do a double click
+		
 		Component command = e.getComponent();
-		String path = command.toString();
-		//System.out.println("image comamand: " + path);	
-		path = path.replaceAll(",", "\r\n");
-		Properties properties = new Properties();
-
-		//System.out.println(properties);
-		try {
-		    properties.load(new StringReader(path));
-		} catch (IOException e1) {
-		    // TODO Auto-generated catch block
-		    e1.printStackTrace();
-		}
-		//System.out.println(properties);
-
-		String requiredPropertyValue = properties.getProperty("defaultIcon");
-		System.out.println("Selected Image Path: "+requiredPropertyValue);
+		String localFileImagePath = PixelApp.pixel.getSelectedFilePath(command);
+		selectedFileName = FilenameUtils.getName(localFileImagePath); //with no extension
+		System.out.println("Selected File Name: " + selectedFileName);
+		String gifNameNoExt = FilenameUtils.removeExtension(selectedFileName); //with no extension
 		
-		selectedFileName = FilenameUtils.getName(requiredPropertyValue); //with no extension
-		System.out.println("Selected File Name: "+selectedFileName);
-		
-	       // String imagePath = "images/" + command;
 	        String imagePath = "images/" + selectedFileName;
 		
 	        try 
@@ -219,6 +206,11 @@ public class ImageTilePanel extends PixelTilePanel
 					e1.printStackTrace();
 				}
 	    }
+     }
+     else {
+    	 String message = "Oops.. PIXEL was not yet detected";
+         PixelApp.statusLabel.setText(message);
+     }
 	}
 
 	@Override
