@@ -9,6 +9,7 @@ import ioio.lib.api.RgbLedMatrix;
 
 import ioio.lib.api.exception.ConnectionLostException;
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
@@ -26,8 +27,10 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.RandomAccessFile;
+import java.io.StringReader;
 import java.net.URL;
 import java.util.Arrays;
+import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -60,6 +63,12 @@ public class Pixel
     protected short[] frame_;
     
     private float fps;
+    
+    public String fileType;
+    
+    public String gifNameNoExt;
+    
+    private static String localFileImagePath;
     
     //private static String decodedDirPathExternal;
     
@@ -696,8 +705,8 @@ public boolean GIFNeedsDecoding(String decodedDir, String gifName, int currentRe
 		//String gifName = FilenameUtils.removeExtension(gifName); //with no extension
 		
 	    String selectedFileName = FilenameUtils.getName(gifFilePath); 
-		String fileType = FilenameUtils.getExtension(gifFilePath);
-		String gifNameNoExt = FilenameUtils.removeExtension(selectedFileName); //with no extension
+		fileType = FilenameUtils.getExtension(gifFilePath);
+	    gifNameNoExt = FilenameUtils.removeExtension(selectedFileName); //with no extension
 		
 		System.out.println("User selected file name: " + selectedFileName);
 		System.out.println("User selected file type: " + fileType);
@@ -1030,6 +1039,34 @@ public void decodeGIFJar(String decodedDir, String gifName, int currentResolutio
 	 FileOutputStream fos = new FileOutputStream(filename, true);  //true means append, false is over-write
      fos.write(data);
      fos.close();
+  }
+  
+  public static String getSelectedFilePath(Component command) {
+	    String path = command.toString();
+		//System.out.println("image comamand: " + path);	
+		path = path.replaceAll(",", "\r\n");
+		Properties properties = new Properties();
+		
+		try {
+		    properties.load(new StringReader(path));
+		} catch (IOException e1) {
+		    // TODO Auto-generated catch block
+		    e1.printStackTrace();
+		}
+
+		localFileImagePath = properties.getProperty("defaultIcon");
+		
+		String selectedFileName = FilenameUtils.getName(localFileImagePath); //with no extension
+		//System.out.println("Selected File Name: " + selectedFileName);
+		String fileType = FilenameUtils.getExtension(selectedFileName);
+		String gifNameNoExt = FilenameUtils.removeExtension(selectedFileName); //with no extension
+		
+		//System.out.println("Local File Image Path: "+ localFileImagePath);
+		//System.out.println("User selected file name: " + selectedFileName);
+		//System.out.println("User selected file type: " + fileType);
+		//System.out.println("User selected file name no extension: " + gifNameNoExt);
+		
+      return localFileImagePath;
   }
   
   public static BufferedImage getScaledImage(BufferedImage image, int width, int height) throws IOException { //resizes our image and preserves hard edges which we need for pixel art
