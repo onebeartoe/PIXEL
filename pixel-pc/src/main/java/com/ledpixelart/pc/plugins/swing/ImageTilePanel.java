@@ -165,7 +165,7 @@ public class ImageTilePanel extends PixelTilePanel
 		
 		if (e.getClickCount() == 3) {
 			
-	      System.out.println("User Triple Clicked...");
+	      System.out.println("User triple clicked...");
 	      if (PixelApp.pixelHardwareID.substring(0,4).equals("PIXL")) { //then it's a PIXEL V2 unit that can write to the sd card, otherwise just stream
 				PixelApp.pixel.interactiveMode();
 				//send loading image
@@ -188,7 +188,7 @@ public class ImageTilePanel extends PixelTilePanel
       }
 	      
 	    } else if (e.getClickCount() == 2) {
-	      System.out.println("User Double Clicked...");
+	      System.out.println("User double clicked...");
 	      if (PixelApp.pixelHardwareID.substring(0,4).equals("PIXL")) { //then it's a PIXEL V2 unit that can write to the sd card, otherwise just stream
 					PixelApp.pixel.interactiveMode();
 					//send loading image
