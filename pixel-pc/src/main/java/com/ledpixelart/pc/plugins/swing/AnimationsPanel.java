@@ -157,7 +157,7 @@ public class AnimationsPanel extends ImageTilePanel implements MouseListener
 			    }
 			    else {  //the text file is not there so we cannot continue and we must decode, let's first copy the file to home dir
 			    
-			    	PixelApp.pixel.decodeGIFJar(decodedDir, selectedFileName, PixelApp.currentResolution, KIND.width, KIND.height);
+			    	PixelApp.pixel.decodeGIFJar(decodedDir, selectedFileName, PixelApp.currentResolution, PixelApp.KIND.width, PixelApp.KIND.height);
 			    }
 			    
 			    if (PixelApp.pixel.GIFNeedsDecoding(decodedDir, selectedFileName, PixelApp.currentResolution) == true) {

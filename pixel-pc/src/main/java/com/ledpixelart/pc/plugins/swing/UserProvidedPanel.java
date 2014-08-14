@@ -381,7 +381,7 @@ imageListPath = "/animations.text";
 						//send loading image
 						PixelApp.pixel.writeMode(10); //need to tell PIXEL the frames per second to use, how fast to play the animations
 						try {
-							PixelApp.pixel.writeImagetoMatrix(originalImage);
+							PixelApp.pixel.writeImagetoMatrix(originalImage, PixelApp.KIND.width,PixelApp.KIND.height);
 						} catch (ConnectionLostException e1) {
 							// TODO Auto-generated catch block
 							e1.printStackTrace();
@@ -392,7 +392,7 @@ imageListPath = "/animations.text";
 			   		else {  //just stream the static image
 					   		
 					   	 try { 
-								PixelApp.pixel.writeImagetoMatrix(originalImage);
+								PixelApp.pixel.writeImagetoMatrix(originalImage, PixelApp.KIND.width,PixelApp.KIND.height);
 							} catch (ConnectionLostException e1) {
 								// TODO Auto-generated catch block
 								e1.printStackTrace();

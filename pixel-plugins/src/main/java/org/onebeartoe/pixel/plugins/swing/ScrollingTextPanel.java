@@ -69,6 +69,15 @@ public class ScrollingTextPanel extends SingleThreadedPixelPanel
         JPanel fontPanel = new JPanel( new BorderLayout() );
         fontFamilyChooser = new JComboBox(fontNames);
         fontPanel.add(fontFamilyChooser, BorderLayout.CENTER);
+        
+        JButton writeButton = new JButton("Write");
+    	writeButton.addActionListener( new ActionListener() 
+    	{
+    	    public void actionPerformed(ActionEvent e) 
+    	    {
+    	
+    	    }
+    	});	
 	
 	colorPanel = new JPanel();
 	colorPanel.setBackground(Color.GREEN);
@@ -85,9 +94,9 @@ public class ScrollingTextPanel extends SingleThreadedPixelPanel
 	colorComponents.add(colorPanel, BorderLayout.CENTER);
 	colorComponents.add(colorButton, BorderLayout.EAST);
         
-        JPanel configurationPanel = new JPanel( new GridLayout(4, 1));
-        configurationPanel.add(inputSubPanel);
-        configurationPanel.add(fontPanel);
+    JPanel configurationPanel = new JPanel( new GridLayout(4, 1));
+    configurationPanel.add(inputSubPanel);
+    configurationPanel.add(fontPanel);
 	configurationPanel.add(colorComponents);
 	
 	textPanel = new JPanel( new BorderLayout());
@@ -99,11 +108,11 @@ public class ScrollingTextPanel extends SingleThreadedPixelPanel
 	speedPanel.add(scrollSpeedSlider);
 	speedPanel.setBorder( BorderFactory.createTitledBorder("Scroll Speed") );
         
-        JPanel propertiesPanel = new JPanel( new GridLayout(2,1, 10,10) );
-        propertiesPanel.add(textPanel);
+    JPanel propertiesPanel = new JPanel( new GridLayout(2,1, 10,10) );
+    propertiesPanel.add(textPanel);
 	propertiesPanel.add(speedPanel);
         
-        setLayout(new BorderLayout());
+    setLayout(new BorderLayout());
 	add(propertiesPanel, BorderLayout.SOUTH);
     }
     
@@ -147,12 +156,15 @@ public class ScrollingTextPanel extends SingleThreadedPixelPanel
 	    
 	    ScrollingTextPanel.this.timer.setDelay(delay);
 	    
-            int w = 64;
-            int h = 64;
+            //int w = 64;
+            //int h = 64;
+	    
+	    	int w = KIND.width * 2;
+	    	int h = KIND.height * 2;
 	    
             BufferedImage img = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
             
-	    Color textColor = colorPanel.getBackground();
+            Color textColor = colorPanel.getBackground();
 	    
             Graphics2D g2d = img.createGraphics();
             g2d.setPaint(textColor);
@@ -200,7 +212,7 @@ public class ScrollingTextPanel extends SingleThreadedPixelPanel
             {
                 try 
                 {  
-                    pixel.writeImagetoMatrix(img);
+                    pixel.writeImagetoMatrix(img, KIND.width,KIND.height); //TO DO need to find out how to reference PixelApp class from here
                 } 
                 catch (ConnectionLostException ex) 
                 {
@@ -211,13 +223,17 @@ public class ScrollingTextPanel extends SingleThreadedPixelPanel
             int messageWidth = fm.stringWidth(message);            
             int resetX = 0 - messageWidth;
             
-            if(x == resetX)
+            //if(x == resetX)
+            if(x < resetX)  //had to change to < because of the key frame change, could skip over the ==
+
             {
-                x = w;
+                //x = w;
+            	x = KIND.width * 2;
             }
             else
             {
                 x--;
+                //x = x - scrollingKeyFrames;  add this later to skip frames to speed up as a preference
             }
         }        
     }

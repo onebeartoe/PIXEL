@@ -158,7 +158,7 @@ public class ImageTilePanel extends PixelTilePanel
 				//send loading image
 				PixelApp.pixel.writeMode(10); //need to tell PIXEL the frames per second to use, how fast to play the animations
 				try {
-					PixelApp.pixel.writeImagetoMatrix(originalImage);
+					PixelApp.pixel.writeImagetoMatrix(originalImage, PixelApp.KIND.width,PixelApp.KIND.height);
 				} catch (ConnectionLostException e1) {
 					// TODO Auto-generated catch block
 					e1.printStackTrace();
@@ -167,7 +167,7 @@ public class ImageTilePanel extends PixelTilePanel
 			}
 	      else {  //they triple clicked but it's not a V2 unit so we can only stream
 		      try {
-					PixelApp.pixel.writeImagetoMatrix(originalImage);
+					PixelApp.pixel.writeImagetoMatrix(originalImage, PixelApp.KIND.width,PixelApp.KIND.height);
 				} catch (ConnectionLostException e1) {
 					// TODO Auto-generated catch block
 					e1.printStackTrace();
@@ -181,7 +181,7 @@ public class ImageTilePanel extends PixelTilePanel
 					//send loading image
 					PixelApp.pixel.writeMode(10); //need to tell PIXEL the frames per second to use, how fast to play the animations
 					try {
-						PixelApp.pixel.writeImagetoMatrix(originalImage);
+						PixelApp.pixel.writeImagetoMatrix(originalImage, PixelApp.KIND.width,PixelApp.KIND.height);
 					} catch (ConnectionLostException e1) {
 						// TODO Auto-generated catch block
 						e1.printStackTrace();
@@ -190,7 +190,7 @@ public class ImageTilePanel extends PixelTilePanel
 			}
 	      else {  //they double clicked but it's not a V2 unit so we can only stream
 			      try { 
-						PixelApp.pixel.writeImagetoMatrix(originalImage);
+						PixelApp.pixel.writeImagetoMatrix(originalImage, PixelApp.KIND.width,PixelApp.KIND.height);
 					} catch (ConnectionLostException e1) {
 						// TODO Auto-generated catch block
 						e1.printStackTrace();
@@ -200,7 +200,7 @@ public class ImageTilePanel extends PixelTilePanel
 	    else {   //then it must have been a single click so let's just stream the image
 	    	    
 	    		try {
-					PixelApp.pixel.writeImagetoMatrix(originalImage);
+					PixelApp.pixel.writeImagetoMatrix(originalImage, PixelApp.KIND.width,PixelApp.KIND.height);
 				} catch (ConnectionLostException e1) {
 					// TODO Auto-generated catch block
 					e1.printStackTrace();

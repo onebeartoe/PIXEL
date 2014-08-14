@@ -104,7 +104,7 @@ public class PixelApp extends IOIOSwingApp
 	    
 	public static int currentResolution;
 	    
-	public static int ledMatrixType = 3; //we'll default to PIXEL 32x32 and change this is a command line option is entered specifying otherwise
+	public static int ledMatrixType = 10; //we'll default to PIXEL 32x32 and change this is a command line option is entered specifying otherwise
 	
 	public static String pixelFirmware = "Not Found";
 	 
@@ -780,7 +780,7 @@ public class PixelApp extends IOIOSwingApp
 			    JOptionPane.showMessageDialog(frame, message, title, JOptionPane.INFORMATION_MESSAGE);
 			}
 			else { //al added this, trying to debug connected message not always showing up
-				String message = "PIXEL Status: Connected";
+				String message = "PIXEL Status: Connected | Single click to display and double click to write";
 	            PixelApp.this.statusLabel.setText(message);
 			}
 	    }

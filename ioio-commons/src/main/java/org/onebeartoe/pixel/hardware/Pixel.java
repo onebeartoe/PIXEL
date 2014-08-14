@@ -1082,20 +1082,25 @@ public void decodeGIFJar(String decodedDir, String gifName, int currentResolutio
 	        image,
 	        new BufferedImage(width, height, image.getType()));
 	}
-    
-    public void writeImagetoMatrix(BufferedImage originalImage) throws ConnectionLostException     
+  
+  
+  public void writeImagetoMatrix(BufferedImage originalImage,  int pixelMatrix_width, int pixelMatrix_height) throws ConnectionLostException     
     {        
-	//here we'll take a PNG, BMP, or whatever and convert it to RGB565 via a canvas, also we'll re-size the image if necessary
+	
+	  BitmapBytes = new byte[pixelMatrix_width * pixelMatrix_height * 2]; //512 * 2 = 1024 or 1024 * 2 = 2048
+	  frame_ = new short[pixelMatrix_width * pixelMatrix_height];
+	  
+	  //here we'll take a PNG, BMP, or whatever and convert it to RGB565 via a canvas, also we'll re-size the image if necessary
         int width_original = originalImage.getWidth();
         int height_original = originalImage.getHeight();
 
-        if (width_original != KIND.width || height_original != KIND.height) 
+        if (width_original != pixelMatrix_width || height_original != pixelMatrix_height) 
         {  
-            //the image is not the right dimensions, ie, 32px by 32px				
-            BufferedImage ResizedImage = new BufferedImage(KIND.width, KIND.height, originalImage.getType());
+        	//the image is not the right dimensions so we need to resize			
+            BufferedImage ResizedImage = new BufferedImage(pixelMatrix_width, pixelMatrix_height, originalImage.getType());
             Graphics2D g = ResizedImage.createGraphics();
-            g.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
-            g.drawImage(originalImage, 0, 0, KIND.width, KIND.height, 0, 0, originalImage.getWidth(), originalImage.getHeight(), null);
+            g.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_NEAREST_NEIGHBOR);  //IMPORTANT to use nearest neighbor or you'll get anti-aliasing which is BAD for pixel art
+            g.drawImage(originalImage, 0, 0, pixelMatrix_width, pixelMatrix_height, 0, 0, originalImage.getWidth(), originalImage.getHeight(), null);
             g.dispose();
             originalImage = ResizedImage;		
         }
@@ -1104,9 +1109,9 @@ public void decodeGIFJar(String decodedDir, String gifName, int currentResolutio
         int i = 0;
         int j = 0;
 
-        for (i = 0; i < KIND.height; i++) 
+        for (i = 0; i < pixelMatrix_height; i++) 
         {
-            for (j = 0; j < KIND.width; j++) 
+            for (j = 0; j < pixelMatrix_width; j++) 
             {
                 Color c = new Color(originalImage.getRGB(j, i));  //i and j were reversed which was rotationg the image by 90 degrees
 //                int aRGBpix = originalImage.getRGB(j, i);  //i and j were reversed which was rotationg the image by 90 degrees
