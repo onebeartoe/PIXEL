@@ -91,6 +91,8 @@ public class ScrollingTextPanel extends SingleThreadedPixelPanel
     private int prefFontSizeSliderPosition;
     
     private int prefFontYOffset;
+    
+    private Color prefColor;
 
     private static String pixelPrefNode = "/com/ledpixelart/pc";
     
@@ -241,13 +243,22 @@ public class ScrollingTextPanel extends SingleThreadedPixelPanel
     	});	
 	
 	colorPanel = new JPanel();
-	colorPanel.setBackground(Color.GREEN);
+	
+	Color colorPrefs = getColor(prefs, "prefTextColor", Color.GREEN);
+	//colorPanel.setBackground(Color.GREEN); //this is the default color, let's instead get it from prefs
+	colorPanel.setBackground(colorPrefs);
+	
+	
 	JButton colorButton = new JButton("change color");
 	colorButton.addActionListener( new ActionListener() 
 	{
 	    public void actionPerformed(ActionEvent e) 
 	    {
 			Color color = colorChooser.showDialog(ScrollingTextPanel.this, "Select the text color.", Color.yellow);
+			
+			//now let's store into preferences
+	    	putColor(prefs, "prefTextColor", color);
+			
 			colorPanel.setBackground(color);
 		    }
 			});	
@@ -294,6 +305,32 @@ public class ScrollingTextPanel extends SingleThreadedPixelPanel
 		        
 		    setLayout(new BorderLayout());
 			add(propertiesPanel, BorderLayout.SOUTH);
+    }
+    
+    public static String getColorString(Color c) {
+        int i = c.getRGB() & 0xFFFFFF;
+        String s = Integer.toHexString(i).toUpperCase();
+        while (s.length() < 6) {
+            s = "0" + s;
+        }
+        return s;
+    }
+    
+    public static void putColor(Preferences node, String key, Color c) {
+        node.put(key, "0x" + getColorString(c));
+    }
+    
+    public static Color getColor(Preferences node, String key, Color default_color) {
+        Color result = default_color;
+        String value = node.get(key, "unknown");
+        if (!value.equals("unknown")) {
+            try {
+                result = Color.decode(value);
+            } catch (Exception e) {
+                System.out.println("Couldn't decode color preference for '" + key + "' from '" + value + "'");
+            }
+        }
+        return result;
     }
     
     private class fontSizeChanged implements ChangeListener{
