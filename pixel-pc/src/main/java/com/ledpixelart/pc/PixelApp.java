@@ -191,7 +191,7 @@ public class PixelApp extends IOIOSwingApp
 	String path = "/tab_icons/apple_small.png";
 	URL url = getClass().getResource(path);
     ImageIcon imagesTabIcon = new ImageIcon(url);
-	PixelTilePanel imagesPanelReal = new ImageTilePanel(pixel.KIND);
+	PixelTilePanel imagesPanelReal = new ImageTilePanel(KIND);
 	imagesPanelReal.populate();
 	builtinPixelPanels.add(imagesPanelReal);
 	
@@ -204,7 +204,7 @@ public class PixelApp extends IOIOSwingApp
 	String localUserPath = preferenceService.get(key, defaultValue);
 
 	File localUserDirectory = new File(localUserPath);
-	localImagesPanel = new UserProvidedPanel(pixel.KIND, localUserDirectory);
+	localImagesPanel = new UserProvidedPanel(KIND, localUserDirectory);
 	localImagesPanel.populate();
 	builtinPixelPanels.add(localImagesPanel);
 
@@ -212,7 +212,7 @@ public class PixelApp extends IOIOSwingApp
 	String path2 = "/tab_icons/ship_small.png";
 	URL url2 = getClass().getResource(path2);
 	ImageIcon animationsTabIcon = new ImageIcon(url2);
-	final PixelTilePanel animationsPanel = new AnimationsPanel(pixel.KIND);
+	final PixelTilePanel animationsPanel = new AnimationsPanel(KIND);
 	animationsPanel.populate();
 	builtinPixelPanels.add(animationsPanel);
 
@@ -246,8 +246,8 @@ public class PixelApp extends IOIOSwingApp
 	tabbedPane.setTabLayoutPolicy(JTabbedPane.SCROLL_TAB_LAYOUT);
         tabbedPane.addChangeListener( new TabChangeListener() );
 	tabbedPane.addTab("Images", imagesTabIcon, imagesPanelReal, "Load built-in images.");
-	tabbedPane.addTab("My Images", userTabIcon, localImagesPanel, "This panel displays images from your local hard drive.");
-        tabbedPane.addTab("Animations", animationsTabIcon, animationsPanel, "Load built-in animations.");
+	tabbedPane.addTab("My Images and GIFs", userTabIcon, localImagesPanel, "This panel displays images from your local hard drive.");
+        tabbedPane.addTab("GIFs", animationsTabIcon, animationsPanel, "Load built-in animations.");
 	tabbedPane.addTab("Scolling Text", textTabIcon, scrollPanel, "Scrolls a text message across the PIXEL");
 	tabbedPane.addTab("Settings", settingsTabIcon, settingsPanel, "Settings");
 	
@@ -397,7 +397,7 @@ public class PixelApp extends IOIOSwingApp
 	    protected void setup() throws ConnectionLostException, InterruptedException
 	    {
 		
-	    	System.out.println("went the IOIO setup");
+	    	System.out.println("Went to IOIO setup...");
 	    	
 	    	//**** let's get IOIO version info for the About Screen ****
   			pixelFirmware = ioio_.getImplVersion(v.APP_FIRMWARE_VER);
