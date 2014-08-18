@@ -50,6 +50,10 @@ public class ScrollingTextPanel extends SingleThreadedPixelPanel
     
     private JSlider scrollSpeedSlider;
     
+    private JSlider textSizeSlider;
+    
+    private JSlider textVerticalSlider;
+    
     private JColorChooser colorChooser;
     
     private HashMap<String, Font> fonts;
@@ -70,6 +74,8 @@ public class ScrollingTextPanel extends SingleThreadedPixelPanel
     
     private int resetX;
     
+    private int y;
+    
     private int messageWidth;
     
     private String pixelHardwareID;
@@ -80,11 +86,13 @@ public class ScrollingTextPanel extends SingleThreadedPixelPanel
 
     private static String pixelPrefNode = "/com/ledpixelart/pc";
     
+    private boolean writeMode = false;
+    
     public ScrollingTextPanel(final RgbLedMatrix.Matrix KIND)
     {
         super(KIND);
         
-        if (pixel !=null) pixel.interactiveMode(); //put into interactive mode as could have been stuck in local mode from previous panel
+      //  if (pixel !=null) pixel.interactiveMode(); //put into interactive mode as could have been stuck in local mode from previous panel
         
        // System.out.println("PIXEL Model is: " + KIND.width); 
         
@@ -127,9 +135,10 @@ public class ScrollingTextPanel extends SingleThreadedPixelPanel
     	    {
     	    	
     	    	if (pixel != null) pixelHardwareID = pixel.getHardwareVersion();
-    	    	
 	    	    	
-    	    		stopExistingTimer();
+    	    		stopExistingTimer(); //this doesn't seem to do anything?
+    	    		
+    	    		writeMode = true;
     	    	
     	    		Float delayFPS = 1000.f / delay; 	
     	    	
@@ -144,7 +153,8 @@ public class ScrollingTextPanel extends SingleThreadedPixelPanel
     	    	
 	    	    	while (x > resetX) {
 	    	    	
-	    	    		System.out.println("x: " + x);
+	    	    		System.out.println("Writing frame: " + Math.abs(x) + " of " + Math.abs(resetX));
+	    	    		
 	    	    		int w = KIND.width * 2;
 		    	    	int h = KIND.height * 2;
 		    	    
@@ -158,11 +168,11 @@ public class ScrollingTextPanel extends SingleThreadedPixelPanel
 		                String fontFamily = fontFamilyChooser.getSelectedItem().toString();
 		                font = fonts.get(fontFamily);
 		                
-		                if(font == null)
-		                {
-		                   font = new Font(fontFamily, Font.PLAIN, fontSize * KIND.width/32);
-		                    fonts.put(fontFamily, font);
-		                }            
+		               // if(font == null)
+		              //  {
+		                   font = new Font(fontFamily, Font.PLAIN, (fontSize * KIND.width/32) + textSizeSlider.getValue());
+		                   fonts.put(fontFamily, font);
+		              //  }            
 		                
 		                g2d.setFont(font);
 		                
@@ -170,7 +180,7 @@ public class ScrollingTextPanel extends SingleThreadedPixelPanel
 		                
 		                fm = g2d.getFontMetrics();
 		                
-		                int y = fm.getHeight();            
+		                y = fm.getHeight() + + textVerticalSlider.getValue();            
 		
 		                try 
 		                {
@@ -212,129 +222,7 @@ public class ScrollingTextPanel extends SingleThreadedPixelPanel
 	    	    } 
 	    	    	
 	    	    pixel.playLocalMode();
-	    	    
-                //if(x == resetX)
-              /*  if(x < resetX)  //had to change to < because of the key frame change, could skip over the ==
-
-                {
-                    //x = w;
-                	x = KIND.width * 2;
-                }
-                else
-                {
-                    x--;
-                    //x = x - scrollingKeyFrames;  add this later to skip frames to speed up as a preference
-                }
-     */
-    	    	
-    	    	
-    			
-	/*   			 if (pixelHardwareID != null && pixelHardwareID.substring(0,4).equals("PIXL")) { //only add the write button if its a PIXEL V2 unit
-	   			
-		    	    	stopExistingTimer();
-		    	    	
-		    	    	x = 0;
-		    	    	
-		    	    	while (x > resetX) {
-		    	    	
-		    	    	message = getText();
-		    	    	
-		    	    	messageWidth = fm.stringWidth(message);            
-		                resetX = 0 - messageWidth;
-		    	    	
-		    	    	// int delay = scrollSpeedSlider.getValue();	//may not need this here since we already have it elsewhere
-						//    delay = 14 - delay;                            // al linke: added this so the higher slider value means faster scrolling
-						    
-						 //   ScrollingTextPanel.this.timer.setDelay(delay);
-						    
-					            //int w = 64;
-					            //int h = 64;
-						    
-						    	int w = KIND.width * 2;
-						    	int h = KIND.height * 2;
-						    	
-						    	 BufferedImage img = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
-		 			            
-		 			            Color textColor = colorPanel.getBackground();
-		 				    
-		 			            Graphics2D g2d = img.createGraphics();
-		 			            g2d.setPaint(textColor);
-		 			            
-		 			           // String fontFamily = fontFamilyChooser.getSelectedItem().toString();
-		 			            
-		 			           // font = fonts.get(fontFamily);
-		 			            
-		 			            
-		 			           //don't need the fonts here because we already set it before
-		 			            
-		 			            if(font == null)
-		 			            {
-		 			               // font = new Font(fontFamily, Font.PLAIN, fontSize);
-		 			                //font = new Font(fontFamily, Font.PLAIN, fontSize * KIND.width/32); //64 / 32 = 2 means twice as large font for the twice as high display
-		 			                font = new Font ("Arial",Font.PLAIN, fontSize * KIND.width/32);
-		 			                fonts.put(fontFamily, font);
-		 			            }            
-		 			            
-		 			            g2d.setFont(font);
-		 			            System.out.println("x before while loop is: " + x);       
-		  			            System.out.println("resetX before while loop is: " + resetX);  
-		 			            pixel.interactiveMode();
-		 			            pixel.writeMode(delay); //need to tell PIXEL the frames per second to use, how fast to play the animations
-		 			            System.out.println("Now writing to PIXEL's SD card, the screen will go blank until writing has been completed..."); 
-		   				  
-		   				
-		 			           
-		    				
-		    			            message = getText();
-		    			            
-		    			            fm = g2d.getFontMetrics();
-		    			            
-		    			            int y = fm.getHeight();            
-		
-		    			            try 
-		    			            {
-		    			                additionalBackgroundDrawing(g2d);
-		    			            } 
-		    			            catch (Exception ex) 
-		    			            {
-		    			                Logger.getLogger(ScrollingTextPanel.class.getName()).log(Level.SEVERE, null, ex);
-		    			            }
-		    			            
-		    			            g2d.drawString(message, x, y);
-		    			            
-		    			            try 
-		    			            {
-		    			                additionalForegroundDrawing(g2d);
-		    			            } 
-		    			            catch (Exception ex) 
-		    			            {
-		    			                Logger.getLogger(ScrollingTextPanel.class.getName()).log(Level.SEVERE, null, ex);
-		    			            }
-		    			            
-		    			            g2d.dispose();
-		    				
-				    				try 
-				      	            {	
-				      	               
-				    					pixel.writeImagetoMatrix(img, KIND.width,KIND.height); 
-				      	                //x = x - scrollingKeyFrames_ ;  //controls the smoothness / number of keyframes
-				    					x--;
-				    					System.out.println("writing frame" + " " + x);
-				      	                
-				      	            } 
-				      	            catch (ConnectionLostException ex) 
-				      	            {
-		      	               
-				      	            }
-		    	    	}  //the while loop is done
-		 			           
-		    	    	pixel.playLocalMode(); //now tell PIXEL to play locally
-    		}  
-		
-	   	else {
-	   		System.out.println("Sorry, this is not a PIXEL V2 frame and cannot write...");
-		 }	*/
-					
+	    	    writeMode = false;
     	    }
     	});	
 	
@@ -363,6 +251,16 @@ public class ScrollingTextPanel extends SingleThreadedPixelPanel
 			textPanel.add(configurationPanel, BorderLayout.NORTH);
 			textPanel.setBorder( BorderFactory.createTitledBorder("Text") );	
 			
+			textSizeSlider = new JSlider(-36, 36);
+			JPanel textSizePanel = new JPanel();
+			textSizePanel.add(textSizeSlider);
+			textSizePanel.setBorder( BorderFactory.createTitledBorder("Text Size") );
+			
+			textVerticalSlider = new JSlider(-36, 36);
+			JPanel textVerticalPanel = new JPanel();
+			textVerticalPanel.add(textVerticalSlider);
+			textVerticalPanel.setBorder( BorderFactory.createTitledBorder("Text Vertical Position") );
+			
 			//scrollSpeedSlider = new JSlider(200, 709);
 			scrollSpeedSlider = new JSlider(1, 10);
 			JPanel speedPanel = new JPanel();
@@ -370,8 +268,10 @@ public class ScrollingTextPanel extends SingleThreadedPixelPanel
 			speedPanel.setBorder( BorderFactory.createTitledBorder("Scroll Speed") );
 			speedPanel.add(writeButton);
 		        
-		    JPanel propertiesPanel = new JPanel( new GridLayout(2,1, 10,10) );
+		    JPanel propertiesPanel = new JPanel( new GridLayout(4,1, 10,10) );
 		    propertiesPanel.add(textPanel);
+		    propertiesPanel.add(textSizePanel);
+		    propertiesPanel.add(textVerticalPanel);
 			propertiesPanel.add(speedPanel);
 		        
 		    setLayout(new BorderLayout());
@@ -422,13 +322,12 @@ public class ScrollingTextPanel extends SingleThreadedPixelPanel
     {
         public void actionPerformed(ActionEvent e) 
         {
-	    delay = scrollSpeedSlider.getValue();	
+	    //as a hack, add if in write mode flag?
+        	
+        delay = scrollSpeedSlider.getValue();	
 	    delay = 14 - delay;                            // 20 is the max slider, so 21 - 20 = 1 ms delay
 	    
 	    ScrollingTextPanel.this.timer.setDelay(delay);
-	    
-            //int w = 64;
-            //int h = 64;
 	    
 	    	int w = KIND.width * 2;
 	    	int h = KIND.height * 2;
@@ -443,12 +342,14 @@ public class ScrollingTextPanel extends SingleThreadedPixelPanel
             fontFamily = fontFamilyChooser.getSelectedItem().toString();
             font = fonts.get(fontFamily);
             
-            if(font == null)
-            {
-               font = new Font(fontFamily, Font.PLAIN, fontSize * KIND.width/32);
-               // font = new Font ("Arial",Font.PLAIN, fontSize * KIND.width/32);
-                fonts.put(fontFamily, font);
-            }            
+        //    if(font == null)  
+        //    {
+               font = new Font(fontFamily, Font.PLAIN, (fontSize * KIND.width/32) + textSizeSlider.getValue());
+               fonts.put(fontFamily, font);
+              // System.out.println("Text Size: " + textSizeSlider.getValue()); 
+        //    }      
+            
+            
             
             g2d.setFont(font);
             
@@ -456,7 +357,7 @@ public class ScrollingTextPanel extends SingleThreadedPixelPanel
             
             fm = g2d.getFontMetrics();
             
-            int y = fm.getHeight();            
+            y = fm.getHeight() + textVerticalSlider.getValue();            
 
             try 
             {
@@ -507,7 +408,7 @@ public class ScrollingTextPanel extends SingleThreadedPixelPanel
                 x--;
                 //x = x - scrollingKeyFrames;  add this later to skip frames to speed up as a preference
             }
-        }        
+         } 
     }
     
 }
