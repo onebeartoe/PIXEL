@@ -5,6 +5,7 @@ package com.ledpixelart.pc;
 import com.ledpixelart.pc.plugins.PluginConfigEntry;
 import com.ledpixelart.pc.plugins.swing.AnimationsPanel;
 import com.ledpixelart.pc.plugins.swing.ImageTilePanel;
+import com.ledpixelart.pc.plugins.swing.SettingsTilePanel;
 
 import com.ledpixelart.pc.plugins.swing.PixelTilePanel;
 import com.ledpixelart.pc.plugins.swing.UserProvidedPanel;
@@ -44,6 +45,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.prefs.Preferences;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
@@ -104,7 +106,7 @@ public class PixelApp extends IOIOSwingApp
 	    
 	public static int currentResolution;
 	    
-	public static int ledMatrixType = 10; //we'll default to PIXEL 32x32 and change this is a command line option is entered specifying otherwise
+	public static int ledMatrixType = 3; //we'll default to PIXEL 32x32 and change this is a command line option is entered specifying otherwise
 	
 	public static String pixelFirmware = "Not Found";
 	 
@@ -137,6 +139,12 @@ public class PixelApp extends IOIOSwingApp
   	public static String decodedDir = userHome + "/pixel/animations/decoded/";  //users/al/pixel/animations/decoded
   	
   	private static boolean pixelFound = false;
+  	
+    private static Preferences prefs;
+    
+    private static int ledMatrix_;
+
+    private static String pixelPrefNode = "/com/ledpixelart/pc";
    
     
     public PixelApp()
@@ -170,11 +178,19 @@ public class PixelApp extends IOIOSwingApp
 	    String message = "An error occured while setting the native look and feel.";
 	    logger.log(Level.SEVERE, message, ex);	
 	}
+	
+	 prefs = Preferences.userRoot().node(pixelPrefNode); //let's get our preferences
+	 
+	 int defaultLEDMatrix = 3; //if the pref does not exist yet for the led matrix, use this and default to pixel 32x32
+	 
+	 ledMatrixType = prefs.getInt("prefMatrix", defaultLEDMatrix);
 
+	 setupEnvironment();
+	
 	// images tab
 	String path = "/tab_icons/apple_small.png";
 	URL url = getClass().getResource(path);
-        ImageIcon imagesTabIcon = new ImageIcon(url);
+    ImageIcon imagesTabIcon = new ImageIcon(url);
 	PixelTilePanel imagesPanelReal = new ImageTilePanel(pixel.KIND);
 	imagesPanelReal.populate();
 	builtinPixelPanels.add(imagesPanelReal);
@@ -204,8 +220,16 @@ public class PixelApp extends IOIOSwingApp
 	String path3 = "/tab_icons/text_small.png";
 	URL url3 = getClass().getResource(path3);
 	ImageIcon textTabIcon = new ImageIcon(url3);
-        PixelPanel scrollPanel = new ScrollingTextPanel(pixel.KIND);
-        builtinPixelPanels.add(scrollPanel);        
+    PixelPanel scrollPanel = new ScrollingTextPanel(KIND);
+    builtinPixelPanels.add(scrollPanel);        
+        
+     // settings tab
+    String path4 = "/tab_icons/settings_small.png";
+    URL url4 = getClass().getResource(path4);
+    ImageIcon settingsTabIcon = new ImageIcon(url4);
+    PixelPanel settingsPanel = new SettingsTilePanel(KIND);
+   // animationsPanel.populate();
+    builtinPixelPanels.add(settingsPanel);
 
 	frame = new JFrame("PIXEL");
 	
@@ -225,6 +249,7 @@ public class PixelApp extends IOIOSwingApp
 	tabbedPane.addTab("My Images", userTabIcon, localImagesPanel, "This panel displays images from your local hard drive.");
         tabbedPane.addTab("Animations", animationsTabIcon, animationsPanel, "Load built-in animations.");
 	tabbedPane.addTab("Scolling Text", textTabIcon, scrollPanel, "Scrolls a text message across the PIXEL");
+	tabbedPane.addTab("Settings", settingsTabIcon, settingsPanel, "Settings");
 	
 	Dimension demension;
 	try 
@@ -295,27 +320,27 @@ public class PixelApp extends IOIOSwingApp
 	menuItem = new JMenuItem("Instructions");
 	KeyStroke instructionsKeyStroke = KeyStroke.getKeyStroke(KeyEvent.VK_1, ActionEvent.ALT_MASK);
 	menuItem.setAccelerator(instructionsKeyStroke);
-	menuItem.getAccessibleContext().setAccessibleDescription("update with accessible description");
+	menuItem.getAccessibleContext().setAccessibleDescription("Instructions");
 	menuItem.addActionListener( new InstructionsListener() );
 	helpMenu.add(menuItem);
 	
 	menuItem = new JMenuItem("About");
-	KeyStroke aboutKeyStroke = KeyStroke.getKeyStroke(KeyEvent.VK_2, ActionEvent.ALT_MASK);
+	KeyStroke aboutKeyStroke = KeyStroke.getKeyStroke(KeyEvent.VK_3, ActionEvent.ALT_MASK);
 	menuItem.setAccelerator(aboutKeyStroke);
-	menuItem.getAccessibleContext().setAccessibleDescription("update with accessible description");
+	menuItem.getAccessibleContext().setAccessibleDescription("About this application");
 	menuItem.addActionListener( new AboutListener() );
 	helpMenu.add(menuItem);
 	
 	menuItem = new JMenuItem("Exit");
-	KeyStroke keyStroke = KeyStroke.getKeyStroke(KeyEvent.VK_3, ActionEvent.ALT_MASK);
+	KeyStroke keyStroke = KeyStroke.getKeyStroke(KeyEvent.VK_4, ActionEvent.ALT_MASK);
 	menuItem.setAccelerator(keyStroke);
 	menuItem.addActionListener( new QuitListener() );
-	menuItem.getAccessibleContext().setAccessibleDescription("update with accessible description");
+	menuItem.getAccessibleContext().setAccessibleDescription("Quit this application");
 	helpMenu.add(menuItem);
 
-	menuItem = new JMenuItem(new ImageIcon("images/middle.gif"));
-	menuItem.setMnemonic(KeyEvent.VK_D);
-	helpMenu.add(menuItem);
+	//menuItem = new JMenuItem(new ImageIcon("images/middle.gif"));  //Al deleted these,not sure why they were there? was causing an extra space in the menu
+	//menuItem.setMnemonic(KeyEvent.VK_D);
+	//helpMenu.add(menuItem);
 	
 	JMenuItem loadPluginsOption = new JMenuItem("Load");
 	loadPluginsOption.addActionListener( new LoadPluginListener() );
@@ -386,7 +411,7 @@ public class PixelApp extends IOIOSwingApp
 	    	
 	    	PixelApp.this.ioiO = ioio_;
 				
-			setupEnvironment();  //here we set the PIXEL LED matrix type
+			//setupEnvironment();  //here we set the PIXEL LED matrix type
 				
             //pixel.matrix = ioio_.openRgbLedMatrix(pixel.KIND);   //AL could not make this work, did a quick hack, Roberto probably can change back to the right way
             pixel.matrix = ioio_.openRgbLedMatrix(KIND);
@@ -641,6 +666,20 @@ public class PixelApp extends IOIOSwingApp
 	}
     }
     
+    private class settingsListener implements ActionListener
+    {
+	public void actionPerformed(ActionEvent e) 
+	{
+	    String path = "/images/";
+	    String iconPath = path + "aaagumball.png";
+	    URL resource = getClass().getResource(iconPath);
+	    ImageIcon imageIcon = new ImageIcon(resource);
+	    String message = "PIXEL Settings";
+	    InstructionsPanel about = new InstructionsPanel();
+	    JOptionPane.showMessageDialog(frame, about, message, JOptionPane.INFORMATION_MESSAGE, imageIcon);
+	}
+    }
+    
     private class LoadPluginListener implements ActionListener
     {
 	@Override
@@ -726,7 +765,7 @@ public class PixelApp extends IOIOSwingApp
     
     private class SearchTimer implements ActionListener 
     {
-	final long searchPeriodLength = 45 * 1000;
+	final long searchPeriodLength = 30 * 1000; //30 seconds
 	
 	final long periodStart;
 	

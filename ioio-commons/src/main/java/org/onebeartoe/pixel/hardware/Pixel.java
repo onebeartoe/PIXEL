@@ -7,6 +7,7 @@ import ioio.lib.api.AnalogInput;
 import ioio.lib.api.IOIO;
 import ioio.lib.api.RgbLedMatrix;
 
+import ioio.lib.api.IOIO.VersionType;
 import ioio.lib.api.exception.ConnectionLostException;
 import java.awt.Color;
 import java.awt.Component;
@@ -69,6 +70,8 @@ public class Pixel
     public String gifNameNoExt;
     
     private static String localFileImagePath;
+    
+    private static VersionType v;
     
     //private static String decodedDirPathExternal;
     
@@ -166,6 +169,42 @@ public class Pixel
 	    matrix.frame(frame_);
 	}
     }
+    
+    
+    public String getHardwareVersion() {
+  	  	String pixelHardwareVersion = null;
+		if (ioiO != null) {
+	  	  	try {
+				pixelHardwareVersion = ioiO.getImplVersion(v.HARDWARE_VER);
+			} catch (ConnectionLostException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		else {
+			System.out.println("PIXEL was not found...");
+			pixelHardwareVersion = "0";
+		}
+  	  return pixelHardwareVersion;
+  }
+    
+    public String getFirmwareVersion() {
+  	  	String pixelFirmware = null;
+		if (ioiO != null) {
+	  	  	try {
+				pixelFirmware = ioiO.getImplVersion(v.APP_FIRMWARE_VER);
+			} catch (ConnectionLostException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		else {
+			System.out.println("PIXEL was not found...");
+			pixelFirmware = "0";
+		}
+  	  return pixelFirmware;
+  }
+  
     
     //*** Al added, this code is to support the SD card and local animations
     public void interactiveMode() {  //puts PIXEL into interactive mode

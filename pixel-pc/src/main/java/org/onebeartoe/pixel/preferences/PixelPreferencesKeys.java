@@ -21,4 +21,6 @@ public class PixelPreferencesKeys
     public static final String windowX = "windowX";
     
     public static final String windowY = "windowY";
+    
+    public static final String ledMatrix = "ledMatrix"; //not used right now
 }
