@@ -26,6 +26,8 @@ import javax.swing.JComboBox;
 import javax.swing.JPanel;
 import javax.swing.JSlider;
 import javax.swing.JTextField;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
 import org.apache.commons.lang3.ArrayUtils;
 
@@ -50,7 +52,7 @@ public class ScrollingTextPanel extends SingleThreadedPixelPanel
     
     private JSlider scrollSpeedSlider;
     
-    private JSlider textSizeSlider;
+    private JSlider fontSizeSlider;
     
     private JSlider textVerticalSlider;
     
@@ -66,7 +68,9 @@ public class ScrollingTextPanel extends SingleThreadedPixelPanel
     
     private Font font;
     
-    private int fontSize = 32;
+    private int fontSizeBase = 32;
+    
+    private int yOffset = 0;
     
     private String fontFamily;
     
@@ -83,6 +87,10 @@ public class ScrollingTextPanel extends SingleThreadedPixelPanel
     private static Preferences prefs;
     
     private static String prefFontString;
+    
+    private int prefFontSizeSliderPosition;
+    
+    private int prefFontYOffset;
 
     private static String pixelPrefNode = "/com/ledpixelart/pc";
     
@@ -111,8 +119,13 @@ public class ScrollingTextPanel extends SingleThreadedPixelPanel
         String [] fontNames = GraphicsEnvironment.getLocalGraphicsEnvironment().getAvailableFontFamilyNames();
         
         prefs = Preferences.userRoot().node(pixelPrefNode); //let's get our preferences
-    	prefFontString = prefs.get("prefFont", "Arial"); //use Arial if there is no pref saved yet
+    	
+        prefFontString = prefs.get("prefFont", "Arial"); //use Arial if there is no pref saved yet
         int selectedFontIndex = ArrayUtils.indexOf(fontNames, prefFontString); //let's set the default font to Arial, otherwise it would have just picked the first one
+        
+        prefFontSizeSliderPosition = prefs.getInt("prefFontSize", 0); //pref for the font size, default to 32 if not there
+        
+        yOffset = prefs.getInt("prefFontYOffset", 0); //pref for the y offset
         
         JPanel fontPanel = new JPanel( new BorderLayout() );
         fontFamilyChooser = new JComboBox(fontNames);
@@ -151,7 +164,7 @@ public class ScrollingTextPanel extends SingleThreadedPixelPanel
 			        System.out.println("x: " + x);
 			        System.out.println("resetX is: " + resetX);
     	    	
-	    	    	while (x > resetX) {
+	    	    	while (x >= resetX) {
 	    	    	
 	    	    		System.out.println("Writing frame: " + Math.abs(x) + " of " + Math.abs(resetX));
 	    	    		
@@ -170,7 +183,8 @@ public class ScrollingTextPanel extends SingleThreadedPixelPanel
 		                
 		               // if(font == null)
 		              //  {
-		                   font = new Font(fontFamily, Font.PLAIN, (fontSize * KIND.width/32) + textSizeSlider.getValue());
+		               // font = new Font(fontFamily, Font.PLAIN, fontSize);  
+		                   font = new Font(fontFamily, Font.PLAIN, (fontSizeBase * KIND.width/32) + fontSizeSlider.getValue());
 		                   fonts.put(fontFamily, font);
 		              //  }            
 		                
@@ -180,7 +194,7 @@ public class ScrollingTextPanel extends SingleThreadedPixelPanel
 		                
 		                fm = g2d.getFontMetrics();
 		                
-		                y = fm.getHeight() + + textVerticalSlider.getValue();            
+		                y = fm.getHeight() + yOffset;          
 		
 		                try 
 		                {
@@ -240,7 +254,6 @@ public class ScrollingTextPanel extends SingleThreadedPixelPanel
 			JPanel colorComponents = new JPanel( new BorderLayout() );
 			colorComponents.add(colorPanel, BorderLayout.CENTER);
 			colorComponents.add(colorButton, BorderLayout.EAST);
-			
 		        
 		    JPanel configurationPanel = new JPanel( new GridLayout(4, 1));
 		    configurationPanel.add(inputSubPanel);
@@ -251,15 +264,20 @@ public class ScrollingTextPanel extends SingleThreadedPixelPanel
 			textPanel.add(configurationPanel, BorderLayout.NORTH);
 			textPanel.setBorder( BorderFactory.createTitledBorder("Text") );	
 			
-			textSizeSlider = new JSlider(-36, 36);
-			JPanel textSizePanel = new JPanel();
-			textSizePanel.add(textSizeSlider);
-			textSizePanel.setBorder( BorderFactory.createTitledBorder("Text Size") );
+			fontSizeSlider = new JSlider(-36, 36);
+			JPanel fontSizePanel = new JPanel();
+			fontSizePanel.add(fontSizeSlider);
+			fontSizePanel.setBorder( BorderFactory.createTitledBorder("Text Size") );
+			fontSizeSlider.setValue(prefFontSizeSliderPosition); //from preferences
+			fontSizeSlider.addChangeListener(new fontSizeChanged());
+			
 			
 			textVerticalSlider = new JSlider(-36, 36);
 			JPanel textVerticalPanel = new JPanel();
 			textVerticalPanel.add(textVerticalSlider);
 			textVerticalPanel.setBorder( BorderFactory.createTitledBorder("Text Vertical Position") );
+			textVerticalSlider.setValue(yOffset); //from preferences
+			textVerticalSlider.addChangeListener(new textVerticalPositionChanged());
 			
 			//scrollSpeedSlider = new JSlider(200, 709);
 			scrollSpeedSlider = new JSlider(1, 10);
@@ -270,13 +288,29 @@ public class ScrollingTextPanel extends SingleThreadedPixelPanel
 		        
 		    JPanel propertiesPanel = new JPanel( new GridLayout(4,1, 10,10) );
 		    propertiesPanel.add(textPanel);
-		    propertiesPanel.add(textSizePanel);
+		    propertiesPanel.add(fontSizePanel);
 		    propertiesPanel.add(textVerticalPanel);
 			propertiesPanel.add(speedPanel);
 		        
 		    setLayout(new BorderLayout());
 			add(propertiesPanel, BorderLayout.SOUTH);
     }
+    
+    private class fontSizeChanged implements ChangeListener{
+    	  public void stateChanged(ChangeEvent ce){
+    	  //fontSize = (fontSizeBase * KIND.width/32) + fontSizeSlider.getValue();
+    	  prefs.putInt("prefFontSize", fontSizeSlider.getValue());
+    	  }
+    }
+    
+    private class textVerticalPositionChanged implements ChangeListener{
+	  	  public void stateChanged(ChangeEvent ce){
+	  	  yOffset = textVerticalSlider.getValue();   
+	  	  prefs.putInt("prefFontYOffset", textVerticalSlider.getValue());
+	  	  }
+  }
+    
+    
     
     private void stopExistingTimer()
     {
@@ -339,17 +373,13 @@ public class ScrollingTextPanel extends SingleThreadedPixelPanel
             Graphics2D g2d = img.createGraphics();
             g2d.setPaint(textColor);
             
+            //get prefs for fontSize, change it from the font size slider
+            
             fontFamily = fontFamilyChooser.getSelectedItem().toString();
             font = fonts.get(fontFamily);
-            
-        //    if(font == null)  
-        //    {
-               font = new Font(fontFamily, Font.PLAIN, (fontSize * KIND.width/32) + textSizeSlider.getValue());
-               fonts.put(fontFamily, font);
-              // System.out.println("Text Size: " + textSizeSlider.getValue()); 
-        //    }      
-            
-            
+            font = new Font(fontFamily, Font.PLAIN, (fontSizeBase * KIND.width/32) + fontSizeSlider.getValue());
+            //font = new Font(fontFamily, Font.PLAIN, fontSize);
+            fonts.put(fontFamily, font);
             
             g2d.setFont(font);
             
@@ -357,7 +387,8 @@ public class ScrollingTextPanel extends SingleThreadedPixelPanel
             
             fm = g2d.getFontMetrics();
             
-            y = fm.getHeight() + textVerticalSlider.getValue();            
+            //y = fm.getHeight() + textVerticalSlider.getValue();     
+            y = fm.getHeight() + yOffset;            
 
             try 
             {

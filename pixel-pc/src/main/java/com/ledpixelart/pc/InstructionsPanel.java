@@ -34,7 +34,7 @@ public class InstructionsPanel extends JPanel
 	String html = "<html><body><h1>" + text + "</h1></body></html>";
 	JLabel productLabel = new JLabel(html, JLabel.CENTER);
 	
-	String developmentHtml = "<html><body>" + "Before this application will function, you must first Bluetooth pair PIXEL to your Android device<br/><br/>PIXEL will show up in Bluetooth settings as “PIXEL”, use pairing code 0000 or 4545 if you have a PIXEL V1 frame<br/><br/>If this application does not find PIXEL: power off and on PIXEL, Bluetooth pair again, and then re-run this application<br/><br/>More info at http://ledpixelart.com" + "</body></html>";
+	String developmentHtml = "<html><body>" + "Before this application will function, you must first Bluetooth pair PIXEL to your Android device.<br/><br/>PIXEL will show up in Bluetooth settings as “PIXEL”, use pairing code 0000 or 4545 if you have a PIXEL V1 frame.<br/><br/>If this application does not find PIXEL: power off and on PIXEL, Bluetooth pair again, and then re-run this application.<br/><br/>Single click to stream images and GIFs and double click to write (only PIXEL V2 frames can write). <br/><br/>More info at http://ledpixelart.com" + "</body></html>";
 	developmentLabel = new JLabel(developmentHtml);
 	developmentLabel.addMouseListener(new DevelopmentLabelListener() );
 	

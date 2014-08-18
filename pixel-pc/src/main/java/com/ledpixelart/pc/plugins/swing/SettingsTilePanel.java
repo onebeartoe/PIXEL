@@ -89,7 +89,7 @@ public class SettingsTilePanel extends PixelTilePanel
     {
 	super(KIND);
     
-    JButton saveButton = new JButton("Save");
+    //JButton saveButton = new JButton("Save");
     
     textPanel = new JPanel( new BorderLayout());
 	//textPanel.add(configurationPanel, BorderLayout.NORTH);
@@ -115,11 +115,9 @@ public class SettingsTilePanel extends PixelTilePanel
     
     propertiesPanel.add(textPanel);
     propertiesPanel.add(ledMatrixCombo);
-    //propertiesPanel.add(saveButton);
-//	propertiesPanel.add(speedPanel);
         
     setLayout(new BorderLayout());
-	add(propertiesPanel, BorderLayout.NORTH);
+  	add(propertiesPanel, BorderLayout.NORTH);
 	
 	ledMatrixCombo.addActionListener (new ActionListener () {
 	    public void actionPerformed(ActionEvent e) {
@@ -128,7 +126,7 @@ public class SettingsTilePanel extends PixelTilePanel
 	    	prefs.putInt("prefMatrix", selectMatrixInt);
 	    	System.out.println("Selected LED Matrix is: " + selectMatrixInt);
 	    	
-	    	if (ledMatrix_ != selectMatrixInt) {
+	    	if (ledMatrix_ != selectMatrixInt) {  //let's prompt the user if the matrix type has changed to restart
 		    	String path = "/images/";
 			    String iconPath = path + "aaagumball.png";
 			    URL resource = getClass().getResource(iconPath);
@@ -137,9 +135,6 @@ public class SettingsTilePanel extends PixelTilePanel
 			    RestartPanel about = new RestartPanel();
 			    JOptionPane.showMessageDialog(frame, about, message, JOptionPane.INFORMATION_MESSAGE, imageIcon);
 	    	}
-	    	
-	    	
-	    	
 	    }
 	});
 	
