@@ -29,6 +29,8 @@ public abstract class SingleThreadedPixelPanel extends PixelPanel
 	System.out.println("Starting PIXEL activity in " + getClass().getSimpleName() + ".");		
 	ActionListener listener = getActionListener();
 	
+	 if (pixel !=null) pixel.interactiveMode();
+	 
 	// set the IOIO loop delay to half a second, by default
 	int delay = 500; // milliseconds
 	timer = new Timer(delay, listener);
