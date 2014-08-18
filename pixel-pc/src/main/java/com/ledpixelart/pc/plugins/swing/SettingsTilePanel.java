@@ -2,7 +2,10 @@
 package com.ledpixelart.pc.plugins.swing;
 
 
+import com.ledpixelart.pc.AboutPanel;
 import com.ledpixelart.pc.PixelApp;
+import com.ledpixelart.pc.RestartPanel;
+
 import ioio.lib.api.RgbLedMatrix;
 import ioio.lib.api.exception.ConnectionLostException;
 import java.awt.BorderLayout;
@@ -36,6 +39,7 @@ import javax.swing.JComboBox;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JSlider;
 import javax.swing.JTextArea;
@@ -123,6 +127,19 @@ public class SettingsTilePanel extends PixelTilePanel
 	    	int selectMatrixInt = ledMatrixCombo.getSelectedIndex();
 	    	prefs.putInt("prefMatrix", selectMatrixInt);
 	    	System.out.println("Selected LED Matrix is: " + selectMatrixInt);
+	    	
+	    	if (ledMatrix_ != selectMatrixInt) {
+		    	String path = "/images/";
+			    String iconPath = path + "aaagumball.png";
+			    URL resource = getClass().getResource(iconPath);
+			    ImageIcon imageIcon = new ImageIcon(resource);
+			    String message = "Please Restart";
+			    RestartPanel about = new RestartPanel();
+			    JOptionPane.showMessageDialog(frame, about, message, JOptionPane.INFORMATION_MESSAGE, imageIcon);
+	    	}
+	    	
+	    	
+	    	
 	    }
 	});
 	

@@ -156,17 +156,11 @@ public class ScrollingTextPanel extends SingleThreadedPixelPanel
 		                g2d.setPaint(textColor);
 		                
 		                String fontFamily = fontFamilyChooser.getSelectedItem().toString();
-		                
-		                //now check if there is a preferences saved for font
-		                font = new Font ("Arial",Font.PLAIN, fontSize * KIND.width/32);
-		                
-		               // System.out.println("Font: " + fontFamily + " | " + font); 
 		                font = fonts.get(fontFamily);
 		                
 		                if(font == null)
 		                {
 		                   font = new Font(fontFamily, Font.PLAIN, fontSize * KIND.width/32);
-		                   // font = new Font ("Arial",Font.PLAIN, fontSize * KIND.width/32);
 		                    fonts.put(fontFamily, font);
 		                }            
 		                
