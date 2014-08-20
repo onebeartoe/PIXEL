@@ -52,7 +52,7 @@ public class AnimationsPanel extends ImageTilePanel implements MouseListener
   	
   	private static String decodedDir = userHome + "/pixel/animations/decoded/";  //users/al/pixel/animations/decoded
   	
-  	private static String soureGIFDir = userHome + "/pixel/animations/decoded/sourcegif/";  //users/al/pixel/animations/decoded
+  	private static String gifSourcePath = "animations/gifsource/";  //the path to the source gifs in the jar
   	
     private static float GIFfps;
     
@@ -66,7 +66,7 @@ public class AnimationsPanel extends ImageTilePanel implements MouseListener
     
     private static String fileType;
     
-    public AnimationsPanel(RgbLedMatrix.Matrix KIND)
+    public AnimationsPanel(final RgbLedMatrix.Matrix KIND)
     {
 	super(KIND);
 	imageListPath = "/animations.text";
@@ -81,7 +81,7 @@ public class AnimationsPanel extends ImageTilePanel implements MouseListener
 		{
 		    i = 0;
 		}
-			PixelApp.pixel.SendPixelDecodedFrame(decodedDir, animation_name, i, GIFnumFrames, GIFresolution, PixelApp.KIND.width,PixelApp.KIND.height);
+			PixelApp.pixel.SendPixelDecodedFrame(decodedDir, animation_name, i, GIFnumFrames, GIFresolution, KIND.width,KIND.height);
 	    }
 	};
     }
@@ -150,18 +150,19 @@ public class AnimationsPanel extends ImageTilePanel implements MouseListener
 		
 	
 		
-		if (fileType.toLowerCase().contains("gif")) {  	//let's first just make sure we have a gif
+	//	if (fileType.toLowerCase().contains("gif")) {  	//let's first just make sure we have a gif
 			
 			if (PixelApp.pixel.GIFTxtExists(decodedDir,selectedFileName) == true && PixelApp.pixel.GIFRGB565Exists(decodedDir,selectedFileName) == true) {
 			    	System.out.println("This GIF was already decoded");
 			    }
 			    else {  //the text file is not there so we cannot continue and we must decode, let's first copy the file to home dir
 			    
-			    	PixelApp.pixel.decodeGIFJar(decodedDir, selectedFileName, PixelApp.currentResolution, PixelApp.KIND.width, PixelApp.KIND.height);
+			    	PixelApp.pixel.decodeGIFJar(decodedDir, gifSourcePath,selectedFileName, PixelApp.currentResolution, KIND.width, KIND.height);
 			    }
 			    
 			    if (PixelApp.pixel.GIFNeedsDecoding(decodedDir, selectedFileName, PixelApp.currentResolution) == true) {
-			    	PixelApp.pixel.decodeGIFJar(decodedDir, selectedFileName, PixelApp.currentResolution, PixelApp.KIND.width, PixelApp.KIND.height);
+			    	System.out.println("Selected LED panel is different than the encoded GIF, need to re-enocde...");
+			    	PixelApp.pixel.decodeGIFJar(decodedDir, gifSourcePath, selectedFileName, PixelApp.currentResolution, KIND.width, KIND.height);
 			    }
 	
 				    //****** Now let's setup the animation ******
@@ -175,8 +176,8 @@ public class AnimationsPanel extends ImageTilePanel implements MouseListener
 				    
 				    System.out.println("Selected GIF Resolution: " + GIFresolution);
 					System.out.println("Current LED Panel Resolution: " + PixelApp.currentResolution);
-					System.out.println("GIF Width: " + PixelApp.KIND.width);
-					System.out.println("GIF Height: " + PixelApp.KIND.height);
+					System.out.println("GIF Width: " + KIND.width);
+					System.out.println("GIF Height: " + KIND.height);
 			            
 			            stopExistingTimer();
 			            
@@ -193,7 +194,7 @@ public class AnimationsPanel extends ImageTilePanel implements MouseListener
 			    			    			System.out.println("Writing " + animation_name + " to PIXEL " + "frame " + y + " of " + GIFnumFrames);
 			    			    			/*String message = "Writing " + animation_name + " to PIXEL " + "frame " + y + " of " + GIFnumFrames;
 			    			   	            PixelApp.statusLabel.setText(message);  TO DO this doesn't work , figure this out later*/
-			    				 		    PixelApp.pixel.SendPixelDecodedFrame(decodedDir, animation_name, y, GIFnumFrames, GIFresolution, PixelApp.KIND.width,PixelApp.KIND.height);
+			    				 		    PixelApp.pixel.SendPixelDecodedFrame(decodedDir, animation_name, y, GIFnumFrames, GIFresolution, KIND.width,KIND.height);
 			    				   	  } //end for loop
 			    					PixelApp.pixel.playLocalMode(); //now tell PIXEL to play locally
 			    					System.out.println("Writing " + animation_name + " to PIXEL complete, now displaying...");
@@ -204,10 +205,10 @@ public class AnimationsPanel extends ImageTilePanel implements MouseListener
 			    				   timer = new Timer(GIFselectedFileDelay, AnimateTimer);
 			    				   timer.start();
 			    			} 
-			}
-		else {
-			System.out.println("Oops.. We are in the panel of GIFs but the file selected was not a gif");
-		}
+	//		}
+	//	else {
+	//		System.out.println("Oops.. We are in the panel of GIFs but the file selected was not a gif");
+	//	}
     }
   
     
@@ -226,7 +227,7 @@ public class AnimationsPanel extends ImageTilePanel implements MouseListener
     we'll use this directory structure
     
     user home/pixel/animations/decoded/
-    user home/pixel/animations/decoded/sourcegif/  not sure we need this one?
+    user home/pixel/animations/decoded/gifsource/  not sure we need this one?
     
     	
     String selectedFileName = event.getActionCommand();

@@ -39,6 +39,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 
 import org.gifdecoder.GifDecoder;
+import org.imgscalr.Scalr;
 
 
 /**
@@ -486,7 +487,7 @@ public boolean GIFNeedsDecoding(String decodedDir, String gifName, int currentRe
 		   return (selectedFileDelay);
 	}
     
-    public void copyJARGif(String jarGIFName, String GIFLocalOutputPath) {
+    public void copyJARGif(String jarGIFName, String GIFLocalOutputPath) { //NOT USED
     	//InputStream stream = ExecutingClass.class.getResourceAsStream("/the/path/to/the/resource/located/INSIDE/the/jar/fileExample.pdf");//note that each / is a directory down in the "jar tree" been the jar the root of the tree"
     	//InputStream stream = Pixel.class.getResourceAsStream("animations/" + jarGIFName); //TO DO maybe later we'll change this if we use pngs instead of gifs on the image tile
     	InputStream stream = getClass().getClassLoader().getResourceAsStream("animations/" + jarGIFName);
@@ -596,10 +597,10 @@ public boolean GIFNeedsDecoding(String decodedDir, String gifName, int currentRe
     
  public boolean GIFTxtExists(String decodedDir, String selectedFileName) {
     	
-    	System.out.println("selected file name: " + selectedFileName);
+    	//System.out.println("selected file name: " + selectedFileName);
     	int i = selectedFileName.lastIndexOf(".");
     	selectedFileName = selectedFileName.substring(0, i);
-    	System.out.println("corrected file name: " + selectedFileName);
+    	//System.out.println("corrected file name: " + selectedFileName);
     	
     	//now let's check if this file exists
     	
@@ -748,12 +749,12 @@ public boolean GIFNeedsDecoding(String decodedDir, String gifName, int currentRe
 	    gifNameNoExt = FilenameUtils.removeExtension(selectedFileName); //with no extension
 		
 		System.out.println("User selected file name: " + selectedFileName);
-		System.out.println("User selected file type: " + fileType);
-		System.out.println("User selected file name no extension: " + gifNameNoExt);
+		//System.out.println("User selected file type: " + fileType);
+		//System.out.println("User selected file name no extension: " + gifNameNoExt);
 		
 		
 		//String gifNamePath = currentDir + "/" + gifName + ".gif";  //   ex. c:\animation\tree.gif
-		
+		System.out.println("User selected file name path: " + gifFilePath);
 		File file = new File(gifFilePath);
 		if (file.exists()) {
 			
@@ -825,8 +826,8 @@ public boolean GIFNeedsDecoding(String decodedDir, String gifName, int currentRe
 	                int y=0;
 	                int len = BitmapBytes.length;
 
-	                for (x=0 ; x < pixelMatrix_width; x++) {
-	                    for (y=0; y < pixelMatrix_height; y++) {
+	                for (x=0 ; x < pixelMatrix_height; x++) { //TO DO double check to make this is right
+	                    for (y=0; y < pixelMatrix_width; y++) {
 
 	                        Color c = new Color(sendImg.getRGB(y, x));  // x and y were switched in the original code which was causing the image to rotate by 90 degrees and was flipped horizontally, switching x and y fixes this bug
 	                        int red = c.getRed();
@@ -903,26 +904,31 @@ public boolean GIFNeedsDecoding(String decodedDir, String gifName, int currentRe
 				}
 		}
 		else {
-			System.out.println("ERROR  Could not write " + decodedDir + gifNameNoExt + ".txt");
+			System.out.println("ERROR  Could not find file " + gifFilePath);
 		}
 			
 	} 
 	
-public void decodeGIFJar(String decodedDir, String gifName, int currentResolution, int pixelMatrix_width, int pixelMatrix_height) {  //pass the matrix type
+public void decodeGIFJar(String decodedDir, String gifSourcePath, String gifName, int currentResolution, int pixelMatrix_width, int pixelMatrix_height) {  //pass the matrix type
 		
-		//we're going to decode a native GIF into our RGB565 format
+	//BitmapBytes = new byte[pixelMatrix_width * pixelMatrix_height * 2]; //512 * 2 = 1024 or 1024 * 2 = 2048
+	//frame_ = new short[pixelMatrix_width * pixelMatrix_height];	
+	
+	//we're going to decode a native GIF into our RGB565 format
 	    //we'll need to know the resolution of the currently selected matrix type: 16x32, 32x32, 32x64, or 64x64
 		//and then we will receive the gif accordingly as we decode
 		//we also need to get the original width and height of the gif which is easily done from the gif decoder class
 		gifName = FilenameUtils.removeExtension(gifName); //with no extension
 		//String gifNamePath = currentDir + "/" + gifName + ".gif";  //   ex. c:\animation\tree.gif
 
-	    InputStream GIFStream = null; //fix this
-	    GIFStream = getClass().getClassLoader().getResourceAsStream("animations/" + gifName + ".gif");
-		
+	    InputStream GIFStream = null; 
+	    //GIFStream = getClass().getClassLoader().getResourceAsStream("animations/" + gifName + ".gif");
+	   // GIFStream = getClass().getClassLoader().getResourceAsStream("animations/gifsource/" + gifName + ".gif"); //since we changed the thumbnails to pngs instead of gifs for performance reasons
+	      GIFStream = getClass().getClassLoader().getResourceAsStream(gifSourcePath + gifName + ".gif"); //since we changed the thumbnails to pngs instead of gifs for performance reasons
+	    
 		if (GIFStream != null) {	
 			
-			  //since we are decoding, we need to first make sure the .rgb565 and .txt decoded file is not there and delete if so.
+			//since we are decoding, we need to first make sure the .rgb565 and .txt decoded file is not there and delete if so.
 			  //String gifName565Path = currentDir + "/decoded/" + gifName + ".rgb565";  //   ex. c:\animation\decoded\tree.rgb565
 			  //String gifNameTXTPath = currentDir + "/decoded/" + gifName + ".txt";  //   ex. c:\animation\decoded\tree.txt
 			  
@@ -938,7 +944,8 @@ public void decodeGIFJar(String decodedDir, String gifName, int currentResolutio
 			
 			  GifDecoder d = new GifDecoder();
 	          //d.read(gifNamePath);
-	          d.read(getClass().getClassLoader().getResourceAsStream("animations/" + gifName + ".gif")); //read the source gif from the jar
+	          //d.read(getClass().getClassLoader().getResourceAsStream("animations/" + gifName + ".gif")); //read the source gif from the jar
+	          d.read(getClass().getClassLoader().getResourceAsStream(gifSourcePath + gifName + ".gif"));
 	          int numFrames = d.getFrameCount(); 
 	          int frameDelay = d.getDelay(1); //even though gifs have a frame delay for each frmae, pixel doesn't support this so we'll take the frame rate of the second frame and use this for the whole animation. We take the second frame because often times the frame delay of the first frame in a gif is much longer than the rest of the frames
 	          
@@ -989,8 +996,8 @@ public void decodeGIFJar(String decodedDir, String gifName, int currentResolutio
 	                int y=0;
 	                int len = BitmapBytes.length;
 
-	                for (x=0 ; x < pixelMatrix_width; x++) {
-	                    for (y=0; y < pixelMatrix_height; y++) {
+	                for (x=0 ; x < pixelMatrix_height; x++) {
+	                    for (y=0; y < pixelMatrix_width; y++) {
 
 	                        Color c = new Color(sendImg.getRGB(y, x));  // x and y were switched in the original code which was causing the image to rotate by 90 degrees and was flipped horizontally, switching x and y fixes this bug
 	                        int red = c.getRed();
@@ -1022,8 +1029,6 @@ public void decodeGIFJar(String decodedDir, String gifName, int currentResolutio
 	                        numByte+=2;
 	                    }
 	                }
-			   		    
-			     //decodedDirPathExternal = decodedDir + "/decoded" ;   //  ex. c:\animations\decoded
 			   		    
 			   		 File decodeddir = new File(decodedDir); //this could be gif, gif64, or usergif
 					    if(decodeddir.exists() == false)
@@ -1069,7 +1074,7 @@ public void decodeGIFJar(String decodedDir, String gifName, int currentResolutio
 				}
 		}
 		else {
-			System.out.println("ERROR  Could not write " + decodedDir + "/" + gifName + ".txt");
+			System.out.println("ERROR  Could not find " + gifSourcePath + gifName + ".gif in the JAR file");
 		}
 			
 	}  
@@ -1108,7 +1113,7 @@ public void decodeGIFJar(String decodedDir, String gifName, int currentResolutio
       return localFileImagePath;
   }
   
-  public static BufferedImage getScaledImage(BufferedImage image, int width, int height) throws IOException { //resizes our image and preserves hard edges which we need for pixel art
+  public static BufferedImage getScaledImage(BufferedImage image, int width, int height) throws IOException { //resizes our image and preserves hard edges we need for pixel art
 	    int imageWidth  = image.getWidth();
 	    int imageHeight = image.getHeight();
 

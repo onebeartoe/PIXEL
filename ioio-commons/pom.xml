@@ -40,13 +40,26 @@
       <scope>test</scope>
     </dependency>
     
+    
+     <!--version>0.0.10/version changed to 10 as it was more reliable at the time
+     version>0.0.17</version was originally 17 -->
+     
     <dependency>
       <groupId>com.sparetimelabs</groupId>
       <artifactId>purejavacomm</artifactId>
       <version>0.0.21</version>
-      <!--version>0.0.10/version changed to 10 as it was more reliable at the time-->
-      <!--version>0.0.17</version  was originally 17-->
    </dependency>
+ 
+   
+    <dependency>
+	    <groupId>org.imgscalr</groupId>
+	    <artifactId>imgscalr-lib</artifactId>
+	    <version>4.2</version>
+	    <type>jar</type>
+	    <scope>compile</scope>
+   </dependency>
+    
+    
   </dependencies>
   
   <build>

@@ -4,6 +4,7 @@ package com.ledpixelart.pc;
 
 import com.ledpixelart.pc.plugins.PluginConfigEntry;
 import com.ledpixelart.pc.plugins.swing.AnimationsPanel;
+import com.ledpixelart.pc.plugins.swing.AnimationsPanel64;
 import com.ledpixelart.pc.plugins.swing.ImageTilePanel;
 import com.ledpixelart.pc.plugins.swing.SettingsTilePanel;
 
@@ -215,6 +216,14 @@ public class PixelApp extends IOIOSwingApp
 	final PixelTilePanel animationsPanel = new AnimationsPanel(KIND);
 	animationsPanel.populate();
 	builtinPixelPanels.add(animationsPanel);
+	
+	// animations64 tab
+	String path5 = "/tab_icons/boat_small.png";
+	URL url5 = getClass().getResource(path5);
+	ImageIcon animations64TabIcon = new ImageIcon(url5);
+	final PixelTilePanel animationsPanel64 = new AnimationsPanel64(KIND);
+	animationsPanel64.populate();
+	builtinPixelPanels.add(animationsPanel64);
 
 	// scrolling text panel
 	String path3 = "/tab_icons/text_small.png";
@@ -245,10 +254,11 @@ public class PixelApp extends IOIOSwingApp
 	tabbedPane = new JTabbedPane();
 	tabbedPane.setTabLayoutPolicy(JTabbedPane.SCROLL_TAB_LAYOUT);
         tabbedPane.addChangeListener( new TabChangeListener() );
-	tabbedPane.addTab("Images", imagesTabIcon, imagesPanelReal, "Load built-in images.");
-	tabbedPane.addTab("My Images and GIFs", userTabIcon, localImagesPanel, "This panel displays images from your local hard drive.");
-        tabbedPane.addTab("GIFs", animationsTabIcon, animationsPanel, "Load built-in animations.");
-	tabbedPane.addTab("Scolling Text", textTabIcon, scrollPanel, "Scrolls a text message across the PIXEL");
+    tabbedPane.addTab("GIFs", animationsTabIcon, animationsPanel, "Load built-in animations.");
+    tabbedPane.addTab("GIF64", animations64TabIcon, animationsPanel64, "Load built-in animations for SUPER PIXEL 64x64.");
+    tabbedPane.addTab("My Images and GIFs", userTabIcon, localImagesPanel, "This panel displays images from your local hard drive.");
+    tabbedPane.addTab("Images", imagesTabIcon, imagesPanelReal, "Load built-in images.");
+    tabbedPane.addTab("Scolling Text", textTabIcon, scrollPanel, "Scrolls a text message across the PIXEL");
 	tabbedPane.addTab("Settings", settingsTabIcon, settingsPanel, "Settings");
 	
 	Dimension demension;

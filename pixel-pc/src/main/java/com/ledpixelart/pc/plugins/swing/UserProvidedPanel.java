@@ -66,9 +66,11 @@ public class UserProvidedPanel extends ImageTilePanel
     
     private String localFileImagePath;
     
+    private String localFileImagePathString;
+    
     private String fileType;
 
-    public UserProvidedPanel(RgbLedMatrix.Matrix KIND, File imageDirectory)
+    public UserProvidedPanel(final RgbLedMatrix.Matrix KIND, File imageDirectory)
     {
 	super(KIND);
         this.imageDirectory = imageDirectory;
@@ -94,7 +96,7 @@ imageListPath = "/animations.text";
 		{
 		    i = 0;
 		}
-			PixelApp.pixel.SendPixelDecodedFrame(PixelApp.decodedDir, animation_name, i, GIFnumFrames, GIFresolution, PixelApp.KIND.width,PixelApp.KIND.height);
+			PixelApp.pixel.SendPixelDecodedFrame(PixelApp.decodedDir, animation_name, i, GIFnumFrames, GIFresolution, KIND.width,KIND.height);
 	    }
 	};
     }    
@@ -256,9 +258,9 @@ imageListPath = "/animations.text";
 			PixelApp.pixel.interactiveMode();
 			Component command = e.getComponent();
 			
-			localFileImagePath = PixelApp.pixel.getSelectedFilePath(command);
+			localFileImagePath = PixelApp.pixel.getSelectedFilePath(command);  //this returns file:/Users/al/Documents/pngs/somegif.gif
 			selectedFileName = FilenameUtils.getName(localFileImagePath); //with no extension
-			System.out.println("Selected File Name: " + selectedFileName);
+			
 			fileType = FilenameUtils.getExtension(selectedFileName);
 			String gifNameNoExt = FilenameUtils.removeExtension(selectedFileName); //with no extension
 		
@@ -267,8 +269,10 @@ imageListPath = "/animations.text";
 	         System.out.println("Attemping to load " + localFileImagePath);
 		     // URL url = PixelApp.class.getClassLoader().getResource(imagePath); //get rid of this cuz we're loading from the local dir, not classpath
 	         URL url = new URL(localFileImagePath); 
+	         localFileImagePathString = url.getPath(); //we're need the path without the file: part for the decodegif method
 	            
 		    originalImage = ImageIO.read(url);
+		    System.out.println("Selected File Local Path: " + localFileImagePath);
 		
 	        } 
 	        catch (Exception e1) 
@@ -330,12 +334,15 @@ imageListPath = "/animations.text";
 			if (fileType.toLowerCase().contains("gif")) {
 	    		
 	   		 if (PixelApp.pixel.GIFNeedsDecoding(PixelApp.decodedDir, selectedFileName, PixelApp.currentResolution) == true) {
-	   		    	PixelApp.pixel.decodeGIF(PixelApp.decodedDir, localFileImagePath, PixelApp.currentResolution, PixelApp.KIND.width, PixelApp.KIND.height);
+	   			    System.out.println("This GIF needs to be encoded...");
+	   		    	PixelApp.pixel.decodeGIF(PixelApp.decodedDir, localFileImagePathString, PixelApp.currentResolution, KIND.width, KIND.height);
 	   		    }
 	
 	   			    //****** Now let's setup the animation ******
 	   			    
 	   			    animation_name = selectedFileName;
+	   			    
+	   			    //TO Add a check here to make sure the txt file exists
 	   			    
 	   			    GIFfps = PixelApp.pixel.getDecodedfps(PixelApp.decodedDir, animation_name); //get the fps //to do fix this later becaause we are getting from internal path
 	   			    GIFnumFrames = PixelApp.pixel.getDecodednumFrames(PixelApp.decodedDir, animation_name);
@@ -344,8 +351,8 @@ imageListPath = "/animations.text";
 	   			    
 	   			    System.out.println("Selected GIF Resolution: " + GIFresolution);
 	   				System.out.println("Current LED Panel Resolution: " + PixelApp.currentResolution);
-	   				System.out.println("GIF Width: " + PixelApp.KIND.width);
-	   				System.out.println("GIF Height: " + PixelApp.KIND.height);
+	   				System.out.println("GIF Width: " + KIND.width);
+	   				System.out.println("GIF Height: " + KIND.height);
 	   				
 	   			 if (PixelApp.pixelHardwareID.substring(0,4).equals("PIXL") && writeMode == true) {  //change this to a double click event later
 		    			
@@ -358,7 +365,7 @@ imageListPath = "/animations.text";
 					      for (y=0;y<GIFnumFrames;y++) { //Al removed the -1, make sure to test that!!!!!
 	
 				    			System.out.println("Writing " + animation_name + " to PIXEL " + "frame " + y);
-					 		    PixelApp.pixel.SendPixelDecodedFrame(PixelApp.decodedDir, animation_name, y, GIFnumFrames, GIFresolution, PixelApp.KIND.width,PixelApp.KIND.height);
+					 		    PixelApp.pixel.SendPixelDecodedFrame(PixelApp.decodedDir, animation_name, y, GIFnumFrames, GIFresolution, KIND.width,KIND.height);
 					   	  } //end for loop
 						PixelApp.pixel.playLocalMode(); //now tell PIXEL to play locally
 						System.out.println("Writing " + animation_name + " to PIXEL complete, now displaying...");
@@ -381,7 +388,7 @@ imageListPath = "/animations.text";
 						//send loading image
 						PixelApp.pixel.writeMode(10); //need to tell PIXEL the frames per second to use, how fast to play the animations
 						try {
-							PixelApp.pixel.writeImagetoMatrix(originalImage, PixelApp.KIND.width,PixelApp.KIND.height);
+							PixelApp.pixel.writeImagetoMatrix(originalImage, KIND.width,KIND.height);
 						} catch (ConnectionLostException e1) {
 							// TODO Auto-generated catch block
 							e1.printStackTrace();
@@ -392,7 +399,7 @@ imageListPath = "/animations.text";
 			   		else {  //just stream the static image
 					   		
 					   	 try { 
-								PixelApp.pixel.writeImagetoMatrix(originalImage, PixelApp.KIND.width,PixelApp.KIND.height);
+								PixelApp.pixel.writeImagetoMatrix(originalImage, KIND.width,KIND.height);
 							} catch (ConnectionLostException e1) {
 								// TODO Auto-generated catch block
 								e1.printStackTrace();
