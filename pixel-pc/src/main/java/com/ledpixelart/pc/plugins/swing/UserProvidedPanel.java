@@ -3,6 +3,8 @@ package com.ledpixelart.pc.plugins.swing;
 
 import com.ledpixelart.pc.PixelApp;
 import com.ledpixelart.pc.filters.ImageFilters;
+import com.ledpixelart.pc.plugins.swing.AnimationsPanel.writePIXEL;
+
 import ioio.lib.api.RgbLedMatrix;
 import ioio.lib.api.exception.ConnectionLostException;
 
@@ -11,6 +13,7 @@ import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -20,12 +23,14 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
+import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
+import javax.swing.SwingWorker;
 import javax.swing.Timer;
 
 import org.apache.commons.io.FilenameUtils;
@@ -33,7 +38,7 @@ import org.apache.commons.io.FilenameUtils;
 /**
  * @author rmarquez
  */
-public class UserProvidedPanel extends ImageTilePanel
+public class UserProvidedPanel extends ImageTilePanel implements MouseListener
 {
     
     private JFileChooser userDirectoryChooser;
@@ -256,7 +261,7 @@ imageListPath = "/animations.text";
 	public void mouseClicked(MouseEvent e) {
       if (PixelApp.getPixelFound() == true) { //let's make sure pixel is found before proceeding or we'll get a crash
 			PixelApp.pixel.interactiveMode();
-			Component command = e.getComponent();
+			Component command = e.getComponent(); //this was the only way I could get the path of the image clicked using the mouse listener, probably there is a better way but this works
 			
 			localFileImagePath = PixelApp.pixel.getSelectedFilePath(command);  //this returns file:/Users/al/Documents/pngs/somegif.gif
 			selectedFileName = FilenameUtils.getName(localFileImagePath); //with no extension
@@ -269,10 +274,12 @@ imageListPath = "/animations.text";
 	         System.out.println("Attemping to load " + localFileImagePath);
 		     // URL url = PixelApp.class.getClassLoader().getResource(imagePath); //get rid of this cuz we're loading from the local dir, not classpath
 	         URL url = new URL(localFileImagePath); 
-	         localFileImagePathString = url.getPath(); //we're need the path without the file: part for the decodegif method
-	            
+	         File file = new File(url.getFile());
+	         //localFileImagePathString = url.getPath(); //we're need the path without the file: part for the decodegif method
+	         localFileImagePathString = file.getAbsolutePath(); //need this for gif use case, use originalimage for png
+	         
 		    originalImage = ImageIO.read(url);
-		    System.out.println("Selected File Local Path: " + localFileImagePath);
+		    System.out.println("Selected File Local Absolute Path: " + localFileImagePathString);
 		
 	        } 
 	        catch (Exception e1) 
@@ -334,7 +341,7 @@ imageListPath = "/animations.text";
 			if (fileType.toLowerCase().contains("gif")) {
 	    		
 	   		 if (PixelApp.pixel.GIFNeedsDecoding(PixelApp.decodedDir, selectedFileName, PixelApp.currentResolution) == true) {
-	   			    System.out.println("This GIF needs to be encoded...");
+	   			    System.out.println("This GIF needs to be encoded: " + localFileImagePathString);
 	   		    	PixelApp.pixel.decodeGIF(PixelApp.decodedDir, localFileImagePathString, PixelApp.currentResolution, KIND.width, KIND.height);
 	   		    }
 	
@@ -354,21 +361,24 @@ imageListPath = "/animations.text";
 	   				System.out.println("GIF Width: " + KIND.width);
 	   				System.out.println("GIF Height: " + KIND.height);
 	   				
+	   				stopExistingTimer();
+	   				
 	   			 if (PixelApp.pixelHardwareID.substring(0,4).equals("PIXL") && writeMode == true) {  //change this to a double click event later
 		    			
 						PixelApp.pixel.interactiveMode();
 						PixelApp.pixel.writeMode(GIFfps); //need to tell PIXEL the frames per second to use, how fast to play the animations
 						System.out.println("Now writing to PIXEL's SD card, the screen will go blank until writing has been completed..."); 
-						  int y=0;
+						new writePIXEL().execute(); 
+						
+						/*  int y=0;
 					    	 
 					   	  //for (y=0;y<numFrames-1;y++) { //let's loop through and send frame to PIXEL with no delay
 					      for (y=0;y<GIFnumFrames;y++) { //Al removed the -1, make sure to test that!!!!!
-	
 				    			System.out.println("Writing " + animation_name + " to PIXEL " + "frame " + y);
 					 		    PixelApp.pixel.SendPixelDecodedFrame(PixelApp.decodedDir, animation_name, y, GIFnumFrames, GIFresolution, KIND.width,KIND.height);
 					   	  } //end for loop
 						PixelApp.pixel.playLocalMode(); //now tell PIXEL to play locally
-						System.out.println("Writing " + animation_name + " to PIXEL complete, now displaying...");
+						System.out.println("Writing " + animation_name + " to PIXEL complete, now displaying...");*/
 				
 				}
 					else {
@@ -387,6 +397,7 @@ imageListPath = "/animations.text";
 			   			PixelApp.pixel.interactiveMode();
 						//send loading image
 						PixelApp.pixel.writeMode(10); //need to tell PIXEL the frames per second to use, how fast to play the animations
+						
 						try {
 							PixelApp.pixel.writeImagetoMatrix(originalImage, KIND.width,KIND.height);
 						} catch (ConnectionLostException e1) {
@@ -409,14 +420,74 @@ imageListPath = "/animations.text";
 			   	}   
 	 
     }
+	
+	 private class writePIXEL extends SwingWorker<Boolean, Integer> {
+			//SwingWorker<Boolean, Integer> writePIXEL = new SwingWorker<Boolean, Integer>() { //use this if you only need once like an startup timer maybe
+				   @Override
+				   protected Boolean doInBackground() throws Exception {
+					   
+					   int y=0;
+				    	 
+					   	  //for (y=0;y<numFrames-1;y++) { //let's loop through and send frame to PIXEL with no delay
+					      for (y=0;y<GIFnumFrames;y++) { //Al removed the -1, make sure to test that!!!!!
+				    			System.out.println("Writing " + animation_name + " to PIXEL " + "frame " + y);
+					 		    PixelApp.pixel.SendPixelDecodedFrame(PixelApp.decodedDir, animation_name, y, GIFnumFrames, GIFresolution, KIND.width,KIND.height);
+					 		    publish(y); 
+					   	  } //end for loop
+					   
+				
+				    return true;
+				   }
+
+				   // Can safely update the GUI from this method.
+				   protected void done() {
+				    
+				    boolean status;
+				    try {
+				     // Retrieve the return value of doInBackground.
+				     status = get();
+				     //we are done so we can now set PIXEL to local playback mode
+				     
+				 	 PixelApp.pixel.playLocalMode(); //now tell PIXEL to play locally
+					 System.out.println("PIXEL CONNECTED: Click to stream or double click to write");
+					 String message = "PIXEL CONNECTED: Click to stream or double click to write";
+				     PixelApp.statusLabel.setText(message);  
+				    // statusLabel.setText("Completed with status: " + status);
+				    } catch (InterruptedException e) {
+				     // This is thrown if the thread's interrupted.
+				    } catch (ExecutionException e) {
+				     // This is thrown if we throw an exception
+				     // from doInBackground.
+				    }
+				   }
+
+				   @Override
+				   // Can safely update the GUI from this method.
+				   protected void process(List<Integer> chunks) {
+				    // Here we receive the values that we publish().
+				    // They may come grouped in chunks.
+				    int mostRecentValue = chunks.get(chunks.size()-1);
+				    System.out.println("DO NOT INTERRUPT: Writing frame " + Integer.toString(mostRecentValue) + " of " + GIFnumFrames);
+				    String message = "DO NOT INTERRUPT: Writing frame " + Integer.toString(mostRecentValue) + " of " + GIFnumFrames;
+			        PixelApp.statusLabel.setText(message);  
+				    //countLabel1.setText(Integer.toString(mostRecentValue));
+				   }
+				  };
+				  
     
     private void stopExistingTimer()
     {
         if(timer != null && timer.isRunning() )
         {
-            System.out.println("Stoping PIXEL activity in " + getClass().getSimpleName() + ".");
+            System.out.println("Stopping PIXEL activity in " + getClass().getSimpleName() + ".");
             timer.stop();
         }        
+    }
+    
+    @Override
+    public void stopPixelActivity()
+    {
+        stopExistingTimer();
     }
     
     private class UserButtonListener implements ActionListener    
