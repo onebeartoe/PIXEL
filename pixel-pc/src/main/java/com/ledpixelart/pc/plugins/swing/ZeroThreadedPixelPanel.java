@@ -18,11 +18,11 @@ public class ZeroThreadedPixelPanel extends PixelPanel
     
    protected boolean pixelFound;
 
-  //  @Override
-   // public void setPixelFound(boolean found) 
-  //  {
-	//this.pixelFound = found;
-  //  }    
+    @Override
+    public void setPixelFound(boolean found) 
+    {
+	this.pixelFound = found;
+    }    
 	
     @Override
     public void startPixelActivity()
@@ -35,5 +35,7 @@ public class ZeroThreadedPixelPanel extends PixelPanel
     {
         
     }
+
+	
 
 }

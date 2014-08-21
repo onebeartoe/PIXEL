@@ -146,6 +146,8 @@ public class PixelApp extends IOIOSwingApp
     private static int ledMatrix_;
 
     private static String pixelPrefNode = "/com/ledpixelart/pc";
+    
+    private static boolean firstTimeUser = true;
    
     
     public PixelApp()
@@ -185,8 +187,9 @@ public class PixelApp extends IOIOSwingApp
 	 int defaultLEDMatrix = 3; //if the pref does not exist yet for the led matrix, use this and default to pixel 32x32
 	 
 	 ledMatrixType = prefs.getInt("prefMatrix", defaultLEDMatrix);
+	 firstTimeUser = prefs.getBoolean("prefFirstTime", true);
 
-	 setupEnvironment();
+	 setupEnvironment();  //set our default led panel that we get from java preferences
 	
 	// images tab
 	String path = "/tab_icons/apple_small.png";
@@ -196,14 +199,13 @@ public class PixelApp extends IOIOSwingApp
 	imagesPanelReal.populate();
 	builtinPixelPanels.add(imagesPanelReal);
 	
-	// user images tab
+	// user supplied images and GIFs tab
 	String userIconPath = "/tab_icons/my_small.png";
 	URL userUrl = getClass().getResource(userIconPath);
 	ImageIcon userTabIcon = new ImageIcon(userUrl);	
 	String key = PixelPreferencesKeys.userImagesDirectory;	
 	String defaultValue = System.getProperty("user.home");
 	String localUserPath = preferenceService.get(key, defaultValue);
-
 	File localUserDirectory = new File(localUserPath);
 	localImagesPanel = new UserProvidedPanel(KIND, localUserDirectory);
 	localImagesPanel.populate();
@@ -237,7 +239,6 @@ public class PixelApp extends IOIOSwingApp
     URL url4 = getClass().getResource(path4);
     ImageIcon settingsTabIcon = new ImageIcon(url4);
     PixelPanel settingsPanel = new SettingsTilePanel(KIND);
-   // animationsPanel.populate();
     builtinPixelPanels.add(settingsPanel);
 
 	frame = new JFrame("PIXEL");
@@ -311,6 +312,19 @@ public class PixelApp extends IOIOSwingApp
 	startSearchTimer();
 		
 	frame.setVisible(true);
+	//frame.setExtendedState(frame.getExtendedState() | JFrame.MAXIMIZED_BOTH); //maximize the window
+	
+	//let's show the user a first time instructions pop up, only shows once as we'll write a preference
+	if (firstTimeUser) {
+		    String path9 = "/tab_icons/";
+		    String iconPath = path9 + "gumball-about256.png";
+		    URL resource = getClass().getResource(iconPath);
+		    ImageIcon imageIcon = new ImageIcon(resource);
+		    String message = "Welcome PIXEL User";
+		    InstructionsPanel about = new InstructionsPanel();
+		    JOptionPane.showMessageDialog(frame, about, message, JOptionPane.INFORMATION_MESSAGE, imageIcon);
+		    prefs.putBoolean("prefFirstTime", false);
+	}
 	
 	return frame;
     }
@@ -407,7 +421,7 @@ public class PixelApp extends IOIOSwingApp
 	    protected void setup() throws ConnectionLostException, InterruptedException
 	    {
 		
-	    	System.out.println("Went to IOIO setup...");
+	    	System.out.println("Found PIXEL, entering initialization routine...");
 	    	
 	    	//**** let's get IOIO version info for the About Screen ****
   			pixelFirmware = ioio_.getImplVersion(v.APP_FIRMWARE_VER);
@@ -451,15 +465,16 @@ public class PixelApp extends IOIOSwingApp
 		pixelFound = true;
 		System.out.println("Found PIXEL: " + pixel.matrix + "\n");
 		System.out.println("You may now interact with the PIXEL\n");
-		String message = "PIXEL Status: Connected";
-        PixelApp.this.statusLabel.setText(message);
+		//String message = "PIXEL Status: Connected";
+        //PixelApp.this.statusLabel.setText(message);
 		
-//TODO: Load something on startup
+		//TODO: Load something on startup on PIXEL like "Select Image"
 
 		searchTimer.stop(); //need to stop the timer so we don't still display the pixel searching message
 		
-		message = "PIXEL Status: Connected";
-                PixelApp.this.statusLabel.setText(message);
+		String message = "PIXEL FOUND: Click to stream or double click to write";
+        PixelApp.this.statusLabel.setText(message);
+        
 	    }
 	    
 	    @Override
@@ -609,7 +624,7 @@ public class PixelApp extends IOIOSwingApp
     {
 	for(PixelPanel panel : builtinPixelPanels)
 	{
-	  //panel.setPixelFound(true);
+	  panel.setPixelFound(true);
 	  
 		
 	}
@@ -637,8 +652,8 @@ public class PixelApp extends IOIOSwingApp
 	@Override
 	public void actionPerformed(ActionEvent e) 
 	{
-	    String path = "/images/";
-	    String iconPath = path + "aaagumball.png";
+	    String path = "/tab_icons/";
+	    String iconPath = path + "gumball-about256.png";
 	    URL resource = getClass().getResource(iconPath);
 	    ImageIcon imageIcon = new ImageIcon(resource);
 	    String message = "About PIXEL";
@@ -666,11 +681,11 @@ public class PixelApp extends IOIOSwingApp
     {
 	public void actionPerformed(ActionEvent e) 
 	{
-	    String path = "/images/";
-	    String iconPath = path + "aaagumball.png";
+	    String path = "/tab_icons/";
+	    String iconPath = path + "gumball-about256.png";
 	    URL resource = getClass().getResource(iconPath);
 	    ImageIcon imageIcon = new ImageIcon(resource);
-	    String message = "PIXEL Instructions";
+	    String message = "Welcome PIXEL User";
 	    InstructionsPanel about = new InstructionsPanel();
 	    JOptionPane.showMessageDialog(frame, about, message, JOptionPane.INFORMATION_MESSAGE, imageIcon);
 	}
@@ -828,8 +843,8 @@ public class PixelApp extends IOIOSwingApp
 			    String title = "PIXEL Connection Unsuccessful";
 			    JOptionPane.showMessageDialog(frame, message, title, JOptionPane.INFORMATION_MESSAGE);
 			}
-			else { //al added this, trying to debug connected message not always showing up
-				String message = "PIXEL Status: Connected | Single click to display and double click to write";
+			else { 
+				String message = "PIXEL FOUND: Click to stream or double click to write";
 	            PixelApp.this.statusLabel.setText(message);
 			}
 	    }
@@ -843,7 +858,10 @@ public class PixelApp extends IOIOSwingApp
 	    for(PixelPanel panel : builtinPixelPanels)
 	    {
 		panel.stopPixelActivity();
+		//System.out.println("built in panels: " + builtinPixelPanels);
 	    }
+	    
+	   
 
 	    // start the selected panel/tab's PIXEL activity
 	    Object o = e.getSource();

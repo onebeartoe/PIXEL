@@ -35,11 +35,15 @@ import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import javax.swing.SwingUtilities;
+
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 
 import org.gifdecoder.GifDecoder;
 import org.imgscalr.Scalr;
+
+
 
 
 /**
@@ -609,6 +613,8 @@ public boolean GIFNeedsDecoding(String decodedDir, String gifName, int currentRe
     	if (filetxt.exists()) return true;
     	else return false;
     }
+ 
+
     
     
     public void SendPixelDecodedFrame(String decodedDir, String gifName, int x, int selectedFileTotalFrames, int selectedFileResolution, int frameWidth, int frameHeight) {
@@ -728,8 +734,7 @@ public boolean GIFNeedsDecoding(String decodedDir, String gifName, int currentRe
 			}
 			
 			else {
-				System.err.println("An error occured while trying to load " + gifNamePath + ".");
-	    	    System.err.println("Make sure " + gifNamePath + "is included in the executable JAR.");
+				//System.err.println("An error occured while trying to load " + gifNamePath);
 	    	   // e.printStackTrace();
 			}
 	}

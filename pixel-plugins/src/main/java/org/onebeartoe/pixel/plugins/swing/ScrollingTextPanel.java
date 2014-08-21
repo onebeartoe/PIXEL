@@ -478,5 +478,13 @@ public class ScrollingTextPanel extends SingleThreadedPixelPanel
             }
          } 
     }
+
+
+
+	@Override
+	public void setPixelFound(boolean found) {
+		// TODO Auto-generated method stub
+		
+	}
     
 }
