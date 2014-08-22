@@ -72,6 +72,7 @@ import javax.swing.event.ChangeListener;
 import org.onebeartoe.pixel.hardware.Pixel;
 import org.onebeartoe.pixel.plugins.swing.PixelPanel;
 import org.onebeartoe.pixel.plugins.swing.ScrollingTextPanel;
+//import org.onebeartoe.pixel.plugins.swing.ScrollingTextPanel;
 import org.onebeartoe.pixel.preferences.JavaPreferencesService;
 import org.onebeartoe.pixel.preferences.PixelPreferencesKeys;
 import org.onebeartoe.pixel.preferences.PreferencesService;
@@ -312,7 +313,7 @@ public class PixelApp extends IOIOSwingApp
 	startSearchTimer();
 		
 	frame.setVisible(true);
-	//frame.setExtendedState(frame.getExtendedState() | JFrame.MAXIMIZED_BOTH); //maximize the window
+	frame.setExtendedState(frame.getExtendedState() | JFrame.MAXIMIZED_BOTH); //maximize the window
 	
 	//let's show the user a first time instructions pop up, only shows once as we'll write a preference
 	if (firstTimeUser) {
@@ -583,13 +584,19 @@ public class PixelApp extends IOIOSwingApp
 		 System.out.println("went to setup & currentResolution is: " + currentResolution + "\n");
 	 }
     
-    public static void main(String[] args) throws Exception 
+    
+	 
+	public static void main(String[] args) throws Exception 
     {		
 	PixelApp app = new PixelApp();
 	app.go(args);		
     }
     
-    private void savePreferences()
+	 public static void setStatusLabel(String message) {
+	        statusLabel.setText(message);
+	 }
+	
+	private void savePreferences()
     {
 	preferenceService.saveWindowPreferences(frame);
 	preferenceService.saveBuiltInPluginsPreferences(localImagesPanel);
@@ -638,6 +645,8 @@ public class PixelApp extends IOIOSwingApp
 	searchTimer = new Timer(delay, worker);
 	searchTimer.start();
     }
+    
+   
     
    
     
@@ -851,6 +860,8 @@ public class PixelApp extends IOIOSwingApp
 	}
     }
 
+   
+    
     private class TabChangeListener implements ChangeListener
     {
 	public void stateChanged(ChangeEvent e) 

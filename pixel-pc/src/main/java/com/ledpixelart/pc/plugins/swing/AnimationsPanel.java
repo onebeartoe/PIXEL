@@ -164,8 +164,10 @@ public class AnimationsPanel extends ImageTilePanel implements MouseListener
 			    	System.out.println("This GIF was already decoded");
 			    }
 			    else {  //the text file is not there so we cannot continue and we must decode, let's first copy the file to home dir
-			    
+			    	
+			      //  PixelApp.setStatusLabel("DO NOT INTERRUPT: Decoding GIF...");
 			    	PixelApp.pixel.decodeGIFJar(decodedDir, gifSourcePath,selectedFileName, PixelApp.currentResolution, KIND.width, KIND.height);
+			    //	PixelApp.setStatusLabel("PIXEL CONNECTED: Click to stream or double click to write");
 			    }
 			    
 			    if (PixelApp.pixel.GIFNeedsDecoding(decodedDir, selectedFileName, PixelApp.currentResolution) == true) {
@@ -186,6 +188,8 @@ public class AnimationsPanel extends ImageTilePanel implements MouseListener
 					System.out.println("Current LED Panel Resolution: " + PixelApp.currentResolution);
 					System.out.println("GIF Width: " + KIND.width);
 					System.out.println("GIF Height: " + KIND.height);
+					
+					
 			            
 			        stopExistingTimer();
 			            
@@ -194,7 +198,8 @@ public class AnimationsPanel extends ImageTilePanel implements MouseListener
 			    					PixelApp.pixel.interactiveMode();
 			    					PixelApp.pixel.writeMode(GIFfps); //need to tell PIXEL the frames per second to use, how fast to play the animations
 			    					System.out.println("Now writing to PIXEL's SD card, the screen will go blank until writing has been completed..."); 
-			    					new writePIXEL().execute(); 
+			    					
+			    					new writePIXEL().execute(); //we'll run this in the background and also update the UI with progress
 			    					 
 			    					/*int y;
 			    				    	 
@@ -252,8 +257,8 @@ public class AnimationsPanel extends ImageTilePanel implements MouseListener
 		     //we are done so we can now set PIXEL to local playback mode
 		     
 		 	 PixelApp.pixel.playLocalMode(); //now tell PIXEL to play locally
-			 System.out.println("PIXEL CONNECTED: Click to stream or double click to write");
-			 String message = "PIXEL CONNECTED: Click to stream or double click to write";
+			 System.out.println("PIXEL FOUND: Click to stream or double click to write");
+			 String message = "PIXEL FOUND: Click to stream or double click to write";
 		     PixelApp.statusLabel.setText(message);  
 		    // statusLabel.setText("Completed with status: " + status);
 		    } catch (InterruptedException e) {

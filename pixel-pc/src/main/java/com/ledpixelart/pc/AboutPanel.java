@@ -22,7 +22,7 @@ import javax.swing.JPanel;
 public class AboutPanel extends JPanel
 {
     
-    private final String developmentUrl = "http://electronics.onebeartoe.org/";
+    private final String developmentUrl = "http://ledpixelart.com/";
     private final String pixelURL = "http://ledpixelart.com/";
     
     private JLabel developmentLabel;
@@ -46,8 +46,9 @@ public class AboutPanel extends JPanel
 	setLayout(layout);
 	
 	add(productLabel);
-	add(developmentLabel);
 	add(projectLabel);
+	add(developmentLabel);
+	
     }
     
     private class DevelopmentLabelListener extends MouseAdapter

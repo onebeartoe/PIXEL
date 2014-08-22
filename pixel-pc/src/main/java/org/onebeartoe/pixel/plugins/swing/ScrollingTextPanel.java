@@ -13,6 +13,7 @@ import java.awt.GraphicsEnvironment;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
 import java.awt.image.BufferedImage;
 import java.util.HashMap;
 import java.util.List;
@@ -22,17 +23,24 @@ import java.util.logging.Logger;
 import java.util.prefs.Preferences;
 
 import javax.swing.BorderFactory;
+import javax.swing.ButtonGroup;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JColorChooser;
 import javax.swing.JComboBox;
 import javax.swing.JPanel;
+import javax.swing.JRadioButton;
 import javax.swing.JSlider;
 import javax.swing.JTextField;
 import javax.swing.SwingWorker;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 
 import org.apache.commons.lang3.ArrayUtils;
+
+import com.ledpixelart.pc.PixelApp;
 
 
 
@@ -60,6 +68,10 @@ public class ScrollingTextPanel extends SingleThreadedPixelPanel
     private JSlider textVerticalSlider;
     
     private JColorChooser colorChooser;
+    
+    private JCheckBox doubleSpeed;
+    
+    private JCheckBox tripleSpeed;
     
     private HashMap<String, Font> fonts;
     
@@ -99,15 +111,19 @@ public class ScrollingTextPanel extends SingleThreadedPixelPanel
 
     private static String pixelPrefNode = "/com/ledpixelart/pc";
     
+    private static String prefSavedText;
+    
+    private static Integer prefRadioSpeedButton;
+    
     private boolean writeMode = false;
+    
+    private int scrollingKeyFrames = 1;
     
     public ScrollingTextPanel(final RgbLedMatrix.Matrix KIND)
     {
         super(KIND);
         
-      //  if (pixel !=null) pixel.interactiveMode(); //put into interactive mode as could have been stuck in local mode from previous panel
-        
-       // System.out.println("PIXEL Model is: " + KIND.width); 
+        prefs = Preferences.userRoot().node(pixelPrefNode); //let's get our preferences
         
         fonts = new HashMap();
         
@@ -115,18 +131,50 @@ public class ScrollingTextPanel extends SingleThreadedPixelPanel
 	
         colorChooser = new JColorChooser();
         
-        textField = new JTextField("Type Something Here");
+        prefRadioSpeedButton = prefs.getInt("prefRadioSpeedButton", 1);  //preferences for the speed accelerator radio buttons
+        
+        prefSavedText = prefs.get("prefSavedText", "Type Something Here");
+        textField = new JTextField(prefSavedText);
+        
+        textField.getDocument().addDocumentListener(new DocumentListener() {
+
+			@Override
+			public void insertUpdate(DocumentEvent e) {
+				// TODO Auto-generated method stub
+				CheckAndStartTimer();
+				prefs.put("prefSavedText", getText());
+				
+			}
+
+			@Override
+			public void removeUpdate(DocumentEvent e) {
+				CheckAndStartTimer();
+				// TODO Auto-generated method stub
+				prefs.put("prefSavedText", getText());
+				
+			}
+
+			@Override
+			public void changedUpdate(DocumentEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+            // implement the methods
+        });
+        
+        
+        
         JPanel inputSubPanel = new JPanel( new BorderLayout() );        
         inputSubPanel.add(textField, BorderLayout.CENTER);
         JPanel inputPanel = new JPanel( new BorderLayout() );
         inputPanel.add(inputSubPanel, BorderLayout.NORTH); 
         
         String [] fontNames = GraphicsEnvironment.getLocalGraphicsEnvironment().getAvailableFontFamilyNames();
-        
-        prefs = Preferences.userRoot().node(pixelPrefNode); //let's get our preferences
+       
     	
         prefFontString = prefs.get("prefFont", "Arial"); //use Arial if there is no pref saved yet
         int selectedFontIndex = ArrayUtils.indexOf(fontNames, prefFontString); //let's set the default font to Arial, otherwise it would have just picked the first one
+        
         
         prefFontSizeSliderPosition = prefs.getInt("prefFontSize", 0); //pref for the font size, default to 32 if not there
         
@@ -138,9 +186,11 @@ public class ScrollingTextPanel extends SingleThreadedPixelPanel
         
         fontFamilyChooser.addActionListener (new ActionListener () {
             public void actionPerformed(ActionEvent e) {
+            	CheckAndStartTimer();
             	String selectedFontName = (String) fontFamilyChooser.getSelectedItem();
     	    	prefs.put("prefFont", selectedFontName);
     	    	System.out.println("Selected Front Name is: " + selectedFontName);
+    	    	prefs.put("prefSavedText", getText());
             }
         });
         
@@ -157,16 +207,19 @@ public class ScrollingTextPanel extends SingleThreadedPixelPanel
     	    		stopExistingTimer(); //this doesn't seem to do anything?
     	    		
     	    		writeMode = true;
+    	    		prefs.put("prefSavedText", getText());
     	    	
-    	    		Integer delayFPS = Math.round(1000.f / delay); 	
+    	    		Float delayFPS = (float) Math.round(1000 / delay); 	
     	    		pixel.interactiveMode();
 			        pixel.writeMode(delayFPS); 
 			        System.out.println("FPS for write mode for scrolling text is: " + delayFPS);
 			        
-			        x = 0;
+			       // x = 0;
+			        x = KIND.width * 2;
 			        
 			        System.out.println("x: " + x);
 			        System.out.println("resetX is: " + resetX);
+			        
 			        new writeScrollingText().execute(); //we'll do this background
 			        
     	    	
@@ -258,11 +311,14 @@ public class ScrollingTextPanel extends SingleThreadedPixelPanel
 	{
 	    public void actionPerformed(ActionEvent e) 
 	    {
-			Color color = colorChooser.showDialog(ScrollingTextPanel.this, "Select the text color.", Color.yellow);
+	    	//check if the timer is not running and if not, start it and then put back into interactive mode
+	    	 CheckAndStartTimer();
+	    	
+	    	Color color = colorChooser.showDialog(ScrollingTextPanel.this, "Select the text color.", Color.yellow);
 			
 			//now let's store into preferences
 	    	putColor(prefs, "prefTextColor", color);
-			
+	    	prefs.put("prefSavedText", getText());
 			colorPanel.setBackground(color);
 		    }
 			});	
@@ -298,7 +354,77 @@ public class ScrollingTextPanel extends SingleThreadedPixelPanel
 			scrollSpeedSlider = new JSlider(1, 10);
 			JPanel speedPanel = new JPanel();
 			speedPanel.add(scrollSpeedSlider);
-			speedPanel.setBorder( BorderFactory.createTitledBorder("Scroll Speed") );
+			speedPanel.setBorder( BorderFactory.createTitledBorder("Scroll Speed"));
+			
+			JRadioButton singleSpeedRadio = new JRadioButton("1X");
+			singleSpeedRadio.setMnemonic(KeyEvent.VK_B);
+			singleSpeedRadio.addActionListener(new ActionListener(){
+		        public void actionPerformed(ActionEvent e) {
+		        	CheckAndStartTimer();
+		        	scrollingKeyFrames = 1;
+		        	prefs.putInt("prefRadioSpeedButton", 1);
+		        	prefs.put("prefSavedText", getText());
+		        }
+		    });
+			
+			
+			JRadioButton doubleSpeedRadio = new JRadioButton("2X");
+			doubleSpeedRadio.setMnemonic(KeyEvent.VK_B);
+			doubleSpeedRadio.addActionListener(new ActionListener(){
+		        public void actionPerformed(ActionEvent e) {
+		        	CheckAndStartTimer();
+		        	scrollingKeyFrames = 2;
+		        	prefs.putInt("prefRadioSpeedButton", 2);
+		        	prefs.put("prefSavedText", getText());
+		        }
+		    });
+
+			JRadioButton threeSpeedRadio = new JRadioButton("3X");
+			threeSpeedRadio.setMnemonic(KeyEvent.VK_B);
+			threeSpeedRadio.addActionListener(new ActionListener(){
+		        public void actionPerformed(ActionEvent e) {
+		        	CheckAndStartTimer();
+		        	scrollingKeyFrames = 3;
+		        	prefs.putInt("prefRadioSpeedButton", 3);
+		        	prefs.put("prefSavedText", getText());
+		        }
+		    });
+
+			JRadioButton fourSpeedRadio = new JRadioButton("4X");
+			fourSpeedRadio.setMnemonic(KeyEvent.VK_B);
+			fourSpeedRadio.addActionListener(new ActionListener(){
+		        public void actionPerformed(ActionEvent e) {
+		        	CheckAndStartTimer();
+		        	scrollingKeyFrames = 4;
+		        	prefs.putInt("prefRadioSpeedButton", 4);
+		        	prefs.put("prefSavedText", getText());
+		        }
+		    });
+
+		    //Group the radio buttons.
+		    ButtonGroup RadioButtonGroup = new ButtonGroup();
+		    RadioButtonGroup.add(singleSpeedRadio);
+		    RadioButtonGroup.add(doubleSpeedRadio);
+		    RadioButtonGroup.add(threeSpeedRadio);
+		    RadioButtonGroup.add(fourSpeedRadio);
+		    
+		    switch (prefRadioSpeedButton) {
+            case 1:  singleSpeedRadio.setSelected(true);
+                     break;
+            case 2:  doubleSpeedRadio.setSelected(true);
+                     break;
+            case 3:  threeSpeedRadio.setSelected(true);
+                     break;
+            case 4:  fourSpeedRadio.setSelected(true);
+                     break;
+            default: singleSpeedRadio.setSelected(true);
+                     break;
+		    }
+			
+		    speedPanel.add(singleSpeedRadio);
+			speedPanel.add(doubleSpeedRadio);
+			speedPanel.add(threeSpeedRadio);
+			speedPanel.add(fourSpeedRadio);
 			speedPanel.add(writeButton);
 		        
 		    JPanel propertiesPanel = new JPanel( new GridLayout(4,1, 10,10) );
@@ -312,7 +438,6 @@ public class ScrollingTextPanel extends SingleThreadedPixelPanel
     }
     
     class writeScrollingText extends SwingWorker<Boolean, Integer> {
-    	//SwingWorker<Boolean, Integer> writePIXEL = new SwingWorker<Boolean, Integer>() {
     		   @Override
     		   protected Boolean doInBackground() throws Exception {
     			   
@@ -379,8 +504,8 @@ public class ScrollingTextPanel extends SingleThreadedPixelPanel
 		                            
 		                messageWidth = fm.stringWidth(message);            
 		                resetX = 0 - messageWidth;
-		                x--;
-		                publish(Math.abs(x));
+		                x = x - scrollingKeyFrames;
+		                publish(Math.abs(x)); //publish the progress of how many frames written to window
 	    	    } 
     			   
     		
@@ -395,12 +520,10 @@ public class ScrollingTextPanel extends SingleThreadedPixelPanel
     		     // Retrieve the return value of doInBackground.
     		     status = get();
     		     //we are done so we can now set PIXEL to local playback mode
-    		     
     		 	 pixel.playLocalMode(); //now tell PIXEL to play locally
     			 System.out.println("PIXEL FOUND: Click to stream or double click to write");
     			 String message = "PIXEL FOUND: Click to stream or double click to write";
-    		     //PixelApp.statusLabel.setText(message);  
-    		    // statusLabel.setText("Completed with status: " + status);
+    		     PixelApp.statusLabel.setText(message);  
     		    } catch (InterruptedException e) {
     		     // This is thrown if the thread's interrupted.
     		    } catch (ExecutionException e) {
@@ -415,9 +538,9 @@ public class ScrollingTextPanel extends SingleThreadedPixelPanel
     		    // Here we receive the values that we publish().
     		    // They may come grouped in chunks.
     		    int mostRecentValue = chunks.get(chunks.size()-1);
-    		    System.out.println("DO NOT INTERRUPT: Writing frame " + Integer.toString(mostRecentValue) + " of " + Math.abs(resetX));
+    		    //System.out.println("DO NOT INTERRUPT: Writing frame " + Integer.toString(mostRecentValue) + " of " + Math.abs(resetX));
     		    String message = "DO NOT INTERRUPT: Writing frame " + Integer.toString(mostRecentValue) + " of " + Math.abs(resetX);
-    	       // PixelApp.statusLabel.setText(message);  
+    	        PixelApp.statusLabel.setText(message);  
     		   }
     		  };
     
@@ -450,17 +573,31 @@ public class ScrollingTextPanel extends SingleThreadedPixelPanel
     private class fontSizeChanged implements ChangeListener{
     	  public void stateChanged(ChangeEvent ce){
     	  //fontSize = (fontSizeBase * KIND.width/32) + fontSizeSlider.getValue();
+    	  CheckAndStartTimer();
+		  
     	  prefs.putInt("prefFontSize", fontSizeSlider.getValue());
+    	  prefs.put("prefSavedText", getText());
     	  }
     }
     
     private class textVerticalPositionChanged implements ChangeListener{
 	  	  public void stateChanged(ChangeEvent ce){
+	  		
+	  	  CheckAndStartTimer();
+	  	  
 	  	  yOffset = textVerticalSlider.getValue();   
 	  	  prefs.putInt("prefFontYOffset", textVerticalSlider.getValue());
+	  	  prefs.put("prefSavedText", getText()); //dont' really want to put the text save in the timer loop as it's too frequent so sticking in these areas
 	  	  }
   }
     
+    
+    private void CheckAndStartTimer() {
+    	if (pixel != null && !timer.isRunning()) {
+	  		  pixel.interactiveMode(); //put into interactive mode as could have been stuck in local mode after a write
+	  		  timer.start();
+	  	  }
+    }
     
     
     private void stopExistingTimer()
@@ -587,8 +724,8 @@ public class ScrollingTextPanel extends SingleThreadedPixelPanel
             }
             else
             {
-                x--;
-                //x = x - scrollingKeyFrames;  add this later to skip frames to speed up as a preference
+                //x--;
+                x = x - scrollingKeyFrames;  
             }
          } 
     }

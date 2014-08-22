@@ -49,7 +49,8 @@
       <artifactId>purejavacomm</artifactId>
       <version>0.0.21</version>
    </dependency>
- 
+   
+    
    
     <dependency>
 	    <groupId>org.imgscalr</groupId>

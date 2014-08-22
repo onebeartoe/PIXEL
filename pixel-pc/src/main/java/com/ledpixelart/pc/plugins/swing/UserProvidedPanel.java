@@ -449,8 +449,8 @@ imageListPath = "/animations.text";
 				     //we are done so we can now set PIXEL to local playback mode
 				     
 				 	 PixelApp.pixel.playLocalMode(); //now tell PIXEL to play locally
-					 System.out.println("PIXEL CONNECTED: Click to stream or double click to write");
-					 String message = "PIXEL CONNECTED: Click to stream or double click to write";
+					 System.out.println("PIXEL FOUND: Click to stream or double click to write");
+					 String message = "PIXEL FOUND: Click to stream or double click to write";
 				     PixelApp.statusLabel.setText(message);  
 				    // statusLabel.setText("Completed with status: " + status);
 				    } catch (InterruptedException e) {

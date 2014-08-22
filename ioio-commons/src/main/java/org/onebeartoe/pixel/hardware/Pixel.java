@@ -31,11 +31,14 @@ import java.io.RandomAccessFile;
 import java.io.StringReader;
 import java.net.URL;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Properties;
+import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.swing.SwingUtilities;
+import javax.swing.SwingWorker;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
@@ -491,99 +494,6 @@ public boolean GIFNeedsDecoding(String decodedDir, String gifName, int currentRe
 		   return (selectedFileDelay);
 	}
     
-    public void copyJARGif(String jarGIFName, String GIFLocalOutputPath) { //NOT USED
-    	//InputStream stream = ExecutingClass.class.getResourceAsStream("/the/path/to/the/resource/located/INSIDE/the/jar/fileExample.pdf");//note that each / is a directory down in the "jar tree" been the jar the root of the tree"
-    	//InputStream stream = Pixel.class.getResourceAsStream("animations/" + jarGIFName); //TO DO maybe later we'll change this if we use pngs instead of gifs on the image tile
-    	InputStream stream = getClass().getClassLoader().getResourceAsStream("animations/" + jarGIFName);
-    	System.out.println("JAR Gif Path ... " + "animations/" + jarGIFName);
-    	
-    	URL inputUrl = getClass().getResource("animations/" + jarGIFName);
-    	
-    	 File outputDir = new File(GIFLocalOutputPath + jarGIFName);
-	        
-	        
-	       if(!outputDir.exists()) outputDir.mkdirs();
-	       
-      //   {
-	        	//outputDir.mkdirs();
-        // }
-    	
-    	//File dest = new File("/path/to/destination/file");
-    	try {
-    		System.out.println("Copying GIF file to... " + GIFLocalOutputPath + jarGIFName);
-    		FileUtils.copyURLToFile(inputUrl, outputDir);
-		} catch (IOException e2) {
-			// TODO Auto-generated catch block
-			e2.printStackTrace();
-		}
-    	
-    	
-    	
-   /* 	
-    	
-    	if (stream == null) {
-    		System.out.println("Could not find the animation in the JAR, please check this");
-        }
-    	else {
-	        OutputStream resStreamOut = null;
-	        int readBytes;
-	        byte[] buffer = new byte[4096];
-	        
-	        File outputDir = new File(GIFLocalOutputPath + jarGIFName);
-	        System.out.println("Copying GIF file to... " + GIFLocalOutputPath + jarGIFName);
-	        
-	        if(outputDir.exists() == false)
-            {
-	        	outputDir.mkdirs();
-            }
-	        
-	       // if (!outputDir.exists()) outputDir.mkdir(); //make the dir if it's not there
-	        
-	       // decodedDirPathExternal = currentDir + "/decoded" ;   //  ex. c:\animations\decoded
-   		    
-	   		// File decodeddir = new File(decodedDirPathExternal); //this could be gif, gif64, or usergif
-			    
-			
-		   			try {
-					
-						appendWrite(BitmapBytes, decodedDirPathExternal + "/" + gifName + ".rgb565"); //this writes one big file instead of individual ones
-						
-						
-					} catch (IOException e1) {
-						// TODO Auto-generated catch block
-						//Log.e("PixelAnimate", "Had a problem writing the original unified animation rgb565 file");
-						e1.printStackTrace();
-					}
-		  
-        
-    // } //end for, we are done wit
-	        
-	        try {
-	           // resStreamOut = new FileOutputStream(new File(pathToWhereIWantMyFile+"/Name of my file.pdf"));
-	            resStreamOut = new FileOutputStream(new File(GIFLocalOutputPath + jarGIFName));
-	            while ((readBytes = stream.read(buffer)) > 0) {
-	                resStreamOut.write(buffer, 0, readBytes);
-	            }
-	        } catch (IOException e1) {
-	            // TODO Auto-generated catch block
-	            e1.printStackTrace();
-	        } finally {
-	            try {
-					stream.close();
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-	            try {
-					resStreamOut.close();
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-	        }
-    	}*/
-    }
-    
     public boolean GIFRGB565Exists(String decodedDir, String selectedFileName) {
     	
     	System.out.println("selected file name: " + selectedFileName);
@@ -613,9 +523,6 @@ public boolean GIFNeedsDecoding(String decodedDir, String gifName, int currentRe
     	if (filetxt.exists()) return true;
     	else return false;
     }
- 
-
-    
     
     public void SendPixelDecodedFrame(String decodedDir, String gifName, int x, int selectedFileTotalFrames, int selectedFileResolution, int frameWidth, int frameHeight) {
 		 
@@ -624,6 +531,7 @@ public boolean GIFNeedsDecoding(String decodedDir, String gifName, int currentRe
 		
 		gifName = FilenameUtils.removeExtension(gifName); //with no extension
     	String gifNamePath = decodedDir + gifName + ".rgb565";  //  ex. c:\animations\decoded\tree.rgb565
+    	String gifname2 = gifName;
     
     	
     	File file = new File(gifNamePath);
@@ -911,10 +819,9 @@ public boolean GIFNeedsDecoding(String decodedDir, String gifName, int currentRe
 		else {
 			System.out.println("ERROR  Could not find file " + gifFilePath);
 		}
-			
 	} 
 	
-public void decodeGIFJar(String decodedDir, String gifSourcePath, String gifName, int currentResolution, int pixelMatrix_width, int pixelMatrix_height) {  //pass the matrix type
+public void decodeGIFJar(final String decodedDir, String gifSourcePath, String gifName, int currentResolution, final int pixelMatrix_width, final int pixelMatrix_height) {  //pass the matrix type
 		
 	//BitmapBytes = new byte[pixelMatrix_width * pixelMatrix_height * 2]; //512 * 2 = 1024 or 1024 * 2 = 2048
 	//frame_ = new short[pixelMatrix_width * pixelMatrix_height];	
@@ -923,11 +830,12 @@ public void decodeGIFJar(String decodedDir, String gifSourcePath, String gifName
 	    //we'll need to know the resolution of the currently selected matrix type: 16x32, 32x32, 32x64, or 64x64
 		//and then we will receive the gif accordingly as we decode
 		//we also need to get the original width and height of the gif which is easily done from the gif decoder class
-		gifName = FilenameUtils.removeExtension(gifName); //with no extension
+	//String str3 = new String(str1); 
+	    
+		 gifName = FilenameUtils.removeExtension(gifName); //with no extension
 		//String gifNamePath = currentDir + "/" + gifName + ".gif";  //   ex. c:\animation\tree.gif
 
 	    InputStream GIFStream = null; 
-	    //GIFStream = getClass().getClassLoader().getResourceAsStream("animations/" + gifName + ".gif");
 	   // GIFStream = getClass().getClassLoader().getResourceAsStream("animations/gifsource/" + gifName + ".gif"); //since we changed the thumbnails to pngs instead of gifs for performance reasons
 	      GIFStream = getClass().getClassLoader().getResourceAsStream(gifSourcePath + gifName + ".gif"); //since we changed the thumbnails to pngs instead of gifs for performance reasons
 	    
@@ -947,113 +855,112 @@ public void decodeGIFJar(String decodedDir, String gifSourcePath, String gifName
 			  if (fileTXT.exists()) file565.delete();
 			  //*******************************************************************************************
 			
-			  GifDecoder d = new GifDecoder();
-	          //d.read(gifNamePath);
-	          //d.read(getClass().getClassLoader().getResourceAsStream("animations/" + gifName + ".gif")); //read the source gif from the jar
+			  final GifDecoder d = new GifDecoder();
 	          d.read(getClass().getClassLoader().getResourceAsStream(gifSourcePath + gifName + ".gif"));
-	          int numFrames = d.getFrameCount(); 
+	          final int numFrames = d.getFrameCount(); 
 	          int frameDelay = d.getDelay(1); //even though gifs have a frame delay for each frmae, pixel doesn't support this so we'll take the frame rate of the second frame and use this for the whole animation. We take the second frame because often times the frame delay of the first frame in a gif is much longer than the rest of the frames
 	          
 	          Dimension frameSize = d.getFrameSize();
-	          int frameWidth = frameSize.width;
-	          int frameHeight = frameSize.height;
+	          final int frameWidth = frameSize.width;
+	          final int frameHeight = frameSize.height;
 	         
 	          System.out.println("frame count: " + numFrames);
 	          System.out.println("frame delay: " + frameDelay);
 	          System.out.println("frame height: " + frameHeight);
 	          System.out.println("frame width: " + frameWidth);
-	          	          
-	          for (int i = 0; i < numFrames; i++) { //loop through all the frames
-	             BufferedImage rotatedFrame = d.getFrame(i);  
-	             //in case we want to add an option to rotate the image, we could use this code later, a user requested this for the 16x32 matrix
-	            // rotatedFrame = Scalr.rotate(rotatedFrame, Scalr.Rotation.CW_90, null); //fixed bug, no longer need to rotate the image
-	            // rotatedFrame = Scalr.rotate(rotatedFrame, Scalr.Rotation.FLIP_HORZ, null); //fixed bug, no longer need to flip the image
-	             
-	             // These worked too but using the scalr library gives quicker results
-	             //rotatedFrame = getFlippedImage(rotatedFrame); //quick hack, for some reason the code below i think is flipping the image so we have to flip it here as a hack
-	             //rotatedFrame = rotate90ToLeft(rotatedFrame);  //quick hack, same as above, have to rotate
-	              
-	    		 if (frameWidth != pixelMatrix_width || frameHeight != pixelMatrix_height) {
-	    			 System.out.println("Resizing and encoding " + gifName + ".gif" + " frame " + i);
-	    			// rotatedFrame = Scalr.resize(rotatedFrame, pixelMatrix_width, pixelMatrix_height); //resize it, need to make sure we do not anti-alias
-	    			 
-	    			 try {
-						rotatedFrame = getScaledImage(rotatedFrame, pixelMatrix_width,pixelMatrix_height);
-					} catch (IOException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
-	    			 
-	    			 
-	    		 }
-	    		 else {
-	    			 System.out.println("Encoding " + gifName + ".gif" + " frame " + i);
-	    		 }
-	            
-	             //this code here to convert a java image to rgb565 taken from stack overflow http://stackoverflow.com/questions/8319770/java-image-conversion-to-rgb565/
-	    		 BufferedImage sendImg  = new BufferedImage(pixelMatrix_width, pixelMatrix_height, BufferedImage.TYPE_USHORT_565_RGB);
-	             sendImg.getGraphics().drawImage(rotatedFrame, 0, 0, pixelMatrix_width, pixelMatrix_height, null);    
+	          
+	          
+    	    	 for (int i = 0; i < numFrames; i++) { //loop through all the frames
+    	             BufferedImage rotatedFrame = d.getFrame(i);  
+    	             //in case we want to add an option to rotate the image, we could use this code later, a user requested this for the 16x32 matrix
+    	            // rotatedFrame = Scalr.rotate(rotatedFrame, Scalr.Rotation.CW_90, null); //fixed bug, no longer need to rotate the image
+    	            // rotatedFrame = Scalr.rotate(rotatedFrame, Scalr.Rotation.FLIP_HORZ, null); //fixed bug, no longer need to flip the image
+    	             
+    	             // These worked too but using the scalr library gives quicker results
+    	             //rotatedFrame = getFlippedImage(rotatedFrame); //quick hack, for some reason the code below i think is flipping the image so we have to flip it here as a hack
+    	             //rotatedFrame = rotate90ToLeft(rotatedFrame);  //quick hack, same as above, have to rotate
+    	              
+    	    		 if (frameWidth != pixelMatrix_width || frameHeight != pixelMatrix_height) {
+    	    			 System.out.println("Resizing and encoding " + gifName + ".gif" + " frame " + i);
+    	    			// rotatedFrame = Scalr.resize(rotatedFrame, pixelMatrix_width, pixelMatrix_height); //resize it, need to make sure we do not anti-alias
+    	    			 
+    	    			 try {
+    						rotatedFrame = getScaledImage(rotatedFrame, pixelMatrix_width,pixelMatrix_height);
+    					} catch (IOException e) {
+    						// TODO Auto-generated catch block
+    						e.printStackTrace();
+    					}
+    	    			 
+    	    			 
+    	    		 }
+    	    		 else {
+    	    			 System.out.println("DO NOT INTERRUPT: Encoding " + gifName + ".gif" + " frame " + i);
+    	    		 }
+    	            
+    	             //this code here to convert a java image to rgb565 taken from stack overflow http://stackoverflow.com/questions/8319770/java-image-conversion-to-rgb565/
+    	    		 BufferedImage sendImg  = new BufferedImage(pixelMatrix_width, pixelMatrix_height, BufferedImage.TYPE_USHORT_565_RGB);
+    	             sendImg.getGraphics().drawImage(rotatedFrame, 0, 0, pixelMatrix_width, pixelMatrix_height, null);    
 
-	             int numByte=0;
-	             BitmapBytes = new byte[pixelMatrix_width*pixelMatrix_height*2];
+    	             int numByte=0;
+    	             BitmapBytes = new byte[pixelMatrix_width*pixelMatrix_height*2];
 
-	                int x=0;
-	                int y=0;
-	                int len = BitmapBytes.length;
+    	                int x=0;
+    	                int y=0;
+    	                int len = BitmapBytes.length;
 
-	                for (x=0 ; x < pixelMatrix_height; x++) {
-	                    for (y=0; y < pixelMatrix_width; y++) {
+    	                for (x=0 ; x < pixelMatrix_height; x++) {
+    	                    for (y=0; y < pixelMatrix_width; y++) {
 
-	                        Color c = new Color(sendImg.getRGB(y, x));  // x and y were switched in the original code which was causing the image to rotate by 90 degrees and was flipped horizontally, switching x and y fixes this bug
-	                        int red = c.getRed();
-	                        int green = c.getGreen();
-	                        int blue = c.getBlue();
+    	                        Color c = new Color(sendImg.getRGB(y, x));  // x and y were switched in the original code which was causing the image to rotate by 90 degrees and was flipped horizontally, switching x and y fixes this bug
+    	                        int red = c.getRed();
+    	                        int green = c.getGreen();
+    	                        int blue = c.getBlue();
 
-	                        //RGB565
-	                        red = red >> 3;
-	                        green = green >> 2;
-	                        blue = blue >> 3;    
-     			  		
-	                        //A pixel is represented by a 4-byte (32 bit) integer, like so:
-	                        //00000000 00000000 00000000 11111111
-	                        //^ Alpha  ^Red     ^Green   ^Blue
-	                        //Converting to RGB565
+    	                        //RGB565
+    	                        red = red >> 3;
+    	                        green = green >> 2;
+    	                        blue = blue >> 3;    
+         			  		
+    	                        //A pixel is represented by a 4-byte (32 bit) integer, like so:
+    	                        //00000000 00000000 00000000 11111111
+    	                        //^ Alpha  ^Red     ^Green   ^Blue
+    	                        //Converting to RGB565
 
-	                        short pixel_to_send = 0;
-	                        int pixel_to_send_int = 0;
-	                        pixel_to_send_int = (red << 11) | (green << 5) | (blue);
-	                        pixel_to_send = (short) pixel_to_send_int;
-	                        //dividing into bytes
-	                        byte byteH=(byte)((pixel_to_send >> 8) & 0x0FF);
-	                        byte byteL=(byte)(pixel_to_send & 0x0FF);
+    	                        short pixel_to_send = 0;
+    	                        int pixel_to_send_int = 0;
+    	                        pixel_to_send_int = (red << 11) | (green << 5) | (blue);
+    	                        pixel_to_send = (short) pixel_to_send_int;
+    	                        //dividing into bytes
+    	                        byte byteH=(byte)((pixel_to_send >> 8) & 0x0FF);
+    	                        byte byteL=(byte)(pixel_to_send & 0x0FF);
 
-	                        //Writing it to array - High-byte is the first, big endian byte order
-	                        BitmapBytes[numByte]=byteL;
-	                        BitmapBytes[numByte+1]=byteH;
-	                        
-	                        numByte+=2;
-	                    }
-	                }
-			   		    
-			   		 File decodeddir = new File(decodedDir); //this could be gif, gif64, or usergif
-					    if(decodeddir.exists() == false)
-			             {
-					    	decodeddir.mkdirs();
-			             }
-					
-				   			try {
-							
-								appendWrite(BitmapBytes, decodedDir + gifName + ".rgb565"); //one big file to user home/pixel/animations/decoded/gifname.gif
-								
-								
-							} catch (IOException e1) {
-								// TODO Auto-generated catch block
-								//Log.e("PixelAnimate", "Had a problem writing the original unified animation rgb565 file");
-								e1.printStackTrace();
-							}
-				  
-	             
-	          } //end for, we are done with the loop so let's now write the file
+    	                        //Writing it to array - High-byte is the first, big endian byte order
+    	                        BitmapBytes[numByte]=byteL;
+    	                        BitmapBytes[numByte+1]=byteH;
+    	                        
+    	                        numByte+=2;
+    	                    }
+    	                }
+    			   		    
+    			   		 File decodeddir = new File(decodedDir); //this could be gif, gif64, or usergif
+    					    if(decodeddir.exists() == false)
+    			             {
+    					    	decodeddir.mkdirs();
+    			             }
+    					
+    				   			try {
+    							
+    								appendWrite(BitmapBytes, decodedDir + gifName + ".rgb565"); //one big file to user home/pixel/animations/decoded/gifname.gif
+    								
+    								
+    							} catch (IOException e1) {
+    								// TODO Auto-generated catch block
+    								//Log.e("PixelAnimate", "Had a problem writing the original unified animation rgb565 file");
+    								e1.printStackTrace();
+    							}
+    				  
+    	             
+    	          } //end for, we are done with the loop so let's now write the file
 	          
 	           //********** now let's write the meta-data text file
 		   		
@@ -1081,8 +988,10 @@ public void decodeGIFJar(String decodedDir, String gifSourcePath, String gifName
 		else {
 			System.out.println("ERROR  Could not find " + gifSourcePath + gifName + ".gif in the JAR file");
 		}
-			
 	}  
+
+
+
           
   public static void appendWrite(byte[] data, String filename) throws IOException {
 	 FileOutputStream fos = new FileOutputStream(filename, true);  //true means append, false is over-write
