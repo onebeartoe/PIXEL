@@ -38,6 +38,7 @@ import java.util.Collection;
 import java.util.Enumeration;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.prefs.Preferences;
 
 import purejavacomm.CommPort;
 import purejavacomm.CommPortIdentifier;
@@ -46,6 +47,8 @@ import purejavacomm.PortInUseException;
 public class SerialPortIOIOConnectionBootstrap implements
 		IOIOConnectionBootstrap {
 	private static final String TAG = "SerialPortIOIOConnectionBootstrap";
+	private static String pixelPrefNode = "/com/ledpixelart/pc";
+	private static Preferences prefs;
 
 	@Override
 	public void getFactories(Collection<IOIOConnectionFactory> result) {
@@ -60,6 +63,7 @@ public class SerialPortIOIOConnectionBootstrap implements
 			ports = getAllOpenablePorts();
 		}
 		for (final String port : ports) {
+		    
 			Log.d(TAG, "Adding serial port " + port);
 			result.add(new IOIOConnectionFactory() {
 				@Override
@@ -102,6 +106,11 @@ public class SerialPortIOIOConnectionBootstrap implements
 
 	static Collection<String> getExplicitPorts() {
 		String property = System.getProperty("ioio.SerialPorts");
+		prefs = Preferences.userRoot().node(pixelPrefNode); //let's get the port from preferences
+		property = prefs.get("prefSavedPort", "");
+		if (property.equals("")) 
+			property = null;
+		//property = "/dev/tty.usbmodem1411";
 		if (property == null) {
 			return null;
 		}

@@ -313,7 +313,8 @@ public class PixelApp extends IOIOSwingApp
 	startSearchTimer();
 		
 	frame.setVisible(true);
-	frame.setExtendedState(frame.getExtendedState() | JFrame.MAXIMIZED_BOTH); //maximize the window
+	//frame.setExtendedState(frame.getExtendedState() | JFrame.MAXIMIZED_BOTH); //maximize the window
+	//frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
 	
 	//let's show the user a first time instructions pop up, only shows once as we'll write a preference
 	if (firstTimeUser) {

@@ -22,15 +22,15 @@ import javax.swing.JPanel;
 public class AboutPanel extends JPanel
 {
     
-    private final String developmentUrl = "http://ledpixelart.com/";
+    private final String developmentUrl = "http://www.onebeartoe.com";
     private final String pixelURL = "http://ledpixelart.com/";
     
     private JLabel developmentLabel;
     
     public AboutPanel()
     {
-	String version = "3.0.0";
-	String text = "PIXEL PC Version " + version;
+	String version = "3.1.0";
+	String text = "PIXEL: LED ART " + version;
 	String html = "<html><body><h2>" + text + "</h2></body></html>";
 	JLabel productLabel = new JLabel(html, JLabel.CENTER);
 	
