@@ -32,7 +32,7 @@
     <module>pixel-plugin-tests</module>
 -->    
     <module>pixel-pc-twitter</module>
-    <module>pixel-plugins</module>
+  <!--  <module>pixel-plugins</module> -->
   </modules>
 
  <build>

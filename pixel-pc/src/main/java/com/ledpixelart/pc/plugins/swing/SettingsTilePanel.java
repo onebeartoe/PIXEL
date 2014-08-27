@@ -256,9 +256,10 @@ public class SettingsTilePanel extends PixelTilePanel
 		    }*/
 		    
 		    if (!pixelPortText.getText().contains("dev") && !pixelPortText.getText().contains("DEV") //do we need dev if we have tty? TO DO test that
-		    		&& !pixelPortText.getText().contains("COM") && !pixelPortText.getText().contains("com")
+		    		&& !pixelPortText.getText().contains("COM") && !pixelPortText.getText().contains("com") 
 		    		&& !pixelPortText.getText().contains("tty") && !pixelPortText.getText().contains("TTY") 
-		    		&& !pixelPortText.getText().contains("ioio") && !pixelPortText.getText().contains("IOIO")) {
+		    		&& !pixelPortText.getText().contains("ioio") && !pixelPortText.getText().contains("IOIO")
+		    		&& !pixelPortText.getText().equals("")) {
 		    	combinedText = "PIXEL PORT FORMAT IS NOT VALID, SEE VALID FORMATS BELOW\n\n"
 		    			+  serialPortInstructions + "\n";
 		    	setMainStatus(combinedText);

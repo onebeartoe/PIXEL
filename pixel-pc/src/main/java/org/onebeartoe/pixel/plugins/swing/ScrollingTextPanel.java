@@ -113,11 +113,13 @@ public class ScrollingTextPanel extends SingleThreadedPixelPanel
     
     private static String prefSavedText;
     
+    private static Integer prefSpeedScrollPosition_;
+    
     private static Integer prefRadioSpeedButton;
     
     private boolean writeMode = false;
     
-    private int scrollingKeyFrames = 1;
+    private int scrollingKeyFrames = 3;
     
     public ScrollingTextPanel(final RgbLedMatrix.Matrix KIND)
     {
@@ -130,7 +132,7 @@ public class ScrollingTextPanel extends SingleThreadedPixelPanel
         x = 0;
 	
         colorChooser = new JColorChooser();
-        
+       
         prefRadioSpeedButton = prefs.getInt("prefRadioSpeedButton", 1);  //preferences for the speed accelerator radio buttons
         
         prefSavedText = prefs.get("prefSavedText", "Type Something Here");
@@ -209,13 +211,15 @@ public class ScrollingTextPanel extends SingleThreadedPixelPanel
     	    		writeMode = true;
     	    		prefs.put("prefSavedText", getText());
     	    	
-    	    		Float delayFPS = (float) Math.round(1000 / delay); 	
+    	    		//Float delayFPS = (float) Math.round(1000 / delay); 	
     	    		pixel.interactiveMode();
-			        pixel.writeMode(delayFPS); 
-			        System.out.println("FPS for write mode for scrolling text is: " + delayFPS);
+			        //pixel.writeMode(delayFPS); 
+			        pixel.writeMode(10); //10 fps or 100ms 
+			       // System.out.println("FPS for write mode for scrolling text is: " + delayFPS);
 			        
 			       // x = 0;
 			        x = KIND.width * 2;
+			        scrollingKeyFrames = scrollSpeedSlider.getValue();
 			        
 			        System.out.println("x: " + x);
 			        System.out.println("resetX is: " + resetX);
@@ -350,11 +354,25 @@ public class ScrollingTextPanel extends SingleThreadedPixelPanel
 			textVerticalSlider.setValue(yOffset); //from preferences
 			textVerticalSlider.addChangeListener(new textVerticalPositionChanged());
 			
+			  
+			prefSpeedScrollPosition_ = prefs.getInt("prefSpeedScrollPosition", 3);  
 			//scrollSpeedSlider = new JSlider(200, 709);
 			scrollSpeedSlider = new JSlider(1, 10);
 			JPanel speedPanel = new JPanel();
 			speedPanel.add(scrollSpeedSlider);
 			speedPanel.setBorder( BorderFactory.createTitledBorder("Scroll Speed"));
+			scrollSpeedSlider.setValue(prefSpeedScrollPosition_);
+			
+			scrollSpeedSlider.addChangeListener(new ChangeListener() {
+		        @Override
+		        public void stateChanged(ChangeEvent ce) {
+		            //System.out.println(((JSlider) ce.getSource()).getValue());
+		        	CheckAndStartTimer();
+		        	prefs.putInt("prefSpeedScrollPosition",scrollSpeedSlider.getValue());
+		        	//TO DO save prefs here
+		        }
+		    });
+			
 			
 			JRadioButton singleSpeedRadio = new JRadioButton("1X");
 			singleSpeedRadio.setMnemonic(KeyEvent.VK_B);
@@ -421,10 +439,10 @@ public class ScrollingTextPanel extends SingleThreadedPixelPanel
                      break;
 		    }
 			
-		    speedPanel.add(singleSpeedRadio);
-			speedPanel.add(doubleSpeedRadio);
-			speedPanel.add(threeSpeedRadio);
-			speedPanel.add(fourSpeedRadio);
+		    //speedPanel.add(singleSpeedRadio);
+			//speedPanel.add(doubleSpeedRadio);
+			//speedPanel.add(threeSpeedRadio);
+			//speedPanel.add(fourSpeedRadio);
 			speedPanel.add(writeButton);
 		        
 		    JPanel propertiesPanel = new JPanel( new GridLayout(4,1, 10,10) );
@@ -646,10 +664,14 @@ public class ScrollingTextPanel extends SingleThreadedPixelPanel
         {
 	    //as a hack, add if in write mode flag?
         	
-        delay = scrollSpeedSlider.getValue();	
-	    delay = 14 - delay;                            // 20 is the max slider, so 21 - 20 = 1 ms delay
+      //  delay = scrollSpeedSlider.getValue();	
+	  //  delay = 14 - delay;  
+        	// 20 is the max slider, so 21 - 20 = 1 ms delay
+        	
+        scrollingKeyFrames = scrollSpeedSlider.getValue();
 	    
-	    ScrollingTextPanel.this.timer.setDelay(delay);
+	    //ScrollingTextPanel.this.timer.setDelay(delay);
+	    ScrollingTextPanel.this.timer.setDelay(100); //we need to hard code this to 100 ms for bluetooth
 	    
 	    	int w = KIND.width * 2;
 	    	int h = KIND.height * 2;
