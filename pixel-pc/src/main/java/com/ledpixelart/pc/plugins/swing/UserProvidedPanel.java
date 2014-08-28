@@ -10,6 +10,7 @@ import ioio.lib.api.exception.ConnectionLostException;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
+import java.awt.Cursor;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
@@ -368,6 +369,11 @@ imageListPath = "/animations.text";
 						PixelApp.pixel.interactiveMode();
 						PixelApp.pixel.writeMode(GIFfps); //need to tell PIXEL the frames per second to use, how fast to play the animations
 						System.out.println("Now writing to PIXEL's SD card, the screen will go blank until writing has been completed..."); 
+						
+						Cursor hourglassCursor = new Cursor(Cursor.WAIT_CURSOR);
+						setCursor(hourglassCursor);
+						PixelApp.frame.setEnabled(false);
+						
 						new writePIXEL().execute(); 
 						
 						/*  int y=0;
@@ -452,6 +458,12 @@ imageListPath = "/animations.text";
 					 System.out.println("PIXEL FOUND: Click to stream or double click to write");
 					 String message = "PIXEL FOUND: Click to stream or double click to write";
 				     PixelApp.statusLabel.setText(message);  
+				     
+				     Cursor normalCursor = new Cursor(Cursor.DEFAULT_CURSOR);
+				     setCursor(normalCursor);
+				     
+				     PixelApp.frame.setEnabled(true);
+				     
 				    // statusLabel.setText("Completed with status: " + status);
 				    } catch (InterruptedException e) {
 				     // This is thrown if the thread's interrupted.

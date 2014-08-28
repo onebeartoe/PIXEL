@@ -88,7 +88,7 @@ public class SettingsTilePanel extends PixelTilePanel
 
     private static String pixelPrefNode = "/com/ledpixelart/pc";
     
-    private JTextField pixelPortText;
+    public static JTextField pixelPortText;
     
     private JButton saveButton;
     
@@ -102,9 +102,9 @@ public class SettingsTilePanel extends PixelTilePanel
 
    
     private static String serialPortInstructions = "If on Mac OSX or LINUX/Raspberry Pi (USB connections only are supported), you'll need to enter the port for PIXEL in the field above" + "\n"
-    		+ "For Mac OSX: if PIXEL is still not found after entering the port, turn PIXEL on and off during the 'Searching for PIXEL' message. PIXEL should then be found." + "\n"
-    		+ "Note: the port will change if you plug PIXEL into a different USB port on your computer and you'll need to re-enter the new port for PIXEL" + "\n"
-    		+ "If on Windows, you do not need to enter a port for PIXEL and can leave blank unless your PC is unable to find PIXEL" + "\n\n"
+    		+ "For Mac OSX: the port will be auto-detected but you can also manually change. if PIXEL is still not found after entering the port, turn PIXEL on and off during the 'Searching for PIXEL' message. PIXEL then should be found." + "\n"
+    		+ "IMPORTANT: the port will change if you plug PIXEL into a different USB port on your computer and you'll need to re-enter the new port for PIXEL" + "\n"
+    		+ "If on Windows, you DO NOT need to enter a port for PIXEL and can leave blank unless your PC is unable to find PIXEL" + "\n\n"
     		+ "How to find PIXEL's port:" + "\n"
 			+ "- Winddows: Open device manager and look for the COM port # next to the device called 'IOIO OTG', format will be COMXX. Ex. COM9 or COM14" + "\n" 
 			+ "- Mac OSX: Type < ls /dev/tty.usb* > from a command prompt, format will be /dev/tty.usbmodemXXXX. Ex. /dev/tty.usbmodem1411 or /dev/tty.usbmodem1421" + "\n" 
@@ -286,7 +286,7 @@ public class SettingsTilePanel extends PixelTilePanel
 			    ImageIcon imageIcon = new ImageIcon(resource);
 			    String message = "Please Restart";
 			    RestartPanel about = new RestartPanel();
-			    JOptionPane.showMessageDialog(frame, about, message, JOptionPane.INFORMATION_MESSAGE, imageIcon);
+			    JOptionPane.showMessageDialog(frame, about, message, JOptionPane.WARNING_MESSAGE, imageIcon);
 	    	}
 	    }
 	});

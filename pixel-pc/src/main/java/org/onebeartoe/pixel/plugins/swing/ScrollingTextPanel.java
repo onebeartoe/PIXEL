@@ -5,6 +5,7 @@ import ioio.lib.api.RgbLedMatrix;
 import ioio.lib.api.exception.ConnectionLostException;
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.FontMetrics;
@@ -224,81 +225,13 @@ public class ScrollingTextPanel extends SingleThreadedPixelPanel
 			        System.out.println("x: " + x);
 			        System.out.println("resetX is: " + resetX);
 			        
-			        new writeScrollingText().execute(); //we'll do this background
+			        Cursor hourglassCursor = new Cursor(Cursor.WAIT_CURSOR);
+			        setCursor(hourglassCursor);
 			        
-    	    	
-	    	    	/*while (x >= resetX) {
-	    	    	
-	    	    		System.out.println("Writing frame: " + Math.abs(x) + " of " + Math.abs(resetX));
-	    	    		
-	    	    		int w = KIND.width * 2;
-		    	    	int h = KIND.height * 2;
-		    	    
-		                BufferedImage img = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
-		                
-		                Color textColor = colorPanel.getBackground();
-		    	    
-		                Graphics2D g2d = img.createGraphics();
-		                g2d.setPaint(textColor);
-		                
-		                String fontFamily = fontFamilyChooser.getSelectedItem().toString();
-		                font = fonts.get(fontFamily);
-		                
-		               // if(font == null)
-		              //  {
-		               // font = new Font(fontFamily, Font.PLAIN, fontSize);  
-		                   font = new Font(fontFamily, Font.PLAIN, (fontSizeBase * KIND.width/32) + fontSizeSlider.getValue());
-		                   fonts.put(fontFamily, font);
-		              //  }            
-		                
-		                g2d.setFont(font);
-		                
-		                message = getText();
-		                
-		                fm = g2d.getFontMetrics();
-		                
-		                y = fm.getHeight() + yOffset;          
-		
-		                try 
-		                {
-		                    additionalBackgroundDrawing(g2d);
-		                } 
-		                catch (Exception ex) 
-		                {
-		                    Logger.getLogger(ScrollingTextPanel.class.getName()).log(Level.SEVERE, null, ex);
-		                }
-		                
-		                g2d.drawString(message, x, y);
-		                
-		                try 
-		                {
-		                    additionalForegroundDrawing(g2d);
-		                } 
-		                catch (Exception ex) 
-		                {
-		                    Logger.getLogger(ScrollingTextPanel.class.getName()).log(Level.SEVERE, null, ex);
-		                }
-		                
-		                g2d.dispose();
-		
-		                if (pixel != null)
-		                {
-		                    try 
-		                    {  
-		                        pixel.writeImagetoMatrix(img, KIND.width,KIND.height); //TO DO need to find out how to reference PixelApp class from here
-		                    } 
-		                    catch (ConnectionLostException ex) 
-		                    {
-		                        Logger.getLogger(ScrollingTextPanel.class.getName()).log(Level.SEVERE, null, ex);
-		                    }                
-		                }
-		                            
-		                messageWidth = fm.stringWidth(message);            
-		                resetX = 0 - messageWidth;
-		                x--;
-	    	    } */
-	    	    	
-	    	    //pixel.playLocalMode();
+			        PixelApp.frame.setEnabled(false); // we don't want the user clicking somewhere else during the write
+			        
+			        new writeScrollingText().execute(); //we'll do this background
+    	    
 	    	    writeMode = false;
     	    }
     	});	
@@ -306,7 +239,6 @@ public class ScrollingTextPanel extends SingleThreadedPixelPanel
 	colorPanel = new JPanel();
 	
 	Color colorPrefs = getColor(prefs, "prefTextColor", Color.GREEN);
-	//colorPanel.setBackground(Color.GREEN); //this is the default color, let's instead get it from prefs
 	colorPanel.setBackground(colorPrefs);
 	
 	
@@ -542,6 +474,12 @@ public class ScrollingTextPanel extends SingleThreadedPixelPanel
     			 System.out.println("PIXEL FOUND: Click to stream or double click to write");
     			 String message = "PIXEL FOUND: Click to stream or double click to write";
     		     PixelApp.statusLabel.setText(message);  
+    		     
+    		     Cursor normalCursor = new Cursor(Cursor.DEFAULT_CURSOR);
+    		     setCursor(normalCursor);
+    		     
+    		     PixelApp.frame.setEnabled(true);
+    		     
     		    } catch (InterruptedException e) {
     		     // This is thrown if the thread's interrupted.
     		    } catch (ExecutionException e) {

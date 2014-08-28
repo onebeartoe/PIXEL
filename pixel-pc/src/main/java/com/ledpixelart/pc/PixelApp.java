@@ -63,6 +63,7 @@ import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 import javax.swing.KeyStroke;
 import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
 import javax.swing.Timer;
 import javax.swing.UIManager;
 import javax.swing.border.BevelBorder;
@@ -149,7 +150,6 @@ public class PixelApp extends IOIOSwingApp
     private static String pixelPrefNode = "/com/ledpixelart/pc";
     
     private static boolean firstTimeUser = true;
-   
     
     public PixelApp()
     {
@@ -413,7 +413,7 @@ public class PixelApp extends IOIOSwingApp
    
 
     @Override
-    public IOIOLooper createIOIOLooper(String connectionType, Object extra) 
+    public IOIOLooper createIOIOLooper(String connectionType, final Object extra) 
     {
 	return new BaseIOIOLooper() 
 	{
@@ -422,8 +422,31 @@ public class PixelApp extends IOIOSwingApp
 	    @Override
 	    protected void setup() throws ConnectionLostException, InterruptedException
 	    {
-		
-	    	System.out.println("Found PIXEL, entering initialization routine...");
+	    	
+	    	System.out.println("Found PIXEL, entering initialization routine, detected port is..." + extra.toString());
+	    	
+	    	//*****If we are on a Mac, let's add in the port if the port value is blank
+	    	String osName = System.getProperty("os.name").toLowerCase();
+			boolean isMacOs = osName.startsWith("mac os x");
+			if (isMacOs) 
+			{
+				if (SettingsTilePanel.pixelPortText.getText().equals("")) {
+					
+					System.out.println("We're on a Mac and the port value is blank so let's auto-detect");
+					prefs.put("prefSavedPort", extra.toString()); //let's write the prefs for the port
+					SettingsTilePanel.pixelPortText.setText(extra.toString());
+					
+					//and now let's pop up a box telling the user what we did and to re-start the app
+					String path = "/images/";
+				    String iconPath = path + "aaagumball.png";
+				    URL resource = getClass().getResource(iconPath);
+				    ImageIcon imageIcon = new ImageIcon(resource);
+				    String message = "PIXEL Port Detected and Saved, Please Force Quit this Application Now and Restart";
+				    MacPixelPort about = new MacPixelPort();
+				    JOptionPane.showMessageDialog(frame, about, message, JOptionPane.INFORMATION_MESSAGE, imageIcon);
+				}
+			}
+			//*************************************************************************
 	    	
 	    	//**** let's get IOIO version info for the About Screen ****
   			pixelFirmware = ioio_.getImplVersion(v.APP_FIRMWARE_VER);
@@ -433,7 +456,6 @@ public class PixelApp extends IOIOSwingApp
   			//**********************************************************
 	    	
 	    	led_ = ioio_.openDigitalOutput(IOIO.LED_PIN, true);
-	    	
 	    	
 	    	PixelApp.this.ioiO = ioio_;
 				
@@ -482,7 +504,7 @@ public class PixelApp extends IOIOSwingApp
 	    @Override
 	    public void disconnected() 
 	    {
-		String message = "PIXEL was disconected";
+		String message = "PIXEL was Disconnected";
 		System.out.println(message);
 		statusLabel.setText(message);
 		pixelFound = false;
@@ -491,7 +513,7 @@ public class PixelApp extends IOIOSwingApp
 	    @Override
 	    public void incompatible() 
 	    {
-		String message = "Incompatible firmware detected";
+		String message = "Incompatible Firmware Detected";
 		System.out.println(message);
 		statusLabel.setText(message);
 	    }
@@ -863,7 +885,7 @@ public class PixelApp extends IOIOSwingApp
 
    
     
-    private class TabChangeListener implements ChangeListener
+    public class TabChangeListener implements ChangeListener
     {
 	public void stateChanged(ChangeEvent e) 
 	{
@@ -872,8 +894,6 @@ public class PixelApp extends IOIOSwingApp
 		panel.stopPixelActivity();
 		//System.out.println("built in panels: " + builtinPixelPanels);
 	    }
-	    
-	   
 
 	    // start the selected panel/tab's PIXEL activity
 	    Object o = e.getSource();

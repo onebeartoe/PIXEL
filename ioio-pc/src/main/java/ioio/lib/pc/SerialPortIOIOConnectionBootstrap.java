@@ -56,10 +56,10 @@ public class SerialPortIOIOConnectionBootstrap implements
 		if (ports == null) {
 			Log.w(TAG, "ioio.SerialPorts not defined.\n"
 					+ "Will attempt to enumerate all possible ports (slow) "
-					+ "and connect to a IOIO over each one.\n"
+					+ "and connect to PIXEL over each one.\n"
 					+ "To fix, add the -Dioio.SerialPorts=xyz argument to "
 					+ "the java command line, where xyz is a colon-separated "
-					+ "list of port identifiers, e.g. COM1:COM2.");
+					+ "list of port identifiers, e.g. COM1:COM2. for Windows or /dev/tty.usbmodem1411 on Mac OSX");
 			ports = getAllOpenablePorts();
 		}
 		for (final String port : ports) {
@@ -68,6 +68,7 @@ public class SerialPortIOIOConnectionBootstrap implements
 			result.add(new IOIOConnectionFactory() {
 				@Override
 				public String getType() {
+					//System.out.println("Found Final Port: " + port);
 					return SerialPortIOIOConnection.class.getCanonicalName();
 				}
 
@@ -89,18 +90,22 @@ public class SerialPortIOIOConnectionBootstrap implements
 		@SuppressWarnings("unchecked")
 		Enumeration<CommPortIdentifier> identifiers = CommPortIdentifier
 				.getPortIdentifiers();
+		
 		while (identifiers.hasMoreElements()) {
 			final CommPortIdentifier identifier = identifiers.nextElement();
 			if (identifier.getPortType() == CommPortIdentifier.PORT_SERIAL) {
 				if (checkIdentifier(identifier)) {
 					Log.d(TAG, "Adding serial port " + identifier.getName());
 					result.add(identifier.getName());
+			    	
 				} else {
 					Log.w(TAG, "Serial port " + identifier.getName()
 							+ " cannot be opened. Not adding.");
 				}
 			}
 		}
+		
+		
 		return result;
 	}
 
@@ -110,7 +115,7 @@ public class SerialPortIOIOConnectionBootstrap implements
 		property = prefs.get("prefSavedPort", "");
 		if (property.equals("")) 
 			property = null;
-		//property = "/dev/tty.usbmodem1411";
+		
 		if (property == null) {
 			return null;
 		}

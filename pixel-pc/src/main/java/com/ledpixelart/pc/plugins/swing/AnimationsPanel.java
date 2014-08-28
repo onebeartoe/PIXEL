@@ -8,6 +8,7 @@ import ioio.lib.api.RgbLedMatrix;
 import ioio.lib.api.exception.ConnectionLostException;
 
 import java.awt.Component;
+import java.awt.Cursor;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.InputEvent;
@@ -188,8 +189,6 @@ public class AnimationsPanel extends ImageTilePanel implements MouseListener
 					System.out.println("Current LED Panel Resolution: " + PixelApp.currentResolution);
 					System.out.println("GIF Width: " + KIND.width);
 					System.out.println("GIF Height: " + KIND.height);
-					
-					
 			            
 			        stopExistingTimer();
 			            
@@ -199,28 +198,12 @@ public class AnimationsPanel extends ImageTilePanel implements MouseListener
 			    					PixelApp.pixel.writeMode(GIFfps); //need to tell PIXEL the frames per second to use, how fast to play the animations
 			    					System.out.println("Now writing to PIXEL's SD card, the screen will go blank until writing has been completed..."); 
 			    					
-			    					new writePIXEL().execute(); //we'll run this in the background and also update the UI with progress
-			    					 
-			    					/*int y;
-			    				    	 
-			    				   	  //for (y=0;y<numFrames-1;y++) { //let's loop through and send frame to PIXEL with no delay
-			    				      for (y=0;y<GIFnumFrames;y++) { //Al removed the -1, make sure to test that!!!!!
-	
-			    			    			System.out.println("Writing " + animation_name + " to PIXEL " + "frame " + y + " of " + GIFnumFrames);
-			    			    			String message = "Writing " + animation_name + " to PIXEL " + "frame " + y + " of " + GIFnumFrames;
-			    			   	            PixelApp.statusLabel.setText(message);  TO DO this doesn't work , figure this out later
-			    				 		    PixelApp.pixel.SendPixelDecodedFrame(decodedDir, animation_name, y, GIFnumFrames, GIFresolution, KIND.width,KIND.height);
-			    				   	  } //end for loop
-*/			    					
+			    					Cursor hourglassCursor = new Cursor(Cursor.WAIT_CURSOR);
+			    					setCursor(hourglassCursor);
+			    					PixelApp.frame.setEnabled(false);
 			    					
-			    					 //we have to instantiate a new swingworker each time due to limitation in how swingworker works
-			    					
-			    					// place this line in your action listener to play the sound every time it is executed
-			    					//writePIXEL2.submit(write);
-			    					
-			    					//PixelApp.pixel.playLocalMode(); //now tell PIXEL to play locally
-			    					//System.out.println("Writing " + animation_name + " to PIXEL complete, now displaying...");
-			    			
+			    				    new writePIXEL().execute(); //we'll run this in the background and also update the UI with progress
+			    				
 			    			}
 			    			else {
 			    				   stopExistingTimer();
@@ -260,6 +243,12 @@ public class AnimationsPanel extends ImageTilePanel implements MouseListener
 			 System.out.println("PIXEL FOUND: Click to stream or double click to write");
 			 String message = "PIXEL FOUND: Click to stream or double click to write";
 		     PixelApp.statusLabel.setText(message);  
+		     //restore the cursor
+		     Cursor normalCursor = new Cursor(Cursor.DEFAULT_CURSOR);
+		     setCursor(normalCursor);
+		     PixelApp.frame.setEnabled(true);
+		      
+		     
 		    // statusLabel.setText("Completed with status: " + status);
 		    } catch (InterruptedException e) {
 		     // This is thrown if the thread's interrupted.

@@ -19,19 +19,19 @@ import javax.swing.JPanel;
  */
 
 // rename this to AboutPanel
-public class AboutPanel extends JPanel
+public class MacPixelPort extends JPanel
 {
     
-    private final String developmentUrl = "http://www.onebeartoe.com";
+    private final String developmentUrl = "http://electronics.onebeartoe.org/";
     private final String pixelURL = "http://ledpixelart.com/";
     
     private JLabel developmentLabel;
     
-    public AboutPanel()
+    public MacPixelPort()
     {
-	String version = "3.4.0";
-	String text = "PIXEL: LED ART " + version;
-	String html = "<html><body><h2>" + text + "</h2></body></html>";
+	String version = "3.0.0";
+	String text = "PIXEL PC Version " + version;
+	String html = "<html><body><h2>" + "PIXEL's port has been detected and saved, please now close and restart this app" + "</h2></body></html>";
 	JLabel productLabel = new JLabel(html, JLabel.CENTER);
 	
 	String developmentHtml = "<html><body><h3>" + "Sofware Development<br/><br/>" + developmentUrl + "</h3></body></html>";
@@ -46,9 +46,8 @@ public class AboutPanel extends JPanel
 	setLayout(layout);
 	
 	add(productLabel);
-	add(projectLabel);
-	add(developmentLabel);
-	
+	//add(developmentLabel);
+	//add(projectLabel);
     }
     
     private class DevelopmentLabelListener extends MouseAdapter
@@ -65,9 +64,9 @@ public class AboutPanel extends JPanel
 	    } 
 	    catch (Exception ex) 
 	    {
-		Logger.getLogger(AboutPanel.class.getName()).log(Level.SEVERE, null, ex);
+		Logger.getLogger(MacPixelPort.class.getName()).log(Level.SEVERE, null, ex);
 		String message = "Please visit " + developmentUrl + "for more information";
-		JOptionPane.showMessageDialog(AboutPanel.this, message);
+		JOptionPane.showMessageDialog(MacPixelPort.this, message);
 	    }    
         }
 	
