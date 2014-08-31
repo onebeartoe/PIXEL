@@ -446,6 +446,14 @@ public class PixelApp extends IOIOSwingApp
 				    JOptionPane.showMessageDialog(frame, about, message, JOptionPane.INFORMATION_MESSAGE, imageIcon);
 				}
 			}
+			
+			//if the port in settings is different than the detected port, we should over-write with the detected port
+			if (!SettingsTilePanel.pixelPortText.getText().equals(extra.toString())) {
+				prefs.put("prefSavedPort", extra.toString()); //let's write the prefs for the port
+				SettingsTilePanel.pixelPortText.setText(extra.toString());
+			}
+			
+			
 			//*************************************************************************
 	    	
 	    	//**** let's get IOIO version info for the About Screen ****

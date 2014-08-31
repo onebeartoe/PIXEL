@@ -92,6 +92,8 @@ public class SettingsTilePanel extends PixelTilePanel
     
     private JButton saveButton;
     
+    private JButton resetPortButton;
+    
     private static String prefSavedPort_;
     
     private static String combinedText;
@@ -101,11 +103,19 @@ public class SettingsTilePanel extends PixelTilePanel
 	private final static boolean shouldWeightX = true;
 
    
-    private static String serialPortInstructions = "If on Mac OSX or LINUX/Raspberry Pi (USB connections only are supported), you'll need to enter the port for PIXEL in the field above" + "\n"
+ /*   private static String serialPortInstructions = "If on Mac OSX or LINUX/Raspberry Pi (USB connections only are supported), you'll need to enter the port for PIXEL in the field above" + "\n"
     		+ "For Mac OSX: the port will be auto-detected but you can also manually change. if PIXEL is still not found after entering the port, turn PIXEL on and off during the 'Searching for PIXEL' message. PIXEL then should be found." + "\n"
     		+ "IMPORTANT: the port will change if you plug PIXEL into a different USB port on your computer and you'll need to re-enter the new port for PIXEL" + "\n"
     		+ "If on Windows, you DO NOT need to enter a port for PIXEL and can leave blank unless your PC is unable to find PIXEL" + "\n\n"
     		+ "How to find PIXEL's port:" + "\n"
+			+ "- Winddows: Open device manager and look for the COM port # next to the device called 'IOIO OTG', format will be COMXX. Ex. COM9 or COM14" + "\n" 
+			+ "- Mac OSX: Type < ls /dev/tty.usb* > from a command prompt, format will be /dev/tty.usbmodemXXXX. Ex. /dev/tty.usbmodem1411 or /dev/tty.usbmodem1421" + "\n" 
+			+ "- Raspberry Pi and LINUX: format will be IOIOX. Ex. IOIO0 or IOIO1" + "\n";*/
+    
+    private static String serialPortInstructions = "PIXEL's port will be auto-detected but you can also manually set. if PIXEL is still not found after entering the port, turn PIXEL on and off during the 'Searching for PIXEL' message. PIXEL then should be found." + "\n"
+    		+ "IMPORTANT: PIXEL's port will change if you plug PIXEL into a different USB port on your computer or use a different Bluetooth dongle. You'll then need to re-enter the new port for PIXEL or click the 'Reset Pixel Port' Button and restart this application." + "\n\n"
+    	
+    		+ "How to find PIXEL's port manually:" + "\n"
 			+ "- Winddows: Open device manager and look for the COM port # next to the device called 'IOIO OTG', format will be COMXX. Ex. COM9 or COM14" + "\n" 
 			+ "- Mac OSX: Type < ls /dev/tty.usb* > from a command prompt, format will be /dev/tty.usbmodemXXXX. Ex. /dev/tty.usbmodem1411 or /dev/tty.usbmodem1421" + "\n" 
 			+ "- Raspberry Pi and LINUX: format will be IOIOX. Ex. IOIO0 or IOIO1" + "\n";
@@ -147,6 +157,7 @@ public class SettingsTilePanel extends PixelTilePanel
   	prefSavedPort_ = prefs.get("prefSavedPort", ""); //leave it blank if not found
   	pixelPortText = new JTextField(prefSavedPort_);
   	saveButton = new JButton("Save");
+  	resetPortButton = new JButton("Reset PIXEL Port");
   	mainText = new JTextArea("");
     
 	GridBagConstraints c = new GridBagConstraints();
@@ -186,21 +197,31 @@ public class SettingsTilePanel extends PixelTilePanel
 	c.insets = new Insets(0,20,0,400);  //left and right padding
 	propertiesPanel.add(pixelPortText, c);
 	
-	/// ********** the save button ***********************
-		c.insets = new Insets(0,0,0,0);  //leave some space on left and right side of buttons
-		c.gridwidth = 2; //from here on, each component should takes up 2 columns
-		
+	/// ********** the save buttons ***********************
+		c.insets = new Insets(20,30,0,50);
+		c.gridwidth = 1; 
 		c.fill = GridBagConstraints.HORIZONTAL;
-		c.ipady = 30;      
+		c.ipady = 30;   
+		c.ipadx = 30;    
 		c.gridx = 0;       
 		c.gridy = 2;    
+		
 		propertiesPanel.add(saveButton, c);
+		  
+		c.ipady = 30;   
+		c.ipadx = 30;   
+		c.gridx = 1;       
+		c.gridy = 2;  
+		c.insets = new Insets(20,20,0,500);
+		propertiesPanel.add(resetPortButton, c);
 		
 		//*************Main Text Area *******************************************
-		
+		c.insets = new Insets(30,10,0,10);
+		c.gridwidth = 2; //from here on, each component should takes up 2 columns
 		c.fill = GridBagConstraints.HORIZONTAL;
 		c.weightx = 0.5;
 		c.ipady = 70;
+		c.ipadx = 0;    
 		c.gridx = 0;
 		c.gridy = 4;	
 		Font font = new Font("Verdana", Font.PLAIN, 11);
@@ -269,6 +290,16 @@ public class SettingsTilePanel extends PixelTilePanel
 		    	prefs.put("prefSavedPort", pixelPortText.getText()); //let's write the prefs for the port
 		    	setMainStatus("PIXEL Port Saved");
 		    }
+        }
+    });
+  	
+  	resetPortButton.addActionListener(new ActionListener(){
+        @Override
+        public void actionPerformed(ActionEvent e){
+		    
+		        pixelPortText.setText("");
+		    	prefs.put("prefSavedPort", pixelPortText.getText()); //let's write the prefs for the port
+		    	setMainStatus("PIXEL's Port has been reset. Please now close and restart this app and PIXEL's port will be auto-detected upon restart.");
         }
     });
 	

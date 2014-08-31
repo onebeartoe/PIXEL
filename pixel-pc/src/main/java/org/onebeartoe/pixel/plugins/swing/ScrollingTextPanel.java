@@ -104,6 +104,8 @@ public class ScrollingTextPanel extends SingleThreadedPixelPanel
     
     private static String prefFontString;
     
+    private static int INDEX_NOT_FOUND = -1;
+    
     private int prefFontSizeSliderPosition;
     
     private int prefFontYOffset;
@@ -121,6 +123,8 @@ public class ScrollingTextPanel extends SingleThreadedPixelPanel
     private boolean writeMode = false;
     
     private int scrollingKeyFrames = 3;
+    
+    private int selectedFontIndex;
     
     public ScrollingTextPanel(final RgbLedMatrix.Matrix KIND)
     {
@@ -165,8 +169,6 @@ public class ScrollingTextPanel extends SingleThreadedPixelPanel
             // implement the methods
         });
         
-        
-        
         JPanel inputSubPanel = new JPanel( new BorderLayout() );        
         inputSubPanel.add(textField, BorderLayout.CENTER);
         JPanel inputPanel = new JPanel( new BorderLayout() );
@@ -176,8 +178,10 @@ public class ScrollingTextPanel extends SingleThreadedPixelPanel
        
     	
         prefFontString = prefs.get("prefFont", "Arial"); //use Arial if there is no pref saved yet
-        int selectedFontIndex = ArrayUtils.indexOf(fontNames, prefFontString); //let's set the default font to Arial, otherwise it would have just picked the first one
-        
+        selectedFontIndex = ArrayUtils.indexOf(fontNames, prefFontString); //let's set the default font to Arial, otherwise it would have just picked the first one
+        if (selectedFontIndex == INDEX_NOT_FOUND) {  //returns -1 if not found
+        	selectedFontIndex = 1; //then we'll just pick the first font in the list
+        }
         
         prefFontSizeSliderPosition = prefs.getInt("prefFontSize", 0); //pref for the font size, default to 32 if not there
         
@@ -623,7 +627,10 @@ public class ScrollingTextPanel extends SingleThreadedPixelPanel
             
             //get prefs for fontSize, change it from the font size slider
             
-            fontFamily = fontFamilyChooser.getSelectedItem().toString();
+            fontFamily = fontFamilyChooser.getSelectedItem().toString(); //this line was crashing on linux and raspberry pi
+            
+            
+            
             font = fonts.get(fontFamily);
             font = new Font(fontFamily, Font.PLAIN, (fontSizeBase * KIND.width/32) + fontSizeSlider.getValue());
             //font = new Font(fontFamily, Font.PLAIN, fontSize);

@@ -110,15 +110,30 @@ public class SerialPortIOIOConnectionBootstrap implements
 	}
 
 	static Collection<String> getExplicitPorts() {
-		String property = System.getProperty("ioio.SerialPorts");
-		prefs = Preferences.userRoot().node(pixelPrefNode); //let's get the port from preferences
-		property = prefs.get("prefSavedPort", "");
-		if (property.equals("")) 
-			property = null;
+		String property = System.getProperty("ioio.SerialPorts"); //if the user specified the port, we should honor that but what if they did that and it's in prefs too, which one to choose?
+		//if the user forced it, then we should take that one
 		
-		if (property == null) {
-			return null;
+		//TO DO should we have a flag to re-run pixel detection?
+		
+		
+		
+		if (property == null) { //the user didn't specify a command line so let's check prefs
+			//and then should we also save it in prefs too? YES but let's not put it here and rather save it during IOIO setup because only then we know it was valid
+		    //the user didn't force it in the command line so now let's check the preferences and see if there
+			prefs = Preferences.userRoot().node(pixelPrefNode); //let's get the port from preferences
+			property = prefs.get("prefSavedPort", "");
+			
+			if (property.equals("")) {  //but if prefs is also null then we need to get out
+				property = null;
+				return null;
+			}	
+			
+			//if (property == null) return null;
+			/*if (property == null) 
+				return null;  //we exit out and scan all ports
+             */			
 		}
+		
 		List<String> result = new LinkedList<String>();
 		String[] portNames = property.split(":");
 		for (String portName : portNames) {
