@@ -11,11 +11,15 @@ import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics2D;
 import java.awt.GraphicsEnvironment;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
 import java.awt.GridLayout;
+import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.image.BufferedImage;
+import java.net.URL;
 import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
@@ -25,15 +29,21 @@ import java.util.prefs.Preferences;
 
 import javax.swing.BorderFactory;
 import javax.swing.ButtonGroup;
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JColorChooser;
 import javax.swing.JComboBox;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
+import javax.swing.JScrollPane;
 import javax.swing.JSlider;
 import javax.swing.JTextField;
+import javax.swing.SwingUtilities;
 import javax.swing.SwingWorker;
+import javax.swing.Timer;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.DocumentEvent;
@@ -41,7 +51,16 @@ import javax.swing.event.DocumentListener;
 
 import org.apache.commons.lang3.ArrayUtils;
 
+import twitter4j.Query;
+import twitter4j.QueryResult;
+import twitter4j.Status;
+import twitter4j.Twitter;
+import twitter4j.TwitterException;
+import twitter4j.TwitterFactory;
+import twitter4j.conf.ConfigurationBuilder;
+
 import com.ledpixelart.pc.PixelApp;
+import com.ledpixelart.pc.RestartPanel;
 
 
 
@@ -70,9 +89,21 @@ public class ScrollingTextPanel extends SingleThreadedPixelPanel
     
     private JColorChooser colorChooser;
     
-    private JCheckBox doubleSpeed;
+    public static JCheckBox twitterTextCheckBox;
     
-    private JCheckBox tripleSpeed;
+    private static JCheckBox filterTweetsCheckBox;
+    
+    private JTextField twitterSearchTerm;
+    
+    private JLabel twitterSearchLabel;
+    
+    private JLabel twitterTimerDelayLabel;
+    
+    private JLabel twitterSecondsLabel;
+    
+    public static JComboBox twitterSearchInterval;
+    
+    public static Integer twitterSearchDelayValue;
     
     private HashMap<String, Font> fonts;
     
@@ -126,6 +157,25 @@ public class ScrollingTextPanel extends SingleThreadedPixelPanel
     
     private int selectedFontIndex;
     
+    public static ActionListener TwitterTimer;
+    
+    public volatile static Timer twitterTimer;
+    
+    private Twitter twitter;
+    
+    private TwitterFactory tf;
+    
+    private Query query;
+    
+    private QueryResult result = null;
+    
+    private Status status;
+    
+    private String lastTweet;
+    
+    private Integer tweetCount = 0;
+	
+    
     public ScrollingTextPanel(final RgbLedMatrix.Matrix KIND)
     {
         super(KIND);
@@ -143,7 +193,61 @@ public class ScrollingTextPanel extends SingleThreadedPixelPanel
         prefSavedText = prefs.get("prefSavedText", "Type Something Here");
         textField = new JTextField(prefSavedText);
         
-        textField.getDocument().addDocumentListener(new DocumentListener() {
+    
+     
+   	 
+        
+        TwitterTimer = new ActionListener() 
+	  	{
+	  	    public void actionPerformed(ActionEvent evt) 
+	  	    {
+	  	    	
+		  	  	//twitter = TwitterFactory.getSingleton();
+		        query = new Query(twitterSearchTerm.getText());
+		        
+				try {
+					result = twitter.search(query);
+					System.out.println("Number of matched tweets: " + result.getCount());
+				} catch (TwitterException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+				for (Status status : result.getTweets()) {
+					
+					if (filterTweetsCheckBox.isSelected()) { // then we don't want @ mentions or http:// tweets
+						if (!status.getText().contains("RT") && !status.getText().contains("http://") && !status.getText().contains("@")) {   //retweets have "RT" in them, we don't want retweets in this case
+							
+							//System.out.println("@" + status.getUser().getScreenName() + ":" + status.getText());
+							System.out.println(status.getText());
+							setText(status.getText()); 
+						}
+					}
+					
+					else {
+						if (!status.getText().contains("RT")) {
+							
+							//System.out.println("@" + status.getUser().getScreenName() + ":" + status.getText());
+							System.out.println(status.getText());
+							setText(status.getText()); //it's the last one so let's display it
+						}
+					}
+					
+		        }
+	  	    }
+	  	};
+	  	
+        
+	    ConfigurationBuilder cb = new ConfigurationBuilder();
+	   	 cb.setDebugEnabled(true)
+	   	   .setOAuthConsumerKey("Ax6lCfg9Yf2Niab22e9SsY75b")
+	   	   .setOAuthConsumerSecret("3isp024VgehfZ60HwbEcBt1ZZzPyoXseaWYmO4NXxoxefKY65A")
+	   	   .setOAuthAccessToken("") // we don't need these right now as we are just calling public twitter searches
+	   	   .setOAuthAccessTokenSecret("");
+	   	 tf = new TwitterFactory(cb.build());
+	   	 twitter = tf.getInstance();
+	   	 
+	  	
+	  	textField.getDocument().addDocumentListener(new DocumentListener() {
 
 			@Override
 			public void insertUpdate(DocumentEvent e) {
@@ -211,9 +315,10 @@ public class ScrollingTextPanel extends SingleThreadedPixelPanel
     	    	
     	    	if (pixel != null) pixelHardwareID = pixel.getHardwareVersion();
 	    	    	
-    	    		stopExistingTimer(); //this doesn't seem to do anything?
+    	    		stopExistingTimer(); 
+    	    		stopTwitterTimer(); //we need to stop the twitter timer if it's running and then restart after the write
     	    		
-    	    		writeMode = true;
+    	    		//writeMode = true;
     	    		prefs.put("prefSavedText", getText());
     	    	
     	    		//Float delayFPS = (float) Math.round(1000 / delay); 	
@@ -236,7 +341,7 @@ public class ScrollingTextPanel extends SingleThreadedPixelPanel
 			        
 			        new writeScrollingText().execute(); //we'll do this background
     	    
-	    	    writeMode = false;
+			        //writeMode = false;
     	    }
     	});	
 	
@@ -248,147 +353,268 @@ public class ScrollingTextPanel extends SingleThreadedPixelPanel
 	
 	JButton colorButton = new JButton("change color");
 	colorButton.addActionListener( new ActionListener() 
-	{
-	    public void actionPerformed(ActionEvent e) 
-	    {
-	    	//check if the timer is not running and if not, start it and then put back into interactive mode
-	    	 CheckAndStartTimer();
+			{
+			    public void actionPerformed(ActionEvent e) 
+			    {
+			    	//check if the timer is not running and if not, start it and then put back into interactive mode
+			    	 CheckAndStartTimer();
+			    	
+			    	Color color = colorChooser.showDialog(ScrollingTextPanel.this, "Select the text color.", Color.yellow);
+					
+					//now let's store into preferences
+			    	putColor(prefs, "prefTextColor", color);
+			    	prefs.put("prefSavedText", getText());
+					colorPanel.setBackground(color);
+				    }
+				});	
+	
+	
+	JPanel colorComponents = new JPanel( new BorderLayout() );
+	colorComponents.add(colorPanel, BorderLayout.CENTER);
+	colorComponents.add(colorButton, BorderLayout.EAST);
+        
+    JPanel configurationPanel = new JPanel( new GridLayout(5, 1));
+    configurationPanel.add(inputSubPanel);
+    configurationPanel.add(fontPanel);
+	configurationPanel.add(colorComponents);
+	
+	textPanel = new JPanel( new BorderLayout());
+	textPanel.add(configurationPanel, BorderLayout.NORTH);
+	textPanel.setBorder( BorderFactory.createTitledBorder("Text") );	
+	
+	twitterTextCheckBox = new JCheckBox("Enable Twitter Feed");
+	twitterSearchTerm = new JTextField(prefs.get("prefSavedTwitterSearchTerm", "Enter Search Term"));
+	twitterSearchLabel = new JLabel("Twitter Search Term:");
+	
+	String twitterIntervals[] = { "10s", "30s", "1 min", "2 min", "5 min",
+			"10 min", "30 min","1 hour","2 hours",
+			"4 hours","8 hours", "16 hours", "24 hours"};
+
+	twitterSearchInterval = new JComboBox(twitterIntervals);
+	twitterSearchInterval.setSelectedIndex(prefs.getInt("preftwitterSearchDelayValue", 2));
+	twitterTimerComboUpdate();
+	
+	twitterSearchInterval.addActionListener (new ActionListener () {
+	    public void actionPerformed(ActionEvent e) {
 	    	
-	    	Color color = colorChooser.showDialog(ScrollingTextPanel.this, "Select the text color.", Color.yellow);
-			
-			//now let's store into preferences
-	    	putColor(prefs, "prefTextColor", color);
-	    	prefs.put("prefSavedText", getText());
-			colorPanel.setBackground(color);
-		    }
-			});	
-			JPanel colorComponents = new JPanel( new BorderLayout() );
-			colorComponents.add(colorPanel, BorderLayout.CENTER);
-			colorComponents.add(colorButton, BorderLayout.EAST);
-		        
-		    JPanel configurationPanel = new JPanel( new GridLayout(4, 1));
-		    configurationPanel.add(inputSubPanel);
-		    configurationPanel.add(fontPanel);
-			configurationPanel.add(colorComponents);
-			
-			textPanel = new JPanel( new BorderLayout());
-			textPanel.add(configurationPanel, BorderLayout.NORTH);
-			textPanel.setBorder( BorderFactory.createTitledBorder("Text") );	
-			
-			fontSizeSlider = new JSlider(-36, 36);
-			JPanel fontSizePanel = new JPanel();
-			fontSizePanel.add(fontSizeSlider);
-			fontSizePanel.setBorder( BorderFactory.createTitledBorder("Text Size") );
-			fontSizeSlider.setValue(prefFontSizeSliderPosition); //from preferences
-			fontSizeSlider.addChangeListener(new fontSizeChanged());
-			
-			
-			textVerticalSlider = new JSlider(-36, 36);
-			JPanel textVerticalPanel = new JPanel();
-			textVerticalPanel.add(textVerticalSlider);
-			textVerticalPanel.setBorder( BorderFactory.createTitledBorder("Text Vertical Position") );
-			textVerticalSlider.setValue(yOffset); //from preferences
-			textVerticalSlider.addChangeListener(new textVerticalPositionChanged());
-			
-			  
-			prefSpeedScrollPosition_ = prefs.getInt("prefSpeedScrollPosition", 3);  
-			//scrollSpeedSlider = new JSlider(200, 709);
-			scrollSpeedSlider = new JSlider(1, 10);
-			JPanel speedPanel = new JPanel();
-			speedPanel.add(scrollSpeedSlider);
-			speedPanel.setBorder( BorderFactory.createTitledBorder("Scroll Speed"));
-			scrollSpeedSlider.setValue(prefSpeedScrollPosition_);
-			
-			scrollSpeedSlider.addChangeListener(new ChangeListener() {
-		        @Override
-		        public void stateChanged(ChangeEvent ce) {
-		            //System.out.println(((JSlider) ce.getSource()).getValue());
-		        	CheckAndStartTimer();
-		        	prefs.putInt("prefSpeedScrollPosition",scrollSpeedSlider.getValue());
-		        	//TO DO save prefs here
-		        }
-		    });
-			
-			
-			JRadioButton singleSpeedRadio = new JRadioButton("1X");
-			singleSpeedRadio.setMnemonic(KeyEvent.VK_B);
-			singleSpeedRadio.addActionListener(new ActionListener(){
-		        public void actionPerformed(ActionEvent e) {
-		        	CheckAndStartTimer();
-		        	scrollingKeyFrames = 1;
-		        	prefs.putInt("prefRadioSpeedButton", 1);
-		        	prefs.put("prefSavedText", getText());
-		        }
-		    });
-			
-			
-			JRadioButton doubleSpeedRadio = new JRadioButton("2X");
-			doubleSpeedRadio.setMnemonic(KeyEvent.VK_B);
-			doubleSpeedRadio.addActionListener(new ActionListener(){
-		        public void actionPerformed(ActionEvent e) {
-		        	CheckAndStartTimer();
-		        	scrollingKeyFrames = 2;
-		        	prefs.putInt("prefRadioSpeedButton", 2);
-		        	prefs.put("prefSavedText", getText());
-		        }
-		    });
+	    	twitterTimerComboUpdate();
+	    	prefs.putInt("preftwitterSearchDelayValue", twitterSearchInterval.getSelectedIndex());
+	    	
+	    	//the interveral changed so we need to stop and restart the twitter timer
+	    	 stopTwitterTimer();
+	    	 System.out.println("Starting Twitter search timer to go off every " + twitterSearchInterval.getSelectedItem().toString());
+			 twitterTimer = new Timer(twitterSearchDelayValue, TwitterTimer);
+			 twitterTimer.start();
+	    
+	    }
+	});
+	
+	filterTweetsCheckBox = new JCheckBox("Filter Tweets containing http:// or @");
+	filterTweetsCheckBox.setSelected(prefs.getBoolean("prefFilterTweets",true));
+	filterTweetsCheckBox.addActionListener(new ActionListener(){
+        public void actionPerformed(ActionEvent e) {
+        	
+        	if (filterTweetsCheckBox.isSelected()) {
+        		prefs.putBoolean("prefFilterTweets",true);
+        	}
+        	else {
+        		prefs.putBoolean("prefFilterTweets",false); 
+        	}
+        	
+        }
+    });
+	
+	twitterTimerDelayLabel = new JLabel("Twitter Refresh Interval:");
+	
+	//JPanel twitterPanel = new JPanel();
+	JPanel twitterPanel = new JPanel(new GridBagLayout());
+	GridBagConstraints c = new GridBagConstraints();
+	
+	c.fill = GridBagConstraints.HORIZONTAL;
+	c.weightx = 0.5;
 
-			JRadioButton threeSpeedRadio = new JRadioButton("3X");
-			threeSpeedRadio.setMnemonic(KeyEvent.VK_B);
-			threeSpeedRadio.addActionListener(new ActionListener(){
-		        public void actionPerformed(ActionEvent e) {
-		        	CheckAndStartTimer();
-		        	scrollingKeyFrames = 3;
-		        	prefs.putInt("prefRadioSpeedButton", 3);
-		        	prefs.put("prefSavedText", getText());
-		        }
-		    });
-
-			JRadioButton fourSpeedRadio = new JRadioButton("4X");
-			fourSpeedRadio.setMnemonic(KeyEvent.VK_B);
-			fourSpeedRadio.addActionListener(new ActionListener(){
-		        public void actionPerformed(ActionEvent e) {
-		        	CheckAndStartTimer();
-		        	scrollingKeyFrames = 4;
-		        	prefs.putInt("prefRadioSpeedButton", 4);
-		        	prefs.put("prefSavedText", getText());
-		        }
-		    });
-
-		    //Group the radio buttons.
-		    ButtonGroup RadioButtonGroup = new ButtonGroup();
-		    RadioButtonGroup.add(singleSpeedRadio);
-		    RadioButtonGroup.add(doubleSpeedRadio);
-		    RadioButtonGroup.add(threeSpeedRadio);
-		    RadioButtonGroup.add(fourSpeedRadio);
-		    
-		    switch (prefRadioSpeedButton) {
-            case 1:  singleSpeedRadio.setSelected(true);
-                     break;
-            case 2:  doubleSpeedRadio.setSelected(true);
-                     break;
-            case 3:  threeSpeedRadio.setSelected(true);
-                     break;
-            case 4:  fourSpeedRadio.setSelected(true);
-                     break;
-            default: singleSpeedRadio.setSelected(true);
-                     break;
-		    }
+    c.gridwidth = 1; //for the first row, each component should take up 1 column
+	c.gridx = 0;
+	c.gridy = 0;
+	c.insets = new Insets(0,0,0,0);  //left and right padding
+	twitterPanel.add(twitterTextCheckBox, c);
+	
+	c.gridwidth = 1; //for the first row, each component should take up 1 column
+	c.gridx = 1;
+	c.gridy = 0;
+	c.insets = new Insets(0,0,0,0);  //left and right padding
+	twitterPanel.add(filterTweetsCheckBox,c);
+	
+	///******* new row
+	
+	c.gridwidth = 1; //for the first row, each component should take up 1 column
+	c.gridx = 0;
+	c.gridy = 1;
+	c.insets = new Insets(0,0,0,0);  //left and right padding
+	twitterPanel.add(twitterSearchLabel, c);
+	
+	c.gridwidth = 1; //for the first row, each component should take up 1 column
+	c.gridx = 1;
+	c.gridy = 1;
+	c.insets = new Insets(0,0,0,0);  //left and right padding
+	twitterPanel.add(twitterSearchTerm, c);
+	
+	//****** next row
+	
+	c.gridwidth = 1; //for the first row, each component should take up 1 column
+	c.gridx = 0;
+	c.gridy = 2;
+	c.insets = new Insets(0,0,0,0);  //left and right padding
+	twitterPanel.add(twitterTimerDelayLabel,c);
+	
+	c.gridwidth = 1; //for the first row, each component should take up 1 column
+	c.gridx = 1;
+	c.gridy = 2;
+	c.insets = new Insets(0,0,0,0);  //left and right padding
+	twitterPanel.add(twitterSearchInterval,c);
+	
+	
+	
+	twitterPanel.setBorder( BorderFactory.createTitledBorder("Twitter") );
+	
+	twitterTextCheckBox.setSelected(prefs.getBoolean("prefTwitterTextCheckBox",false));
+	
+	if (twitterTextCheckBox.isSelected()) {
+		
+  		//first time run on startup, then we switch to the timer
+		//twitter = TwitterFactory.getSingleton();
+        query = new Query(twitterSearchTerm.getText());
+        int z = 0;
+        
+		try {
+			result = twitter.search(query);
+			tweetCount = result.getCount();
+		} catch (TwitterException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+        
+		for (Status status : result.getTweets()) {
 			
-		    //speedPanel.add(singleSpeedRadio);
-			//speedPanel.add(doubleSpeedRadio);
-			//speedPanel.add(threeSpeedRadio);
-			//speedPanel.add(fourSpeedRadio);
-			speedPanel.add(writeButton);
-		        
-		    JPanel propertiesPanel = new JPanel( new GridLayout(4,1, 10,10) );
-		    propertiesPanel.add(textPanel);
-		    propertiesPanel.add(fontSizePanel);
-		    propertiesPanel.add(textVerticalPanel);
-			propertiesPanel.add(speedPanel);
-		        
-		    setLayout(new BorderLayout());
-			add(propertiesPanel, BorderLayout.SOUTH);
+			if (filterTweetsCheckBox.isSelected()) { // then we don't want @ mentions or http:// tweets
+				if (!status.getText().contains("RT") && !status.getText().contains("http://") && !status.getText().contains("@")) {   //retweets have "RT" in them, we don't want retweets in this case
+					
+					//System.out.println("@" + status.getUser().getScreenName() + ":" + status.getText());
+					System.out.println(status.getText());
+					setText(status.getText()); //it's the last one so let's display it
+				}
+			}
+			
+			else {
+				if (!status.getText().contains("RT")) {
+					
+					//System.out.println("@" + status.getUser().getScreenName() + ":" + status.getText());
+					System.out.println(status.getText());
+					setText(status.getText()); //it's the last one so let's display it
+				}
+			}
+			
+        }
+
+		 stopTwitterTimer();
+		 System.out.println("Starting Twitter search timer to go off every " + twitterSearchInterval.getSelectedItem().toString());
+		 twitterTimer = new Timer(twitterSearchDelayValue, TwitterTimer);
+		 twitterTimer.start();
+
+		 //TO DO test this if Internet is down
+	} 
+	
+	twitterTextCheckBox.addActionListener(new ActionListener(){
+        public void actionPerformed(ActionEvent e) {
+        	
+        	if (twitterTextCheckBox.isSelected()) {
+        		prefs.putBoolean("prefTwitterTextCheckBox",true);
+        		stopTwitterTimer();
+        		System.out.println("Starting Twitter search timer to go off every " + twitterSearchInterval.getSelectedItem().toString());
+				twitterTimer = new Timer(twitterSearchDelayValue, TwitterTimer);
+				twitterTimer.start();
+        	}
+        	else {
+        		prefs.putBoolean("prefTwitterTextCheckBox",false); 
+        		stopTwitterTimer();
+        	}
+        	
+        }
+    });
+	
+	twitterSearchTerm.getDocument().addDocumentListener(new DocumentListener() {
+
+			@Override
+			public void insertUpdate(DocumentEvent e) {
+				// TODO Auto-generated method stub
+				//CheckAndStartTimer();
+				prefs.put("prefSavedTwitterSearchTerm", twitterSearchTerm.getText()); 
+				
+			}
+
+			@Override
+			public void removeUpdate(DocumentEvent e) {
+				//CheckAndStartTimer();
+				// TODO Auto-generated method stub
+				prefs.put("prefSavedTwitterSearchTerm", twitterSearchTerm.getText()); 
+				
+			}
+
+			@Override
+			public void changedUpdate(DocumentEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+            // implement the methods
+        });
+	
+
+	
+	fontSizeSlider = new JSlider(-36, 36);
+	JPanel fontSizePanel = new JPanel();
+	fontSizePanel.add(fontSizeSlider);
+	fontSizePanel.setBorder( BorderFactory.createTitledBorder("Text Size") );
+	fontSizeSlider.setValue(prefFontSizeSliderPosition); //from preferences
+	fontSizeSlider.addChangeListener(new fontSizeChanged());
+	
+	
+	textVerticalSlider = new JSlider(-36, 36);
+	JPanel textVerticalPanel = new JPanel();
+	textVerticalPanel.add(textVerticalSlider);
+	textVerticalPanel.setBorder( BorderFactory.createTitledBorder("Text Vertical Position") );
+	textVerticalSlider.setValue(yOffset); //from preferences
+	textVerticalSlider.addChangeListener(new textVerticalPositionChanged());
+	
+	  
+	prefSpeedScrollPosition_ = prefs.getInt("prefSpeedScrollPosition", 3);  
+	//scrollSpeedSlider = new JSlider(200, 709);
+	scrollSpeedSlider = new JSlider(1, 10);
+	JPanel speedPanel = new JPanel();
+	speedPanel.add(scrollSpeedSlider);
+	speedPanel.setBorder( BorderFactory.createTitledBorder("Scroll Speed"));
+	scrollSpeedSlider.setValue(prefSpeedScrollPosition_);
+	
+	scrollSpeedSlider.addChangeListener(new ChangeListener() {
+        @Override
+        public void stateChanged(ChangeEvent ce) {
+            //System.out.println(((JSlider) ce.getSource()).getValue());
+        	CheckAndStartTimer();
+        	prefs.putInt("prefSpeedScrollPosition",scrollSpeedSlider.getValue());
+        	//TO DO save prefs here
+        }
+    });
+	
+	speedPanel.add(writeButton);
+        
+    JPanel propertiesPanel = new JPanel( new GridLayout(0,1, 0,0) );
+    propertiesPanel.add(textPanel);
+    propertiesPanel.add(twitterPanel);
+    propertiesPanel.add(fontSizePanel);
+    propertiesPanel.add(textVerticalPanel);
+	propertiesPanel.add(speedPanel);
+        
+    setLayout(new BorderLayout());
+	add(propertiesPanel, BorderLayout.CENTER);
     }
     
     class writeScrollingText extends SwingWorker<Boolean, Integer> {
@@ -490,6 +716,19 @@ public class ScrollingTextPanel extends SingleThreadedPixelPanel
     		     // This is thrown if we throw an exception
     		     // from doInBackground.
     		    }
+    		    
+    		    //lastly let's make restart the twitter timer is the check box was enabled
+    		    
+    		    if (twitterTextCheckBox.isSelected()) {
+    				 stopTwitterTimer();
+    				 System.out.println("Starting Twitter search timer to go off every " + twitterSearchInterval.getSelectedItem().toString());
+    				 twitterTimer = new Timer(twitterSearchDelayValue, TwitterTimer);
+    				 twitterTimer.start();
+    				 //TO DO test this if Internet is down
+    			} 
+    		    
+    		    
+    		    
     		   }
 
     		   @Override
@@ -552,6 +791,54 @@ public class ScrollingTextPanel extends SingleThreadedPixelPanel
   }
     
     
+    private void twitterTimerComboUpdate() {
+    	switch (twitterSearchInterval.getSelectedIndex()) { 
+	     case 0:
+	    	 twitterSearchDelayValue = 10000;
+	    	 break;
+	     case 1:
+	    	 twitterSearchDelayValue = 30000;
+	    	 break;
+	     case 2:
+	    	 twitterSearchDelayValue = 60000;
+	    	 break;
+	     case 3:
+	    	 twitterSearchDelayValue = 120000;
+	    	 break;
+	     case 4:
+	    	 twitterSearchDelayValue = 300000;
+	    	 break;
+	     case 5:
+	    	 twitterSearchDelayValue = 600000;
+	    	 break;	 
+	     case 6:
+	    	 twitterSearchDelayValue = 1800000;
+	    	 break;	 	 
+	     case 7:
+	    	 twitterSearchDelayValue = 3600000;
+	    	 break;	 	 
+	     case 8:
+	    	 twitterSearchDelayValue = 7200000;
+	    	 break;	 	 
+	     case 9:
+	    	 twitterSearchDelayValue = 14400000;
+	    	 break;	 	 
+	     case 10:
+	    	 twitterSearchDelayValue = 28800000;
+	    	 break;	 	
+	     case 11:
+	    	 twitterSearchDelayValue = 57600000;
+	    	 break;	 	 	
+	     case 12:
+	    	 twitterSearchDelayValue = 86400000;
+	    	 break;	 	 	
+	     default:	    		 
+	    	 twitterSearchDelayValue = 60000;
+	    	 prefs.putInt("preftwitterSearchDelayValue", 2);
+	     
+    }
+    }
+    
     private void CheckAndStartTimer() {
     	if (pixel != null && !timer.isRunning()) {
 	  		  pixel.interactiveMode(); //put into interactive mode as could have been stuck in local mode after a write
@@ -564,8 +851,17 @@ public class ScrollingTextPanel extends SingleThreadedPixelPanel
     {
         if(timer != null && timer.isRunning() )
         {
-            System.out.println("Stoping PIXEL activity in " + getClass().getSimpleName() + ".");
+            System.out.println("Stopping PIXEL activity in " + getClass().getSimpleName() + ".");
             timer.stop();
+        }        
+    }
+    
+    private void stopTwitterTimer()
+    {
+        if(twitterTimer != null && twitterTimer.isRunning() )
+        {
+            System.out.println("Stopping Twitter Search Timer...");
+            twitterTimer.stop();
         }        
     }
     
@@ -628,8 +924,6 @@ public class ScrollingTextPanel extends SingleThreadedPixelPanel
             //get prefs for fontSize, change it from the font size slider
             
             fontFamily = fontFamilyChooser.getSelectedItem().toString(); //this line was crashing on linux and raspberry pi
-            
-            
             
             font = fonts.get(fontFamily);
             font = new Font(fontFamily, Font.PLAIN, (fontSizeBase * KIND.width/32) + fontSizeSlider.getValue());
@@ -703,6 +997,17 @@ public class ScrollingTextPanel extends SingleThreadedPixelPanel
 	public void setPixelFound(boolean found) {
 		// TODO Auto-generated method stub
 		
+	}
+	
+	public void setText(final String message) {
+		
+		SwingUtilities.invokeLater(new Runnable() {
+		      public void run() {
+		    	  textField.setText(message);
+		      }
+		    });
+		
+		//textField.setText(message);
 	}
     
 }

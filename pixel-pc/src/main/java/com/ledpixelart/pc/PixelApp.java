@@ -78,6 +78,10 @@ import org.onebeartoe.pixel.preferences.JavaPreferencesService;
 import org.onebeartoe.pixel.preferences.PixelPreferencesKeys;
 import org.onebeartoe.pixel.preferences.PreferencesService;
 
+import twitter4j.Twitter;
+import twitter4j.TwitterFactory;
+import twitter4j.conf.ConfigurationBuilder;
+
 public class PixelApp extends IOIOSwingApp
 {    
     
@@ -191,6 +195,9 @@ public class PixelApp extends IOIOSwingApp
 	 firstTimeUser = prefs.getBoolean("prefFirstTime", true);
 
 	 setupEnvironment();  //set our default led panel that we get from java preferences
+	 
+	 // initialize twitter
+	 
 	
 	// images tab
 	String path = "/tab_icons/apple_small.png";
@@ -258,9 +265,9 @@ public class PixelApp extends IOIOSwingApp
         tabbedPane.addChangeListener( new TabChangeListener() );
     tabbedPane.addTab("GIFs", animationsTabIcon, animationsPanel, "Load built-in animations.");
     tabbedPane.addTab("GIF64", animations64TabIcon, animationsPanel64, "Load built-in animations for SUPER PIXEL 64x64.");
-    tabbedPane.addTab("My Images and GIFs", userTabIcon, localImagesPanel, "This panel displays images from your local hard drive.");
+    tabbedPane.addTab("My Images and GIFs", userTabIcon, localImagesPanel, "This panel displays images and GIFs from your local hard drive.");
     tabbedPane.addTab("Images", imagesTabIcon, imagesPanelReal, "Load built-in images.");
-    tabbedPane.addTab("Scolling Text", textTabIcon, scrollPanel, "Scrolls a text message across the PIXEL");
+    tabbedPane.addTab("Scolling Text", textTabIcon, scrollPanel, "Scrolling Text");
 	tabbedPane.addTab("Settings", settingsTabIcon, settingsPanel, "Settings");
 	
 	Dimension demension;
@@ -313,8 +320,7 @@ public class PixelApp extends IOIOSwingApp
 	startSearchTimer();
 		
 	frame.setVisible(true);
-	//frame.setExtendedState(frame.getExtendedState() | JFrame.MAXIMIZED_BOTH); //maximize the window
-	//frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
+	//frame.setExtendedState(frame.getExtendedState() | JFrame.MAXIMIZED_BOTH); // this didn't work on the Mac, didn't spend time troubleshooting
 	
 	//let's show the user a first time instructions pop up, only shows once as we'll write a preference
 	if (firstTimeUser) {
@@ -540,7 +546,7 @@ public class PixelApp extends IOIOSwingApp
 		} 
 		catch (ConnectionLostException ex) 
 		{
-		    String message = "The IOIO connection was lost.";
+		    String message = "The PIXEL connection was lost.";
 		    Logger.getLogger(PixelApp.class.getName()).log(Level.SEVERE, message, ex);
 		}
 	    }            
@@ -619,18 +625,18 @@ public class PixelApp extends IOIOSwingApp
 	 
 	public static void main(String[] args) throws Exception 
     {		
-	PixelApp app = new PixelApp();
-	app.go(args);		
+		PixelApp app = new PixelApp();
+		app.go(args);		
     }
     
 	 public static void setStatusLabel(String message) {
-	        statusLabel.setText(message);
+	    statusLabel.setText(message);
 	 }
 	
 	private void savePreferences()
     {
-	preferenceService.saveWindowPreferences(frame);
-	preferenceService.saveBuiltInPluginsPreferences(localImagesPanel);
+		preferenceService.saveWindowPreferences(frame);
+		preferenceService.saveBuiltInPluginsPreferences(localImagesPanel);
     }
     
     private List<PixelPanel> loadPluginPreferences() throws Exception
@@ -646,10 +652,7 @@ public class PixelApp extends IOIOSwingApp
 	    for (PixelPanel panel : foundClasses)	    
 	    {
 		System.out.println ("Found " + panel.getClass());
-		
-		
-		
-                userPluginPanels.add(panel);
+        userPluginPanels.add(panel);
 		displayPlugin(panel);	
 	    }
 	}
@@ -660,14 +663,11 @@ public class PixelApp extends IOIOSwingApp
     
     private void setPixelFound()
     {
-	for(PixelPanel panel : builtinPixelPanels)
-	{
-	  panel.setPixelFound(true);
-	  
-		
-	}
+		for(PixelPanel panel : builtinPixelPanels)
+		{
+		  panel.setPixelFound(true);
+		}
     }
-
     
     private void startSearchTimer()
     {
@@ -676,10 +676,6 @@ public class PixelApp extends IOIOSwingApp
 	searchTimer = new Timer(delay, worker);
 	searchTimer.start();
     }
-    
-   
-    
-   
     
     @Override
     public void windowClosing(WindowEvent event)
@@ -707,7 +703,7 @@ public class PixelApp extends IOIOSwingApp
 	@Override
 	public void actionPerformed(ActionEvent e) 
 	{
-            userPluginConfiguration.clear();
+        userPluginConfiguration.clear();
 	    preferenceService.saveUserPluginPreferences(userPluginConfiguration);
 	    
 	    for(PixelPanel panel : userPluginPanels)
@@ -877,10 +873,10 @@ public class PixelApp extends IOIOSwingApp
 		
 			if(pixel.matrix == null)
 			{
-			    message = "A connection to PIXEL could not be established. \n\nPlease ensure you have Bluetooth paired using code 4545 for PIXEL V1 and code 0000 for PIXEL V2. Mac users: please connect to PIXEL over USB.";
+			    message = "Please ensure you have Bluetooth paired using code 0000 or code 4545 for PIXEL V1. \nThe PIXEL port may be wrong, see the Settings tab. Mac users: please connect to PIXEL over USB.";
 			    PixelApp.this.statusLabel.setText(message);
 			    System.out.println(message);
-			    String title = "PIXEL Connection Unsuccessful";
+			    String title = "PIXEL Not Found";
 			    JOptionPane.showMessageDialog(frame, message, title, JOptionPane.INFORMATION_MESSAGE);
 			}
 			else { 
@@ -890,8 +886,6 @@ public class PixelApp extends IOIOSwingApp
 	    }
 	}
     }
-
-   
     
     public class TabChangeListener implements ChangeListener
     {

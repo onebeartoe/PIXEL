@@ -15,23 +15,25 @@
 
 	<modules>
 		<module>ioio-commons</module>
-		<module>ioio-android</module>
-		<module>ioio-bluetooth</module>
 		<module>ioio-pc</module>
-                <module>pixel-commons</module>
-                <module>pixel-jee</module>
+        <module>pixel-commons</module>
 		<module>pixel-pc</module>
 <!--
+		
+        
+		<module>ioio-bluetooth</module>
+        <module>pixel-jee</module>
+		<module>ioio-android</module>
 		<module>ioio-simple-app</module>
 		<module>pixel-scrolling-text-android</module>
 		<module>pixel-touch-android</module>
--->
-    <module>pixel-weather</module>
-    <module>pixel-games</module>
-<!--    
-    <module>pixel-plugin-tests</module>
+		
+		 <module>pixel-weather</module>
+         <module>pixel-games</module>
+         <module>pixel-plugin-tests</module>
+         <module>pixel-pc-twitter</module>
 -->    
-    <module>pixel-pc-twitter</module>
+   
   <!--  <module>pixel-plugins</module> -->
   </modules>
 

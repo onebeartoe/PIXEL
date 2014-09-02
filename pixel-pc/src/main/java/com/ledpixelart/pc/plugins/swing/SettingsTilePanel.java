@@ -54,6 +54,15 @@ import javax.swing.UIManager;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 
+import twitter4j.Query;
+import twitter4j.QueryResult;
+import twitter4j.Status;
+import twitter4j.Twitter;
+import twitter4j.TwitterException;
+import twitter4j.TwitterFactory;
+import twitter4j.auth.AccessToken;
+import twitter4j.auth.RequestToken;
+
 /**
  * @author rmarquez
  */
@@ -148,11 +157,11 @@ public class SettingsTilePanel extends PixelTilePanel
     //JPanel propertiesPanel = new JPanel( new GridLayout(4,2, 10,10) );
     JPanel propertiesPanel = new JPanel( new GridBagLayout() );
     
-  	textPanel.add(propertiesPanel, BorderLayout.NORTH);
+  	textPanel.add(propertiesPanel, BorderLayout.CENTER);
   	textPanel.setBorder( BorderFactory.createTitledBorder("Settings") );	
         
     setLayout(new BorderLayout());
-  	add(propertiesPanel, BorderLayout.NORTH);
+  	add(propertiesPanel, BorderLayout.CENTER);
   	
   	prefSavedPort_ = prefs.get("prefSavedPort", ""); //leave it blank if not found
   	pixelPortText = new JTextField(prefSavedPort_);
@@ -180,7 +189,7 @@ public class SettingsTilePanel extends PixelTilePanel
 	c.fill = GridBagConstraints.HORIZONTAL;
 	c.gridx = 1;
 	c.gridy = 0;
-	c.insets = new Insets(0,20,0,400);  //left and right padding
+	c.insets = new Insets(0,20,0,30);  //left and right padding
 	propertiesPanel.add(ledMatrixCombo, c);
 	
 	c.gridwidth = 1; //for the first row, each component should take up 1 column
@@ -194,11 +203,11 @@ public class SettingsTilePanel extends PixelTilePanel
 	c.fill = GridBagConstraints.HORIZONTAL;
 	c.gridx = 1;
 	c.gridy = 1;
-	c.insets = new Insets(0,20,0,400);  //left and right padding
+	c.insets = new Insets(0,20,0,30);  //left and right padding
 	propertiesPanel.add(pixelPortText, c);
 	
 	/// ********** the save buttons ***********************
-		c.insets = new Insets(20,30,0,50);
+		c.insets = new Insets(20,30,0,30);
 		c.gridwidth = 1; 
 		c.fill = GridBagConstraints.HORIZONTAL;
 		c.ipady = 30;   
@@ -212,11 +221,11 @@ public class SettingsTilePanel extends PixelTilePanel
 		c.ipadx = 30;   
 		c.gridx = 1;       
 		c.gridy = 2;  
-		c.insets = new Insets(20,20,0,500);
+		c.insets = new Insets(20,20,0,30);
 		propertiesPanel.add(resetPortButton, c);
 		
 		//*************Main Text Area *******************************************
-		c.insets = new Insets(30,10,0,10);
+		c.insets = new Insets(30,10,0,30);
 		c.gridwidth = 2; //from here on, each component should takes up 2 columns
 		c.fill = GridBagConstraints.HORIZONTAL;
 		c.weightx = 0.5;
@@ -234,7 +243,74 @@ public class SettingsTilePanel extends PixelTilePanel
 		mainText.setForeground(Color.BLUE);
 		propertiesPanel.add(mainText, c);
 		setMainStatus(serialPortInstructions);
-  	
+		
+		/* Twitter twitter = TwitterFactory.getSingleton();
+		    Query query = new Query("pixel art");
+		    QueryResult result = null;
+			try {
+				result = twitter.search(query);
+			} catch (TwitterException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+		    for (Status status : result.getTweets()) {
+		        System.out.println("@" + status.getUser().getScreenName() + ":" + status.getText());
+		    }*/
+		
+		/*Twitter twitter = TwitterFactory.getSingleton();
+	    twitter.setOAuthConsumer("[consumer key]", "[consumer secret]");
+	    RequestToken requestToken = null;
+		try {
+			requestToken = twitter.getOAuthRequestToken();
+		} catch (TwitterException e2) {
+			// TODO Auto-generated catch block
+			e2.printStackTrace();
+		}
+	    AccessToken accessToken = null;
+	    BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+	    while (null == accessToken) {
+	      System.out.println("Open the following URL and grant access to your account:");
+	      System.out.println(requestToken.getAuthorizationURL());
+	      System.out.print("Enter the PIN(if aviailable) or just hit enter.[PIN]:");
+	      String pin = null;
+		try {
+			pin = br.readLine();
+		} catch (IOException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+	      try{
+	         if(pin.length() > 0){
+	           accessToken = twitter.getOAuthAccessToken(requestToken, pin);
+	         }else{
+	           accessToken = twitter.getOAuthAccessToken();
+	         }
+	      } catch (TwitterException te) {
+	        if(401 == te.getStatusCode()){
+	          System.out.println("Unable to get the access token.");
+	        }else{
+	          te.printStackTrace();
+	        }
+	      }
+	    }
+	    //persist to the accessToken for future reference.
+	    try {
+			storeAccessToken(twitter.verifyCredentials().getId() , accessToken);
+		} catch (TwitterException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+	    String[] args = null;
+		Status status = null;
+		try {
+			status = twitter.updateStatus(args[0]);
+		} catch (TwitterException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+	    System.out.println("Successfully updated the status to [" + status.getText() + "].");
+	   // System.exit(0);
+*/  	
   	
   /*	propertiesPanel.add(LEDPanelLabel_);
     propertiesPanel.add(ledMatrixCombo);
@@ -298,7 +374,7 @@ public class SettingsTilePanel extends PixelTilePanel
         public void actionPerformed(ActionEvent e){
 		    
 		        pixelPortText.setText("");
-		    	prefs.put("prefSavedPort", pixelPortText.getText()); //let's write the prefs for the port
+		    	prefs.put("prefSavedPort", ""); //let's write the prefs for the port
 		    	setMainStatus("PIXEL's Port has been reset. Please now close and restart this app and PIXEL's port will be auto-detected upon restart.");
         }
     });
@@ -323,6 +399,11 @@ public class SettingsTilePanel extends PixelTilePanel
 	});
 	
     }
+    
+    private static void storeAccessToken(long l, AccessToken accessToken){
+        //store accessToken.getToken()
+        //store accessToken.getTokenSecret()
+      }
     
     private void setMainStatus (String message) {
     	mainText.setText(message);
