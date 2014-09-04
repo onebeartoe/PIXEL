@@ -121,13 +121,33 @@ public class SettingsTilePanel extends PixelTilePanel
 			+ "- Mac OSX: Type < ls /dev/tty.usb* > from a command prompt, format will be /dev/tty.usbmodemXXXX. Ex. /dev/tty.usbmodem1411 or /dev/tty.usbmodem1421" + "\n" 
 			+ "- Raspberry Pi and LINUX: format will be IOIOX. Ex. IOIO0 or IOIO1" + "\n";*/
     
-    private static String serialPortInstructions = "PIXEL's port will be auto-detected but you can also manually set. if PIXEL is still not found after entering the port, turn PIXEL on and off during the 'Searching for PIXEL' message. PIXEL then should be found." + "\n"
-    		+ "IMPORTANT: PIXEL's port will change if you plug PIXEL into a different USB port on your computer or use a different Bluetooth dongle. You'll then need to re-enter the new port for PIXEL or click the 'Reset Pixel Port' Button and restart this application." + "\n\n"
+    private static String serialPortInstructions = "PIXEL's port will be auto-detected but you can also manually set. If PIXEL is still not found after entering the port, turn PIXEL on and off during the 'Searching for PIXEL' message. PIXEL then should be found." + "\n\n"
+    		+ "IMPORTANT: PIXEL's port will change if you plug PIXEL into a different USB port on your computer or use a different Bluetooth dongle. You'll then need to re-enter the new port for PIXEL or click the 'Reset Pixel Port' Button and restart this application." + "\n"
+    		+ "Windows users: You may leave the Pixel Port field blank, only specify a port if your PC is unable to find PIXEL" + "\n"
     	
     		+ "How to find PIXEL's port manually:" + "\n"
 			+ "- Winddows: Open device manager and look for the COM port # next to the device called 'IOIO OTG', format will be COMXX. Ex. COM9 or COM14" + "\n" 
 			+ "- Mac OSX: Type < ls /dev/tty.usb* > from a command prompt, format will be /dev/tty.usbmodemXXXX. Ex. /dev/tty.usbmodem1411 or /dev/tty.usbmodem1421" + "\n" 
 			+ "- Raspberry Pi and LINUX: format will be IOIOX. Ex. IOIO0 or IOIO1" + "\n";
+    
+    private static String serialPortInstructionsMac = "PIXEL's port will be auto-detected when you first run this program on your Mac but you can also manually set, see below." + "\n\n"
+    		+ "IMPORTANT: PIXEL's port will change if you plug PIXEL into a different USB port on your Mac. You'll then need to re-enter the new port for PIXEL or click the 'Reset Pixel Port' Button and restart this application to auto-detect again." + "\n\n"
+    		+ "If PIXEL is still not found, turn PIXEL on and off during the 'Searching for PIXEL' message. PIXEL should then be found." + "\n\n"
+    		+ "How to find PIXEL's port manually on Mac OSX:" + "\n"
+			+ "- Type < ls /dev/tty.usb* > from a command prompt, format will be /dev/tty.usbmodemXXXX. Ex. /dev/tty.usbmodem1411 or /dev/tty.usbmodem1421 or tty.usbmodem1411" + "\n";
+    
+    private static String serialPortInstructionsWindows = "Windows Users: Leave the PIXEL Port field blank, only enter if your PC is unable to find PIXEL." + "\n"
+    		+ "IMPORTANT: If you do enter PIXEL's Port, this port will change if you plug PIXEL into a different USB port on your computer or switch to Bluetooth. You'll then need to re-enter the new port for PIXEL or click the 'Reset Pixel Port' Button and restart this application." + "\n\n"
+    		+ "How to find PIXEL's port manually on Windows:" + "\n"
+			+ "- Windows: Open device manager and look for the COM port # next to the device called 'PIXEL', format will be COMXX. Ex. COM9 or COM14" + "\n" ;
+	
+private static String serialPortInstructionsLinux = "LINUX, Raspberry Pi, and BeagleBone Black Users: If you have not already, follow these one time setup instructions: http://ledpixelart.com/raspberry-pi/ or http://ledpixelart.com/beaglebone/ for BeagleBone Black." + "\n\n"
+		+ "Enter PIXEL's port in the box above, see how to find below."  + "\n\n"
+		+ "IMPORTANT: PIXEL's port will change if you plug PIXEL into a different USB port on your computer. You'll then need to re-enter the new port for PIXEL or click the 'Reset Pixel Port' Button and restart this application." + "\n\n"
+		+ "How to find PIXEL's port manually on Raspberry Pi, LINUX, and BeagleBone Black:" + "\n"
+		+ "- Format will be IOIOX. Ex. IOIO0 or IOIO1" + "\n"
+		+ "- Type < ls /dev/IOIO* > from a terminal/command line to check";
+    
     
     public SettingsTilePanel(RgbLedMatrix.Matrix KIND)
     {
@@ -150,6 +170,17 @@ public class SettingsTilePanel extends PixelTilePanel
     ledMatrixCombo.setSelectedIndex(ledMatrix_);
     
     ledMatrixCombo.setEditable(true);
+	
+	if (PixelApp.isMacOs) {
+		serialPortInstructions = serialPortInstructionsMac;
+	}
+	else if (PixelApp.isWindows) {
+		serialPortInstructions = serialPortInstructionsWindows;
+	}
+	else {
+		serialPortInstructions = serialPortInstructionsLinux;
+	}	
+    
     
     portLabel_ = new JLabel("PIXEL Port");
     LEDPanelLabel_ = new JLabel("Select PIXEL Model / LED Panel Type");

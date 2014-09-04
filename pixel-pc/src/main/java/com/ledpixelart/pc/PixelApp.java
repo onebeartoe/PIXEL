@@ -117,7 +117,7 @@ public class PixelApp extends IOIOSwingApp
 	
 	public static String pixelFirmware = "Not Found";
 	 
-	public static String pixelHardwareID = "";
+	public static String pixelHardwareID = "Not Found";
 	    
 	private static VersionType v;
     
@@ -154,6 +154,12 @@ public class PixelApp extends IOIOSwingApp
     private static String pixelPrefNode = "/com/ledpixelart/pc";
     
     private static boolean firstTimeUser = true;
+    
+    private static String osName = System.getProperty("os.name").toLowerCase();
+	
+    public static boolean isMacOs = osName.startsWith("mac os x");
+	
+    public static boolean isWindows = osName.startsWith("windows");
     
     public PixelApp()
     {
@@ -325,7 +331,7 @@ public class PixelApp extends IOIOSwingApp
 	//let's show the user a first time instructions pop up, only shows once as we'll write a preference
 	if (firstTimeUser) {
 		    String path9 = "/tab_icons/";
-		    String iconPath = path9 + "gumball-about256.png";
+		    String iconPath = path9 + "gumball-about64.png";
 		    URL resource = getClass().getResource(iconPath);
 		    ImageIcon imageIcon = new ImageIcon(resource);
 		    String message = "Welcome PIXEL User";
@@ -432,8 +438,10 @@ public class PixelApp extends IOIOSwingApp
 	    	System.out.println("Found PIXEL, entering initialization routine, detected port is..." + extra.toString());
 	    	
 	    	//*****If we are on a Mac, let's add in the port if the port value is blank
-	    	String osName = System.getProperty("os.name").toLowerCase();
-			boolean isMacOs = osName.startsWith("mac os x");
+	    	//String osName = System.getProperty("os.name").toLowerCase();
+			//boolean isMacOs = osName.startsWith("mac os x");
+			//boolean isWindows = osName.startsWith("Windows");
+			
 			if (isMacOs) 
 			{
 				if (SettingsTilePanel.pixelPortText.getText().equals("")) {
@@ -453,12 +461,12 @@ public class PixelApp extends IOIOSwingApp
 				}
 			}
 			
-			//if the port in settings is different than the detected port, we should over-write with the detected port
-			if (!SettingsTilePanel.pixelPortText.getText().equals(extra.toString())) {
+			//if we are not on windows and the port in settings is different than the detected port, we should over-write with the detected port
+			// we're not writing the port if we are on windows because windows does not have an issue auto-detecting so this is better because the port does change if the user plugs into a different usb port which will be a usability problem
+			if (!isWindows && !SettingsTilePanel.pixelPortText.getText().equals(extra.toString())) {
 				prefs.put("prefSavedPort", extra.toString()); //let's write the prefs for the port
 				SettingsTilePanel.pixelPortText.setText(extra.toString());
 			}
-			
 			
 			//*************************************************************************
 	    	
@@ -718,7 +726,7 @@ public class PixelApp extends IOIOSwingApp
 	public void actionPerformed(ActionEvent e) 
 	{
 	    String path = "/tab_icons/";
-	    String iconPath = path + "gumball-about256.png";
+	    String iconPath = path + "gumball-about64.png";
 	    URL resource = getClass().getResource(iconPath);
 	    ImageIcon imageIcon = new ImageIcon(resource);
 	    String message = "Welcome PIXEL User";
@@ -873,7 +881,15 @@ public class PixelApp extends IOIOSwingApp
 		
 			if(pixel.matrix == null)
 			{
-			    message = "Please ensure you have Bluetooth paired using code 0000 or code 4545 for PIXEL V1. \nThe PIXEL port may be wrong, see the Settings tab. Mac users: please connect to PIXEL over USB.";
+				if (isMacOs) {
+					message = "Check that the toggle switch on PIXEL's side is pointing towards 'PC USB' \nand you've connected PIXEL to your Mac using the included USB A-A cable. \n\nThe PIXEL port may be wrong, see the Settings tab to correct. \n\nYou may also need to turn PIXEL on and off during the 'Searching for PIXEL' message.";
+				}
+				else if (isWindows) {
+					message = "Have you Bluetooth paired using code 0000 or 4545 for PIXEL V1? \n\nMake sure the toggle switch on PIXEL's side is pointing towards\nthe 'Bluetooth' position if using Bluetooth or towards 'PC USB' if connecting with USB.";
+				}
+				else { //then it's linux
+					message = "Check that the toggle switch on PIXEL's side is pointing towards 'PC USB' \nand you've connected PIXEL to your computer using the included USB A-A cable. \n\nPlease ensure you follow these first time \nsetup instructions for Linux http://ledpixelart.com/raspberry-pi/ \n\nThe PIXEL port may be wrong, see the Settings tab to correct.";
+				}
 			    PixelApp.this.statusLabel.setText(message);
 			    System.out.println(message);
 			    String title = "PIXEL Not Found";
