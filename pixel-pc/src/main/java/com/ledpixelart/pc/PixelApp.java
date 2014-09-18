@@ -63,7 +63,6 @@ import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 import javax.swing.KeyStroke;
 import javax.swing.SwingConstants;
-import javax.swing.SwingUtilities;
 import javax.swing.Timer;
 import javax.swing.UIManager;
 import javax.swing.border.BevelBorder;
@@ -73,14 +72,12 @@ import javax.swing.event.ChangeListener;
 import org.onebeartoe.pixel.hardware.Pixel;
 import org.onebeartoe.pixel.plugins.swing.PixelPanel;
 import org.onebeartoe.pixel.plugins.swing.ScrollingTextPanel;
+import org.onebeartoe.pixel.plugins.swing.VuMeterPanel;
 //import org.onebeartoe.pixel.plugins.swing.ScrollingTextPanel;
 import org.onebeartoe.pixel.preferences.JavaPreferencesService;
 import org.onebeartoe.pixel.preferences.PixelPreferencesKeys;
 import org.onebeartoe.pixel.preferences.PreferencesService;
 
-import twitter4j.Twitter;
-import twitter4j.TwitterFactory;
-import twitter4j.conf.ConfigurationBuilder;
 
 public class PixelApp extends IOIOSwingApp
 {    
@@ -245,15 +242,19 @@ public class PixelApp extends IOIOSwingApp
 	String path3 = "/tab_icons/text_small.png";
 	URL url3 = getClass().getResource(path3);
 	ImageIcon textTabIcon = new ImageIcon(url3);
-    PixelPanel scrollPanel = new ScrollingTextPanel(KIND);
-    builtinPixelPanels.add(scrollPanel);        
+        PixelPanel scrollPanel = new ScrollingTextPanel(KIND);
+        builtinPixelPanels.add(scrollPanel);        
+
+         // settings tab
+        String path4 = "/tab_icons/settings_small.png";
+        URL url4 = getClass().getResource(path4);
+        ImageIcon settingsTabIcon = new ImageIcon(url4);
+        PixelPanel settingsPanel = new SettingsTilePanel(KIND);
+        builtinPixelPanels.add(settingsPanel);
         
-     // settings tab
-    String path4 = "/tab_icons/settings_small.png";
-    URL url4 = getClass().getResource(path4);
-    ImageIcon settingsTabIcon = new ImageIcon(url4);
-    PixelPanel settingsPanel = new SettingsTilePanel(KIND);
-    builtinPixelPanels.add(settingsPanel);
+        // VU Meter tab
+        PixelPanel vuMeterTab = new VuMeterPanel(KIND);
+        builtinPixelPanels.add(vuMeterTab);
 
 	frame = new JFrame("PIXEL");
 	
@@ -269,11 +270,12 @@ public class PixelApp extends IOIOSwingApp
 	tabbedPane = new JTabbedPane();
 	tabbedPane.setTabLayoutPolicy(JTabbedPane.SCROLL_TAB_LAYOUT);
         tabbedPane.addChangeListener( new TabChangeListener() );
-    tabbedPane.addTab("GIFs", animationsTabIcon, animationsPanel, "Load built-in animations.");
-    tabbedPane.addTab("GIF64", animations64TabIcon, animationsPanel64, "Load built-in animations for SUPER PIXEL 64x64.");
-    tabbedPane.addTab("My Images and GIFs", userTabIcon, localImagesPanel, "This panel displays images and GIFs from your local hard drive.");
-    tabbedPane.addTab("Images", imagesTabIcon, imagesPanelReal, "Load built-in images.");
-    tabbedPane.addTab("Scolling Text", textTabIcon, scrollPanel, "Scrolling Text");
+        tabbedPane.addTab("GIFs", animationsTabIcon, animationsPanel, "Load built-in animations.");
+        tabbedPane.addTab("GIF64", animations64TabIcon, animationsPanel64, "Load built-in animations for SUPER PIXEL 64x64.");
+        tabbedPane.addTab("My Images and GIFs", userTabIcon, localImagesPanel, "This panel displays images and GIFs from your local hard drive.");
+        tabbedPane.addTab("Images", imagesTabIcon, imagesPanelReal, "Load built-in images.");
+        tabbedPane.addTab("Scolling Text", textTabIcon, scrollPanel, "Scrolling Text");
+//        tabbedPane.addTab("Microphone", textTabIcon, vuMeterTab, "See a VU meter");
 	tabbedPane.addTab("Settings", settingsTabIcon, settingsPanel, "Settings");
 	
 	Dimension demension;
