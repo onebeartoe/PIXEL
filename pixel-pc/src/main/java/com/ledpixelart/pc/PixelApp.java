@@ -73,11 +73,9 @@ import org.onebeartoe.pixel.hardware.Pixel;
 import org.onebeartoe.pixel.plugins.swing.PixelPanel;
 import org.onebeartoe.pixel.plugins.swing.ScrollingTextPanel;
 import org.onebeartoe.pixel.plugins.swing.VuMeterPanel;
-//import org.onebeartoe.pixel.plugins.swing.ScrollingTextPanel;
 import org.onebeartoe.pixel.preferences.JavaPreferencesService;
 import org.onebeartoe.pixel.preferences.PixelPreferencesKeys;
 import org.onebeartoe.pixel.preferences.PreferencesService;
-
 
 public class PixelApp extends IOIOSwingApp
 {    
@@ -275,7 +273,7 @@ public class PixelApp extends IOIOSwingApp
         tabbedPane.addTab("My Images and GIFs", userTabIcon, localImagesPanel, "This panel displays images and GIFs from your local hard drive.");
         tabbedPane.addTab("Images", imagesTabIcon, imagesPanelReal, "Load built-in images.");
         tabbedPane.addTab("Scolling Text", textTabIcon, scrollPanel, "Scrolling Text");
-//        tabbedPane.addTab("Microphone", textTabIcon, vuMeterTab, "See a VU meter");
+        tabbedPane.addTab("Microphone", textTabIcon, vuMeterTab, "See a VU meter");
 	tabbedPane.addTab("Settings", settingsTabIcon, settingsPanel, "Settings");
 	
 	Dimension demension;

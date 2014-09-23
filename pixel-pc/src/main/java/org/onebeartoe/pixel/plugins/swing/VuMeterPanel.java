@@ -32,11 +32,11 @@ public class VuMeterPanel extends ImageTilePanel
 
     private volatile List<VuReading> microphoneValues;
     
-    private final int VALUES_MAX = 25;  // did we try 25 alrady?
+    private final int VALUES_MAX = 32;
     
     private final int COLUMN_WIDTH = 2;
   
-    private final int SENSOR_READ_DELAY = 500;
+    private final int SENSOR_READ_DELAY = 300;
     
     private int w = KIND.width * 2;
     
@@ -91,12 +91,13 @@ Random random = new Random();
         {
             g2d.setColor(f.color);
                             
-            g2d.fillRect(x, 0, COLUMN_WIDTH, f.height);
+            int y = h - f.height;
+                    
+            g2d.fillRect(x, y, COLUMN_WIDTH, f.height);
+//            g2d.fillRect(x, 0, COLUMN_WIDTH, f.height);
             
             x += COLUMN_WIDTH;
         }
-        
-//g2d.fillRect(0, 0, w, h);
 
         g2d.dispose();
 
@@ -127,7 +128,8 @@ Random random = new Random();
                 {
                     float p = proximitySensor.read();
 p = random.nextFloat();
-                    System.out.println("proximity sensor: " + p);
+                    
+//                    System.out.println("proximity sensor: " + p);
 
                     float r = h * p;
                     int height = (int) r;
