@@ -1,8 +1,6 @@
 
 package org.onebeartoe.pixel.hardware;
 
-//import com.ledpixelart.pc.PixelApp;
-
 import ioio.lib.api.AnalogInput;
 import ioio.lib.api.IOIO;
 import ioio.lib.api.RgbLedMatrix;

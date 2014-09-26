@@ -8,6 +8,7 @@ import java.awt.image.BufferedImage;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.onebeartoe.pixel.hardware.Pixel;
 
 /**
  * @author Roberto Marquez
@@ -28,7 +29,7 @@ public class SoundMeter
         this.COLUMN_WIDTH = columnWidth;
     }
 
-/*    
+    
     public void displaySoundData(Pixel pixel, List<SoundReading> microphoneValues) 
     {	    
         BufferedImage img = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
@@ -46,7 +47,6 @@ public class SoundMeter
             int y = height - f.height;
                     
             g2d.fillRect(x, y, COLUMN_WIDTH, f.height);
-//            g2d.fillRect(x, 0, COLUMN_WIDTH, f.height);
             
             x += COLUMN_WIDTH;
         }
@@ -56,15 +56,17 @@ public class SoundMeter
         if (pixel != null)
         {
             try 
-            {  
-                pixel.writeImagetoMatrix(img, KIND.width,KIND.height); //TO DO need to find out how to reference PixelApp class from here
+            {
+                int w = pixel.KIND.width;
+                int h = pixel.KIND.height;
+                pixel.writeImagetoMatrix(img, w, h); //TO DO need to find out how to reference PixelApp class from here
             } 
             catch (ConnectionLostException ex) 
             {
-                Logger.getLogger(ScrollingTextPanel.class.getName()).log(Level.SEVERE, null, ex);
+                String name = getClass().getName();
+                Logger.getLogger(name).log(Level.SEVERE, null, ex);
             }                
         }
     } 
-*/    
     
 }
