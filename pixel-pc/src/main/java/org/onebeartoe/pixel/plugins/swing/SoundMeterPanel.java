@@ -31,9 +31,7 @@ public class SoundMeterPanel extends ImageTilePanel
 
     private volatile List<SoundReading> microphoneValues;
     
-    private final int VALUES_MAX = 32;
-    
-    private final int COLUMN_WIDTH = 2;
+    private final int VALUES_MAX = 32;        
   
     private final int SENSOR_READ_DELAY = 300;
     
@@ -41,7 +39,7 @@ public class SoundMeterPanel extends ImageTilePanel
     
     private int h = KIND.height * 2;
 
-    private Random random = new Random();
+    private Random random;
     
     private SoundMeter soundMeter;
     
@@ -52,11 +50,13 @@ public class SoundMeterPanel extends ImageTilePanel
         w = KIND.width * 2;
         h = KIND.height * 2;
         
+        random = new Random();
+        
         proximityListener = new ProximityListener();
         
         microphoneValues = new ArrayList();
         
-        soundMeter = new SoundMeter(w, h, COLUMN_WIDTH);
+        soundMeter = new SoundMeter(w, h);
     }
     
     @Override
@@ -117,8 +117,7 @@ p = random.nextFloat();
                         microphoneValues.remove(0);
                     }
 
-// PICK UP HERE                    
-//                    soundMeter.displaySoundData();
+                    soundMeter.displaySoundData(pixel, microphoneValues);
                 } 
                 catch (Exception ex) 
                 {

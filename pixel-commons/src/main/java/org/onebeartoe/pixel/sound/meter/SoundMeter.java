@@ -19,14 +19,12 @@ public class SoundMeter
     
     private int height;
     
-    private final int COLUMN_WIDTH;
+    private final int COLUMN_WIDTH = 2;
     
-    public SoundMeter(int width, int height, int columnWidth)
+    public SoundMeter(int width, int height)
     {
         this.width = width;
-        this.height = height;
-        
-        this.COLUMN_WIDTH = columnWidth;
+        this.height = height;                
     }
 
     
