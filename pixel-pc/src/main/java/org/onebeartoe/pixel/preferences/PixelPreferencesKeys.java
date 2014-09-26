@@ -2,7 +2,8 @@
 package org.onebeartoe.pixel.preferences;
 
 /**
- * @author rmarquez
+ * @deprecated Use the version at https://github.com/onebeartoe/java-libraries/tree/master/onebeartoe-application/src/main/java/org/onebeartoe/application
+ * @author Roberto Marquez
  */
 public class PixelPreferencesKeys
 {

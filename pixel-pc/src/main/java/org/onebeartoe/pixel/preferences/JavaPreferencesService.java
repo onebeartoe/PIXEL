@@ -3,7 +3,6 @@ package org.onebeartoe.pixel.preferences;
 
 import com.ledpixelart.pc.PixelApp;
 import com.ledpixelart.pc.plugins.PluginConfigEntry;
-//import com.ledpixelart.pc.plugins.swing.PixelPanel;
 import com.ledpixelart.pc.plugins.swing.UserProvidedPanel;
 import ioio.lib.api.RgbLedMatrix;
 import java.awt.Dimension;
@@ -25,7 +24,8 @@ import javax.swing.JFrame;
 import org.onebeartoe.pixel.plugins.swing.PixelPanel;
 
 /**
- * @author rmarquez
+ * @deprecated Use the version at https://github.com/onebeartoe/java-libraries/tree/master/onebeartoe-application/src/main/java/org/onebeartoe/application
+ * @author Roberto Marquez
  */
 public class JavaPreferencesService implements PreferencesService
 {
