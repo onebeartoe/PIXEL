@@ -5,12 +5,9 @@ import ioio.lib.api.AnalogInput;
 import ioio.lib.api.RgbLedMatrix;
 import ioio.lib.api.exception.ConnectionLostException;
 
-import java.awt.Canvas;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.ByteBuffer;
 import java.util.Arrays;
-
 
 /**
  * @author rmarquez
