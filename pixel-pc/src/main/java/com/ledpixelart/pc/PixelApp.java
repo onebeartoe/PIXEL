@@ -72,7 +72,7 @@ import javax.swing.event.ChangeListener;
 import org.onebeartoe.pixel.hardware.Pixel;
 import org.onebeartoe.pixel.plugins.swing.PixelPanel;
 import org.onebeartoe.pixel.plugins.swing.ScrollingTextPanel;
-import org.onebeartoe.pixel.plugins.swing.VuMeterPanel;
+import org.onebeartoe.pixel.plugins.swing.SoundMeterPanel;
 import org.onebeartoe.pixel.preferences.JavaPreferencesService;
 import org.onebeartoe.pixel.preferences.PixelPreferencesKeys;
 import org.onebeartoe.pixel.preferences.PreferencesService;
@@ -251,7 +251,7 @@ public class PixelApp extends IOIOSwingApp
         builtinPixelPanels.add(settingsPanel);
         
         // VU Meter tab
-        PixelPanel vuMeterTab = new VuMeterPanel(KIND);
+        PixelPanel vuMeterTab = new SoundMeterPanel(KIND);
         builtinPixelPanels.add(vuMeterTab);
 
 	frame = new JFrame("PIXEL");
@@ -563,7 +563,11 @@ public class PixelApp extends IOIOSwingApp
         return pixel.matrix;
     } 
     
-	 private static void setupEnvironment() {
+    /**
+     * @deprecated Use a PixelEnvironment object instead.
+     */
+    private static void setupEnvironment() 
+    {
 		 
 		 switch (ledMatrixType) { 
 		     case 0:

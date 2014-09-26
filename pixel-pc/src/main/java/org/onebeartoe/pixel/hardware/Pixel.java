@@ -25,29 +25,17 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.RandomAccessFile;
 import java.io.StringReader;
-import java.net.URL;
 import java.util.Arrays;
-import java.util.List;
 import java.util.Properties;
-import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import javax.swing.SwingUtilities;
-import javax.swing.SwingWorker;
-
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 
 import org.gifdecoder.GifDecoder;
-import org.imgscalr.Scalr;
-
-
-
 
 /**
  * @author rmarquez
