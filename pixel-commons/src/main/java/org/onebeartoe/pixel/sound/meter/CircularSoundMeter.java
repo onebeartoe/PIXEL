@@ -1,4 +1,5 @@
-
+/*
+ */
 package org.onebeartoe.pixel.sound.meter;
 
 import ioio.lib.api.exception.ConnectionLostException;
@@ -11,22 +12,16 @@ import java.util.logging.Logger;
 import org.onebeartoe.pixel.hardware.Pixel;
 
 /**
+ *
  * @author Roberto Marquez
  */
-public class ButtonUpSoundMeter implements SoundMeter
+public class CircularSoundMeter extends ButtonUpSoundMeter
 {
-    protected int width;
-    
-    protected int height;
-    
-    protected final int COLUMN_WIDTH = 2;
-    
-    public ButtonUpSoundMeter(int width, int height)
-    {
-        this.width = width;
-        this.height = height;                
-    }
 
+    public CircularSoundMeter(int width, int height)
+    {
+        super(width, height);
+    }
     
     @Override
     public void displaySoundData(Pixel pixel, List<SoundReading> microphoneValues) 
@@ -38,16 +33,12 @@ public class ButtonUpSoundMeter implements SoundMeter
         Graphics2D g2d = img.createGraphics();
         g2d.setPaint(textColor);
 
-        int x = 0;
+        int x = width / 2;
+        int y = height / 2;
         for(SoundReading f : microphoneValues)
         {
-            g2d.setColor(f.color);
-                            
-            int y = height - f.height;
-                    
-            g2d.fillRect(x, y, COLUMN_WIDTH, f.height);
-            
-            x += COLUMN_WIDTH;
+            g2d.setColor(f.color);                            
+            g2d.drawOval(x, y, f.height, f.height);                        
         }
 
         g2d.dispose();
@@ -66,6 +57,5 @@ public class ButtonUpSoundMeter implements SoundMeter
                 Logger.getLogger(name).log(Level.SEVERE, null, ex);
             }                
         }
-    }
-    
+    }    
 }
