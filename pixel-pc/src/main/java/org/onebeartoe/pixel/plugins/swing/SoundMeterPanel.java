@@ -12,7 +12,7 @@ import java.util.Random;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.Timer;
-import org.onebeartoe.pixel.sound.meter.SoundMeter;
+import org.onebeartoe.pixel.sound.meter.ButtonUpSoundMeter;
 import org.onebeartoe.pixel.sound.meter.SoundReading;
 
 /**
@@ -41,7 +41,7 @@ public class SoundMeterPanel extends ImageTilePanel
 
     private Random random;
     
-    private SoundMeter soundMeter;
+    private ButtonUpSoundMeter soundMeter;
     
     public SoundMeterPanel(RgbLedMatrix.Matrix KIND) 
     {
@@ -56,7 +56,7 @@ public class SoundMeterPanel extends ImageTilePanel
         
         microphoneValues = new ArrayList();
         
-        soundMeter = new SoundMeter(w, h);
+        soundMeter = new ButtonUpSoundMeter(w, h);
     }
     
     @Override
