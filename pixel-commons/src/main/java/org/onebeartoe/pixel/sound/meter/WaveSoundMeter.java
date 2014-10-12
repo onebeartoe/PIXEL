@@ -9,9 +9,9 @@ import java.util.Random;
 /**
  * @author Roberto Marquez
  */
-public class ButtonUpSoundMeter extends AllOffSoundMeter
+public class WaveSoundMeter extends AllOffSoundMeter
 {   
-    public ButtonUpSoundMeter(int width, int height)
+    public WaveSoundMeter(int width, int height)
     {
         super(width, height);
     }

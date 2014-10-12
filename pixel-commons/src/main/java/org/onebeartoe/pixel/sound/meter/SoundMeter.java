@@ -1,5 +1,4 @@
-/*
- */
+
 package org.onebeartoe.pixel.sound.meter;
 
 import java.util.List;
