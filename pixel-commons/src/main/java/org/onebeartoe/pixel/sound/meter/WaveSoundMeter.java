@@ -12,8 +12,8 @@ import java.util.Random;
 public class WaveSoundMeter extends AllOffSoundMeter
 {   
     public WaveSoundMeter(int width, int height)
-    {
-        super(width, height);
+    { 
+       super(width, height);
     }
 
     @Override
@@ -23,10 +23,12 @@ public class WaveSoundMeter extends AllOffSoundMeter
         for(SoundReading f : microphoneValues)
         {
             g2d.setColor(f.color);
-                            
-            int y = height - f.height;
-                    
-            g2d.fillRect(x, y, COLUMN_WIDTH, f.height);
+            
+            int topY = (int) ((height / 2f) - f.height);
+            g2d.fillRect(x, topY, COLUMN_WIDTH, f.height);
+            
+            int bottomY = (int) ((float) height / 2f);
+            g2d.fillRect(x, bottomY, COLUMN_WIDTH, f.height);
             
             x += COLUMN_WIDTH;
         }        
