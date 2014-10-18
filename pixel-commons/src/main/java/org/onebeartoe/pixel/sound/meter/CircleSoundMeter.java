@@ -10,7 +10,7 @@ import java.util.List;
 /**
  * @author Roberto Marquez
  */
-public class CircleSoundMeter extends ButtonUpSoundMeter
+public class CircleSoundMeter extends BottomUpSoundMeter
 {
 
     public CircleSoundMeter(int width, int height)

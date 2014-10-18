@@ -13,7 +13,7 @@ import java.util.Set;
 /**
  * @author Roberto Marquez
  */
-public class RectangularSoundMeter extends ButtonUpSoundMeter
+public class RectangularSoundMeter extends BottomUpSoundMeter
 {
 
     public RectangularSoundMeter(int width, int height)
@@ -45,7 +45,7 @@ public class RectangularSoundMeter extends ButtonUpSoundMeter
         {
             // iterate over every unique value in the buffer
             
-            Color c = ButtonUpSoundMeter.randomcolor();
+            Color c = BottomUpSoundMeter.randomcolor();
             g2d.setColor(c);
             
             float heightRatio = (float) i / height;

@@ -10,7 +10,9 @@ import org.onebeartoe.pixel.hardware.Pixel;
  */
 public interface SoundMeter
 {
-
     void displaySoundData(Pixel pixel, List<SoundReading> microphoneValues);
+
+//    void setRedrawDelay();
     
+//    void setReadingsDelay();
 }

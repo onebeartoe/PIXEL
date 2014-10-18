@@ -7,7 +7,7 @@ import java.util.List;
 /**
  * @author Roberto Marquez
  */
-public class BlobSoundMeter extends ButtonUpSoundMeter
+public class BlobSoundMeter extends BottomUpSoundMeter
 {
 
     public BlobSoundMeter(int width, int height)
