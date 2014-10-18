@@ -879,7 +879,7 @@ public class PixelApp extends IOIOSwingApp
 
     public class TabChangeListener implements ChangeListener
     {
-
+        @Override
         public void stateChanged(ChangeEvent e)
         {
             for (PixelPanel panel : builtinPixelPanels)
