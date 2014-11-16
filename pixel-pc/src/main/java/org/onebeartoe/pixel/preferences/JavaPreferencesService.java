@@ -44,6 +44,15 @@ public class JavaPreferencesService implements PreferencesService
 	return value;
     }
     
+    /**
+AS AN ALTERNATIVE TO THE USER HAVING TO SUPPLY THE CLASS NAME,
+TRY THIS CLASS: https://commons.apache.org/proper/commons-discovery/apidocs/index.html?org/apache/commons/discovery/tools/DiscoverSingleton.html
+     * @param jarPath
+     * @param className
+     * @param KIND
+     * @return
+     * @throws Exception 
+     */
     @Override
     public PixelPanel loadPlugin(String jarPath, String className, RgbLedMatrix.Matrix KIND) throws Exception
     {	
