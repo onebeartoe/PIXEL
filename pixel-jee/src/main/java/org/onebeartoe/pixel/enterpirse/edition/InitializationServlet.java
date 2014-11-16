@@ -1,5 +1,5 @@
 
-package org.onebeartoe.pixeljee;
+package org.onebeartoe.pixel.enterpirse.edition;
 
 import ioio.lib.api.DigitalOutput;
 import ioio.lib.api.IOIO;
@@ -22,25 +22,29 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.servlet.RequestDispatcher;
+import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.swing.Timer;
+
 import org.onebeartoe.pixel.hardware.Pixel;
 
 /**
  * @author rmarquez
  */
-@WebServlet(value = "/report", loadOnStartup=1)
-public class ScrollingTextServlet extends HttpServlet implements IOIOLooperProvider
+@WebServlet(value = "/status", loadOnStartup=1)
+public class InitializationServlet extends HttpServlet implements IOIOLooperProvider
 {
-    private static IOIO ioiO;
+// REMOVE THIS FROM CLASS SCOPE    
+//    private static IOIO ioiO;
     
-    private static RgbLedMatrix.Matrix KIND = ioio.lib.api.RgbLedMatrix.Matrix.SEEEDSTUDIO_32x32;
+    private static RgbLedMatrix.Matrix MATRIX_TYPE = RgbLedMatrix.Matrix.SEEEDSTUDIO_32x32;
     
-    public static final Pixel pixel = new Pixel(KIND);
+//    public static final Pixel pixel = new Pixel(MATRIX_TYPE);
     
     private Timer searchTimer;
     
@@ -53,16 +57,25 @@ public class ScrollingTextServlet extends HttpServlet implements IOIOLooperProvi
     private HashMap<String, Font> fonts;
     
     public static final String [] fontNames = GraphicsEnvironment.getLocalGraphicsEnvironment().getAvailableFontFamilyNames();
-    
+
+// MOVE THIS TO THE SCROLING TEXT CLASS    
     private int x;
+    
+    private final String PIXEL_KEY = "PIXEL_KEY";
     
     @Override
     public void init()
     {
-        String className = ScrollingTextServlet.class.getName();
+        String className = InitializationServlet.class.getName();
         logger = Logger.getLogger(className);
      
         fonts = new HashMap();
+        
+        Pixel pixel = new Pixel(MATRIX_TYPE);
+                
+        // save the pixel to appliction scope
+        ServletContext servletContext = getServletContext();     
+        servletContext.setAttribute(PIXEL_KEY, pixel);
         
 	startSearchTimer();
     
@@ -72,7 +85,7 @@ public class ScrollingTextServlet extends HttpServlet implements IOIOLooperProvi
         try 
         {
             statusLabel = "Initializing";
-            go(args);
+            initializePixel(args);
         } 
         catch (Exception ex) 
         {
@@ -85,15 +98,44 @@ public class ScrollingTextServlet extends HttpServlet implements IOIOLooperProvi
     public void destroy()
     {
         searchTimer.stop();
-        
-        timer.stop();
+                
+        if(timer == null)
+        {
+            logger.log(Level.INFO, "The init servlet stopped with not timer set.");
+        }
+        else
+        {
+            timer.stop();
+            logger.log(Level.INFO, "The init servlet stopped the REFRESH? timer.");
+        }
     }
     
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException 
     {
-        response.setContentType("text/plain");
-        response.getWriter().write(new Date().toString());
+        ServletContext servletContext = getServletContext();     
+        Pixel pixel = (Pixel) servletContext.getAttribute(PIXEL_KEY);
+        boolean initialized;
+        if(pixel == null)
+        {
+            initialized = false;
+        }
+        else
+        {
+            initialized = true;
+            
+            String firmware = pixel.getFirmwareVersion();            
+            request.setAttribute("firmware", firmware);
+            
+            String hardware = pixel.getHardwareVersion();
+            request.setAttribute("hardware", hardware);
+        }
+        
+        request.setAttribute("initialized", initialized);
+        
+        ServletContext c = getServletContext();
+        RequestDispatcher rd = c.getRequestDispatcher("/status.jsp");
+        rd.forward(request, response);
     }
     
     @Override
@@ -109,18 +151,26 @@ public class ScrollingTextServlet extends HttpServlet implements IOIOLooperProvi
 	    protected void setup() throws ConnectionLostException, InterruptedException
 	    {
 		led_ = ioio_.openDigitalOutput(IOIO.LED_PIN, true);
-                ScrollingTextServlet.this.ioiO = ioio_;
+                
+//                InitializationServlet.this.ioiO = ioio_;
+                
+                
+                ServletContext servletContext = getServletContext();     
+                Pixel pixel = (Pixel) servletContext.getAttribute(PIXEL_KEY);
 		pixel.matrix = ioio_.openRgbLedMatrix(pixel.KIND);
                 pixel.ioiO = ioio_;
-                
-		System.out.println("Found PIXEL: " + pixel.matrix + "\n");
-		System.out.println("You may now interact with the PIXEL\n");
+
+                StringBuilder message = new StringBuilder();
+		message.append("Found PIXEL: " + pixel.matrix + "\n");
+		message.append("You may now interact with the PIXEL\n");
 		
 //TODO: Load something on startup
 
 		searchTimer.stop(); //need to stop the timer so we don't still display the pixel searching message
-		String message = "PIXEL Status: Connected";
-                ScrollingTextServlet.this.statusLabel = message;
+		message.append("PIXEL Status: Connected");
+                statusLabel = message.toString();
+                
+                logger.log(Level.INFO, message.toString() );
 	    }
 	    
 	    @Override
@@ -138,23 +188,26 @@ public class ScrollingTextServlet extends HttpServlet implements IOIOLooperProvi
 	    }
 	};
     }
-    
-    public ActionListener getActionListener() 
-    {
-        ActionListener listener = new TextScroller();
-        
-        return listener;
-    }
-    
-    protected final void go(String[] args) throws Exception 
+
+    private final void initializePixel(String[] args) throws Exception 
     {
         System.out.println("initializing the IOIO application helper");
         
         IOIOPcApplicationHelper helper = new IOIOPcApplicationHelper(this);
-        helper.start();
+//        helper.start();
+        try
+        {
+            helper.start();
+        }
+        catch(UnsatisfiedLinkError e)
+        {
+            // we are not ont he Raspberry Pi or something went real bad
+            e.printStackTrace();
+        }
         
         try 
-        {            
+        {
+            
             run(args);
         } 
         catch (Exception e) 
@@ -167,16 +220,17 @@ public class ScrollingTextServlet extends HttpServlet implements IOIOLooperProvi
         }
     }
     
-    protected void run(String[] args) throws Exception
+    private void run(String[] argssss) throws Exception
     {
-        System.out.println("Starting PIXEL activity in " + getClass().getSimpleName() + ".");		
-	ActionListener listener = getActionListener();
-	
-	// set the IOIO loop delay to half a second, by default
-	int delay = 500; // milliseconds
-        
-	timer = new Timer(delay, listener);	
-	timer.start();
+// DONT RUN THE SCROLLING TEXT HERE        
+//        System.out.println("Starting PIXEL activity in " + getClass().getSimpleName() + ".");		
+//	ActionListener listener = new TextScroller();
+//	
+//	// set the IOIO loop delay to half a second, by default
+//	int delay = 500; // milliseconds
+//        
+//	timer = new Timer(delay, listener);	
+//	timer.start();
     }
     
     private void startSearchTimer()
@@ -232,6 +286,9 @@ public class ScrollingTextServlet extends HttpServlet implements IOIOLooperProvi
 	    if(now > periodEnd)
 	    {
 		searchTimer.stop();
+                
+                ServletContext servletContext = getServletContext();     
+                Pixel pixel = (Pixel) servletContext.getAttribute(PIXEL_KEY);
 		if(pixel.matrix == null)
 		{
 		    message = "A Bluetooth connection to PIXEL could not be established. \n\nPlease ensure you have Bluetooth paired your PC to PIXEL first using code: 4545 and then try again.";		    		    
@@ -245,7 +302,7 @@ public class ScrollingTextServlet extends HttpServlet implements IOIOLooperProvi
 
     public String getText()
     {
-	return "E2 Rocks!!!!!!!!!!!!!!!!!";
+	return "some text";
     }
     
     /**
@@ -273,7 +330,7 @@ public class ScrollingTextServlet extends HttpServlet implements IOIOLooperProvi
 	    int delay = 200;//scrollSpeedSlider.getValue();	
 	    delay = 710 - delay;                            // al linke: added this so the higher slider value means faster scrolling
 	    
-	    ScrollingTextServlet.this.timer.setDelay(delay);
+	    InitializationServlet.this.timer.setDelay(delay);
 	    
             int w = 64;
             int h = 64;
@@ -324,14 +381,15 @@ public class ScrollingTextServlet extends HttpServlet implements IOIOLooperProvi
             }
             
             g2d.dispose();
+System.out.println(".");
 
-System.out.println(".")            ;
-            
+            ServletContext servletContext = getServletContext();     
+            Pixel pixel = (Pixel) servletContext.getAttribute(PIXEL_KEY);
             if(pixel != null)
             {
                 try 
                 {  
-                    pixel.writeImagetoMatrix(img);
+                    pixel.writeImagetoMatrix(img, MATRIX_TYPE.width, MATRIX_TYPE.height);
                 } 
                 catch (ConnectionLostException ex) 
                 {
