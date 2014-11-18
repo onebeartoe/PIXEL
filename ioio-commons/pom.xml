@@ -37,8 +37,7 @@
             <version>3.8.1</version>
             <scope>test</scope>
         </dependency>
-    
-    
+     
         <!--version>0.0.10/version changed to 10 as it was more reliable at the time
         version>0.0.17</version was originally 17 -->
      
@@ -48,8 +47,6 @@
             <version>0.0.22</version>
         </dependency>
    
-    
-   
         <dependency>
             <groupId>org.imgscalr</groupId>
             <artifactId>imgscalr-lib</artifactId>
@@ -57,8 +54,6 @@
             <type>jar</type>
             <scope>compile</scope>
         </dependency>
-    
-    
     </dependencies>
   
     <build>
