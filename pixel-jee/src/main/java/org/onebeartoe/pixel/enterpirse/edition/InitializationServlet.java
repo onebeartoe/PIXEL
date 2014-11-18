@@ -1,14 +1,11 @@
 
 package org.onebeartoe.pixel.enterpirse.edition;
 
-import ioio.lib.api.DigitalOutput;
-import ioio.lib.api.IOIO;
 import ioio.lib.api.RgbLedMatrix;
 import ioio.lib.api.exception.ConnectionLostException;
 import ioio.lib.util.BaseIOIOLooper;
 import ioio.lib.util.IOIOLooper;
-import ioio.lib.util.IOIOLooperProvider;
-import ioio.lib.util.pc.IOIOPcApplicationHelper;
+import ioio.lib.util.pc.IOIOConsoleApp;
 import java.awt.GraphicsEnvironment;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -30,8 +27,8 @@ import org.onebeartoe.pixel.hardware.Pixel;
 /**
  * @author rmarquez
  */
-@WebServlet(value = "/status", loadOnStartup=1)
-public class InitializationServlet extends HttpServlet implements IOIOLooperProvider
+@WebServlet(value = "/status")//, loadOnStartup=1)
+public class InitializationServlet extends HttpServlet //implements IOIOLooperProvider
 {
 // REMOVE THIS FROM CLASS SCOPE    
 //    private static IOIO ioiO;
@@ -117,87 +114,43 @@ public class InitializationServlet extends HttpServlet implements IOIOLooperProv
         rd.forward(request, response);
     }
     
-    @Override
-    public IOIOLooper createIOIOLooper(String connectionType, Object extra) 
+    private void initializePixel(String[] args) throws Exception 
     {
-        System.out.println(getClass().getSimpleName() + " creating IOIO looper");
-        
-	return new BaseIOIOLooper() 
-	{
-	    private DigitalOutput led_;
-
-	    @Override
-	    protected void setup() throws ConnectionLostException, InterruptedException
-	    {
-		led_ = ioio_.openDigitalOutput(IOIO.LED_PIN, true);
-                
-//                InitializationServlet.this.ioiO = ioio_;
-                
-                
-                ServletContext servletContext = getServletContext();     
-                Pixel pixel = (Pixel) servletContext.getAttribute(PIXEL_KEY);
-		pixel.matrix = ioio_.openRgbLedMatrix(pixel.KIND);
-                pixel.ioiO = ioio_;
-
-                StringBuilder message = new StringBuilder();
-		message.append("Found PIXEL: " + pixel.matrix + "\n");
-		message.append("You may now interact with the PIXEL\n");
-		
-//TODO: Load something on startup
-
-		searchTimer.stop(); //need to stop the timer so we don't still display the pixel searching message
-		message.append("PIXEL Status: Connected");
-                statusLabel = message.toString();
-                
-                logger.log(Level.INFO, message.toString() );
-	    }
-	    
-	    @Override
-	    public void disconnected() 
-	    {
-		statusLabel = "PIXEL was disconected";
-		System.out.println(statusLabel);
-	    }
-
-	    @Override
-	    public void incompatible() 
-	    {
-		statusLabel = "Incompatible firmware detected";
-		System.out.println(statusLabel);
-	    }
-	};
+        PixelIntegration pi = new PixelIntegration();
+//        pi.
     }
-
-    private final void initializePixel(String[] args) throws Exception 
-    {
-        System.out.println("initializing the IOIO application helper");
-        
-        IOIOPcApplicationHelper helper = new IOIOPcApplicationHelper(this);
-//        helper.start();
-        try
-        {
-            helper.start();
-        }
-        catch(UnsatisfiedLinkError e)
-        {
-            // we are not ont he Raspberry Pi or something went real bad
-            e.printStackTrace();
-        }
-        
-        try 
-        {
-            
-            run(args);
-        } 
-        catch (Exception e) 
-        {                
-            throw e;
-        } 
-        finally 
-        {                
-            helper.stop();
-        }
-    }
+    
+//    @Deprecated
+//    private void initializePixelOld(String[] args) throws Exception 
+//    {
+//        System.out.println("initializing the IOIO application helper");
+//        
+//        IOIOPcApplicationHelper helper = new IOIOPcApplicationHelper(this);
+////        helper.start();
+//        try
+//        {
+//            helper.start();
+//        }
+//        catch(UnsatisfiedLinkError e)
+//        {
+//            // we are not ont he Raspberry Pi or something went real bad
+//            e.printStackTrace();
+//        }
+//        
+//        try 
+//        {
+//            
+//            run(args);
+//        } 
+//        catch (Exception e) 
+//        {                
+//            throw e;
+//        } 
+//        finally 
+//        {                
+//            helper.stop();
+//        }
+//    }
     
     private void run(String[] argssss) throws Exception
     {
@@ -218,6 +171,74 @@ public class InitializationServlet extends HttpServlet implements IOIOLooperProv
 	SearchTimer worker = new SearchTimer();
 	searchTimer = new Timer(delay, worker);
 	searchTimer.start();
+    }    
+    
+    private class PixelIntegration extends IOIOConsoleApp
+    {
+        public PixelIntegration()
+        {
+            try
+            {
+                System.out.println("CALLING GO");
+                go(null);
+            } 
+            catch (Exception ex)
+            {
+                String message = "Could not initialize Pixel: " + ex.getMessage();
+                logger.log(Level.INFO, message);
+            }
+        }
+        
+        @Override
+        protected void run(String[] args) throws IOException 
+        {
+            System.out.println("PixelIntegration.run()");
+        }
+
+        @Override
+        public IOIOLooper createIOIOLooper(String connectionType, Object extra)
+        {
+            IOIOLooper looper = new BaseIOIOLooper() 
+            {
+            
+                @Override
+                public void disconnected() 
+                {
+                    String message = "PIXEL was Disconnected";
+                    System.out.println(message);
+                }
+
+                @Override
+                public void incompatible() 
+                {
+                    String message = "Incompatible Firmware Detected";
+                    System.out.println(message);
+                }
+
+                @Override
+                protected void setup() throws ConnectionLostException, InterruptedException
+                {
+                    ServletContext servletContext = getServletContext();     
+                    Pixel pixel = (Pixel) servletContext.getAttribute(PIXEL_KEY);
+                    pixel.matrix = ioio_.openRgbLedMatrix(pixel.KIND);
+                    pixel.ioiO = ioio_;
+
+                    StringBuilder message = new StringBuilder();
+                    message.append("Found PIXEL: " + pixel.matrix + "\n");
+                    message.append("You may now interact with the PIXEL\n");
+
+    //TODO: Load something on startup
+
+                    searchTimer.stop(); //need to stop the timer so we don't still display the pixel searching message
+                    message.append("PIXEL Status: Connected");
+                    statusLabel = message.toString();
+
+                    logger.log(Level.INFO, statusLabel);
+                }
+            };
+                    
+            return looper;
+        }        
     }
     
     private class SearchTimer implements ActionListener 
@@ -270,8 +291,8 @@ public class InitializationServlet extends HttpServlet implements IOIOLooperProv
                 Pixel pixel = (Pixel) servletContext.getAttribute(PIXEL_KEY);
 		if(pixel.matrix == null)
 		{
-		    message = "A Bluetooth connection to PIXEL could not be established. \n\nPlease ensure you have Bluetooth paired your PC to PIXEL first using code: 4545 and then try again.";		    		    
-		    String title = "PIXEL Connection Unsuccessful";
+		    message = "A connection to PIXEL could not be established.";
+		    String title = "PIXEL Connection Unsuccessful: ";
                     statusLabel = title + message;
                     logger.log(Level.SEVERE, statusLabel);
 		}

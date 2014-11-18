@@ -93,21 +93,32 @@ public class ChangeModeServlet extends HttpServlet
         TimerTask drawTask = null;
         
         String forward;
-        switch(mode)
+//        switch(mode)
+//        {
+//            case "/":
+//            {
+//                forward = "";
+//
+//                break;
+//            }
+//            default:
+//            {
+//                drawTask = new TextScroller();
+//                
+//                // scrolling text
+//                forward = "scrolling-text";
+//            }
+//        }
+        if(mode.equals(""))
         {
-            case "/":
-            {
-                forward = "";
-                        
-                break;
-            }
-            default:
-            {
-                drawTask = new TextScroller();
-                
-                // scrolling text
-                forward = "scrolling-text";
-            }
+            forward = "";
+        }
+        else
+        {
+            drawTask = new TextScroller();
+
+            // scrolling text
+            forward = "scrolling-text";            
         }
         
         ServletContext servletContext = getServletContext();     
