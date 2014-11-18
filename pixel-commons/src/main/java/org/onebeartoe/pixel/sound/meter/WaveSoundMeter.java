@@ -23,12 +23,19 @@ public class WaveSoundMeter extends AllOffSoundMeter
         for(SoundReading f : microphoneValues)
         {
             g2d.setColor(f.color);
-            
-            int topY = (int) ((height / 2f) - f.height);
+
+//            int topHeight = (int) (f.height / 2f);
+            int topY = (int) ((height / 2f) - (f.height / 2f));
             g2d.fillRect(x, topY, COLUMN_WIDTH, f.height);
+
             
-            int bottomY = (int) ((float) height / 2f);
-            g2d.fillRect(x, bottomY, COLUMN_WIDTH, f.height);
+//            int topHeight = (int) (f.height / 2f);
+//            int topY = (int) ((height / 2f) - f.height);
+//            g2d.fillRect(x, topY, COLUMN_WIDTH, topHeight);
+//            
+//            int bottomHeight = topHeight;
+//            int bottomY = (int) ((float) height / 2f);
+//            g2d.fillRect(x, bottomY, COLUMN_WIDTH, bottomHeight);
             
             x += COLUMN_WIDTH;
         }        
