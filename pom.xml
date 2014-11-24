@@ -35,6 +35,7 @@
         <module>pixel-weather</module>
 -->
         <module>pixel-jee</module>
+        <module>pixel-web-enabled</module>
     </modules>
 
     <build>
