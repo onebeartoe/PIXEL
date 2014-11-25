@@ -103,7 +103,7 @@ public class WebEnabledPixel
     
     private class IndexHttpHandler extends TextHttpHandler
     {
-        protected String getText()
+        protected String getHttpText()
         {
             String response = "Hello, Pixel Worlds!\n";
             
@@ -111,14 +111,14 @@ public class WebEnabledPixel
         }
     }
     
-    // MOVE ME
+// MOVE ME
     private abstract class TextHttpHandler implements HttpHandler
     {
-        protected abstract String getText();
+        protected abstract String getHttpText();
         
         public void handle(HttpExchange t) throws IOException
         {
-            String response = getText();
+            String response = getHttpText();
             t.sendResponseHeaders(200, response.length());
             OutputStream os = t.getResponseBody();
             os.write(response.getBytes());
@@ -234,7 +234,7 @@ public class WebEnabledPixel
         private Timer timer;
         
         @Override
-        protected String getText()
+        protected String getHttpText()
         {
             if(timer == null)
             {
