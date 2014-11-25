@@ -7,41 +7,34 @@ import ioio.lib.util.BaseIOIOLooper;
 import ioio.lib.util.IOIOLooper;
 import ioio.lib.util.pc.IOIOConsoleApp;
 import java.awt.GraphicsEnvironment;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.io.IOException;
 import java.util.Date;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.swing.Timer;
 
 import org.onebeartoe.pixel.hardware.Pixel;
 
 /**
- * @author rmarquez
+ * @author Roberto Marquez
  */
-@WebServlet(value = "/status")//, loadOnStartup=1)
-public class InitializationServlet extends HttpServlet //implements IOIOLooperProvider
-{
-// REMOVE THIS FROM CLASS SCOPE    
-//    private static IOIO ioiO;
-    
-    public static RgbLedMatrix.Matrix MATRIX_TYPE = RgbLedMatrix.Matrix.SEEEDSTUDIO_32x32;
-    
-//    public static final Pixel pixel = new Pixel(MATRIX_TYPE);
+@WebServlet(value = "/init", loadOnStartup=1)
+public class InitializationServlet extends HttpServlet
+{   
+    public static RgbLedMatrix.Matrix MATRIX_TYPE = RgbLedMatrix.Matrix.ADAFRUIT_32x16;
+//    public static RgbLedMatrix.Matrix MATRIX_TYPE = RgbLedMatrix.Matrix.SEEEDSTUDIO_32x32;
     
     private Timer searchTimer;
     
     private String statusLabel;
     
     private Logger logger;
+    
+    private boolean stayConnected = true;
     
     public static final String [] fontNames = GraphicsEnvironment.getLocalGraphicsEnvironment().getAvailableFontFamilyNames();
     
@@ -54,6 +47,7 @@ public class InitializationServlet extends HttpServlet //implements IOIOLooperPr
     {
         String className = InitializationServlet.class.getName();
         logger = Logger.getLogger(className);
+        logger.log(Level.INFO, "The initialization servlet started!.!");
         
         Pixel pixel = new Pixel(MATRIX_TYPE);
                 
@@ -66,57 +60,40 @@ public class InitializationServlet extends HttpServlet //implements IOIOLooperPr
         servletContext.setAttribute(PIXEL_TIMER_KEY, timer);
         
 	startSearchTimer();
-        
-        String [] args = {};
-        try 
+            
+        statusLabel = "Initializing";
+        TimerTask initializeTask = new TimerTask()
         {
-            statusLabel = "Initializing";
-            initializePixel(args);
-        } 
-        catch (Exception ex) 
-        {
-            statusLabel = "An error occureds while initializing";
-            logger.log(Level.SEVERE, statusLabel, ex);
-        }
+
+            @Override
+            public void run()
+            {
+                final String [] args = {};
+                try 
+                {
+                    initializePixel(args);
+                } 
+                catch (Exception ex) 
+                {
+                    statusLabel = "An error occureds while initializing";
+                    logger.log(Level.SEVERE, statusLabel, ex);
+                }                    
+            }
+        };
+        Date now  = new Date();    
+        Timer initTimer = new Timer();
+        initTimer.schedule(initializeTask, now);
     }
     
     @Override
     public void destroy()
     {
-        searchTimer.stop();
+        searchTimer.cancel();
     }
-    
-    @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException 
-    {
-        ServletContext servletContext = getServletContext();     
-        Pixel pixel = (Pixel) servletContext.getAttribute(PIXEL_KEY);
-        boolean initialized;
-        if(pixel == null)
-        {
-            initialized = false;
-        }
-        else
-        {
-            initialized = true;
-            
-            String firmware = pixel.getFirmwareVersion();            
-            request.setAttribute("firmware", firmware);
-            
-            String hardware = pixel.getHardwareVersion();
-            request.setAttribute("hardware", hardware);
-        }
         
-        request.setAttribute("initialized", initialized);
-        
-        ServletContext c = getServletContext();
-        RequestDispatcher rd = c.getRequestDispatcher("/status.jsp");
-        rd.forward(request, response);
-    }
-    
     private void initializePixel(String[] args) throws Exception 
     {
-        PixelIntegration pi = new PixelIntegration();
+        PixelIntegration pi = new PixelIntegration(args);
 //        pi.
     }
     
@@ -167,20 +144,20 @@ public class InitializationServlet extends HttpServlet //implements IOIOLooperPr
     
     private void startSearchTimer()
     {
-	int delay = 1000;
+//	int delay = 1000;
 	SearchTimer worker = new SearchTimer();
-	searchTimer = new Timer(delay, worker);
-	searchTimer.start();
-    }    
+	searchTimer = new Timer();//delay, worker);
+	searchTimer.schedule(worker, new Date());
+    }
     
     private class PixelIntegration extends IOIOConsoleApp
     {
-        public PixelIntegration()
+        public PixelIntegration(String [] args)
         {
             try
             {
                 System.out.println("CALLING GO");
-                go(null);
+                go(args);
             } 
             catch (Exception ex)
             {
@@ -192,7 +169,46 @@ public class InitializationServlet extends HttpServlet //implements IOIOLooperPr
         @Override
         protected void run(String[] args) throws IOException 
         {
-            System.out.println("PixelIntegration.run()");
+            System.out.println("Pixel integration with delayted run() via sleep.");
+            
+            while(stayConnected)
+            {
+                long duration = 1000 * 60 * 1;
+                try
+                {
+                    Thread.sleep(duration);
+                } 
+                catch (InterruptedException ex)
+                {
+                    String message = "Error sleeping for Pixel initialization: " + ex.getMessage();
+                    logger.log(Level.INFO, message, ex);
+                }
+            }
+            
+
+            
+            
+//            InputStreamReader isr = new InputStreamReader(System.in);
+//            BufferedReader reader = new BufferedReader(isr);
+//            boolean abort = false;
+//            String line;
+//            while (!abort && (line = reader.readLine()) != null) 
+//            {
+//                if (line.equals("t")) 
+//                {
+//                    //ledOn_ = !ledOn_;
+//                } 
+//                else if (line.equals("q")) {
+//                    abort = true;
+//                    System.exit(1);
+//                } 
+//                else 
+//                {
+//                    System.out.println("Unknown input. q=quit.");
+//                }
+//            }            
+            
+            logger.log(Level.INFO, "Pixel integration: end of run");
         }
 
         @Override
@@ -229,7 +245,7 @@ public class InitializationServlet extends HttpServlet //implements IOIOLooperPr
 
     //TODO: Load something on startup
 
-                    searchTimer.stop(); //need to stop the timer so we don't still display the pixel searching message
+                    searchTimer.cancel();//stop(); //need to stop the timer so we don't still display the pixel searching message
                     message.append("PIXEL Status: Connected");
                     statusLabel = message.toString();
 
@@ -241,7 +257,7 @@ public class InitializationServlet extends HttpServlet //implements IOIOLooperPr
         }        
     }
     
-    private class SearchTimer implements ActionListener 
+    private class SearchTimer extends TimerTask//implements ActionListener 
     {
 	final long searchPeriodLength = 45 * 1000;
 	
@@ -263,10 +279,11 @@ public class InitializationServlet extends HttpServlet //implements IOIOLooperPr
 	    periodStart = d.getTime();
 	    periodEnd = periodStart + searchPeriodLength;
 	}
-	
-	public void actionPerformed(ActionEvent e) 
-	{	    	    	    
-	    if(dotCount > 10)
+
+        @Override
+        public void run()
+        {
+            if(dotCount > 10)
 	    {
 		label = new StringBuilder(message);
 		label.insert(0, "<html><body><h2>");
@@ -285,7 +302,7 @@ public class InitializationServlet extends HttpServlet //implements IOIOLooperPr
 	    long now = d.getTime();
 	    if(now > periodEnd)
 	    {
-		searchTimer.stop();
+		searchTimer.cancel();
                 
                 ServletContext servletContext = getServletContext();     
                 Pixel pixel = (Pixel) servletContext.getAttribute(PIXEL_KEY);
@@ -297,6 +314,6 @@ public class InitializationServlet extends HttpServlet //implements IOIOLooperPr
                     logger.log(Level.SEVERE, statusLabel);
 		}
 	    }
-	}
+        }
     }
 }
