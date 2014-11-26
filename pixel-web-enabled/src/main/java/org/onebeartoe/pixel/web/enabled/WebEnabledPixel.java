@@ -20,7 +20,10 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
 import java.net.InetSocketAddress;
+import java.net.URI;
+import java.net.URLDecoder;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.TimerTask;
@@ -50,16 +53,20 @@ public class WebEnabledPixel
     
     private HashMap<String, Font> fonts;
     
+    private String scrollingText;
+    
     public WebEnabledPixel()
     {
         String name = getClass().getName();
         logger = Logger.getLogger(name);
-        InetSocketAddress anyhost = new InetSocketAddress(2007);
+        
         try
         {
+            InetSocketAddress anyhost = new InetSocketAddress(2007);
             server = HttpServer.create(anyhost, 0);
             HttpContext createContext = server.createContext("/",     new IndexHttpHandler() );
             HttpContext   textContext = server.createContext("/text", new ScrollingTextHttpHander() );
+                                        server.createContext("/still", new StillImageHttpHandler() );
         } 
         catch (IOException ex)
         {
@@ -71,11 +78,39 @@ public class WebEnabledPixel
         fonts = new HashMap();
     }
 
+    /**
+     * Override this to perform any additional background drawing on the image that get sent to the PIXEL
+     * @param g2d 
+     */
+    protected void additionalBackgroundDrawing(Graphics2D g2d) throws Exception
+    {
+        
+    }    
+    
+    /**
+     * Override this to perform any additional foreground drawing on the image that get sent to the PIXEL
+     * @param g2d 
+     */
+    protected void additionalForegroundDrawing(Graphics2D g2d) throws Exception
+    {
+        
+    }    
+    
+    public String getScrollingText()
+    {
+        return scrollingText;
+    }
+    
     public static void main(String[] args)
     {
         WebEnabledPixel app = new WebEnabledPixel();
         app.startServer();
     }
+
+    public void setScrollingText(String scrollingText)
+    {
+        this.scrollingText = scrollingText;
+    }    
 
     private void startSearchTimer()
     {
@@ -101,7 +136,7 @@ public class WebEnabledPixel
     
     private class IndexHttpHandler extends TextHttpHandler
     {
-        protected String getHttpText()
+        protected String getHttpText(HttpExchange t)
         {
             String response = "Hello, Pixel Worlds!\n";
             
@@ -112,13 +147,13 @@ public class WebEnabledPixel
 // MOVE ME
     private abstract class TextHttpHandler implements HttpHandler
     {
-        protected abstract String getHttpText();
+        protected abstract String getHttpText(HttpExchange exchange);
         
-        public void handle(HttpExchange t) throws IOException
-        {
-            String response = getHttpText();
-            t.sendResponseHeaders(200, response.length());
-            OutputStream os = t.getResponseBody();
+        public void handle(HttpExchange exchange) throws IOException
+        {            
+            String response = getHttpText(exchange);
+            exchange.sendResponseHeaders(200, response.length());
+            OutputStream os = exchange.getResponseBody();
             os.write(response.getBytes());
             os.close();
         }        
@@ -232,8 +267,33 @@ public class WebEnabledPixel
         private Timer timer;
         
         @Override
-        protected String getHttpText()
+        protected String getHttpText(HttpExchange exchange)
         {
+            String requestMethod = exchange.getRequestMethod();
+            URI requestURI = exchange.getRequestURI();
+            
+            String encodedQuery = requestURI.getQuery();
+            String query;
+            try
+            {
+                query = URLDecoder.decode(encodedQuery, "UTF-8");
+                String[] parameters = query.split("&");
+                if(parameters != null && parameters.length > 0)
+                {
+                    String command = parameters[0];
+                    String [] strs = command.split("=");
+                    String t = strs[0];
+                    String text = strs[1];
+                    
+                    setScrollingText(text);
+                }
+            } 
+            catch (UnsupportedEncodingException ex)
+            {
+                logger.log(Level.SEVERE, "The scrolling text parameters could not be decoded.", ex);
+            }
+            
+            
             if(timer == null)
             {
                 System.out.println("time is not null");
@@ -318,29 +378,6 @@ public class WebEnabledPixel
 	}        
     }
     
-        /**
-     * Override this to perform any additional background drawing on the image that get sent to the PIXEL
-     * @param g2d 
-     */
-    protected void additionalBackgroundDrawing(Graphics2D g2d) throws Exception
-    {
-        
-    }    
-    
-    /**
-     * Override this to perform any additional foreground drawing on the image that get sent to the PIXEL
-     * @param g2d 
-     */
-    protected void additionalForegroundDrawing(Graphics2D g2d) throws Exception
-    {
-        
-    }
-    
-    public String getText()
-    {
-	return "some text";
-    }
-    
     @Deprecated
     public class TextScroller extends TimerTask//implements ActionListener
     {
@@ -374,7 +411,7 @@ public class WebEnabledPixel
             
             g2d.setFont(font);
             
-            String message = getText();
+            String message = getScrollingText();
             
             FontMetrics fm = g2d.getFontMetrics();
             
