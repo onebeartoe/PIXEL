@@ -42,7 +42,7 @@
 		<configuration>
 		    <archive>
 			<manifest>
-			    <mainClass>org.onebeartoe.pixel.web.enabled.WebEnabledPixel</mainClass>
+			    <mainClass>org.onebeartoe.web.enabled.pixel.WebEnabledPixel</mainClass>
 			</manifest>
 		    </archive>
                     
