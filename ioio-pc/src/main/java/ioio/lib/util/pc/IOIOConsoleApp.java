@@ -103,5 +103,12 @@ public abstract class IOIOConsoleApp implements IOIOLooperProvider {
 		}
 	}
 
+        /**
+         * This method should not return while a connection to the Pixel is 
+         * needed.  Conversely, if you need to disconnect from the Pixel then have 
+         * this method return execution to the caller.
+         * @param args
+         * @throws Exception 
+         */
 	protected abstract void run(String[] args) throws Exception;
 }
