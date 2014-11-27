@@ -2,31 +2,17 @@
 package com.ledpixelart.pc.plugins.swing;
 
 import com.ledpixelart.pc.PixelApp;
-import com.sun.org.apache.xerces.internal.util.Status;
 
 import ioio.lib.api.RgbLedMatrix;
-import ioio.lib.api.exception.ConnectionLostException;
 
 import java.awt.Component;
 import java.awt.Cursor;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.InputEvent;
-import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.URL;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-
-import javax.imageio.ImageIO;
-import javax.swing.SwingUtilities;
 import javax.swing.SwingWorker;
 import javax.swing.Timer;
 
@@ -38,7 +24,8 @@ import org.apache.commons.io.FilenameUtils;
 public class AnimationsPanel extends ImageTilePanel implements MouseListener
 {
     private int i;
-  
+
+// This member looks like it is not needed; use selectedFileName everywhere instead.    
     private static String animation_name;
     
     private volatile Timer timer;
@@ -57,17 +44,20 @@ public class AnimationsPanel extends ImageTilePanel implements MouseListener
   	
   	private static float fps = 0;
   	
-  	private static String userHome = System.getProperty("user.home");
+    private static String userHome = System.getProperty("user.home");
   	
-  	private static String decodedDir = userHome + "/pixel/animations/decoded/";  //users/al/pixel/animations/decoded
+    private static String decodedDir = userHome + "/pixel/animations/decoded/";
   	
-  	private static String gifSourcePath = "animations/gifsource/";  //the path to the source gifs in the jar
+    /**
+     * the path to the source gifs in the jar
+     */
+    private String gifSourcePath = "animations/gifsource/";
   	
-    private static float GIFfps;
+//    private static float GIFfps;
     
     private static int GIFnumFrames;
     
-    private static int GIFselectedFileDelay;
+//    private static int gifSelectedFileDelay;
     
     private static int GIFresolution;
     
@@ -90,52 +80,61 @@ public class AnimationsPanel extends ImageTilePanel implements MouseListener
 		{
 		    i = 0;
 		}
-			PixelApp.pixel.SendPixelDecodedFrame(decodedDir, animation_name, i, GIFnumFrames, GIFresolution, KIND.width,KIND.height);
+                PixelApp.pixel.SendPixelDecodedFrame(decodedDir, animation_name, i, GIFnumFrames, GIFresolution, KIND.width,KIND.height);
 	    }
 	};
     }
     
     @Override
-	public void mouseClicked(MouseEvent e) {
-    	if (PixelApp.getPixelFound() == true) { //let's make sure pixel is found before proceeding or we'll get a crash
-			PixelApp.pixel.interactiveMode();
+    public void mouseClicked(MouseEvent e) 
+    {
+    	if (PixelApp.getPixelFound() == true) 
+        { 
+            //let's make sure pixel is found before proceeding or we'll get a crash
+            PixelApp.pixel.interactiveMode();
 			
-			Component command = e.getComponent();
-			String localFileImagePath = PixelApp.pixel.getSelectedFilePath(command);
-			selectedFileName = FilenameUtils.getName(localFileImagePath); //with the extension .gif
-			fileType = FilenameUtils.getExtension(selectedFileName);
-			System.out.println("Selected File Name: " + selectedFileName);
-			
-			if (e.getClickCount() == 3) {
-				
-		      System.out.println("User triple clicked...");
-		      handleSelectedFile(true); //write
+            Component command = e.getComponent();
+            String localFileImagePath = PixelApp.pixel.getSelectedFilePath(command);
+                        
+//TODO: WHERE ELSE ARE WE USING APACHE COMMONS, AND IS THE WIEGHT OF THE JAR REALLY NEEDED?
+            selectedFileName = FilenameUtils.getName(localFileImagePath); //with the extension .gif
+            fileType = FilenameUtils.getExtension(selectedFileName);
+            System.out.println("Selected File Name: " + selectedFileName);
+
+            if (e.getClickCount() == 3) 
+            {
+                System.out.println("User triple clicked...");
+                handleSelectedFile(true); //write
 		    
-	      }
-		      
-		     else if (e.getClickCount() == 2) {
-		      System.out.println("User double clicked...");
-		      handleSelectedFile(true); //write
+            }
+            else if (e.getClickCount() == 2) 
+            {
+                System.out.println("User double clicked...");
+                handleSelectedFile(true); //write
 		   
-			}
-		     
-		    
-		    else {   //then it must have been a single click so let's just stream the image
-		      handleSelectedFile(false); //single click so just stream    
-		    		
-		    }
+            }
+            else 
+            {   
+                // then it must have been a single click so let's just stream the image
+                handleSelectedFile(false); //single click so just stream    
+            }
     	}
-    	else {
+    	else 
+        {
     		 String message = "Oops.. PIXEL was not yet detected";
 	         PixelApp.statusLabel.setText(message);
     	}
     }	
 
-	@Override
-	public void mousePressed(MouseEvent e) {
+	
+    @Override
+	
+    public void mousePressed(MouseEvent e) 
+    {
 		// TODO Auto-generated method stub
 		
-	}
+	
+    }
 
 	@Override
 	public void mouseReleased(MouseEvent e) {
@@ -155,66 +154,66 @@ public class AnimationsPanel extends ImageTilePanel implements MouseListener
 		
 	}
 	
-	public void handleSelectedFile(boolean writeMode) {
-		
-		
-		
-	//	if (fileType.toLowerCase().contains("gif")) {  	//let's first just make sure we have a gif
-			
-			if (PixelApp.pixel.GIFTxtExists(decodedDir,selectedFileName) == true && PixelApp.pixel.GIFRGB565Exists(decodedDir,selectedFileName) == true) {
-			    	System.out.println("This GIF was already decoded");
-			    }
-			    else {  //the text file is not there so we cannot continue and we must decode, let's first copy the file to home dir
-			    	
-			      //  PixelApp.setStatusLabel("DO NOT INTERRUPT: Decoding GIF...");
-			    	PixelApp.pixel.decodeGIFJar(decodedDir, gifSourcePath,selectedFileName, PixelApp.currentResolution, KIND.width, KIND.height);
-			    //	PixelApp.setStatusLabel("PIXEL CONNECTED: Click to stream or double click to write");
-			    }
-			    
-			    if (PixelApp.pixel.GIFNeedsDecoding(decodedDir, selectedFileName, PixelApp.currentResolution) == true) {
-			    	System.out.println("Selected LED panel is different than the encoded GIF, need to re-enocde...");
-			    	PixelApp.pixel.decodeGIFJar(decodedDir, gifSourcePath, selectedFileName, PixelApp.currentResolution, KIND.width, KIND.height);
-			    }
+        
+    public void handleSelectedFile(boolean writeMode)
+    {
+        if (PixelApp.pixel.GIFTxtExists(decodedDir,selectedFileName) == true && PixelApp.pixel.GIFRGB565Exists(decodedDir,selectedFileName) == true) 
+        {
+            System.out.println("This GIF was already decoded");
+        }
+        else 
+        {  
+            // the text file is not there so we cannot continue and we must decode, let's first copy the file to home dir
+            PixelApp.pixel.decodeGIFJar(decodedDir, gifSourcePath,selectedFileName, PixelApp.currentResolution, KIND.width, KIND.height);
+        }
+        
+        if (PixelApp.pixel.GIFNeedsDecoding(decodedDir, selectedFileName, PixelApp.currentResolution) == true) 
+        {
+            System.out.println("Selected LED panel is different than the encoded GIF, need to re-enocde...");
+            PixelApp.pixel.decodeGIFJar(decodedDir, gifSourcePath, selectedFileName, PixelApp.currentResolution, KIND.width, KIND.height);
+        }
 	
-				    //****** Now let's setup the animation ******
+        //****** Now let's setup the animation ******
+        animation_name = selectedFileName;
+
+        //to do fix this later becaause we are getting from internal path
+        //get the fps 
+        float GIFfps = pixel.getDecodedfps(decodedDir, animation_name);
+        
+        GIFnumFrames = PixelApp.pixel.getDecodednumFrames(decodedDir, animation_name);
+        int gifSelectedFileDelay = pixel.getDecodedframeDelay(decodedDir, animation_name);
+        GIFresolution = pixel.getDecodedresolution(decodedDir, animation_name);
 				    
-				    animation_name = selectedFileName;
-				    
-				    GIFfps = pixel.getDecodedfps(decodedDir, animation_name); //get the fps //to do fix this later becaause we are getting from internal path
-				    GIFnumFrames = PixelApp.pixel.getDecodednumFrames(decodedDir, animation_name);
-				    GIFselectedFileDelay = pixel.getDecodedframeDelay(decodedDir, animation_name);
-				    GIFresolution = pixel.getDecodedresolution(decodedDir, animation_name);
-				    
-				    System.out.println("Selected GIF Resolution: " + GIFresolution);
-					System.out.println("Current LED Panel Resolution: " + PixelApp.currentResolution);
-					System.out.println("GIF Width: " + KIND.width);
-					System.out.println("GIF Height: " + KIND.height);
+        System.out.println("Selected GIF Resolution: " + GIFresolution);
+        System.out.println("Current LED Panel Resolution: " + PixelApp.currentResolution);
+        System.out.println("GIF Width: " + KIND.width);
+        System.out.println("GIF Height: " + KIND.height);
+
+        stopExistingTimer();
 			            
-			        stopExistingTimer();
-			            
-			             if (PixelApp.pixelHardwareID.substring(0,4).equals("PIXL") && writeMode == true) {  //change this to a double click event later
-			    			
-			    					PixelApp.pixel.interactiveMode();
-			    					PixelApp.pixel.writeMode(GIFfps); //need to tell PIXEL the frames per second to use, how fast to play the animations
-			    					System.out.println("Now writing to PIXEL's SD card, the screen will go blank until writing has been completed..."); 
+        if (PixelApp.pixelHardwareID.substring(0,4).equals("PIXL") && writeMode == true)
+        {
+            //change this to a double click event later			    			
+            PixelApp.pixel.interactiveMode();
+            PixelApp.pixel.writeMode(GIFfps); //need to tell PIXEL the frames per second to use, how fast to play the animations
+            System.out.println("Now writing to PIXEL's SD card, the screen will go blank until writing has been completed..."); 
+
+            Cursor hourglassCursor = new Cursor(Cursor.WAIT_CURSOR);
+            setCursor(hourglassCursor);
+            PixelApp.frame.setEnabled(false);
 			    					
-			    					Cursor hourglassCursor = new Cursor(Cursor.WAIT_CURSOR);
-			    					setCursor(hourglassCursor);
-			    					PixelApp.frame.setEnabled(false);
-			    					
-			    				    new writePIXEL().execute(); //we'll run this in the background and also update the UI with progress
-			    				
-			    			}
-			    			else {
-			    				   stopExistingTimer();
-			    				   timer = new Timer(GIFselectedFileDelay, AnimateTimer);
-			    				   timer.start();
-			    			} 
+            new writePIXEL().execute(); //we'll run this in the background and also update the UI with progress
+        }
+        else
+        {
+            stopExistingTimer();
+            timer = new Timer(gifSelectedFileDelay, AnimateTimer);
+            timer.start();
+        } 
     }
-	
-	
-	
-    class writePIXEL extends SwingWorker<Boolean, Integer> {
+
+    class writePIXEL extends SwingWorker<Boolean, Integer> 
+    {
 	//SwingWorker<Boolean, Integer> writePIXEL = new SwingWorker<Boolean, Integer>() {
 		   @Override
 		   protected Boolean doInBackground() throws Exception {
@@ -269,7 +268,7 @@ public class AnimationsPanel extends ImageTilePanel implements MouseListener
 	        PixelApp.statusLabel.setText(message);  
 		    //countLabel1.setText(Integer.toString(mostRecentValue));
 		   }
-		  };
+		  }
     
     @Override
     protected String imagePath() 

@@ -16,6 +16,7 @@ import java.util.logging.Logger;
 import javax.servlet.ServletContext;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
+import org.onebeartoe.pixel.PixelEnvironment;
 
 import org.onebeartoe.pixel.hardware.Pixel;
 
@@ -41,6 +42,11 @@ public class InitializationServlet extends HttpServlet
     public static final String PIXEL_KEY = "PIXEL_KEY";
     
     public static final String PIXEL_TIMER_KEY = "PIXEL_TIMER_KEY";
+  
+    // 3 translates to RgbLedMatrix.Matrix.SEEEDSTUDIO_32x32;
+    private final static int LED_MATRIX_ID = 3;
+    
+    private static final PixelEnvironment pixelEnvironment = new PixelEnvironment(LED_MATRIX_ID);
     
     @Override
     public void init()
@@ -49,7 +55,8 @@ public class InitializationServlet extends HttpServlet
         logger = Logger.getLogger(className);
         logger.log(Level.INFO, "The initialization servlet started!.!");
         
-        Pixel pixel = new Pixel(MATRIX_TYPE);
+        Pixel pixel = new Pixel(pixelEnvironment.KIND, pixelEnvironment.currentResolution);
+//        Pixel pixel = new Pixel(MATRIX_TYPE);
                 
         // save the pixel to appliction scope
         ServletContext servletContext = getServletContext();     

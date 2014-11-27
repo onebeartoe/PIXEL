@@ -12,6 +12,8 @@ import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.geom.AffineTransform;
 import java.awt.image.AffineTransformOp;
 import java.awt.image.BufferedImage;
@@ -27,21 +29,30 @@ import java.io.OutputStreamWriter;
 import java.io.RandomAccessFile;
 import java.io.StringReader;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Properties;
+import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.SwingWorker;
+import javax.swing.Timer;
 
 import org.apache.commons.io.FilenameUtils;
 
 import org.gifdecoder.GifDecoder;
 
 /**
- * @author rmarquez
+ * @author Roberto Marquez
+ * @author Al Linke
  */
 public class Pixel 
 {
-   
-	public static IOIO ioiO;
+    /**
+     * This is for the animations.
+     */
+    private int i;
+        
+    public static IOIO ioiO;
     
     public RgbLedMatrix matrix;
     
@@ -67,15 +78,54 @@ public class Pixel
     
     private static VersionType v;
     
-    //private static String decodedDirPathExternal;
+    private String userHome;
+  	
+    private String decodedDir;
+
+    private int currentResolution;
     
-    public Pixel(RgbLedMatrix.Matrix KIND)
+// Is this a dup of currentResolution?    
+    private static int GIFresolution;
+    
+    /**
+     * the path to the source gifs in the jar
+     */
+    private String gifSourcePath = "animations/gifsource/";
+    
+    /**
+     * This is for the animations.
+     */
+    private int GIFnumFrames;
+    
+    private volatile Timer timer;
+    
+    private ActionListener AnimateTimer;
+    
+    private String animationFilename;
+    
+    /**
+     * @param KIND
+     * @param resolution 
+     */
+    public Pixel(RgbLedMatrix.Matrix KIND, int resolution)
     {
 	this.KIND = KIND;
+        
+        this.currentResolution = resolution;
 	
 	BitmapBytes = new byte[KIND.width * KIND.height * 2]; //512 * 2 = 1024 or 1024 * 2 = 2048
 	
 	frame_ = new short[KIND.width * KIND.height];
+        
+        try
+        {
+            userHome = System.getProperty("user.home");
+            decodedDir = userHome + "/pixel/animations/decoded/";
+        }
+        catch(Exception e)
+        {
+            e.printStackTrace();
+        }
     }
     
         private static AnalogInput getAnalogInput(int pinNumber) 
@@ -227,7 +277,16 @@ public class Pixel
 			e.printStackTrace();
 		}
     }
-    //*******************************
+    
+    private void stopExistingTimer()
+    {
+        System.out.println("checking PIXEL activity in " + getClass().getSimpleName() + ".");
+        if(timer != null && timer.isRunning() )
+        {
+            System.out.println("Stopping PIXEL activity in " + getClass().getSimpleName() + ".");
+            timer.stop();
+        }        
+    }        
     
     private int[] getDecodedMetadata(String currentDir, String gifName) {  //not using this one right now
     	
@@ -1013,7 +1072,16 @@ public void decodeGIFJar(final String decodedDir, String gifSourcePath, String g
       return localFileImagePath;
   }
   
-  public static BufferedImage getScaledImage(BufferedImage image, int width, int height) throws IOException { //resizes our image and preserves hard edges we need for pixel art
+    /**
+     * resizes our image and preserves hard edges we need for pixel art
+     * @param image
+     * @param width
+     * @param height
+     * @return
+     * @throws IOException 
+     */
+    public static BufferedImage getScaledImage(BufferedImage image, int width, int height) throws IOException 
+    {
 	    int imageWidth  = image.getWidth();
 	    int imageHeight = image.getHeight();
 
@@ -1024,11 +1092,88 @@ public void decodeGIFJar(final String decodedDir, String gifSourcePath, String g
 
 	    return bilinearScaleOp.filter(
 	        image,
-	        new BufferedImage(width, height, image.getType()));
-	}
+	        new BufferedImage(width, height, image.getType()));	
+    }
   
+    public void writeAnimation(String selectedFileName, boolean writeMode)
+    {
+        animationFilename = selectedFileName;
+        if(GIFTxtExists(decodedDir,selectedFileName) == true && GIFRGB565Exists(decodedDir,selectedFileName) == true) 
+        {
+            System.out.println("This GIF was already decoded");
+        }
+        else 
+        {
+            System.out.println("Decoding " + selectedFileName);
+            // the text file is not there so we cannot continue and we must decode, let's first copy the file to home dir
+            decodeGIFJar(decodedDir, gifSourcePath,selectedFileName, currentResolution, KIND.width, KIND.height);
+        }
+			    
+        if (GIFNeedsDecoding(decodedDir, selectedFileName, currentResolution) == true) 
+        {
+            System.out.println("Selected LED panel is different than the encoded GIF, need to re-enocde...");
+            decodeGIFJar(decodedDir, gifSourcePath, selectedFileName, currentResolution, KIND.width, KIND.height);
+        }
+	
+        //****** Now let's setup the animation ******
+
+// TODO: replace animation_name with selectedFileName
+        String animation_name = selectedFileName;
+
+        float GIFfps = getDecodedfps(decodedDir, animation_name); //get the fps //to do fix this later becaause we are getting from internal path
+        GIFnumFrames = getDecodednumFrames(decodedDir, animation_name);
+        int gifSelectedFileDelay = getDecodedframeDelay(decodedDir, animation_name);
+        
+        currentResolution = getDecodedresolution(decodedDir, animation_name);
+        GIFresolution = currentResolution;
+
+        System.out.println("Selected GIF Resolution: " + GIFresolution);
+        System.out.println("Current LED Panel Resolution: " + currentResolution);
+        System.out.println("GIF Width: " + KIND.width);
+        System.out.println("GIF Height: " + KIND.height);
+			            
+        stopExistingTimer();
+        System.out.println("The existing timer was stopped");
+		
+        String pixelHardwareId = "not found";
+        try 
+        {
+            pixelHardwareId = ioiO.getImplVersion(v.HARDWARE_VER);
+        } 
+        catch (ConnectionLostException ex) 
+        {
+            Logger.getLogger(Pixel.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        
+        if (pixelHardwareId.substring(0,4).equals("PIXL") && writeMode == true) 
+        {  
+            //change this to a double click event later
+			    			
+            interactiveMode();
+            writeMode(GIFfps); //need to tell PIXEL the frames per second to use, how fast to play the animations
+            System.out.println("Now writing to PIXEL's SD card, the screen will go blank until writing has been completed..."); 
+
+            // we'll run this in the background and also update the UI with progress
+            System.out.println("The Pixel animation writter is being created");
+            writePIXEL wp = new writePIXEL();
+            wp.execute(); 
+            System.out.println("The Pixel animation writter was created");
+        }
+        else 
+        {
+            System.out.println("A non PIXL, version of the timer is starting.");
+            stopExistingTimer();
+            System.out.println("stopped the existingn timer again.");
+            
+TRY USING A java.util.Timer INSTEAD OF A SWING ONE            
+            timer = new Timer(gifSelectedFileDelay, AnimateTimer);
+            timer.start();
+            System.out.println("A non PIXL, version of the timer has started.");
+        } 
+    }
+            
   
-  public void writeImagetoMatrix(BufferedImage originalImage,  int pixelMatrix_width, int pixelMatrix_height) throws ConnectionLostException     
+    public void writeImagetoMatrix(BufferedImage originalImage,  int pixelMatrix_width, int pixelMatrix_height) throws ConnectionLostException     
     {        
 	
 	  BitmapBytes = new byte[pixelMatrix_width * pixelMatrix_height * 2]; //512 * 2 = 1024 or 1024 * 2 = 2048
@@ -1108,6 +1253,80 @@ public void decodeGIFJar(final String decodedDir, String gifSourcePath, String g
 	}
     }
 
-	
-    
+    class writePIXEL extends SwingWorker<Boolean, Integer>     
+    {
+
+
+        @Override
+
+        protected Boolean doInBackground() throws Exception
+        {
+            int y;
+                                      //for (y=0;y<numFrames-1;y++) { //let's loop through and send frame to PIXEL with no delay
+                                  for (y=0;y<GIFnumFrames;y++) 
+                                  { 
+                                    //Al removed the -1, make sure to test that!!!!!
+                                                SendPixelDecodedFrame(decodedDir, animationFilename, y, GIFnumFrames, GIFresolution, KIND.width,KIND.height);
+                                                publish(y); 
+
+                                  }
+
+
+                        return true;
+                       }
+
+                       // Can safely update the GUI from this method.
+                       protected void done() {
+
+                        boolean status;
+                        try {
+                         // Retrieve the return value of doInBackground.
+                         status = get();
+                         //we are done so we can now set PIXEL to local playback mode
+
+                             playLocalMode(); //now tell PIXEL to play locally
+                             System.out.println("PIXEL FOUND: Click to stream or double click to write");
+                             String message = "PIXEL FOUND: Click to stream or double click to write";
+                         System.out.println(message);  
+
+                        //TODO UPDATE THE BROWSER SOMEHOW
+
+
+
+                        // statusLabel.setText("Completed with status: " + status);
+                        } catch (InterruptedException e) {
+                         // This is thrown if the thread's interrupted.
+                        } catch (ExecutionException e) {
+                         // This is thrown if we throw an exception
+                         // from doInBackground.
+                        }
+                       }
+
+                       @Override
+                       // Can safely update the GUI from this method.
+                       protected void process(List<Integer> chunks) {
+                        // Here we receive the values that we publish().
+                        // They may come grouped in chunks.
+                        int mostRecentValue = chunks.get(chunks.size()-1);
+                        System.out.println("DO NOT INTERRUPT: Writing frame " + Integer.toString(mostRecentValue) + " of " + GIFnumFrames);
+                        String message = "DO NOT INTERRUPT: Writing frame " + Integer.toString(mostRecentValue) + " of " + GIFnumFrames;
+                        System.out.println(message);  
+
+                       }
+		  
+    }
+
+    private class AnimateTimer implements ActionListener
+    {
+        public void actionPerformed(ActionEvent evt) 
+        {
+            i++;
+
+            if (i >= GIFnumFrames - 1) 
+            {
+                i = 0;
+            }
+            SendPixelDecodedFrame(decodedDir, animationFilename, i, GIFnumFrames, GIFresolution, KIND.width,KIND.height);
+        }
+    }
 }

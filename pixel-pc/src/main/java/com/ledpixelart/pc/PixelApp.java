@@ -66,6 +66,7 @@ import javax.swing.UIManager;
 import javax.swing.border.BevelBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+import org.onebeartoe.pixel.PixelEnvironment;
 
 import org.onebeartoe.pixel.hardware.Pixel;
 import org.onebeartoe.pixel.plugins.swing.PixelPanel;
@@ -88,7 +89,15 @@ public class PixelApp extends IOIOSwingApp
 
     public static RgbLedMatrix.Matrix KIND = ioio.lib.api.RgbLedMatrix.Matrix.SEEEDSTUDIO_32x32;
 
-    public static final Pixel pixel = new Pixel(KIND);
+    static int pixleType = 1;
+    static PixelEnvironment pixelEnvironment = new PixelEnvironment(pixleType);
+    
+    @Deprecated()
+    /**
+     * We need to get away from using static references, and use getters and setters.  One problem is the mis-import
+     * of the duplicate classes in other applications.
+     */
+    public static final Pixel pixel = new Pixel(pixelEnvironment.KIND, pixelEnvironment.currentResolution);
 
     private static int selectedFileResolution = 32;
 

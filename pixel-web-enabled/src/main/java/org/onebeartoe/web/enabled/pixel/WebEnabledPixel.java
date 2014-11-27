@@ -18,7 +18,9 @@ import java.util.TimerTask;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.Timer;
+import org.onebeartoe.pixel.PixelEnvironment;
 import org.onebeartoe.pixel.hardware.Pixel;
+import org.onebeartoe.web.enabled.pixel.controllers.AnimationsHttpHandler;
 import org.onebeartoe.web.enabled.pixel.controllers.IndexHttpHandler;
 import org.onebeartoe.web.enabled.pixel.controllers.PixelHttpHandler;
 import org.onebeartoe.web.enabled.pixel.controllers.ScrollingTextHttpHander;
@@ -36,16 +38,21 @@ public class WebEnabledPixel
     private Timer searchTimer;
     
     private Pixel pixel;
-    
-    public static RgbLedMatrix.Matrix MATRIX_TYPE = RgbLedMatrix.Matrix.SEEEDSTUDIO_32x32;
 
     public static final String [] fontNames = GraphicsEnvironment.getLocalGraphicsEnvironment().getAvailableFontFamilyNames();
+    
+    // 3 translates to RgbLedMatrix.Matrix.SEEEDSTUDIO_32x32;
+    private final static int LED_MATRIX_ID = 3;
+    
+    private static final PixelEnvironment pixelEnvironment = new PixelEnvironment(LED_MATRIX_ID);
+    
+    public final static RgbLedMatrix.Matrix MATRIX_TYPE = pixelEnvironment.KIND;
     
     public WebEnabledPixel()
     {
         String name = getClass().getName();
         logger = Logger.getLogger(name);
-
+        
         createControllers();
     }
     
@@ -59,14 +66,18 @@ public class WebEnabledPixel
             PixelHttpHandler indexHttpHandler = new IndexHttpHandler();
             PixelHttpHandler scrollingTextHttpHander = new ScrollingTextHttpHander();
             PixelHttpHandler stillImageHttpHandler = new StillImageHttpHandler() ;
-                                        
+            PixelHttpHandler animationsHttpHandler = new AnimationsHttpHandler();
+
+// ARE WE GONNA DO ANYTHING WITH THE HttpContext OBJECTS?            
             HttpContext createContext = server.createContext("/",     indexHttpHandler);
             HttpContext   textContext = server.createContext("/text", scrollingTextHttpHander);
             HttpContext  stillContext = server.createContext("/still", stillImageHttpHandler);
+            HttpContext animationsContext = server.createContext("/animations", animationsHttpHandler);
                                         
             indexHttpHandler.setApp(this);
             scrollingTextHttpHander.setApp(this);
             stillImageHttpHandler.setApp(this);
+            animationsHttpHandler.setApp(this);
         } 
         catch (IOException ex)
         {
@@ -181,7 +192,7 @@ public class WebEnabledPixel
                 @Override
                 protected void setup() throws ConnectionLostException, InterruptedException
                 {
-                    pixel = new Pixel(MATRIX_TYPE);
+                    pixel = new Pixel(pixelEnvironment.KIND, pixelEnvironment.currentResolution);
                     pixel.matrix = ioio_.openRgbLedMatrix(pixel.KIND);
                     pixel.ioiO = ioio_;
 
