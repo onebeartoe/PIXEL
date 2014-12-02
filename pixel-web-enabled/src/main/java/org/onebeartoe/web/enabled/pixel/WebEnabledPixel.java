@@ -128,7 +128,7 @@ public class WebEnabledPixel
         {
             try
             {
-                System.out.println("CALLING GO");
+                System.out.println("PixelIntegration is calling go()");
                 go(null);
             } 
             catch (Exception ex)

@@ -2,7 +2,9 @@
 package org.onebeartoe.web.enabled.pixel.controllers;
 
 import com.sun.net.httpserver.HttpExchange;
+
 import ioio.lib.api.exception.ConnectionLostException;
+
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.FontMetrics;
@@ -16,6 +18,7 @@ import java.util.HashMap;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.logging.Level;
+
 import static org.onebeartoe.web.enabled.pixel.WebEnabledPixel.MATRIX_TYPE;
 import static org.onebeartoe.web.enabled.pixel.WebEnabledPixel.fontNames;
 
