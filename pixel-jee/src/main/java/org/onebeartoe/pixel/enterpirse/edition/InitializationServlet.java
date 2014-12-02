@@ -8,14 +8,18 @@ import ioio.lib.util.IOIOLooper;
 import ioio.lib.util.pc.IOIOConsoleApp;
 import java.awt.GraphicsEnvironment;
 import java.io.IOException;
+
 import java.util.Date;
 import java.util.Timer;
 import java.util.TimerTask;
+
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
 import javax.servlet.ServletContext;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
+
 import org.onebeartoe.pixel.PixelEnvironment;
 
 import org.onebeartoe.pixel.hardware.Pixel;
