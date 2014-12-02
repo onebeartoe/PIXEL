@@ -88,9 +88,10 @@ public class AnimationsPanel extends ImageTilePanel implements MouseListener
     @Override
     public void mouseClicked(MouseEvent e) 
     {
+        // let's make sure pixel is found before proceeding or we'll get a crash
     	if (PixelApp.getPixelFound() == true) 
         { 
-            //let's make sure pixel is found before proceeding or we'll get a crash
+//TODO: Move away from using the static reference to the pixel, and use a getter on the application instead.            
             PixelApp.pixel.interactiveMode();
 			
             Component command = e.getComponent();
