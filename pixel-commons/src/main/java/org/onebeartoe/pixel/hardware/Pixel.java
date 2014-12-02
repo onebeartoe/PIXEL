@@ -29,13 +29,16 @@ import java.io.OutputStreamWriter;
 import java.io.RandomAccessFile;
 import java.io.StringReader;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 import java.util.Properties;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.swing.SwingWorker;
-import javax.swing.Timer;
+//import javax.swing.SwingWorker;
+
 
 import org.apache.commons.io.FilenameUtils;
 
@@ -99,7 +102,8 @@ public class Pixel
     
     private volatile Timer timer;
     
-    private ActionListener AnimateTimer;
+//    private AnimateTimer AnimateTimer;
+//    private ActionListener AnimateTimer;
     
     private String animationFilename;
     
@@ -281,10 +285,10 @@ public class Pixel
     private void stopExistingTimer()
     {
         System.out.println("checking PIXEL activity in " + getClass().getSimpleName() + ".");
-        if(timer != null && timer.isRunning() )
+        if(timer != null) //&& timer.isRunning() )
         {
             System.out.println("Stopping PIXEL activity in " + getClass().getSimpleName() + ".");
-            timer.stop();
+            timer.cancel();
         }        
     }        
     
@@ -569,7 +573,8 @@ public boolean GIFNeedsDecoding(String decodedDir, String gifName, int currentRe
     	else return false;
     }
     
-    public void SendPixelDecodedFrame(String decodedDir, String gifName, int x, int selectedFileTotalFrames, int selectedFileResolution, int frameWidth, int frameHeight) {
+    public void SendPixelDecodedFrame(String decodedDir, String gifName, int x, int selectedFileTotalFrames, int selectedFileResolution, int frameWidth, int frameHeight) 
+    {
 		 
     	BitmapBytes = new byte[frameWidth * frameHeight * 2]; //512 * 2 = 1024 or 1024 * 2 = 2048
 		frame_ = new short[frameWidth * frameHeight];
@@ -1146,32 +1151,36 @@ public void decodeGIFJar(final String decodedDir, String gifSourcePath, String g
         }
         
         if (pixelHardwareId.substring(0,4).equals("PIXL") && writeMode == true) 
-        {  
-            //change this to a double click event later
-			    			
+        {
             interactiveMode();
-            writeMode(GIFfps); //need to tell PIXEL the frames per second to use, how fast to play the animations
+            
+            // need to tell PIXEL the frames per second to use, how fast to play the animations
+            writeMode(GIFfps); 
             System.out.println("Now writing to PIXEL's SD card, the screen will go blank until writing has been completed..."); 
 
             // we'll run this in the background and also update the UI with progress
             System.out.println("The Pixel animation writter is being created");
+            Date now = new Date();
             writePIXEL wp = new writePIXEL();
-            wp.execute(); 
+            Timer animationTimer = new Timer();
+            animationTimer.schedule(wp, now);
             System.out.println("The Pixel animation writter was created");
         }
         else 
         {
             System.out.println("A non PIXL, version of the timer is starting.");
+            
             stopExistingTimer();
             System.out.println("stopped the existingn timer again.");
             
-TRY USING A java.util.Timer INSTEAD OF A SWING ONE            
-            timer = new Timer(gifSelectedFileDelay, AnimateTimer);
-            timer.start();
+            TimerTask animateTimer = new AnimateTimer();
+            timer = new Timer();
+            Date firstTime = new Date();
+            timer.schedule(animateTimer, firstTime, gifSelectedFileDelay);
+        
             System.out.println("A non PIXL, version of the timer has started.");
         } 
     }
-            
   
     public void writeImagetoMatrix(BufferedImage originalImage,  int pixelMatrix_width, int pixelMatrix_height) throws ConnectionLostException     
     {        
@@ -1253,72 +1262,39 @@ TRY USING A java.util.Timer INSTEAD OF A SWING ONE
 	}
     }
 
-    class writePIXEL extends SwingWorker<Boolean, Integer>     
+// CHANGE THE NAME OF THIS CLASS    
+    class writePIXEL extends TimerTask//SwingWorker<Boolean, Integer>     
     {
-
-
         @Override
-
-        protected Boolean doInBackground() throws Exception
+        public void run()
         {
-            int y;
-                                      //for (y=0;y<numFrames-1;y++) { //let's loop through and send frame to PIXEL with no delay
-                                  for (y=0;y<GIFnumFrames;y++) 
-                                  { 
-                                    //Al removed the -1, make sure to test that!!!!!
-                                                SendPixelDecodedFrame(decodedDir, animationFilename, y, GIFnumFrames, GIFresolution, KIND.width,KIND.height);
-                                                publish(y); 
+            String message = "Pixel is writing an animation to the hardware.";
+            System.out.println(message);
+            
+            //let's loop through and send frame to PIXEL with no delay
+            for(int y=0; y<GIFnumFrames; y++) 
+            { 
+                //Al removed the -1, make sure to test that!!!!!
+                SendPixelDecodedFrame(decodedDir, animationFilename, y, GIFnumFrames, GIFresolution, KIND.width,KIND.height);
+            }
 
-                                  }
+            message = "Pixel is done writing the animation, setting PIXEL to local playback mode.";
+            System.out.println(message);
+            playLocalMode();
+            
+            message = "Pixel is in local playback mode.";
+            System.out.println(message);  
 
-
-                        return true;
-                       }
-
-                       // Can safely update the GUI from this method.
-                       protected void done() {
-
-                        boolean status;
-                        try {
-                         // Retrieve the return value of doInBackground.
-                         status = get();
-                         //we are done so we can now set PIXEL to local playback mode
-
-                             playLocalMode(); //now tell PIXEL to play locally
-                             System.out.println("PIXEL FOUND: Click to stream or double click to write");
-                             String message = "PIXEL FOUND: Click to stream or double click to write";
-                         System.out.println(message);  
-
-                        //TODO UPDATE THE BROWSER SOMEHOW
-
-
-
-                        // statusLabel.setText("Completed with status: " + status);
-                        } catch (InterruptedException e) {
-                         // This is thrown if the thread's interrupted.
-                        } catch (ExecutionException e) {
-                         // This is thrown if we throw an exception
-                         // from doInBackground.
-                        }
-                       }
-
-                       @Override
-                       // Can safely update the GUI from this method.
-                       protected void process(List<Integer> chunks) {
-                        // Here we receive the values that we publish().
-                        // They may come grouped in chunks.
-                        int mostRecentValue = chunks.get(chunks.size()-1);
-                        System.out.println("DO NOT INTERRUPT: Writing frame " + Integer.toString(mostRecentValue) + " of " + GIFnumFrames);
-                        String message = "DO NOT INTERRUPT: Writing frame " + Integer.toString(mostRecentValue) + " of " + GIFnumFrames;
-                        System.out.println(message);  
-
-                       }
-		  
+            //TODO UPDATE THE BROWSER SOMEHOW
+        }
     }
 
-    private class AnimateTimer implements ActionListener
+    private class AnimateTimer extends TimerTask//ActionListener
+//ActionListener
     {
-        public void actionPerformed(ActionEvent evt) 
+        @Override
+        public void run()
+//        public void actionPerformed(ActionEvent evt) 
         {
             i++;
 
@@ -1328,5 +1304,10 @@ TRY USING A java.util.Timer INSTEAD OF A SWING ONE
             }
             SendPixelDecodedFrame(decodedDir, animationFilename, i, GIFnumFrames, GIFresolution, KIND.width,KIND.height);
         }
+
+        
+//        {
+//            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+//        }
     }
 }
