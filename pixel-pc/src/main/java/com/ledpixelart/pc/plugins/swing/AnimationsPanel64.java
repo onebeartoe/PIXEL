@@ -90,7 +90,7 @@ public class AnimationsPanel64 extends ImageTilePanel implements MouseListener
 		{
 		    i = 0;
 		}
-			PixelApp.pixel.SendPixelDecodedFrame(decodedDir, animation_name, i, GIFnumFrames, GIFresolution, KIND.width,KIND.height);
+			PixelApp.pixel.sendPixelDecodedFrame(decodedDir, animation_name, i, GIFnumFrames, GIFresolution, KIND.width,KIND.height);
 	    }
 	};
     }
@@ -161,7 +161,7 @@ public class AnimationsPanel64 extends ImageTilePanel implements MouseListener
 		
 	//	if (fileType.toLowerCase().contains("gif")) {  	//let's first just make sure we have a gif
 			
-			if (PixelApp.pixel.GIFTxtExists(decodedDir,selectedFileName) == true && PixelApp.pixel.GIFRGB565Exists(decodedDir,selectedFileName) == true) {
+			if (PixelApp.pixel.gifTxtExists(decodedDir,selectedFileName) == true && PixelApp.pixel.GIFRGB565Exists(decodedDir,selectedFileName) == true) {
 			    	System.out.println("This GIF was already decoded");
 			    }
 			    else {  //the text file is not there so we cannot continue and we must decode, let's first copy the file to home dir
@@ -221,7 +221,7 @@ public class AnimationsPanel64 extends ImageTilePanel implements MouseListener
 			   	int y;
 			   	  //for (y=0;y<numFrames-1;y++) { //let's loop through and send frame to PIXEL with no delay
 			      for (y=0;y<GIFnumFrames;y++) { //Al removed the -1, make sure to test that!!!!!
-			 		    PixelApp.pixel.SendPixelDecodedFrame(decodedDir, animation_name, y, GIFnumFrames, GIFresolution, KIND.width,KIND.height);
+			 		    PixelApp.pixel.sendPixelDecodedFrame(decodedDir, animation_name, y, GIFnumFrames, GIFresolution, KIND.width,KIND.height);
 			 		    publish(y); 
 			   	  } //end for loop
 			   

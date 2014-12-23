@@ -102,7 +102,7 @@ imageListPath = "/animations.text";
 		{
 		    i = 0;
 		}
-			PixelApp.pixel.SendPixelDecodedFrame(PixelApp.decodedDir, animation_name, i, GIFnumFrames, GIFresolution, KIND.width,KIND.height);
+			PixelApp.pixel.sendPixelDecodedFrame(PixelApp.decodedDir, animation_name, i, GIFnumFrames, GIFresolution, KIND.width,KIND.height);
 	    }
 	};
     }    
@@ -225,7 +225,7 @@ imageListPath = "/animations.text";
 		    				      for (y=0;y<GIFnumFrames;y++) { //Al removed the -1, make sure to test that!!!!!
 
 		    			    			System.out.println("Writing " + animation_name + " to PIXEL " + "frame " + y);
-		    				 		    PixelApp.pixel.SendPixelDecodedFrame(PixelApp.decodedDir, animation_name, y, GIFnumFrames, GIFresolution, PixelApp.KIND.width,PixelApp.KIND.height);
+		    				 		    PixelApp.pixel.sendPixelDecodedFrame(PixelApp.decodedDir, animation_name, y, GIFnumFrames, GIFresolution, PixelApp.KIND.width,PixelApp.KIND.height);
 		    				   	  } //end for loop
 		    					PixelApp.pixel.playLocalMode(); //now tell PIXEL to play locally
 		    					System.out.println("Writing " + animation_name + " to PIXEL complete, now displaying...");
@@ -381,7 +381,7 @@ imageListPath = "/animations.text";
 					   	  //for (y=0;y<numFrames-1;y++) { //let's loop through and send frame to PIXEL with no delay
 					      for (y=0;y<GIFnumFrames;y++) { //Al removed the -1, make sure to test that!!!!!
 				    			System.out.println("Writing " + animation_name + " to PIXEL " + "frame " + y);
-					 		    PixelApp.pixel.SendPixelDecodedFrame(PixelApp.decodedDir, animation_name, y, GIFnumFrames, GIFresolution, KIND.width,KIND.height);
+					 		    PixelApp.pixel.sendPixelDecodedFrame(PixelApp.decodedDir, animation_name, y, GIFnumFrames, GIFresolution, KIND.width,KIND.height);
 					   	  } //end for loop
 						PixelApp.pixel.playLocalMode(); //now tell PIXEL to play locally
 						System.out.println("Writing " + animation_name + " to PIXEL complete, now displaying...");*/
@@ -437,7 +437,7 @@ imageListPath = "/animations.text";
 					   	  //for (y=0;y<numFrames-1;y++) { //let's loop through and send frame to PIXEL with no delay
 					      for (y=0;y<GIFnumFrames;y++) { //Al removed the -1, make sure to test that!!!!!
 				    			System.out.println("Writing " + animation_name + " to PIXEL " + "frame " + y);
-					 		    PixelApp.pixel.SendPixelDecodedFrame(PixelApp.decodedDir, animation_name, y, GIFnumFrames, GIFresolution, KIND.width,KIND.height);
+					 		    PixelApp.pixel.sendPixelDecodedFrame(PixelApp.decodedDir, animation_name, y, GIFnumFrames, GIFresolution, KIND.width,KIND.height);
 					 		    publish(y); 
 					   	  } //end for loop
 					   

@@ -558,7 +558,7 @@ public boolean GIFNeedsDecoding(String decodedDir, String gifName, int currentRe
     	else return false;
     }
     
- public boolean GIFTxtExists(String decodedDir, String selectedFileName) {
+    public boolean gifTxtExists(String decodedDir, String selectedFileName) {
     	
     	//System.out.println("selected file name: " + selectedFileName);
     	int i = selectedFileName.lastIndexOf(".");
@@ -573,7 +573,7 @@ public boolean GIFNeedsDecoding(String decodedDir, String gifName, int currentRe
     	else return false;
     }
     
-    public void SendPixelDecodedFrame(String decodedDir, String gifName, int x, int selectedFileTotalFrames, int selectedFileResolution, int frameWidth, int frameHeight) 
+    public void sendPixelDecodedFrame(String decodedDir, String gifName, int x, int selectedFileTotalFrames, int selectedFileResolution, int frameWidth, int frameHeight) 
     {
 		 
     	BitmapBytes = new byte[frameWidth * frameHeight * 2]; //512 * 2 = 1024 or 1024 * 2 = 2048
@@ -585,7 +585,8 @@ public boolean GIFNeedsDecoding(String decodedDir, String gifName, int currentRe
     
     	
     	File file = new File(gifNamePath);
-			if (file.exists()) {
+			if (file.exists()) 
+                        {
 				
 				/*Because the decoded gif is one big .rgb565 file that contains all the frames, we need
 			to use the raf pointer and extract just a single frame at a time and then we'll move the 
@@ -677,25 +678,31 @@ public boolean GIFNeedsDecoding(String decodedDir, String gifName, int currentRe
    			//now that we have the byte array loaded, load it into the frame short array
    			
    			int y = 0;
-     		for (int i = 0; i < frame_.length; i++) {
+     		for (int i = 0; i < frame_.length; i++) 
+                {
      			frame_[i] = (short) (((short) BitmapBytes[y] & 0xFF) | (((short) BitmapBytes[y + 1] & 0xFF) << 8));
      			y = y + 2;
      		}
      		
-		   	try {
+		   	try 
+                        {
 		   		matrix.frame(frame_);
 				
-			} catch (ConnectionLostException e) {
+			} 
+                        catch (ConnectionLostException e) 
+                        {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-			}
 			
-			else {
-				//System.err.println("An error occured while trying to load " + gifNamePath);
-	    	   // e.printStackTrace();
-			}
-	}
+        }
+        else 
+        {
+            //System.err.println("An error occured while trying to load " + gifNamePath);
+            // e.printStackTrace();
+        }
+	
+    }
     
 	public void decodeGIF(String decodedDir, String gifFilePath, int currentResolution, int pixelMatrix_width, int pixelMatrix_height) {  //pass the matrix type
 		
@@ -1103,7 +1110,7 @@ public void decodeGIFJar(final String decodedDir, String gifSourcePath, String g
     public void writeAnimation(String selectedFileName, boolean writeMode)
     {
         animationFilename = selectedFileName;
-        if(GIFTxtExists(decodedDir,selectedFileName) == true && GIFRGB565Exists(decodedDir,selectedFileName) == true) 
+        if(gifTxtExists(decodedDir,selectedFileName) == true && GIFRGB565Exists(decodedDir,selectedFileName) == true) 
         {
             System.out.println("This GIF was already decoded");
         }
@@ -1161,7 +1168,7 @@ public void decodeGIFJar(final String decodedDir, String gifSourcePath, String g
             // we'll run this in the background and also update the UI with progress
             System.out.println("The Pixel animation writter is being created");
             Date now = new Date();
-            writePIXEL wp = new writePIXEL();
+            SendGifAnimationTask wp = new SendGifAnimationTask();
             Timer animationTimer = new Timer();
             animationTimer.schedule(wp, now);
             System.out.println("The Pixel animation writter was created");
@@ -1182,11 +1189,17 @@ public void decodeGIFJar(final String decodedDir, String gifSourcePath, String g
         } 
     }
   
+    /**
+     * This method is used to write a single frame to the pixel.
+     * @param originalImage
+     * @param pixelMatrix_width
+     * @param pixelMatrix_height
+     * @throws ConnectionLostException 
+     */
     public void writeImagetoMatrix(BufferedImage originalImage,  int pixelMatrix_width, int pixelMatrix_height) throws ConnectionLostException     
     {        
-	
-	  BitmapBytes = new byte[pixelMatrix_width * pixelMatrix_height * 2]; //512 * 2 = 1024 or 1024 * 2 = 2048
-	  frame_ = new short[pixelMatrix_width * pixelMatrix_height];
+        BitmapBytes = new byte[pixelMatrix_width * pixelMatrix_height * 2]; //512 * 2 = 1024 or 1024 * 2 = 2048
+        frame_ = new short[pixelMatrix_width * pixelMatrix_height];
 	  
 	  //here we'll take a PNG, BMP, or whatever and convert it to RGB565 via a canvas, also we'll re-size the image if necessary
         int width_original = originalImage.getWidth();
@@ -1262,8 +1275,10 @@ public void decodeGIFJar(final String decodedDir, String gifSourcePath, String g
 	}
     }
 
-// CHANGE THE NAME OF THIS CLASS    
-    class writePIXEL extends TimerTask//SwingWorker<Boolean, Integer>     
+    /**
+     * When this task is executed, it sends an animated GIF to the the Pixel.
+     */
+    class SendGifAnimationTask extends TimerTask
     {
         @Override
         public void run()
@@ -1275,7 +1290,7 @@ public void decodeGIFJar(final String decodedDir, String gifSourcePath, String g
             for(int y=0; y<GIFnumFrames; y++) 
             { 
                 //Al removed the -1, make sure to test that!!!!!
-                SendPixelDecodedFrame(decodedDir, animationFilename, y, GIFnumFrames, GIFresolution, KIND.width,KIND.height);
+                sendPixelDecodedFrame(decodedDir, animationFilename, y, GIFnumFrames, GIFresolution, KIND.width,KIND.height);
             }
 
             message = "Pixel is done writing the animation, setting PIXEL to local playback mode.";
@@ -1285,7 +1300,7 @@ public void decodeGIFJar(final String decodedDir, String gifSourcePath, String g
             message = "Pixel is in local playback mode.";
             System.out.println(message);  
 
-            //TODO UPDATE THE BROWSER SOMEHOW
+            //TODO UPDATE THE BROWSER/CLIENTS SOMEHOW
         }
     }
 
@@ -1302,7 +1317,7 @@ public void decodeGIFJar(final String decodedDir, String gifSourcePath, String g
             {
                 i = 0;
             }
-            SendPixelDecodedFrame(decodedDir, animationFilename, i, GIFnumFrames, GIFresolution, KIND.width,KIND.height);
+            sendPixelDecodedFrame(decodedDir, animationFilename, i, GIFnumFrames, GIFresolution, KIND.width,KIND.height);
         }
 
         
