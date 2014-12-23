@@ -35,6 +35,7 @@ public class StillImageHttpHandler extends PixelHttpHandler
             try
             {
                 System.out.println("writing image to the Pixel");
+                pixel.stopExistingTimer();
                 pixel.writeImagetoMatrix(originalImage, pixel.KIND.width, pixel.KIND.height);
                 System.out.println("image wrote to the Pixel");
             } 

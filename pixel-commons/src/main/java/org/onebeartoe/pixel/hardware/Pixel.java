@@ -10,10 +10,11 @@ import ioio.lib.api.exception.ConnectionLostException;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.Font;
+import java.awt.FontMetrics;
 import java.awt.Graphics2D;
+import java.awt.GraphicsEnvironment;
 import java.awt.RenderingHints;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.geom.AffineTransform;
 import java.awt.image.AffineTransformOp;
 import java.awt.image.BufferedImage;
@@ -30,15 +31,12 @@ import java.io.RandomAccessFile;
 import java.io.StringReader;
 import java.util.Arrays;
 import java.util.Date;
-import java.util.List;
+import java.util.HashMap;
 import java.util.Properties;
 import java.util.Timer;
 import java.util.TimerTask;
-import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-//import javax.swing.SwingWorker;
-
 
 import org.apache.commons.io.FilenameUtils;
 
@@ -102,10 +100,21 @@ public class Pixel
     
     private volatile Timer timer;
     
-//    private AnimateTimer AnimateTimer;
-//    private ActionListener AnimateTimer;
-    
     private String animationFilename;
+    
+    private PixelModes mode;
+
+//TODO: rename for scrolling text
+    private int x;
+    
+    private HashMap<String, Font> fonts;
+
+//TODO: Why does this need to be static?   
+    public static final String [] fontNames = GraphicsEnvironment.getLocalGraphicsEnvironment().getAvailableFontFamilyNames();
+
+    private String scrollingText;
+    
+    private Logger logger;
     
     /**
      * @param KIND
@@ -113,6 +122,11 @@ public class Pixel
      */
     public Pixel(RgbLedMatrix.Matrix KIND, int resolution)
     {
+        String name = getClass().getName();
+        logger = Logger.getLogger(name);
+        
+        mode = PixelModes.STILL_IMAGE;
+        
 	this.KIND = KIND;
         
         this.currentResolution = resolution;
@@ -120,6 +134,12 @@ public class Pixel
 	BitmapBytes = new byte[KIND.width * KIND.height * 2]; //512 * 2 = 1024 or 1024 * 2 = 2048
 	
 	frame_ = new short[KIND.width * KIND.height];
+        
+        x = 0;
+                
+        fonts = new HashMap();
+        
+        scrollingText = "Scolling Text Inital Value";
         
         try
         {
@@ -219,9 +239,11 @@ public class Pixel
     }
     
     
-    public String getHardwareVersion() {
-  	  	String pixelHardwareVersion = null;
-		if (ioiO != null) {
+    public String getHardwareVersion() 
+    {
+        String pixelHardwareVersion = null;
+		if (ioiO != null) 
+                {
 	  	  	try {
 				pixelHardwareVersion = ioiO.getImplVersion(v.HARDWARE_VER);
 			} catch (ConnectionLostException e) {
@@ -233,12 +255,15 @@ public class Pixel
 			System.out.println("PIXEL was not found...");
 			pixelHardwareVersion = "0";
 		}
-  	  return pixelHardwareVersion;
-  }
+                
+        return pixelHardwareVersion;
+    }
     
-    public String getFirmwareVersion() {
-  	  	String pixelFirmware = null;
-		if (ioiO != null) {
+    public String getFirmwareVersion() 
+    {
+        String pixelFirmware = null;
+		if (ioiO != null) 
+                {
 	  	  	try {
 				pixelFirmware = ioiO.getImplVersion(v.APP_FIRMWARE_VER);
 			} catch (ConnectionLostException e) {
@@ -250,8 +275,13 @@ public class Pixel
 			System.out.println("PIXEL was not found...");
 			pixelFirmware = "0";
 		}
-  	  return pixelFirmware;
-  }
+        return pixelFirmware;
+    }
+    
+    public PixelModes getMode()
+    {
+        return mode;
+    }
   
     
     //*** Al added, this code is to support the SD card and local animations
@@ -282,14 +312,20 @@ public class Pixel
 		}
     }
     
-    private void stopExistingTimer()
+    public void stopExistingTimer()
     {
         System.out.println("checking PIXEL activity in " + getClass().getSimpleName() + ".");
-        if(timer != null) //&& timer.isRunning() )
+
+        if(timer == null)
         {
-            System.out.println("Stopping PIXEL activity in " + getClass().getSimpleName() + ".");
+            System.out.println("No timer stop needed at Pixel mode change.");
+        }
+        else
+        {
+            System.out.println("Pixel is stopping PIXEL activity in " + getClass().getSimpleName() + ".");
             timer.cancel();
-        }        
+        }
+        
     }        
     
     private int[] getDecodedMetadata(String currentDir, String gifName) {  //not using this one right now
@@ -698,13 +734,42 @@ public boolean GIFNeedsDecoding(String decodedDir, String gifName, int currentRe
         }
         else 
         {
-            //System.err.println("An error occured while trying to load " + gifNamePath);
-            // e.printStackTrace();
+            // do nothing huh?
         }
-	
     }
     
-	public void decodeGIF(String decodedDir, String gifFilePath, int currentResolution, int pixelMatrix_width, int pixelMatrix_height) {  //pass the matrix type
+    public void scrollText()
+    {
+        stopExistingTimer();
+
+        timer = new Timer();
+
+        int refreshDelay = 500;//1000 * 12;  // in twelve seconds
+
+        TimerTask drawTask = new TextScroller();
+
+        Date firstTime = new Date();
+
+        timer.schedule(drawTask, firstTime, refreshDelay);
+    }
+    
+    public void setMode(PixelModes mode)
+    {
+        if( this.mode.equals(mode) )
+        {
+            System.out.println("Pixel is ignoring a setMode() call.  The mode is already " + this.mode + "/" + mode);
+        }
+        else
+        {
+            // the mode has changed
+            stopExistingTimer();
+        }
+
+        this.mode = mode;
+    }
+	
+    public void decodeGIF(String decodedDir, String gifFilePath, int currentResolution, int pixelMatrix_width, int pixelMatrix_height) 
+    {  //pass the matrix type
 		
 		//we should add another flag here if we're decoding from the jar or user supplied gif
 		
@@ -1049,12 +1114,30 @@ public void decodeGIFJar(final String decodedDir, String gifSourcePath, String g
 
 
 
+    /**
+     * Override this to perform any additional background drawing on the image that get sent to the PIXEL
+     * @param g2d 
+     */
+    protected void additionalBackgroundDrawing(Graphics2D g2d) throws Exception
+    {
+        
+    }    
+    
+    /**
+     * Override this to perform any additional foreground drawing on the image that get sent to the PIXEL
+     * @param g2d 
+     */
+    protected void additionalForegroundDrawing(Graphics2D g2d) throws Exception
+    {
+        
+    }
           
-  public static void appendWrite(byte[] data, String filename) throws IOException {
-	 FileOutputStream fos = new FileOutputStream(filename, true);  //true means append, false is over-write
-     fos.write(data);
-     fos.close();
-  }
+    public static void appendWrite(byte[] data, String filename) throws IOException 
+    {
+        FileOutputStream fos = new FileOutputStream(filename, true);  //true means append, false is over-write
+        fos.write(data);
+        fos.close();
+    }
   
   public static String getSelectedFilePath(Component command) {
 	    String path = command.toString();
@@ -1106,6 +1189,11 @@ public void decodeGIFJar(final String decodedDir, String gifSourcePath, String g
 	        image,
 	        new BufferedImage(width, height, image.getType()));	
     }
+    
+    public void setScrollingText(String text)
+    {
+        scrollingText = text;
+    }
   
     public void writeAnimation(String selectedFileName, boolean writeMode)
     {
@@ -1143,8 +1231,7 @@ public void decodeGIFJar(final String decodedDir, String gifSourcePath, String g
         System.out.println("Current LED Panel Resolution: " + currentResolution);
         System.out.println("GIF Width: " + KIND.width);
         System.out.println("GIF Height: " + KIND.height);
-			            
-        stopExistingTimer();
+        
         System.out.println("The existing timer was stopped");
 		
         String pixelHardwareId = "not found";
@@ -1156,6 +1243,8 @@ public void decodeGIFJar(final String decodedDir, String gifSourcePath, String g
         {
             Logger.getLogger(Pixel.class.getName()).log(Level.SEVERE, null, ex);
         }
+        
+        stopExistingTimer();
         
         if (pixelHardwareId.substring(0,4).equals("PIXL") && writeMode == true) 
         {
@@ -1169,8 +1258,8 @@ public void decodeGIFJar(final String decodedDir, String gifSourcePath, String g
             System.out.println("The Pixel animation writter is being created");
             Date now = new Date();
             SendGifAnimationTask wp = new SendGifAnimationTask();
-            Timer animationTimer = new Timer();
-            animationTimer.schedule(wp, now);
+            timer = new Timer();
+            timer.schedule(wp, now);
             System.out.println("The Pixel animation writter was created");
         }
         else 
@@ -1275,6 +1364,31 @@ public void decodeGIFJar(final String decodedDir, String gifSourcePath, String g
 	}
     }
 
+
+//TODO: this is not a Timer, where is this used?
+    private class AnimateTimer extends TimerTask
+    {
+        @Override
+        public void run()
+        {
+            i++;
+
+            if (i >= GIFnumFrames - 1) 
+            {
+                i = 0;
+            }
+            sendPixelDecodedFrame(decodedDir, animationFilename, i, GIFnumFrames, GIFresolution, KIND.width,KIND.height);
+        }
+    }
+    
+//TODO: Did this not exist before?
+    public enum PixelModes
+    {
+        ANIMATED_GIF,
+        SCROLLING_TEXT,
+        STILL_IMAGE
+    }
+    
     /**
      * When this task is executed, it sends an animated GIF to the the Pixel.
      */
@@ -1303,26 +1417,95 @@ public void decodeGIFJar(final String decodedDir, String gifSourcePath, String g
             //TODO UPDATE THE BROWSER/CLIENTS SOMEHOW
         }
     }
-
-    private class AnimateTimer extends TimerTask//ActionListener
-//ActionListener
+    
+    private class TextScroller extends TimerTask
     {
         @Override
         public void run()
-//        public void actionPerformed(ActionEvent evt) 
         {
-            i++;
-
-            if (i >= GIFnumFrames - 1) 
+	    int delay = 200;//scrollSpeedSlider.getValue();	
+	    delay = 710 - delay;                            // al linke: added this so the higher slider value means faster scrolling
+	    
+//	    ChangeModeServlet.this.timer.setDelay(refreshDelay);
+	    
+            int w = 64;
+            int h = 64;
+	    
+            BufferedImage img = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
+            
+	    Color textColor = Color.GREEN;//colorPanel.getBackground();
+	    
+            Graphics2D g2d = img.createGraphics();
+            g2d.setPaint(textColor);
+                      
+            String fontFamily = fontNames[0];
+//            String fontFamily = fontFamilyChooser.getSelectedItem().toString();
+            
+            Font font = fonts.get(fontFamily);
+            if(font == null)
             {
-                i = 0;
-            }
-            sendPixelDecodedFrame(decodedDir, animationFilename, i, GIFnumFrames, GIFresolution, KIND.width,KIND.height);
-        }
+                font = new Font(fontFamily, Font.PLAIN, 32);
+                fonts.put(fontFamily, font);
+            }            
+            
+            g2d.setFont(font);
+            
+            FontMetrics fm = g2d.getFontMetrics();
+            
+            int y = fm.getHeight();            
 
-        
-//        {
-//            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-//        }
+            try 
+            {
+                additionalBackgroundDrawing(g2d);
+            } 
+            catch (Exception ex) 
+            {
+                logger.log(Level.SEVERE, null, ex);
+            }
+            
+//            set intial value on scrollingText
+            g2d.drawString(scrollingText, x, y);
+            
+            try 
+            {
+                additionalForegroundDrawing(g2d);
+            } 
+            catch (Exception ex) 
+            {
+                logger.log(Level.SEVERE, null, ex);
+            }
+            
+            g2d.dispose();
+
+            System.out.println(".");
+
+            if(matrix == null)
+            {
+                logger.log(Level.INFO, "There is no matrix for the text scrolller.");
+            }
+            else
+            {
+                try 
+                {  
+                    writeImagetoMatrix(img, KIND.width, KIND.height);
+                } 
+                catch (ConnectionLostException ex) 
+                {
+                    logger.log(Level.SEVERE, null, ex);
+                }                
+            }
+                        
+            int messageWidth = fm.stringWidth(scrollingText);            
+            int resetX = 0 - messageWidth;
+            
+            if(x == resetX)
+            {
+                x = w;
+            }
+            else
+            {
+                x--;
+            }
+        }
     }
 }
