@@ -7,29 +7,29 @@ import org.onebeartoe.pixel.hardware.Pixel;
 /**
  * @author Roberto Marquez
  */
-public class AnimationsHttpHandler extends PixelHttpHandler
+public class AnimationsHttpHandler extends TextHttpHandler
 {
-    private String userHome = System.getProperty("user.home");
-
-    private String decodedDir = userHome + "/pixel/animations/decoded/";
-
     @Override
     protected String getHttpText(HttpExchange exchange)
     {
         boolean saveAnimation = false;
         
+        String animationName = "arrows.png";
+        String message = null;
         try
         {
             Pixel pixel = app.getPixel();
-            pixel.writeAnimation("arrows.png", saveAnimation);
+            pixel.writeAnimation(animationName, saveAnimation);
+            message = "written to the Pixel";
         }
         catch(Exception e)
         {
             e.printStackTrace();
+            message = e.getMessage();
         }
         finally
         {
-            return "Animate an image!";
+            return "animation " + animationName + ": " + message;
         }
     }
 }

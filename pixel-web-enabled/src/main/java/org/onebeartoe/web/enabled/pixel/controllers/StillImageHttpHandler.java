@@ -13,7 +13,7 @@ import org.onebeartoe.pixel.hardware.Pixel;
 /**
  * @author Roberto Marquez
  */
-public class StillImageHttpHandler extends PixelHttpHandler
+public class StillImageHttpHandler extends TextHttpHandler
 {
 
     @Override

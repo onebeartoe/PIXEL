@@ -8,7 +8,7 @@ import com.sun.net.httpserver.HttpExchange;
  *
  * @author Roberto Marquez
  */
-public class IndexHttpHandler extends PixelHttpHandler
+public class IndexHttpHandler extends TextHttpHandler
 {
     @Override
     protected String getHttpText(HttpExchange t)

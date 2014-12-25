@@ -3,29 +3,15 @@ package org.onebeartoe.web.enabled.pixel.controllers;
 
 import com.sun.net.httpserver.HttpExchange;
 
-import ioio.lib.api.exception.ConnectionLostException;
-
-import java.awt.Color;
-import java.awt.Font;
-import java.awt.FontMetrics;
-import java.awt.Graphics2D;
-import java.awt.image.BufferedImage;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URLDecoder;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Timer;
-import java.util.TimerTask;
 import java.util.logging.Level;
-
-import static org.onebeartoe.web.enabled.pixel.WebEnabledPixel.MATRIX_TYPE;
-//import static org.onebeartoe.web.enabled.pixel.WebEnabledPixel.fontNames;
 
 /**
  * @author Roberto Marquez
  */
-public class ScrollingTextHttpHander extends PixelHttpHandler
+public class ScrollingTextHttpHander extends TextHttpHandler
 {
     
 //TODO: delete?        
@@ -37,9 +23,9 @@ public class ScrollingTextHttpHander extends PixelHttpHandler
     @Override
     protected String getHttpText(HttpExchange exchange)
     {
-        logger.log(Level.INFO, "hi from scroller");
-
         URI requestURI = exchange.getRequestURI();
+        
+        logger.log(Level.INFO, "Scrolling text handler received a request: " + requestURI);
 
         String encodedQuery = requestURI.getQuery();
         String query;
@@ -55,15 +41,16 @@ public class ScrollingTextHttpHander extends PixelHttpHandler
                 String text = strs[1];
 
                 app.getPixel().setScrollingText(text);
+                app.getPixel().scrollText();
             }
         } 
         catch (UnsupportedEncodingException ex)
         {
             logger.log(Level.SEVERE, "The scrolling text parameters could not be decoded.", ex);
         }
-
-        app.getPixel().scrollText();
-
-        return "scrolling text request received";
+        finally
+        {
+            return "scrolling text request received";
+        }
     }
 }

@@ -6,33 +6,22 @@ import ioio.lib.api.RgbLedMatrix;
 import ioio.lib.api.exception.ConnectionLostException;
 
 import java.awt.Component;
-import java.awt.Point;
-import java.awt.event.ActionEvent;
-import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
-import java.awt.peer.ComponentPeer;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.StringReader;
 import java.net.URL;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Properties;
 
 import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
 
 import org.apache.commons.io.FilenameUtils;
+import org.onebeartoe.io.TextFileReader;
 
 /**
  * @author rmarquez
  */
 public class ImageTilePanel extends PixelTilePanel
 {
-       
     protected String imageListPath = "/images.text";
     
     private String selectedFileName;
@@ -97,22 +86,12 @@ public class ImageTilePanel extends PixelTilePanel
     @Override
     protected List<String> imageNames() throws Exception
     {
-	List<String> names = new ArrayList();	
-	InputStream instream = getClass().getResourceAsStream(imageListPath);
-	BufferedReader br = new BufferedReader(new InputStreamReader(instream));
-	String line = br.readLine();  	
-	while (line != null)   
-	{
-	    names.add(line);
-	    line = br.readLine();
-	}	
-	instream.close(); 		
+        TextFileReader textFileReader = new TextFileReader();
+        List<String> names = textFileReader.readTextLinesFromClasspath(imageListPath); 		
 	
 	return names;
     }       
-    
- 
-    
+
     @Override
     protected String imagePath() 
     {
