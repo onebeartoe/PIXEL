@@ -2,6 +2,7 @@
 package org.onebeartoe.web.enabled.pixel;
 
 import com.sun.net.httpserver.HttpContext;
+import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
 import ioio.lib.api.RgbLedMatrix;
 import ioio.lib.api.exception.ConnectionLostException;
@@ -9,6 +10,7 @@ import ioio.lib.util.BaseIOIOLooper;
 import ioio.lib.util.IOIOLooper;
 import ioio.lib.util.pc.IOIOConsoleApp;
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.InetSocketAddress;
@@ -17,12 +19,15 @@ import java.util.TimerTask;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.Timer;
+import org.onebeartoe.io.TextFileReader;
+import org.onebeartoe.io.TextFileWriter;
 import org.onebeartoe.pixel.PixelEnvironment;
 import org.onebeartoe.pixel.hardware.Pixel;
 import org.onebeartoe.web.enabled.pixel.controllers.AnimationsHttpHandler;
 import org.onebeartoe.web.enabled.pixel.controllers.IndexHttpHandler;
 import org.onebeartoe.web.enabled.pixel.controllers.PixelHttpHandler;
 import org.onebeartoe.web.enabled.pixel.controllers.ScrollingTextHttpHander;
+import org.onebeartoe.web.enabled.pixel.controllers.StaticFileHttpHandler;
 import org.onebeartoe.web.enabled.pixel.controllers.StillImageHttpHandler;
 
 /**
@@ -52,6 +57,10 @@ public class WebEnabledPixel
         String name = getClass().getName();
         logger = Logger.getLogger(name);
         
+        pixel = new Pixel(pixelEnvironment.KIND, pixelEnvironment.currentResolution);
+        
+        extractDefaultContent();
+        
         createControllers();
     }
     
@@ -63,15 +72,19 @@ public class WebEnabledPixel
             server = HttpServer.create(anyhost, 0);
             
             PixelHttpHandler indexHttpHandler = new IndexHttpHandler();
+//            PixelHttpHandler interpolatedHttpHandler = new InterpolatedHttpHandler();
             PixelHttpHandler scrollingTextHttpHander = new ScrollingTextHttpHander();
+            HttpHandler      staticFileHttpHandler = new StaticFileHttpHandler();
             PixelHttpHandler stillImageHttpHandler = new StillImageHttpHandler() ;
             PixelHttpHandler animationsHttpHandler = new AnimationsHttpHandler();
 
 // ARE WE GONNA DO ANYTHING WITH THE HttpContext OBJECTS?            
-            HttpContext createContext = server.createContext("/",     indexHttpHandler);
-            HttpContext   textContext = server.createContext("/text", scrollingTextHttpHander);
-            HttpContext  stillContext = server.createContext("/still", stillImageHttpHandler);
+            HttpContext createContext =     server.createContext("/",     indexHttpHandler);
             HttpContext animationsContext = server.createContext("/animations", animationsHttpHandler);
+//            HttpContext interpolatedContext = server.createContext("/interpolated", interpolatedHttpHandler);
+            HttpContext staticContent =     server.createContext("/files", staticFileHttpHandler);
+            HttpContext  stillContext =     server.createContext("/still", stillImageHttpHandler);
+            HttpContext   textContext =     server.createContext("/text", scrollingTextHttpHander);
                                         
             indexHttpHandler.setApp(this);
             scrollingTextHttpHander.setApp(this);
@@ -82,6 +95,34 @@ public class WebEnabledPixel
         {
             String message = "An error occured while creating the controllers";
             logger.log(Level.SEVERE, message, ex);
+        }
+    }
+    
+    public void extractDefaultContent()
+    {
+        String contentClasspath = "/web-content/";
+        String inpath = contentClasspath + "index.html";
+
+        try
+        {
+            TextFileReader tfr = new TextFileReader();
+            String text = tfr.readTextFromClasspath(inpath);
+            
+            String pixelHomePath = pixel.getPixelHome();
+            File pixelHomeDirectory = new File(pixelHomePath);
+            if( !pixelHomeDirectory.exists() )
+            {
+                pixelHomeDirectory.mkdirs();
+            }
+            
+            String outpath = pixelHomePath + "index.html";
+            File outfile = new File(outpath);
+            TextFileWriter writer = new TextFileWriter();
+            writer.writeText(outfile, text);
+        } 
+        catch (IOException ex)
+        {
+            logger.log(Level.SEVERE, null, ex);
         }
     }
 
@@ -103,7 +144,6 @@ public class WebEnabledPixel
 
     private void startSearchTimer()
     {
-// CHAGN ETH ENAME OF THIS        
 	int refreshDelay = 1000 * 12;  // in twelve seconds
         searchTimer = new Timer();
         
@@ -191,7 +231,7 @@ public class WebEnabledPixel
                 @Override
                 protected void setup() throws ConnectionLostException, InterruptedException
                 {
-                    pixel = new Pixel(pixelEnvironment.KIND, pixelEnvironment.currentResolution);
+//                    pixel = new Pixel(pixelEnvironment.KIND, pixelEnvironment.currentResolution);
                     pixel.matrix = ioio_.openRgbLedMatrix(pixel.KIND);
                     pixel.ioiO = ioio_;
 
