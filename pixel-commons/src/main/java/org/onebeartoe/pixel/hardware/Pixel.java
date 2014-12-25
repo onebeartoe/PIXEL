@@ -80,8 +80,12 @@ public class Pixel
     private static VersionType v;
     
     private String userHome;
-  	
-    private String decodedDir;
+    
+    private String pixelHome;
+  
+    private String animationsPath;
+    
+    private String decodedAnimationsPath;
 
     private int currentResolution;
     
@@ -110,7 +114,7 @@ public class Pixel
     private HashMap<String, Font> fonts;
 
 //TODO: Why does this need to be static?   
-    public static final String [] fontNames = GraphicsEnvironment.getLocalGraphicsEnvironment().getAvailableFontFamilyNames();
+//    public static final String [] fontNames = GraphicsEnvironment.getLocalGraphicsEnvironment().getAvailableFontFamilyNames();
 
     private String scrollingText;
     
@@ -144,7 +148,9 @@ public class Pixel
         try
         {
             userHome = System.getProperty("user.home");
-            decodedDir = userHome + "/pixel/animations/decoded/";
+            pixelHome = userHome + "/pixel/";
+            animationsPath = pixelHome + "animations/";
+            decodedAnimationsPath = animationsPath + "decoded/";
         }
         catch(Exception e)
         {
@@ -152,7 +158,7 @@ public class Pixel
         }
     }
     
-        private static AnalogInput getAnalogInput(int pinNumber) 
+    private static AnalogInput getAnalogInput(int pinNumber) 
     {
 	if(ioiO != null)
 	{
@@ -218,7 +224,7 @@ public class Pixel
 	    frame_[f] = (short) (((short) BitmapBytes[y] & 0xFF) | (((short) BitmapBytes[y + 1] & 0xFF) << 8));
 	    y = y + 2;
 	}
-//        matrix = PixelApp.getMatrix();
+
 	matrix.frame(frame_);
     }
     
@@ -231,14 +237,12 @@ public class Pixel
 	    y = y + 2;
 	}
 
-//        matrix = PixelApp.getMatrix();
 	if(matrix != null)
 	{
 	    matrix.frame(frame_);
 	}
     }
-    
-    
+
     public String getHardwareVersion() 
     {
         String pixelHardwareVersion = null;
@@ -282,7 +286,11 @@ public class Pixel
     {
         return mode;
     }
-  
+
+    public String getPixelHome()
+    {
+        return pixelHome;
+    }
     
     //*** Al added, this code is to support the SD card and local animations
     public void interactiveMode() {  //puts PIXEL into interactive mode
@@ -326,7 +334,12 @@ public class Pixel
             timer.cancel();
         }
         
-    }        
+    }
+    
+    public String getDecodedAnimationsPath()
+    {
+        return decodedAnimationsPath;
+    }
     
     private int[] getDecodedMetadata(String currentDir, String gifName) {  //not using this one right now
     	
@@ -374,8 +387,8 @@ public class Pixel
 	    		fps = 0;
 	    	}
 
-		   return (decodedMetadata); //we are returning an array here
-	}
+        return (decodedMetadata); //we are returning an array here
+    }
 
 public boolean GIFNeedsDecoding(String decodedDir, String gifName, int currentResolution) {
 	
@@ -605,6 +618,7 @@ public boolean GIFNeedsDecoding(String decodedDir, String gifName, int currentRe
     	
     	File filetxt = new File(decodedDir + selectedFileName + ".txt");
     	
+//TODO: BRACKETS        
     	if (filetxt.exists()) return true;
     	else return false;
     }
@@ -753,6 +767,11 @@ public boolean GIFNeedsDecoding(String decodedDir, String gifName, int currentRe
         timer.schedule(drawTask, firstTime, refreshDelay);
     }
     
+    public void setDecodedAnimationsPath(String decodedAnimationsPath)
+    {
+        this.decodedAnimationsPath = decodedAnimationsPath;
+    }
+    
     public void setMode(PixelModes mode)
     {
         if( this.mode.equals(mode) )
@@ -798,8 +817,8 @@ public boolean GIFNeedsDecoding(String decodedDir, String gifName, int currentRe
 			  String gifNameTXTPath = decodedDir + gifNameNoExt + ".txt";  //   ex. c:\animation\decoded\tree.txt
 			  
 			  //since we are decoding, we need to first make sure the .rgb565 and .txt decoded file is not there and delete if so.
-			//  String gifName565Path = decodedDir + gifName + ".rgb565";  //   ex. c:\animation\decoded\tree.rgb565
-			//  String gifNameTXTPath = decodedDir + gifName + ".txt";  //   ex. c:\animation\decoded\tree.txt
+			//  String gifName565Path = decodedAnimationsPath + gifName + ".rgb565";  //   ex. c:\animation\decoded\tree.rgb565
+			//  String gifNameTXTPath = decodedAnimationsPath + gifName + ".txt";  //   ex. c:\animation\decoded\tree.txt
 			  
 			  File file565 = new File(gifName565Path);
 			  File fileTXT = new File(gifNameTXTPath);
@@ -943,7 +962,11 @@ public boolean GIFNeedsDecoding(String decodedDir, String gifName, int currentRe
 		}
 	} 
 	
-public void decodeGIFJar(final String decodedDir, String gifSourcePath, String gifName, int currentResolution, final int pixelMatrix_width, final int pixelMatrix_height) {  //pass the matrix type
+
+    public void decodeGIFJar(final String decodedDir, String gifSourcePath, String gifName, int currentResolution, final int pixelMatrix_width, final int pixelMatrix_height) 
+    {  
+
+//pass the matrix type
 		
 	//BitmapBytes = new byte[pixelMatrix_width * pixelMatrix_height * 2]; //512 * 2 = 1024 or 1024 * 2 = 2048
 	//frame_ = new short[pixelMatrix_width * pixelMatrix_height];	
@@ -961,7 +984,8 @@ public void decodeGIFJar(final String decodedDir, String gifSourcePath, String g
 	   // GIFStream = getClass().getClassLoader().getResourceAsStream("animations/gifsource/" + gifName + ".gif"); //since we changed the thumbnails to pngs instead of gifs for performance reasons
 	      GIFStream = getClass().getClassLoader().getResourceAsStream(gifSourcePath + gifName + ".gif"); //since we changed the thumbnails to pngs instead of gifs for performance reasons
 	    
-		if (GIFStream != null) {	
+		if (GIFStream != null) 
+                {	
 			
 			//since we are decoding, we need to first make sure the .rgb565 and .txt decoded file is not there and delete if so.
 			  //String gifName565Path = currentDir + "/decoded/" + gifName + ".rgb565";  //   ex. c:\animation\decoded\tree.rgb565
@@ -974,7 +998,11 @@ public void decodeGIFJar(final String decodedDir, String gifSourcePath, String g
 			  File fileTXT = new File(gifNameTXTPath);
 			  
 			  if (file565.exists()) file565.delete();
+                          
+//TODO: Do we really want to delete file565 if fileTXT.exists()?
 			  if (fileTXT.exists()) file565.delete();
+                          
+                          
 			  //*******************************************************************************************
 			
 			  final GifDecoder d = new GifDecoder();
@@ -992,8 +1020,11 @@ public void decodeGIFJar(final String decodedDir, String gifSourcePath, String g
 	          System.out.println("frame width: " + frameWidth);
 	          
 	          
-    	    	 for (int i = 0; i < numFrames; i++) { //loop through all the frames
-    	             BufferedImage rotatedFrame = d.getFrame(i);  
+                for (int i = 0; i < numFrames; i++)
+                { 
+                    //loop through all the frames
+    	             
+                    BufferedImage rotatedFrame = d.getFrame(i);  
     	             //in case we want to add an option to rotate the image, we could use this code later, a user requested this for the 16x32 matrix
     	            // rotatedFrame = Scalr.rotate(rotatedFrame, Scalr.Rotation.CW_90, null); //fixed bug, no longer need to rotate the image
     	            // rotatedFrame = Scalr.rotate(rotatedFrame, Scalr.Rotation.FLIP_HORZ, null); //fixed bug, no longer need to flip the image
@@ -1107,10 +1138,13 @@ public void decodeGIFJar(final String decodedDir, String gifSourcePath, String g
 					e.printStackTrace();
 				}
 		}
-		else {
+		else 
+                {
 			System.out.println("ERROR  Could not find " + gifSourcePath + gifName + ".gif in the JAR file");
-		}
-	}  
+		
+                }
+	
+    }  
 
 
 
@@ -1198,7 +1232,7 @@ public void decodeGIFJar(final String decodedDir, String gifSourcePath, String g
     public void writeAnimation(String selectedFileName, boolean writeMode)
     {
         animationFilename = selectedFileName;
-        if(gifTxtExists(decodedDir,selectedFileName) == true && GIFRGB565Exists(decodedDir,selectedFileName) == true) 
+        if(gifTxtExists(decodedAnimationsPath,selectedFileName) == true && GIFRGB565Exists(decodedAnimationsPath,selectedFileName) == true) 
         {
             System.out.println("This GIF was already decoded");
         }
@@ -1206,13 +1240,13 @@ public void decodeGIFJar(final String decodedDir, String gifSourcePath, String g
         {
             System.out.println("Decoding " + selectedFileName);
             // the text file is not there so we cannot continue and we must decode, let's first copy the file to home dir
-            decodeGIFJar(decodedDir, gifSourcePath,selectedFileName, currentResolution, KIND.width, KIND.height);
+            decodeGIFJar(decodedAnimationsPath, gifSourcePath,selectedFileName, currentResolution, KIND.width, KIND.height);
         }
 			    
-        if (GIFNeedsDecoding(decodedDir, selectedFileName, currentResolution) == true) 
+        if (GIFNeedsDecoding(decodedAnimationsPath, selectedFileName, currentResolution) == true) 
         {
             System.out.println("Selected LED panel is different than the encoded GIF, need to re-enocde...");
-            decodeGIFJar(decodedDir, gifSourcePath, selectedFileName, currentResolution, KIND.width, KIND.height);
+            decodeGIFJar(decodedAnimationsPath, gifSourcePath, selectedFileName, currentResolution, KIND.width, KIND.height);
         }
 	
         //****** Now let's setup the animation ******
@@ -1220,11 +1254,11 @@ public void decodeGIFJar(final String decodedDir, String gifSourcePath, String g
 // TODO: replace animation_name with selectedFileName
         String animation_name = selectedFileName;
 
-        float GIFfps = getDecodedfps(decodedDir, animation_name); //get the fps //to do fix this later becaause we are getting from internal path
-        GIFnumFrames = getDecodednumFrames(decodedDir, animation_name);
-        int gifSelectedFileDelay = getDecodedframeDelay(decodedDir, animation_name);
+        float GIFfps = getDecodedfps(decodedAnimationsPath, animation_name); //get the fps //to do fix this later becaause we are getting from internal path
+        GIFnumFrames = getDecodednumFrames(decodedAnimationsPath, animation_name);
+        int gifSelectedFileDelay = getDecodedframeDelay(decodedAnimationsPath, animation_name);
         
-        currentResolution = getDecodedresolution(decodedDir, animation_name);
+        currentResolution = getDecodedresolution(decodedAnimationsPath, animation_name);
         GIFresolution = currentResolution;
 
         System.out.println("Selected GIF Resolution: " + GIFresolution);
@@ -1377,7 +1411,7 @@ public void decodeGIFJar(final String decodedDir, String gifSourcePath, String g
             {
                 i = 0;
             }
-            sendPixelDecodedFrame(decodedDir, animationFilename, i, GIFnumFrames, GIFresolution, KIND.width,KIND.height);
+            sendPixelDecodedFrame(decodedAnimationsPath, animationFilename, i, GIFnumFrames, GIFresolution, KIND.width,KIND.height);
         }
     }
     
@@ -1404,7 +1438,7 @@ public void decodeGIFJar(final String decodedDir, String gifSourcePath, String g
             for(int y=0; y<GIFnumFrames; y++) 
             { 
                 //Al removed the -1, make sure to test that!!!!!
-                sendPixelDecodedFrame(decodedDir, animationFilename, y, GIFnumFrames, GIFresolution, KIND.width,KIND.height);
+                sendPixelDecodedFrame(decodedAnimationsPath, animationFilename, y, GIFnumFrames, GIFresolution, KIND.width,KIND.height);
             }
 
             message = "Pixel is done writing the animation, setting PIXEL to local playback mode.";
@@ -1438,8 +1472,9 @@ public void decodeGIFJar(final String decodedDir, String gifSourcePath, String g
             Graphics2D g2d = img.createGraphics();
             g2d.setPaint(textColor);
                       
-            String fontFamily = fontNames[0];
-//            String fontFamily = fontFamilyChooser.getSelectedItem().toString();
+//               Font tr = new Font("Arial", Font.PLAIN, scrollingTextFontSize_);
+            String fontFamily = "Arial";
+//            String fontFamily = fontNames[0];
             
             Font font = fonts.get(fontFamily);
             if(font == null)
