@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.net.URI;
 import java.util.logging.Level;
+import org.onebeartoe.pixel.hardware.Pixel;
 
 /**
  * @author Roberto Marquez
@@ -18,13 +19,22 @@ public class StaticFileHttpHandler extends PixelHttpHandler
     public void handle(HttpExchange t) throws IOException
     {
         logger.log(Level.INFO, "static file handler request: " + t.getRequestURI());
-        String root = app.getPixel().getPixelHome();
+        
+        Pixel pixel = app.getPixel();
+        String root = pixel.getPixelHome();
+        
         URI uri = t.getRequestURI();
-        String path = root + uri.getPath();
-        File file = new File(path).getCanonicalFile();
+        String request = uri.getPath();
+        String urlPrefix = t.getHttpContext().getPath() + "/";
+        request = request.replaceFirst(urlPrefix, "");
+        
+        String path = root + request;
+        File f = new File(path);
+        File file = f.getCanonicalFile();
         if (!file.getPath().startsWith(root))
         {
             logger.log(Level.INFO, "forbidden request: " + t.getRequestURI());
+            logger.log(Level.INFO, "forbidden    file: " + file.getAbsolutePath() );
             
             // Suspected path traversal attack: reject with 403 error.
             String response = "403 (Forbidden)\n";
@@ -35,7 +45,8 @@ public class StaticFileHttpHandler extends PixelHttpHandler
         } 
         else if (!file.isFile())
         {
-            logger.log(Level.INFO, "file not found request: " + t.getRequestURI());
+            logger.log(Level.INFO, "file not found    request: " + t.getRequestURI());
+            logger.log(Level.INFO, "file not found translated: " + file.getAbsolutePath() );
             
             // Object does not exist or is not a file: reject with 404 error.
             String response = "404 (Not Found)\n";

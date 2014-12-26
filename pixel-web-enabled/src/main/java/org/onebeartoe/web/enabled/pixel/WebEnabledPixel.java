@@ -2,7 +2,6 @@
 package org.onebeartoe.web.enabled.pixel;
 
 import com.sun.net.httpserver.HttpContext;
-import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
 import ioio.lib.api.RgbLedMatrix;
 import ioio.lib.api.exception.ConnectionLostException;
@@ -14,11 +13,14 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.InetSocketAddress;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.TimerTask;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.Timer;
+import org.apache.commons.io.IOUtils;
 import org.onebeartoe.io.TextFileReader;
 import org.onebeartoe.io.TextFileWriter;
 import org.onebeartoe.pixel.PixelEnvironment;
@@ -71,13 +73,31 @@ public class WebEnabledPixel
             InetSocketAddress anyhost = new InetSocketAddress(2007);
             server = HttpServer.create(anyhost, 0);
             
+            List<PixelHttpHandler> handlers = new ArrayList();
+            
             PixelHttpHandler indexHttpHandler = new IndexHttpHandler();
+            handlers.add(indexHttpHandler);
+            
 //            PixelHttpHandler interpolatedHttpHandler = new InterpolatedHttpHandler();
+// add interpolted handelr to the handler list
+            
             PixelHttpHandler scrollingTextHttpHander = new ScrollingTextHttpHander();
-            HttpHandler      staticFileHttpHandler = new StaticFileHttpHandler();
+            handlers.add(scrollingTextHttpHander);
+            
+            PixelHttpHandler staticFileHttpHandler = new StaticFileHttpHandler();
+            handlers.add(staticFileHttpHandler);
+            
             PixelHttpHandler stillImageHttpHandler = new StillImageHttpHandler() ;
+            handlers.add(stillImageHttpHandler);
+            
             PixelHttpHandler animationsHttpHandler = new AnimationsHttpHandler();
+            handlers.add(animationsHttpHandler);
 
+            for(PixelHttpHandler phh : handlers)
+            {
+                phh.setApp(this);
+            }
+            
 // ARE WE GONNA DO ANYTHING WITH THE HttpContext OBJECTS?            
             HttpContext createContext =     server.createContext("/",     indexHttpHandler);
             HttpContext animationsContext = server.createContext("/animations", animationsHttpHandler);
@@ -85,11 +105,6 @@ public class WebEnabledPixel
             HttpContext staticContent =     server.createContext("/files", staticFileHttpHandler);
             HttpContext  stillContext =     server.createContext("/still", stillImageHttpHandler);
             HttpContext   textContext =     server.createContext("/text", scrollingTextHttpHander);
-                                        
-            indexHttpHandler.setApp(this);
-            scrollingTextHttpHander.setApp(this);
-            stillImageHttpHandler.setApp(this);
-            animationsHttpHandler.setApp(this);
         } 
         catch (IOException ex)
         {
@@ -117,13 +132,31 @@ public class WebEnabledPixel
             
             String outpath = pixelHomePath + "index.html";
             File outfile = new File(outpath);
-            TextFileWriter writer = new TextFileWriter();
-            writer.writeText(outfile, text);
+            if( outfile.exists() )
+            {
+                logger.log(Level.INFO, "Pixel app will not extract index.html.  It already exists.");
+            }
+            else
+            {
+                logger.log(Level.INFO, "Pixel app is extracting index.html.");
+                TextFileWriter writer = new TextFileWriter();
+                writer.writeText(outfile, text);
+            }
         } 
         catch (IOException ex)
         {
             logger.log(Level.SEVERE, null, ex);
         }
+    }
+    
+    private void extractHtmlIndex()
+    {
+        
+    }
+    
+    private void extractResourceFromClasspath()
+    {
+        IOUtils.copy(
     }
 
     public Pixel getPixel()
@@ -250,7 +283,7 @@ public class WebEnabledPixel
                     
                     message.append("You may now interact with the PIXEL!\n");
 
-    //TODO: Load something on startup
+//TODO: Load something on startup
 
                     searchTimer.cancel(); //need to stop the timer so we don't still display the pixel searching message
                     
