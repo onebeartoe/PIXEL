@@ -157,44 +157,6 @@ public class Pixel
             e.printStackTrace();
         }
     }
-    
-    private static AnalogInput getAnalogInput(int pinNumber) 
-    {
-	if(ioiO != null)
-	{
-	    try 
-	    {
-		analogInput1 = ioiO.openAnalogInput(pinNumber);
-	    } 
-	    catch (ConnectionLostException ex) 
-	    {
-		String message = "The PIXEL connection was lost.";
-		Logger.getLogger("Pixel").log(Level.SEVERE, message, ex);
-	    }		
-	}
-        
-        return analogInput1;
-    }
-    
-    public static AnalogInput getAnalogInput1() 
-    {
-        if (analogInput1 == null) 
-	{
-	    analogInput1 = getAnalogInput(31);			    
-        }
-        
-        return analogInput1;
-    }
-    
-    public static AnalogInput getAnalogInput2() 
-    {
-        if (analogInput2 == null) 
-	{
-	    analogInput2 = getAnalogInput(32);
-        }
-        
-        return analogInput2;
-    }
 
     /**
      * Read the input stream into a byte array
@@ -242,6 +204,22 @@ public class Pixel
 	    matrix.frame(frame_);
 	}
     }
+    
+    /**
+     * tells PIXEL to play the local files
+     */
+    public void playLocalMode() 
+    {
+    	try 
+        {
+    		matrix.playFile();
+        } 
+        catch (ConnectionLostException e) 
+        {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+        }
+    }    
 
     public String getHardwareVersion() 
     {
@@ -311,29 +289,49 @@ public class Pixel
 		}
     }
     
-    public void playLocalMode() {  //tells PIXEL to play the local files
-    	try {
-    		matrix.playFile();
-		} catch (ConnectionLostException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+
+    
+    private static AnalogInput getAnalogInput(int pinNumber) 
+    {
+	if(ioiO != null)
+	{
+	    try 
+	    {
+		analogInput1 = ioiO.openAnalogInput(pinNumber);
+	    } 
+	    catch (ConnectionLostException ex) 
+	    {
+		String message = "The PIXEL connection was lost.";
+		Logger.getLogger("Pixel").log(Level.SEVERE, message, ex);
+	    }		
+	}
+        
+        return analogInput1;
     }
     
-    public void stopExistingTimer()
+    public static AnalogInput getAnalogInput1() 
     {
-        System.out.println("checking PIXEL activity in " + getClass().getSimpleName() + ".");
-
-        if(timer == null)
-        {
-            System.out.println("No timer stop needed at Pixel mode change.");
-        }
-        else
-        {
-            System.out.println("Pixel is stopping PIXEL activity in " + getClass().getSimpleName() + ".");
-            timer.cancel();
+        if (analogInput1 == null) 
+	{
+	    analogInput1 = getAnalogInput(31);			    
         }
         
+        return analogInput1;
+    }
+    
+    public static AnalogInput getAnalogInput2() 
+    {
+        if (analogInput2 == null) 
+	{
+	    analogInput2 = getAnalogInput(32);
+        }
+        
+        return analogInput2;
+    }
+
+    public String getAnimationsPath()
+    {
+        return animationsPath;
     }
     
     public String getDecodedAnimationsPath()
@@ -1228,6 +1226,21 @@ public boolean GIFNeedsDecoding(String decodedDir, String gifName, int currentRe
     {
         scrollingText = text;
     }
+    
+    public void stopExistingTimer()
+    {
+        System.out.println("checking PIXEL activity in " + getClass().getSimpleName() + ".");
+
+        if(timer == null)
+        {
+            System.out.println("No timer stop needed at Pixel mode change.");
+        }
+        else
+        {
+            System.out.println("Pixel is stopping PIXEL activity in " + getClass().getSimpleName() + ".");
+            timer.cancel();
+        }
+    }    
   
     public void writeAnimation(String selectedFileName, boolean writeMode)
     {
