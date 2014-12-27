@@ -87,6 +87,8 @@ public class Pixel
     
     private String decodedAnimationsPath;
 
+    private String imagesPath;
+    
     private int currentResolution;
     
 // Is this a dup of currentResolution?    
@@ -148,9 +150,13 @@ public class Pixel
         try
         {
             userHome = System.getProperty("user.home");
+            
             pixelHome = userHome + "/pixel/";
-            animationsPath = pixelHome + "animations/";
+            
+            animationsPath = pixelHome + "animations/";            
             decodedAnimationsPath = animationsPath + "decoded/";
+            
+            imagesPath = pixelHome + "images/";
         }
         catch(Exception e)
         {
@@ -239,6 +245,11 @@ public class Pixel
 		}
                 
         return pixelHardwareVersion;
+    }
+
+    public String getImagesPath()
+    {
+        return imagesPath;
     }
     
     public String getFirmwareVersion() 

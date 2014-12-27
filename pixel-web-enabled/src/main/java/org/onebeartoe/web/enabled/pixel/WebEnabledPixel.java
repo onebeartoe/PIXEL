@@ -10,10 +10,14 @@ import ioio.lib.util.IOIOLooper;
 import ioio.lib.util.pc.IOIOConsoleApp;
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.FilenameFilter;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.TimerTask;
@@ -22,7 +26,6 @@ import java.util.logging.Logger;
 import java.util.Timer;
 import org.apache.commons.io.IOUtils;
 import org.onebeartoe.io.TextFileReader;
-import org.onebeartoe.io.TextFileWriter;
 import org.onebeartoe.pixel.PixelEnvironment;
 import org.onebeartoe.pixel.hardware.Pixel;
 import org.onebeartoe.web.enabled.pixel.controllers.AnimationsHttpHandler;
@@ -31,6 +34,7 @@ import org.onebeartoe.web.enabled.pixel.controllers.PixelHttpHandler;
 import org.onebeartoe.web.enabled.pixel.controllers.ScrollingTextHttpHander;
 import org.onebeartoe.web.enabled.pixel.controllers.StaticFileHttpHandler;
 import org.onebeartoe.web.enabled.pixel.controllers.StillImageHttpHandler;
+import org.onebeartoe.web.enabled.pixel.controllers.StillImageListHttpHandler;
 
 /**
  * @author Roberto Marquez
@@ -54,6 +58,12 @@ public class WebEnabledPixel
     
     public final static RgbLedMatrix.Matrix MATRIX_TYPE = pixelEnvironment.KIND;
     
+//TODO: MAKE THIS PRIVATE    
+    public List<String> stillImageNames;
+
+//TODO: MAKE THIS PRIVATE    
+    public List<String> animationImageNames;
+    
     public WebEnabledPixel()
     {
         String name = getClass().getName();
@@ -62,6 +72,8 @@ public class WebEnabledPixel
         pixel = new Pixel(pixelEnvironment.KIND, pixelEnvironment.currentResolution);
         
         extractDefaultContent();
+        
+        loadImageLists();
         
         createControllers();
     }
@@ -90,6 +102,9 @@ public class WebEnabledPixel
             PixelHttpHandler stillImageHttpHandler = new StillImageHttpHandler() ;
             handlers.add(stillImageHttpHandler);
             
+            PixelHttpHandler stillImageListHttpHandler = new StillImageListHttpHandler();
+            handlers.add(stillImageListHttpHandler);
+            
             PixelHttpHandler animationsHttpHandler = new AnimationsHttpHandler();
             handlers.add(animationsHttpHandler);
 
@@ -100,10 +115,11 @@ public class WebEnabledPixel
             
 // ARE WE GONNA DO ANYTHING WITH THE HttpContext OBJECTS?            
             HttpContext createContext =     server.createContext("/",     indexHttpHandler);
-            HttpContext animationsContext = server.createContext("/animations", animationsHttpHandler);
+            HttpContext animationsContext = server.createContext("/animation", animationsHttpHandler);
 //            HttpContext interpolatedContext = server.createContext("/interpolated", interpolatedHttpHandler);
             HttpContext staticContent =     server.createContext("/files", staticFileHttpHandler);
             HttpContext  stillContext =     server.createContext("/still", stillImageHttpHandler);
+                                            server.createContext("/still/list", stillImageListHttpHandler);
             HttpContext   textContext =     server.createContext("/text", scrollingTextHttpHander);
         } 
         catch (IOException ex)
@@ -113,55 +129,175 @@ public class WebEnabledPixel
         }
     }
     
-    public void extractDefaultContent()
+    public void extractAnimationImages() throws IOException
+    {
+        String animationsListFilesystemPath = pixel.getPixelHome() + "animations.text";
+        File animationsListFile = new File(animationsListFilesystemPath);
+        
+        String pathPrefix = "animations/";
+        String animationsListClasspath = "/animations.text";
+        
+        extractListOfClasspathResources(animationsListFile, animationsListClasspath, pathPrefix);        
+    }
+    
+    private void extractDefaultContent()
+    {
+        try
+        {
+            extractHtmlAndJavascript();
+                        
+            extractStillImages();
+            
+            extractAnimationImages();
+        } 
+        catch (IOException ex)
+        {
+            logger.log(Level.SEVERE, "could not extract all default content", ex);
+        }
+    }
+    
+    private void extractHtmlAndJavascript() throws IOException
     {
         String contentClasspath = "/web-content/";
         String inpath = contentClasspath + "index.html";
 
-        try
-        {
-            TextFileReader tfr = new TextFileReader();
-            String text = tfr.readTextFromClasspath(inpath);
+        String pixelHomePath = pixel.getPixelHome();
+        File pixelHomeDirectory = new File(pixelHomePath);
             
-            String pixelHomePath = pixel.getPixelHome();
-            File pixelHomeDirectory = new File(pixelHomePath);
-            if( !pixelHomeDirectory.exists() )
-            {
-                pixelHomeDirectory.mkdirs();
-            }
-            
-            String outpath = pixelHomePath + "index.html";
-            File outfile = new File(outpath);
-            if( outfile.exists() )
-            {
-                logger.log(Level.INFO, "Pixel app will not extract index.html.  It already exists.");
-            }
-            else
-            {
-                logger.log(Level.INFO, "Pixel app is extracting index.html.");
-                TextFileWriter writer = new TextFileWriter();
-                writer.writeText(outfile, text);
-            }
-        } 
-        catch (IOException ex)
+        extractClasspathResource(inpath, pixelHomeDirectory);
+        
+        inpath = contentClasspath + "pixel.js";
+        extractClasspathResource(inpath, pixelHomeDirectory);
+    }
+    
+    private void extractStillImages() throws IOException
+    {
+        String imagesListFilesystemPath = pixel.getPixelHome() + "images.text";
+        File imagesListFile = new File(imagesListFilesystemPath);
+        
+        String pathPrefix = "images/";
+        String imagesListClasspath = "/images.text";
+        
+        extractListOfClasspathResources(imagesListFile, imagesListClasspath, pathPrefix);
+    }
+
+    private void extractClasspathResource(String classpath, File parentDirectory) throws IOException
+    {
+        InputStream instream = getClass().getResourceAsStream(classpath);
+
+        if( !parentDirectory.exists() )
         {
-            logger.log(Level.SEVERE, null, ex);
+            parentDirectory.mkdirs();
+        }
+
+        int i = classpath.lastIndexOf("/") + 1;
+        String outname = classpath.substring(i);
+        String outpath = parentDirectory.getAbsolutePath() + File.separator + outname;
+        File outfile = new File(outpath);
+        
+//TODO: UNCOMMENT THIS IF/ELSE WHEN YOU ARE DONE TESTING, as is, the code extracts 
+//      all files every run to make Web development faster.
+//        if( outfile.exists() )
+//        {
+//            logger.log(Level.INFO, "Pixel app will not extract " + classpath + ".  It already exists.");
+//        }
+//        else
+        {
+            logger.log(Level.INFO, "Pixel app is extracting " + classpath);
+
+            FileOutputStream fos = new FileOutputStream(outfile);
+            IOUtils.copy(instream, fos);
         }
     }
     
-    private void extractHtmlIndex()
+    /**
+     * This method only extracts the resources to the file system if the list 
+     * does not exist on the filesystem.  This is to keep extracting the default 
+     * content every run.
+     */
+    private void extractListOfClasspathResources(File resourceListFile, 
+                                                 String resourceListClasspath,
+                                                 String pathPrefix) throws IOException
     {
         
-    }
-    
-    private void extractResourceFromClasspath()
-    {
-        IOUtils.copy(
+        if(resourceListFile.exists() )
+        {
+            String message = "Pixel app will not extract the contents of " + resourceListClasspath
+                        + ".  The list already exists at " + resourceListFile.getAbsolutePath();
+            logger.log(Level.INFO, message);
+        }
+        else
+        {
+            // extract the list so on next run the app knows not to extract the default content
+            extractClasspathResource(resourceListClasspath, resourceListFile);
+            
+            String outputDrectoryPath = pixel.getPixelHome() + pathPrefix;
+            File outputDirectory = new File(outputDrectoryPath);
+            
+            TextFileReader tfr = new TextFileReader();
+            List<String> imageNames = tfr.readTextLinesFromClasspath(resourceListClasspath);
+            
+            for(String name : imageNames)
+            {
+                String classpath = "/" + pathPrefix + name;
+                
+                System.out.println("Extracting " + classpath);
+                
+                extractClasspathResource(classpath, outputDirectory);
+            }
+        }
     }
 
     public Pixel getPixel()
     {
         return pixel;
+    }
+    
+    private List<String> loadImageList(String directoryName) throws Exception
+    {
+        String dirPath = pixel.getPixelHome() + directoryName;
+        File parent = new File(dirPath);
+        
+        List<String> namesList = new ArrayList();
+        
+        if( !parent.exists() || !parent.isDirectory() )
+        {
+            String message = "The directory is not valid:" +
+                             dirPath + "\n" + 
+                             "exists: " + parent.exists() + "\n" + 
+                             "directory: " + parent.isDirectory();
+            throw new Exception(message);
+        }
+        else
+        {
+            String [] names = parent.list( new FilenameFilter()
+            {
+
+                @Override
+                public boolean accept(File dir, String name)
+                {
+                    return name.toLowerCase().endsWith(".png");
+                }
+            });
+            
+            List<String> list = Arrays.asList(names);
+            namesList.addAll(list);
+        }
+        
+        return namesList;
+    }
+    
+    private void loadImageLists()
+    {
+        try
+        {        
+            stillImageNames = loadImageList("images");
+            animationImageNames = loadImageList("animations");
+        } 
+        catch (Exception ex)
+        {
+            logger.log(Level.SEVERE, "could not load image resources on the filesystem", ex);
+        }
     }
     
     public static void main(String[] args)
