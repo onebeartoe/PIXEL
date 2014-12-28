@@ -29,6 +29,7 @@ import org.onebeartoe.io.TextFileReader;
 import org.onebeartoe.pixel.PixelEnvironment;
 import org.onebeartoe.pixel.hardware.Pixel;
 import org.onebeartoe.web.enabled.pixel.controllers.AnimationsHttpHandler;
+import org.onebeartoe.web.enabled.pixel.controllers.AnimationsListHttpHandler;
 import org.onebeartoe.web.enabled.pixel.controllers.IndexHttpHandler;
 import org.onebeartoe.web.enabled.pixel.controllers.PixelHttpHandler;
 import org.onebeartoe.web.enabled.pixel.controllers.ScrollingTextHttpHander;
@@ -103,10 +104,13 @@ public class WebEnabledPixel
             handlers.add(stillImageHttpHandler);
             
             PixelHttpHandler stillImageListHttpHandler = new StillImageListHttpHandler();
-            handlers.add(stillImageListHttpHandler);
+            handlers.add(stillImageListHttpHandler);            
             
             PixelHttpHandler animationsHttpHandler = new AnimationsHttpHandler();
             handlers.add(animationsHttpHandler);
+            
+            PixelHttpHandler animationsListHttpHandler = new AnimationsListHttpHandler();
+            handlers.add(animationsListHttpHandler);
 
             for(PixelHttpHandler phh : handlers)
             {
@@ -116,6 +120,7 @@ public class WebEnabledPixel
 // ARE WE GONNA DO ANYTHING WITH THE HttpContext OBJECTS?            
             HttpContext createContext =     server.createContext("/",     indexHttpHandler);
             HttpContext animationsContext = server.createContext("/animation", animationsHttpHandler);
+                                            server.createContext("/animation/list", animationsListHttpHandler);
 //            HttpContext interpolatedContext = server.createContext("/interpolated", interpolatedHttpHandler);
             HttpContext staticContent =     server.createContext("/files", staticFileHttpHandler);
             HttpContext  stillContext =     server.createContext("/still", stillImageHttpHandler);
@@ -137,7 +142,7 @@ public class WebEnabledPixel
         String pathPrefix = "animations/";
         String animationsListClasspath = "/animations.text";
         
-        extractListOfClasspathResources(animationsListFile, animationsListClasspath, pathPrefix);        
+        extractClasspathResourcesList(animationsListFile, animationsListClasspath, pathPrefix);        
     }
     
     private void extractDefaultContent()
@@ -178,7 +183,7 @@ public class WebEnabledPixel
         String pathPrefix = "images/";
         String imagesListClasspath = "/images.text";
         
-        extractListOfClasspathResources(imagesListFile, imagesListClasspath, pathPrefix);
+        extractClasspathResourcesList(imagesListFile, imagesListClasspath, pathPrefix);
     }
 
     private void extractClasspathResource(String classpath, File parentDirectory) throws IOException
@@ -196,7 +201,8 @@ public class WebEnabledPixel
         File outfile = new File(outpath);
         
 //TODO: UNCOMMENT THIS IF/ELSE WHEN YOU ARE DONE TESTING, as is, the code extracts 
-//      all files every run to make Web development faster.
+//      all files every run to make Web development faster.  That is, the existing 
+//      files don't need not be removed to get the latest changes extracted.
 //        if( outfile.exists() )
 //        {
 //            logger.log(Level.INFO, "Pixel app will not extract " + classpath + ".  It already exists.");
@@ -211,15 +217,14 @@ public class WebEnabledPixel
     }
     
     /**
-     * This method only extracts the resources to the file system if the list 
-     * does not exist on the filesystem.  This is to keep extracting the default 
-     * content every run.
+     * This method only extracts the resources to the file system if the list file
+     * does not exist on the filesystem.  This is to keep from extracting the default 
+     * content every time the application runs.
      */
-    private void extractListOfClasspathResources(File resourceListFile, 
+    private void extractClasspathResourcesList(File resourceListFile, 
                                                  String resourceListClasspath,
                                                  String pathPrefix) throws IOException
     {
-        
         if(resourceListFile.exists() )
         {
             String message = "Pixel app will not extract the contents of " + resourceListClasspath

@@ -8,11 +8,11 @@ import java.util.List;
  *
  * @author Roberto Marquez
  */
-public class StillImageListHttpHandler extends ListHttpHandler
+public class AnimationsListHttpHandler extends ListHttpHandler
 {
     @Override
     protected List<String> getList()
     {
-        return getApp().stillImageNames;
+        return getApp().animationImageNames;
     }
 }
