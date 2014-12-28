@@ -37,39 +37,34 @@ public class ScrollingTextHttpHander extends TextHttpHandler
 
             logger.log(Level.INFO, "scrolling default text");            
         }
-        
-        try
+        else
         {
-            String query = URLDecoder.decode(encodedQuery, "UTF-8");
-            String[] parameters = query.split("&");
-            logger.log(Level.INFO, "parameters: " + parameters);
-            if(parameters != null && parameters.length > 0)
+            try
             {
-                String command = parameters[0];
-                String [] strs = command.split("=");
-                String t = strs[0];
-                text = strs[1];
-                
-                logger.log(Level.INFO, "scrolling custom message:" + text);
-            }
-            else
+                String query = URLDecoder.decode(encodedQuery, "UTF-8");
+                String[] parameters = query.split("&");
+                logger.log(Level.INFO, "parameters: " + parameters);
+                if(parameters != null && parameters.length > 0)
+                {
+                    String command = parameters[0];
+                    String [] strs = command.split("=");
+                    String t = strs[0];
+                    text = strs[1];
+
+                    logger.log(Level.INFO, "scrolling custom message:" + text);
+                }
+                else
+                {
+                    text = "error processing request";
+                }
+
+
+            } 
+            catch (UnsupportedEncodingException ex)
             {
-                text = "error processing request";
+                logger.log(Level.SEVERE, "The scrolling text parameters could not be decoded.", ex);
             }
-            
-            
-        } 
-        catch (UnsupportedEncodingException ex)
-        {
-            logger.log(Level.SEVERE, "The scrolling text parameters could not be decoded.", ex);
         }
-//        finally
-//        {
-//            if(text == null)
-//            {
-//                text = 
-//            }
-//        }
         
         app.getPixel().setScrollingText(text);
         app.getPixel().scrollText();

@@ -4,7 +4,6 @@ package org.onebeartoe.web.enabled.pixel.controllers;
 import com.sun.net.httpserver.HttpExchange;
 import java.io.IOException;
 import java.io.OutputStream;
-import org.onebeartoe.web.enabled.pixel.controllers.PixelHttpHandler;
 
 /**
  * @author Roberto Marquez

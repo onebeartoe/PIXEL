@@ -161,6 +161,7 @@ public class WebEnabledPixel
         }
     }
     
+// AND CSS OR RENAME!    
     private void extractHtmlAndJavascript() throws IOException
     {
         String contentClasspath = "/web-content/";
@@ -172,6 +173,9 @@ public class WebEnabledPixel
         extractClasspathResource(inpath, pixelHomeDirectory);
         
         inpath = contentClasspath + "pixel.js";
+        extractClasspathResource(inpath, pixelHomeDirectory);
+        
+        inpath = contentClasspath + "images.css";
         extractClasspathResource(inpath, pixelHomeDirectory);
     }
     

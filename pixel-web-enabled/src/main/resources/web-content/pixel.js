@@ -5,31 +5,31 @@ function changeControls(mode)
     {
         case "animations":
         {
-            hideElement("still");
+            hideElement("stillPanel");
             
-            showElement("animations");
+            showElement("animationsPanel");
             
             break;
         }
         case "still":
         {
-            hideElement("animations");
+            hideElement("animationsPanel");
             
-            showElement("still");
+            showElement("stillPanel");
             
             break;
         }
         case "text":
         {
-            hideElement("animations");
-            hideElement("still");
+            hideElement("animationsPanel");
+            hideElement("stillPanel");
             
             break;
         }
         default:
         {
             // "time-lapse"
-            showElement("time-lapse-controls");
+            showElement("stillPanel");
         }
     }
 }
@@ -91,25 +91,51 @@ function loadImageList(url, elementName, imagePath)
             
             var names = list.split("-+-");
             
-            var e = document.getElementById(elementName);
+            
 
-            e.innerHTML = "<div>";
+            var html = "<table>";
+            
+            var c = 0;
+            var columns = 4;
             
             for(var n in names)
             {
                 var name = names[n].trim();
                 
+                if(c === columns)
+                {
+                    html += "<tr>";
+                }
+                
                 if(name != "")
                 {
-                    e.innerHTML += "<div>" + "\n";
-                    e.innerHTML += "\t" + "<img src=\"/files/" + imagePath + name + "\">" + "\n";
-                    e.innerHTML += "\t" + "<button onclick=\"displayImage('" + imagePath + "', '" + name + "')\">Display</button>" + "\n";
-                    e.innerHTML += name + "\n";
-                    e.innerHTML += "</div>" + "\n";
+                    html += "<td>";
+                    html += "<img src=\"/files/" + imagePath + name + "\" " + 
+                                   "width=\"50\" height=\"50\" alt=\"" + name +  "\"" +  
+                                   ">";
+                    html += "<br/>";
+                    html += "<button onclick=\"displayImage('" + imagePath + "', '" + name + "')\">Display</button>";
+                    html += "<p>" + name + "</p>";
+                    html += "</td>";
+                }
+                
+                if(c < columns)
+                {
+                    c++;
+                }
+                else
+                {
+                    html += "</tr>";
+                    c = 0;
                 }
             }
             
-            e.innerHTML += "</div>";
+            html += "<div class=\"spacer\">&nbsp;</div>";
+            
+            html += "</table>";
+            
+            var e = document.getElementById(elementName);
+            e.innerHTML = html;
             
             logEvent("done loading " + elementName);
         }
@@ -153,8 +179,13 @@ function logEvent(message)
     e.innerHTML = logs;
 }
 
-function modeChanged(mode, imageName = "")
+function modeChanged(mode, imageName)
 {
+    if(imageName === null)
+    {
+        imageName = "";
+    }
+    
     changeControls(mode);
     
     var xmlhttp = new XMLHttpRequest();
