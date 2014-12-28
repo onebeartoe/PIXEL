@@ -5,16 +5,24 @@ function changeControls(mode)
     {
         case "animations":
         {
+            hideElement("still");
+            
+            showElement("animations");
+            
             break;
         }
         case "still":
         {
-            hideElement("time-lapse-controls");
+            hideElement("animations");
+            
+            showElement("still");
             
             break;
         }
         case "text":
         {
+            hideElement("animations");
+            hideElement("still");
             
             break;
         }
@@ -26,6 +34,35 @@ function changeControls(mode)
     }
 }
 
+function displayImage(imagePath, name)
+{
+    var mode;
+    
+    switch(imagePath)
+    {
+        case "animations/":
+        {
+            mode = "animation/";
+            break;
+        }
+        default:
+        {
+            // still images
+            mode = "still/";
+        }
+    }
+    
+    var xmlhttp = new XMLHttpRequest();
+    xmlhttp.onreadystatechange=function()
+    {
+        logServerResponse(xmlhttp);
+    }
+    var url = "/" + mode + name;
+    xmlhttp.open("POST", url, true);
+    xmlhttp.setRequestHeader("Content-type","application/x-www-form-urlencoded");
+    xmlhttp.send("&p=3");    
+}
+
 function hideElement(id)
 {
     var element = document.getElementById(id);
@@ -34,18 +71,16 @@ function hideElement(id)
 
 function loadAnimations()
 {
+    var url = "/animation/list";
+    var elementName = "animations";
+    var imagePath = "animations/";
     
+    loadImageList(url, elementName, imagePath);
 }
 
-function loadImageResources()
+function loadImageList(url, elementName, imagePath)
 {
-    loadStillImages();
-    loadAnimations();
-}
-
-function loadStillImages()
-{
-    logEvent("loading still images...");
+    logEvent("loading " + elementName + "...");
     
     var xmlhttp = new XMLHttpRequest();
     xmlhttp.onreadystatechange=function()
@@ -56,7 +91,7 @@ function loadStillImages()
             
             var names = list.split("-+-");
             
-            var e = document.getElementById("still-images");
+            var e = document.getElementById(elementName);
 
             e.innerHTML = "<div>";
             
@@ -67,7 +102,8 @@ function loadStillImages()
                 if(name != "")
                 {
                     e.innerHTML += "<div>" + "\n";
-                    e.innerHTML += "\t" + "<img src=\"/files/images/" + name + "\">" + "\n";
+                    e.innerHTML += "\t" + "<img src=\"/files/" + imagePath + name + "\">" + "\n";
+                    e.innerHTML += "\t" + "<button onclick=\"displayImage('" + imagePath + "', '" + name + "')\">Display</button>" + "\n";
                     e.innerHTML += name + "\n";
                     e.innerHTML += "</div>" + "\n";
                 }
@@ -75,13 +111,28 @@ function loadStillImages()
             
             e.innerHTML += "</div>";
             
-            logEvent("done loading still images");
+            logEvent("done loading " + elementName);
         }
     }
-    var url = "/still/list";    
+    
     xmlhttp.open("POST", url, true);
     xmlhttp.setRequestHeader("Content-type","application/x-www-form-urlencoded");
     xmlhttp.send("&p=3");    
+}
+
+function loadImageResources()
+{
+    loadStillImages();
+    loadAnimations();
+}
+
+function loadStillImages()
+{
+    var url = "/still/list";
+    var elementName = "still";
+    var imagePath = "images/";
+    
+    loadImageList(url, elementName, imagePath);
 }
 
 function logServerResponse(xmlhttp)
@@ -102,7 +153,7 @@ function logEvent(message)
     e.innerHTML = logs;
 }
 
-function modeChanged(mode)
+function modeChanged(mode, imageName = "")
 {
     changeControls(mode);
     
@@ -111,7 +162,13 @@ function modeChanged(mode)
     {
         logServerResponse(xmlhttp);
     }
-    var url = "/" + mode;    
+    var url = "/" + mode;
+    
+    if(imageName != "")
+    {
+        url += "/" + imageName;
+    }
+    
     xmlhttp.open("POST", url, true);
     xmlhttp.setRequestHeader("Content-type","application/x-www-form-urlencoded");
     xmlhttp.send("&p=3");
