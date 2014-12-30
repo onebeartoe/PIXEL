@@ -113,7 +113,7 @@ function loadImageList(url, elementName, imagePath)
             
             var names = list.split("-+-");
             
-            var html = "<table>";
+            var html = "<div class='thumb-holder'>";
             
  //           var c = 0;
             var columns = 4;
@@ -130,14 +130,16 @@ function loadImageList(url, elementName, imagePath)
                 
                 if(name != "")
                 {
-                    html += "<td>";
+                    html += "<div class='thumb'>";
                     html += "<img src=\"/files/" + imagePath + name + "\" " + 
                                    "width=\"50\" height=\"50\" alt=\"" + name +  "\"" +  
                                    ">";
-                    html += "<br/>";
-                    html += "<button onclick=\"displayImage('" + imagePath + "', '" + name + "')\">Display</button>";
-                    html += "<p>" + name + "</p>";
-                    html += "</td>";
+//                    html += "<br/>";
+                    html += "<p>" + name + "</p>";                    
+                    html += "<center style=\"margin-bottom: 40px;\">";
+                    html += "<button onclick=\"displayImage('" + imagePath + "', '" + name + "')\" style=\"margin-left: auto; margin-right: auto;\">Display</button>";
+                    html += "</center>";
+                    html += "</div>";
                 }
                 
                 if(mod == 0)
@@ -148,7 +150,7 @@ function loadImageList(url, elementName, imagePath)
             
             html += "<div class=\"spacer\">&nbsp;</div>";
             
-            html += "</table>";
+            html += "</div>";
             
             var e = document.getElementById(elementName);
             e.innerHTML = html;
