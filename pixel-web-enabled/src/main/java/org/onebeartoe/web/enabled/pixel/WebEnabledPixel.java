@@ -32,7 +32,9 @@ import org.onebeartoe.web.enabled.pixel.controllers.AnimationsHttpHandler;
 import org.onebeartoe.web.enabled.pixel.controllers.AnimationsListHttpHandler;
 import org.onebeartoe.web.enabled.pixel.controllers.IndexHttpHandler;
 import org.onebeartoe.web.enabled.pixel.controllers.PixelHttpHandler;
+import org.onebeartoe.web.enabled.pixel.controllers.ScrollingTextColorHttpHandler;
 import org.onebeartoe.web.enabled.pixel.controllers.ScrollingTextHttpHander;
+import org.onebeartoe.web.enabled.pixel.controllers.ScrollingTextSpeedHttpHandler;
 import org.onebeartoe.web.enabled.pixel.controllers.StaticFileHttpHandler;
 import org.onebeartoe.web.enabled.pixel.controllers.StillImageHttpHandler;
 import org.onebeartoe.web.enabled.pixel.controllers.StillImageListHttpHandler;
@@ -97,6 +99,12 @@ public class WebEnabledPixel
             PixelHttpHandler scrollingTextHttpHander = new ScrollingTextHttpHander();
             handlers.add(scrollingTextHttpHander);
             
+            PixelHttpHandler scrollingTextSpeedHttpHander = new ScrollingTextSpeedHttpHandler();
+            handlers.add(scrollingTextSpeedHttpHander);
+            
+            PixelHttpHandler scrollingTextColorHttpHandler = new ScrollingTextColorHttpHandler();
+            handlers.add(scrollingTextColorHttpHandler);
+            
             PixelHttpHandler staticFileHttpHandler = new StaticFileHttpHandler();
             handlers.add(staticFileHttpHandler);
             
@@ -126,6 +134,9 @@ public class WebEnabledPixel
             HttpContext  stillContext =     server.createContext("/still", stillImageHttpHandler);
                                             server.createContext("/still/list", stillImageListHttpHandler);
             HttpContext   textContext =     server.createContext("/text", scrollingTextHttpHander);
+                                            server.createContext("/text/speed", scrollingTextSpeedHttpHander);
+                                            server.createContext("/text/color", scrollingTextColorHttpHandler);
+                                            
         } 
         catch (IOException ex)
         {

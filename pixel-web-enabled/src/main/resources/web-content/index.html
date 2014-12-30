@@ -14,7 +14,7 @@
         <title>onebeartoe Pixel Web Application</title>
     </head>
 
-    <body onload="loadImageResources();">
+    <body onload="loadImageResources(); changeScrollingText('Hello, Pixel World');">
         
         <script type="text/javascript" src="pixel.js"></script>
         
@@ -40,10 +40,10 @@
             <select name="mode" 
                     onchange="modeChanged(this.value);"
                     style="width: 50%; height: 2em; font-size: 3em;">
-                <option value="off">Off</option>
+                
                 <option value="animations">Animations</option>
                 <option value="still">Still Images</option>
-                <option value="text">Scrolling Text</option>
+                <option value="text" selected>Scrolling Text</option>
             </select>
         </center>
 
@@ -70,7 +70,26 @@
 
             </div>
         </div>
+
+        <div id="scrollingTextPanel">
+            <hr/>
+
+            <h3>Scrolling Text</h3>
+
             
+            <input type="text" onchange="changeScrollingText(this.value);"/>
+            
+            <br/>
+            
+            <label for="points">Speed:</label>
+            <input type="range" onmouseup="changeScrollingTextSpeed(this.value);" name="points" min="100" max="600">
+                
+            <br/>
+            
+            <label for="color">Color:</label>
+            <input type="color" name="color" onchange="changeScrollingTextColor(this.value);">
+        </div>        
+        
         <hr/>
         
         <h3>Logs</h3>

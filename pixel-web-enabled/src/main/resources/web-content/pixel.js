@@ -6,6 +6,7 @@ function changeControls(mode)
         case "animations":
         {
             hideElement("stillPanel");
+            hideElement("scrollingTextPanel");
             
             showElement("animationsPanel");
             
@@ -14,24 +15,45 @@ function changeControls(mode)
         case "still":
         {
             hideElement("animationsPanel");
+            hideElement("scrollingTextPanel");
             
             showElement("stillPanel");
-            
-            break;
-        }
-        case "text":
-        {
-            hideElement("animationsPanel");
-            hideElement("stillPanel");
             
             break;
         }
         default:
         {
-            // "time-lapse"
-            showElement("stillPanel");
+            // scrolling text
+            hideElement("animationsPanel");
+            hideElement("stillPanel");
+            
+            showElement("scrollingTextPanel");
+            
+            break;
         }
     }
+}
+
+function changeScrollingText(text)
+{
+    var modeString = "text?t=" + text;
+    
+    modeChanged(modeString);
+}
+
+function changeScrollingTextSpeed(speed)
+{
+    var speedString = "text/speed/" + speed;
+    
+    modeChanged(speedString);
+}
+
+function changeScrollingTextColor(color)
+{
+    var hex = color.substring(1);
+    var colorString = "text/color/" + hex;
+    
+    modeChanged(colorString);
 }
 
 function displayImage(imagePath, name)
@@ -91,18 +113,17 @@ function loadImageList(url, elementName, imagePath)
             
             var names = list.split("-+-");
             
-            
-
             var html = "<table>";
             
-            var c = 0;
+ //           var c = 0;
             var columns = 4;
             
             for(var n in names)
             {
                 var name = names[n].trim();
                 
-                if(c === columns)
+                var mod = parseInt(n) % columns;
+                if(mod == 0)
                 {
                     html += "<tr>";
                 }
@@ -119,14 +140,9 @@ function loadImageList(url, elementName, imagePath)
                     html += "</td>";
                 }
                 
-                if(c < columns)
-                {
-                    c++;
-                }
-                else
+                if(mod == 0)
                 {
                     html += "</tr>";
-                    c = 0;
                 }
             }
             
@@ -195,7 +211,7 @@ function modeChanged(mode, imageName)
     }
     var url = "/" + mode;
     
-    if(imageName != "")
+    if(imageName != "" && !(imageName === undefined))
     {
         url += "/" + imageName;
     }

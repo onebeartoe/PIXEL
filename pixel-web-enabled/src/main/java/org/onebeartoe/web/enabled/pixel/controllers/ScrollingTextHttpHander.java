@@ -57,8 +57,6 @@ public class ScrollingTextHttpHander extends TextHttpHandler
                 {
                     text = "error processing request";
                 }
-
-
             } 
             catch (UnsupportedEncodingException ex)
             {

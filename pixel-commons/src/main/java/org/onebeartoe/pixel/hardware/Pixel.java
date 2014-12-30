@@ -120,6 +120,13 @@ public class Pixel
 
     private String scrollingText;
     
+    /**
+     * This is length in milliseconds of the delay between each scrolling text redraw.
+     */
+    private long scrollDelay = 500; 
+    
+    private Color scrollingTextColor = Color.ORANGE;
+    
     private Logger logger;
     
     /**
@@ -767,13 +774,11 @@ public boolean GIFNeedsDecoding(String decodedDir, String gifName, int currentRe
 
         timer = new Timer();
 
-        int refreshDelay = 500;//1000 * 12;  // in twelve seconds
-
         TimerTask drawTask = new TextScroller();
 
         Date firstTime = new Date();
 
-        timer.schedule(drawTask, firstTime, refreshDelay);
+        timer.schedule(drawTask, firstTime, scrollDelay);
     }
     
     public void setDecodedAnimationsPath(String decodedAnimationsPath)
@@ -1233,9 +1238,19 @@ public boolean GIFNeedsDecoding(String decodedDir, String gifName, int currentRe
 	        new BufferedImage(width, height, image.getType()));	
     }
     
+    public void setScrollDelay(long delay)
+    {
+        scrollDelay = delay;
+    }
+    
     public void setScrollingText(String text)
     {
         scrollingText = text;
+    }
+    
+    public void setScrollTextColor(Color color)
+    {
+        scrollingTextColor = color;
     }
     
     public void stopExistingTimer()
@@ -1484,17 +1499,18 @@ public boolean GIFNeedsDecoding(String decodedDir, String gifName, int currentRe
 	    int delay = 200;//scrollSpeedSlider.getValue();	
 	    delay = 710 - delay;                            // al linke: added this so the higher slider value means faster scrolling
 	    
-//	    ChangeModeServlet.this.timer.setDelay(refreshDelay);
+//	    ChangeModeServlet.this.timer.setDelay(scrollDelay);
 	    
             int w = 64;
             int h = 64;
 	    
             BufferedImage img = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
             
-	    Color textColor = Color.GREEN;//colorPanel.getBackground();
+            
+//	    Color textColor = Color.GREEN;//colorPanel.getBackground();
 	    
             Graphics2D g2d = img.createGraphics();
-            g2d.setPaint(textColor);
+            g2d.setPaint(scrollingTextColor);
                       
 //               Font tr = new Font("Arial", Font.PLAIN, scrollingTextFontSize_);
             String fontFamily = "Arial";
@@ -1536,7 +1552,7 @@ public boolean GIFNeedsDecoding(String decodedDir, String gifName, int currentRe
             
             g2d.dispose();
 
-            System.out.println(".");
+//            System.out.print(".");
 
             if(matrix == null)
             {
