@@ -296,7 +296,8 @@ public class WebEnabledPixel
                 @Override
                 public boolean accept(File dir, String name)
                 {
-                    return name.toLowerCase().endsWith(".png");
+                    return name.toLowerCase().endsWith(".png") || 
+                            name.toLowerCase().endsWith(".gif");
                 }
             });
             
