@@ -36,6 +36,9 @@ public class StaticFileHttpHandler extends PixelHttpHandler
             logger.log(Level.INFO, "forbidden request: " + t.getRequestURI());
             logger.log(Level.INFO, "forbidden    file: " + file.getAbsolutePath() );
             
+            logger.log(Level.INFO, "compared paths - root: " + root);
+            logger.log(Level.INFO, "compared paths - file: " + file.getPath() );
+                    
             // Suspected path traversal attack: reject with 403 error.
             String response = "403 (Forbidden)\n";
             t.sendResponseHeaders(403, response.length());
