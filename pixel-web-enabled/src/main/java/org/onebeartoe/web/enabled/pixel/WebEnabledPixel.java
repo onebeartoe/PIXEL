@@ -128,12 +128,15 @@ public class WebEnabledPixel
             
 // ARE WE GONNA DO ANYTHING WITH THE HttpContext OBJECTS?            
             HttpContext createContext =     server.createContext("/",     indexHttpHandler);
+            
             HttpContext animationsContext = server.createContext("/animation", animationsHttpHandler);
                                             server.createContext("/animation/list", animationsListHttpHandler);
-//            HttpContext interpolatedContext = server.createContext("/interpolated", interpolatedHttpHandler);
+
             HttpContext staticContent =     server.createContext("/files", staticFileHttpHandler);
+            
             HttpContext  stillContext =     server.createContext("/still", stillImageHttpHandler);
                                             server.createContext("/still/list", stillImageListHttpHandler);
+                                            
             HttpContext   textContext =     server.createContext("/text", scrollingTextHttpHander);
                                             server.createContext("/text/speed", scrollingTextSpeedHttpHander);
                                             server.createContext("/text/color", scrollingTextColorHttpHandler);
