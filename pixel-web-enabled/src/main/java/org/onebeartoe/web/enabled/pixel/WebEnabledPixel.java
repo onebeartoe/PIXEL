@@ -54,8 +54,9 @@ public class WebEnabledPixel
 
 //    public static final String [] fontNames = GraphicsEnvironment.getLocalGraphicsEnvironment().getAvailableFontFamilyNames();
     
-    // 3 translates to RgbLedMatrix.Matrix.SEEEDSTUDIO_32x32;
-    private final static int LED_MATRIX_ID = 3;
+    //  3 translates to RgbLedMatrix.Matrix.SEEEDSTUDIO_32x32;
+    // 10 translates to SEEEDSTUDIO_64x64
+    private final static int LED_MATRIX_ID = 10;
     
     private static final PixelEnvironment pixelEnvironment = new PixelEnvironment(LED_MATRIX_ID);
     
