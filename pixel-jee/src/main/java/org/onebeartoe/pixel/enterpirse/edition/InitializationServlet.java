@@ -59,7 +59,7 @@ public class InitializationServlet extends HttpServlet
         logger = Logger.getLogger(className);
         logger.log(Level.INFO, "The initialization servlet started!.!");
         
-        Pixel pixel = new Pixel(pixelEnvironment.KIND, pixelEnvironment.currentResolution);
+        Pixel pixel = new Pixel(pixelEnvironment.LED_MATRIX, pixelEnvironment.currentResolution);
 //        Pixel pixel = new Pixel(MATRIX_TYPE);
                 
         // save the pixel to appliction scope

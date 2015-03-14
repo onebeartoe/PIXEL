@@ -52,15 +52,18 @@ public class WebEnabledPixel
     
     private Pixel pixel;
 
-//    public static final String [] fontNames = GraphicsEnvironment.getLocalGraphicsEnvironment().getAvailableFontFamilyNames();
-    
-    //  3 translates to RgbLedMatrix.Matrix.SEEEDSTUDIO_32x32;
-    // 10 translates to SEEEDSTUDIO_64x64
+    //  1: 32x16 from Sparkfun - ioio.lib.api.RgbLedMatrix.Matrix.ADAFRUIT_32x16
+    //  3: translates to RgbLedMatrix.Matrix.SEEEDSTUDIO_32x32;
+    // 10: translates to SEEEDSTUDIO_64x64
     private final static int LED_MATRIX_ID = 3;
-    
+//TODO: We shoudl invert this and have teh user specicy the matrix label 
+//      (SEEEDSTUDIO_64x64, Matrix.SEEEDSTUDIO_32x32, etc...) instead of an
+//      integer ID.
+//      The lable makes sense if user's are copying and pasting the commands, if not then
+//      integer IDs makes sense, but is harder to maintain.        
     private static final PixelEnvironment pixelEnvironment = new PixelEnvironment(LED_MATRIX_ID);
     
-    public final static RgbLedMatrix.Matrix MATRIX_TYPE = pixelEnvironment.KIND;
+    public final static RgbLedMatrix.Matrix MATRIX_TYPE = pixelEnvironment.LED_MATRIX;
     
 //TODO: MAKE THIS PRIVATE    
     public List<String> stillImageNames;
@@ -73,7 +76,7 @@ public class WebEnabledPixel
         String name = getClass().getName();
         logger = Logger.getLogger(name);
         
-        pixel = new Pixel(pixelEnvironment.KIND, pixelEnvironment.currentResolution);
+        pixel = new Pixel(pixelEnvironment.LED_MATRIX, pixelEnvironment.currentResolution);
         
         extractDefaultContent();
         
@@ -350,8 +353,16 @@ public class WebEnabledPixel
         server.start();
         
         PixelIntegration pi = new PixelIntegration();
+//TODO: ONCE USING THE PIXelINTEGRATRION FROM PIXEL-COMMONS
+//      CALL ITS addXxxxxListeners() methods
+//      AND then its initialize() method
     }
     
+    
+    /**
+     * @deprecated Use the version in pixel-commons from Alinke's github.com repository.
+     */
+    @Deprecated
     private class PixelIntegration extends IOIOConsoleApp
     {
         public PixelIntegration()
@@ -359,6 +370,7 @@ public class WebEnabledPixel
             try
             {
                 System.out.println("PixelIntegration is calling go()");
+                
                 go(null);
             } 
             catch (Exception ex)
@@ -422,7 +434,7 @@ public class WebEnabledPixel
                 @Override
                 protected void setup() throws ConnectionLostException, InterruptedException
                 {
-//                    pixel = new Pixel(pixelEnvironment.KIND, pixelEnvironment.currentResolution);
+//                    pixel = new Pixel(pixelEnvironment.LED_MATRIX, pixelEnvironment.currentResolution);
                     pixel.matrix = ioio_.openRgbLedMatrix(pixel.KIND);
                     pixel.ioiO = ioio_;
 

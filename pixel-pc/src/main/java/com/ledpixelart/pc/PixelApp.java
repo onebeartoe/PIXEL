@@ -97,7 +97,7 @@ public class PixelApp extends IOIOSwingApp
      * We need to get away from using static references, and use getters and setters.  One problem is the mis-import
      * of the duplicate classes in other applications.
      */
-    public static final Pixel pixel = new Pixel(pixelEnvironment.KIND, pixelEnvironment.currentResolution);
+    public static final Pixel pixel = new Pixel(pixelEnvironment.LED_MATRIX, pixelEnvironment.currentResolution);
 
     private static int selectedFileResolution = 32;
 
@@ -463,7 +463,7 @@ public class PixelApp extends IOIOSwingApp
 
                 PixelApp.this.ioiO = ioio_;
 
-                //pixel.matrix = ioio_.openRgbLedMatrix(pixel.KIND);   //AL could not make this work, did a quick hack, Roberto probably can change back to the right way
+                //pixel.matrix = ioio_.openRgbLedMatrix(pixel.LED_MATRIX);   //AL could not make this work, did a quick hack, Roberto probably can change back to the right way
                 pixel.matrix = ioio_.openRgbLedMatrix(KIND);
                 pixel.ioiO = ioio_;
                 System.out.println("Found PIXEL: " + pixel.matrix + "\n");
