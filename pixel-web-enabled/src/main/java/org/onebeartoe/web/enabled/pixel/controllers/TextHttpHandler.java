@@ -1,4 +1,4 @@
-
+// this shoujdl be a class in onebeartoe Java libraries that does not extends PixelHttpHandler
 package org.onebeartoe.web.enabled.pixel.controllers;
 
 import com.sun.net.httpserver.HttpExchange;
@@ -6,8 +6,11 @@ import java.io.IOException;
 import java.io.OutputStream;
 
 /**
+ * @deprecated use the version in the onebeartoe Java Libraries
+ * 
  * @author Roberto Marquez
  */
+@Deprecated
 public abstract class TextHttpHandler extends PixelHttpHandler
 {    
     protected abstract String getHttpText(HttpExchange exchange);
@@ -23,3 +26,4 @@ public abstract class TextHttpHandler extends PixelHttpHandler
         os.close();
     }        
 }
+

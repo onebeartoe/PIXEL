@@ -94,9 +94,6 @@ public class WebEnabledPixel
             PixelHttpHandler indexHttpHandler = new IndexHttpHandler();
             handlers.add(indexHttpHandler);
             
-//            PixelHttpHandler interpolatedHttpHandler = new InterpolatedHttpHandler();
-// add interpolted handelr to the handler list
-            
             PixelHttpHandler scrollingTextHttpHander = new ScrollingTextHttpHander();
             handlers.add(scrollingTextHttpHander);
             
@@ -515,6 +512,5 @@ public class WebEnabledPixel
                 }
 	    }
 	}        
-    }
-    
+    }    
 }

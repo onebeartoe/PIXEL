@@ -11,8 +11,11 @@ import java.util.logging.Level;
 import org.onebeartoe.pixel.hardware.Pixel;
 
 /**
+ * @deprecated Use the version in onebeartoe Java libraries
+ * 
  * @author Roberto Marquez
  */
+@Deprecated
 public class StaticFileHttpHandler extends PixelHttpHandler
 {
     @Override    

@@ -5,8 +5,11 @@ import com.sun.net.httpserver.HttpExchange;
 import java.util.List;
 
 /**
+ * @deprecated use the version in the onebeartoe Java Libraries
+ * 
  * @author Roberto Marquez
  */
+@Deprecated
 public abstract class ListHttpHandler extends TextHttpHandler
 {
     @Override
