@@ -12,7 +12,7 @@
 
     <packaging>pom</packaging>
 
-    <name>onebeartoe-pixel</name>
+    <name>pixel-parent</name>
 
     <repositories>
 	<repository>
