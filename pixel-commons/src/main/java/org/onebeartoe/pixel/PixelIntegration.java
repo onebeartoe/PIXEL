@@ -32,6 +32,9 @@ public class PixelIntegration extends IOIOConsoleApp
      */
     public PixelIntegration(PixelEnvironment envronment)
     {
+        String className = getClass().getName();
+        logger = Logger.getLogger(className);
+        
         matrixListeners = new ArrayList();        
         ioioListeners = new ArrayList();
 

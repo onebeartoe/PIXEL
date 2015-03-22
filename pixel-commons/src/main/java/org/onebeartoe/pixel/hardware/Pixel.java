@@ -13,7 +13,6 @@ import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics2D;
-import java.awt.GraphicsEnvironment;
 import java.awt.RenderingHints;
 import java.awt.geom.AffineTransform;
 import java.awt.image.AffineTransformOp;
@@ -41,6 +40,7 @@ import java.util.logging.Logger;
 import org.apache.commons.io.FilenameUtils;
 
 import org.gifdecoder.GifDecoder;
+import org.onebeartoe.pixel.sound.meter.SoundReading;
 
 /**
  * @author Roberto Marquez
@@ -56,7 +56,8 @@ public class Pixel
     public static IOIO ioiO;
     
     public RgbLedMatrix matrix;
-    
+
+//TODO: rename this matrix_type    
     public final RgbLedMatrix.Matrix KIND;
     
     public static AnalogInput analogInput1;
@@ -809,7 +810,7 @@ public boolean GIFNeedsDecoding(String decodedDir, String gifName, int currentRe
 		//we're going to decode a native GIF into our RGB565 format
 	    //we'll need to know the resolution of the currently selected matrix type: 16x32, 32x32, 32x64, or 64x64
 		//and then we will receive the gif accordingly as we decode
-		//we also need to get the original width and height of the gif which is easily done from the gif decoder class
+		//we also need to get the original width and vuHeight of the gif which is easily done from the gif decoder class
 		//String gifName = FilenameUtils.removeExtension(gifName); //with no extension
 		
 	    String selectedFileName = FilenameUtils.getName(gifFilePath); 
@@ -977,18 +978,16 @@ public boolean GIFNeedsDecoding(String decodedDir, String gifName, int currentRe
 	} 
 	
 
+//TODO: pass the matrix type, OR BETTER YET, USE THE INSTANCE'S PIXEL ENVIRONMENT OBJECT
     public void decodeGIFJar(final String decodedDir, String gifSourcePath, String gifName, int currentResolution, final int pixelMatrix_width, final int pixelMatrix_height) 
     {  
-
-//pass the matrix type
-		
 	//BitmapBytes = new byte[pixelMatrix_width * pixelMatrix_height * 2]; //512 * 2 = 1024 or 1024 * 2 = 2048
 	//frame_ = new short[pixelMatrix_width * pixelMatrix_height];	
 	
 	//we're going to decode a native GIF into our RGB565 format
 	    //we'll need to know the resolution of the currently selected matrix type: 16x32, 32x32, 32x64, or 64x64
 		//and then we will receive the gif accordingly as we decode
-		//we also need to get the original width and height of the gif which is easily done from the gif decoder class
+		//we also need to get the original width and vuHeight of the gif which is easily done from the gif decoder class
 	//String str3 = new String(str1); 
 	    
 		 gifName = FilenameUtils.removeExtension(gifName); //with no extension
@@ -1160,7 +1159,34 @@ public boolean GIFNeedsDecoding(String decodedDir, String gifName, int currentRe
 	
     }  
 
+    public void drawEqualizer(double [] values) throws ConnectionLostException
+    {
+        int w = KIND.width;
+        int h = KIND.height;
 
+        BufferedImage vuImage = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
+        
+        Color textColor = Color.RED;
+        
+        Graphics2D g2d = vuImage.createGraphics();
+        g2d.setPaint(textColor);
+        
+        double COLUMN_WIDTH = w / (double) values.length;        
+        int x = 0;
+        
+        for(double f : values)
+        {
+            double vuHeight = h * f;
+                    
+            double y = (double) h - vuHeight;
+                    
+            g2d.fillRect(x, (int) y, (int) COLUMN_WIDTH, (int) vuHeight);
+            
+            x += COLUMN_WIDTH;
+        }
+
+        writeImagetoMatrix(vuImage, w, h);        
+    }
 
     /**
      * Override this to perform any additional background drawing on the image that get sent to the PIXEL

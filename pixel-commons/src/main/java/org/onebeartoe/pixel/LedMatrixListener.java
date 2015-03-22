@@ -2,20 +2,15 @@
 package org.onebeartoe.pixel;
 
 import ioio.lib.api.RgbLedMatrix;
+import org.onebeartoe.pixel.hardware.Pixel;
 
+//TODO: WE MAY NEED TO REFACTOR THE CLASS NAME TO PixelListener
 /**
  * @author Roberto Marquez
  */
-public class LedMatrixListener 
+public interface LedMatrixListener
 {
-    RgbLedMatrix matrix;
+    Pixel getPixel();
     
-    public void ledMatrixReady(RgbLedMatrix matrix)
-    {
-        this.matrix = matrix;
-        
-        
-    }
-    
-    
+    void ledMatrixReady(RgbLedMatrix matrix);
 }
