@@ -61,6 +61,5 @@ public class CliPixel {
   HelpFormatter formater = new HelpFormatter();
 
   formater.printHelp("Main", options);
-  System.exit(0);
  }
 }
