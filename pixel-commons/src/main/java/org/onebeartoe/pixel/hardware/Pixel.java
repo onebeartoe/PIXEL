@@ -153,7 +153,7 @@ public class Pixel
                 
         fonts = new HashMap();
         
-        scrollingText = "Scolling Text Inital Value";
+        scrollingText = "Scolling Text Initial Value";
         
         try
         {
