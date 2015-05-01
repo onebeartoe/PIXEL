@@ -25,6 +25,8 @@ public class StaticFileHttpHandler extends PixelHttpHandler
         
         Pixel pixel = app.getPixel();
         String root = pixel.getPixelHome();
+        File rootDir = new File(root);
+        root = rootDir.getCanonicalPath() + File.separatorChar;
         
         URI uri = t.getRequestURI();
         String request = uri.getPath();
