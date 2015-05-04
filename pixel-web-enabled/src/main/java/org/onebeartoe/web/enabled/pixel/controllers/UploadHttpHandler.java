@@ -2,96 +2,73 @@
 package org.onebeartoe.web.enabled.pixel.controllers;
 
 import com.sun.net.httpserver.Headers;
-import com.sun.net.httpserver.HttpContext;
 import com.sun.net.httpserver.HttpExchange;
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
-import java.io.Writer;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.eh.core.model.FileInfo;
+import org.eh.core.util.FileUploadContentAnalysis;
 
 /**
+ * The classes from this Github repository are used:
+ * https://github.com/NotBadPad/easy-httpserver
  * @author Roberto Marquez
  */
 public class UploadHttpHandler extends TextHttpHandler
 {
 
     @Override
-    protected String getHttpText(HttpExchange exchange)
+    protected String getHttpText(HttpExchange httpExchange)
     {
-        int totalRead = 0;
-        String contentDisposition = null;
-        String contentType = null;
+        System.out.println("request reviced");
+
+        Headers headers = httpExchange.getRequestHeaders();
+        // get ContentType
+        String contentType = headers.get("Content-type").toString().replace("[", "")
+                        .replace("]", "");
+
+        // get content length
+        int length = Integer.parseInt(headers.get("Content-length").toString().replace("[", "")
+                        .replace("]", ""));
+
+        StringBuilder issues = new StringBuilder();
         
         try
         {
-            InputStream requestBody = exchange.getRequestBody();
+            InputStream requestBody = httpExchange.getRequestBody();
+            Map<String, Object> map = FileUploadContentAnalysis.parse(requestBody, contentType, length);
             
-            InputStreamReader streamReader = new InputStreamReader(requestBody);            
-            BufferedReader reader = new BufferedReader(streamReader);
+            String paramKey = "animation";
+            FileInfo fileInfo = (FileInfo) map.get(paramKey);
             
-            String barrier = reader.readLine();
-            contentDisposition = reader.readLine();
-            contentType = reader.readLine();
-            
-            // blank line
-            reader.readLine();
-            
-            // now the HTTP POST multiform data,
-            // plus the last barrier,
-            // are left in the input stream
-            
-            File outfile = new File("c:\\home\\", "upload.jpg");
-            OutputStream outputStream = new FileOutputStream(outfile);
-            Writer writer = new OutputStreamWriter(outputStream);
-            BufferedWriter outputWriter = new BufferedWriter(writer);
-            
-            char [] fileData = new char[1024];
-            int readCount = reader.read(fileData);
-            
-
-            while(readCount > 0)
+            if(fileInfo == null)
             {
-                if( String.valueOf(fileData).contains(barrier))
-                {
-                    // the 'end' barrier has been reached
-                    break;
-                }
-                
-                outputWriter.write(fileData, 0, readCount);
-                totalRead += readCount;
-                
-                readCount = reader.read(fileData);
+                issues.append("No file was posted with request, for param named: " + paramKey);
             }
-            
-            reader.close();
-            
-            outputWriter.flush();
-            outputWriter.close();
-                        
-//            IOUtils.copy
-//            totalRead = IOUtils.copy(requestBody, outputStream);
-        }
-        catch (FileNotFoundException ex)
-        {
-            Logger.getLogger(UploadHttpHandler.class.getName()).log(Level.SEVERE, null, ex);
+            else
+            {
+                String outpath = "c:\\home\\" + "out.png";//fileInfo.getFilename();
+                FileOutputStream fos = new FileOutputStream(outpath);
+                fos.write(fileInfo.getBytes());
+                fos.close();
+            }
         }
         catch (IOException ex)
         {
+            String message = ex.getMessage();
+            issues.append(message);
+            
             Logger.getLogger(UploadHttpHandler.class.getName()).log(Level.SEVERE, null, ex);
-        }   
+        }
+
+        String response = "made it back";   
         
-        return contentDisposition + "\n" + 
-                contentType + "\n" + 
-                "upload recived: " + totalRead;
+        return contentType + "\n" + 
+               response + "\n" + 
+               issues.toString();
     }
 
 }
