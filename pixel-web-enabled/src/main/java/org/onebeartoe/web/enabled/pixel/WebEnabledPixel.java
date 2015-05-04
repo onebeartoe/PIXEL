@@ -158,7 +158,7 @@ public class WebEnabledPixel
         } 
         catch (IOException ex)
         {
-            String message = "An error occured while creating the controllers";
+            String message = "An error occurred while creating the controllers";
             logger.log(Level.SEVERE, message, ex);
         }
     }
@@ -269,8 +269,8 @@ public class WebEnabledPixel
             // extract the list so on next run the app knows not to extract the default content
             extractClasspathResource(resourceListClasspath, resourceListFile);
             
-            String outputDrectoryPath = pixel.getPixelHome() + pathPrefix;
-            File outputDirectory = new File(outputDrectoryPath);
+            String outputDirectoryPath = pixel.getPixelHome() + pathPrefix;
+            File outputDirectory = new File(outputDirectoryPath);
             
             TextFileReader tfr = new TextFileReader();
             List<String> imageNames = tfr.readTextLinesFromClasspath(resourceListClasspath);
