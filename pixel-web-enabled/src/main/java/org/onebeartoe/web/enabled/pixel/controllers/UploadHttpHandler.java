@@ -12,6 +12,7 @@ import java.util.logging.Logger;
 import org.eh.core.model.FileInfo;
 import org.eh.core.util.FileUploadContentAnalysis;
 import org.onebeartoe.network.TextHttpHandler;
+import org.onebeartoe.web.enabled.pixel.WebEnabledPixel;
 
 /**
  * The classes from this Github repository are used:
@@ -20,6 +21,12 @@ import org.onebeartoe.network.TextHttpHandler;
  */
 public class UploadHttpHandler extends TextHttpHandler
 {
+    protected WebEnabledPixel application;
+    
+    public UploadHttpHandler(WebEnabledPixel application)
+    {
+        this.application = application;
+    }
 
     @Override
     protected String getHttpText(HttpExchange httpExchange)
@@ -51,7 +58,10 @@ public class UploadHttpHandler extends TextHttpHandler
             }
             else
             {
-                String outpath = "c:\\home\\" + "out.png";//fileInfo.getFilename();
+                String path = application.getPixel().getImagesPath();
+                
+                String outpath = path + fileInfo.getFilename();
+                
                 FileOutputStream fos = new FileOutputStream(outpath);
                 fos.write(fileInfo.getBytes());
                 fos.close();

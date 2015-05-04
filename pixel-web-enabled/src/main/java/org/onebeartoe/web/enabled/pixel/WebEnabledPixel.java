@@ -101,43 +101,26 @@ public class WebEnabledPixel
         {
             InetSocketAddress anyhost = new InetSocketAddress(httpPort);
             server = HttpServer.create(anyhost, 0);
-
-//            List<PixelHttpHandler> handlers = new ArrayList();
             
             HttpHandler indexHttpHandler = new IndexHttpHandler();
-//            handlers.add(indexHttpHandler);
             
             HttpHandler scrollingTextHttpHander = new ScrollingTextHttpHander(this);
-//            handlers.add(scrollingTextHttpHander);
             
             HttpHandler scrollingTextSpeedHttpHander = new ScrollingTextSpeedHttpHandler(this);
-//            handlers.add(scrollingTextSpeedHttpHander);
             
             HttpHandler scrollingTextColorHttpHandler = new ScrollingTextColorHttpHandler(this);
-//            handlers.add(scrollingTextColorHttpHandler);
             
             HttpHandler staticFileHttpHandler = new StaticFileHttpHandler(this);
-//            handlers.add(staticFileHttpHandler);
             
             HttpHandler stillImageHttpHandler = new StillImageHttpHandler(this) ;
-//            handlers.add(stillImageHttpHandler);
             
             HttpHandler stillImageListHttpHandler = new StillImageListHttpHandler(this);
-//            handlers.add(stillImageListHttpHandler);            
             
             HttpHandler animationsHttpHandler = new AnimationsHttpHandler(this);
-//            handlers.add(animationsHttpHandler);
             
             HttpHandler animationsListHttpHandler = new AnimationsListHttpHandler(this);
-//            handlers.add(animationsListHttpHandler);
 
-            HttpHandler uploadHttpHandler = new UploadHttpHandler();
-//            handlers.add(uploadHttpHandler);
-            
-//            for(PixelHttpHandler phh : handlers)
-//            {
-//                phh.setApp(this);
-//            }
+            HttpHandler uploadHttpHandler = new UploadHttpHandler(this);
             
 // ARE WE GONNA DO ANYTHING WITH THE HttpContext OBJECTS?            
             HttpContext createContext =     server.createContext("/",     indexHttpHandler);
