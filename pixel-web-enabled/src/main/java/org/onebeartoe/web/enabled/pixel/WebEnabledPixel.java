@@ -2,6 +2,7 @@
 package org.onebeartoe.web.enabled.pixel;
 
 import com.sun.net.httpserver.HttpContext;
+import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
 import ioio.lib.api.RgbLedMatrix;
 import ioio.lib.api.exception.ConnectionLostException;
@@ -31,7 +32,6 @@ import org.onebeartoe.pixel.hardware.Pixel;
 import org.onebeartoe.web.enabled.pixel.controllers.AnimationsHttpHandler;
 import org.onebeartoe.web.enabled.pixel.controllers.AnimationsListHttpHandler;
 import org.onebeartoe.web.enabled.pixel.controllers.IndexHttpHandler;
-import org.onebeartoe.web.enabled.pixel.controllers.PixelHttpHandler;
 import org.onebeartoe.web.enabled.pixel.controllers.ScrollingTextColorHttpHandler;
 import org.onebeartoe.web.enabled.pixel.controllers.ScrollingTextHttpHander;
 import org.onebeartoe.web.enabled.pixel.controllers.ScrollingTextSpeedHttpHandler;
@@ -90,6 +90,7 @@ public class WebEnabledPixel
         extractDefaultContent();
         
         loadImageLists();
+        loadAnimationList();
         
         createControllers();
     }
@@ -101,42 +102,42 @@ public class WebEnabledPixel
             InetSocketAddress anyhost = new InetSocketAddress(httpPort);
             server = HttpServer.create(anyhost, 0);
 
-            List<PixelHttpHandler> handlers = new ArrayList();
+//            List<PixelHttpHandler> handlers = new ArrayList();
             
-            PixelHttpHandler indexHttpHandler = new IndexHttpHandler();
-            handlers.add(indexHttpHandler);
+            HttpHandler indexHttpHandler = new IndexHttpHandler();
+//            handlers.add(indexHttpHandler);
             
-            PixelHttpHandler scrollingTextHttpHander = new ScrollingTextHttpHander();
-            handlers.add(scrollingTextHttpHander);
+            HttpHandler scrollingTextHttpHander = new ScrollingTextHttpHander(this);
+//            handlers.add(scrollingTextHttpHander);
             
-            PixelHttpHandler scrollingTextSpeedHttpHander = new ScrollingTextSpeedHttpHandler();
-            handlers.add(scrollingTextSpeedHttpHander);
+            HttpHandler scrollingTextSpeedHttpHander = new ScrollingTextSpeedHttpHandler(this);
+//            handlers.add(scrollingTextSpeedHttpHander);
             
-            PixelHttpHandler scrollingTextColorHttpHandler = new ScrollingTextColorHttpHandler();
-            handlers.add(scrollingTextColorHttpHandler);
+            HttpHandler scrollingTextColorHttpHandler = new ScrollingTextColorHttpHandler(this);
+//            handlers.add(scrollingTextColorHttpHandler);
             
-            PixelHttpHandler staticFileHttpHandler = new StaticFileHttpHandler();
-            handlers.add(staticFileHttpHandler);
+            HttpHandler staticFileHttpHandler = new StaticFileHttpHandler(this);
+//            handlers.add(staticFileHttpHandler);
             
-            PixelHttpHandler stillImageHttpHandler = new StillImageHttpHandler() ;
-            handlers.add(stillImageHttpHandler);
+            HttpHandler stillImageHttpHandler = new StillImageHttpHandler(this) ;
+//            handlers.add(stillImageHttpHandler);
             
-            PixelHttpHandler stillImageListHttpHandler = new StillImageListHttpHandler();
-            handlers.add(stillImageListHttpHandler);            
+            HttpHandler stillImageListHttpHandler = new StillImageListHttpHandler(this);
+//            handlers.add(stillImageListHttpHandler);            
             
-            PixelHttpHandler animationsHttpHandler = new AnimationsHttpHandler();
-            handlers.add(animationsHttpHandler);
+            HttpHandler animationsHttpHandler = new AnimationsHttpHandler(this);
+//            handlers.add(animationsHttpHandler);
             
-            PixelHttpHandler animationsListHttpHandler = new AnimationsListHttpHandler();
-            handlers.add(animationsListHttpHandler);
+            HttpHandler animationsListHttpHandler = new AnimationsListHttpHandler(this);
+//            handlers.add(animationsListHttpHandler);
 
-            PixelHttpHandler uploadHttpHandler = new UploadHttpHandler();
-            handlers.add(uploadHttpHandler);
+            HttpHandler uploadHttpHandler = new UploadHttpHandler();
+//            handlers.add(uploadHttpHandler);
             
-            for(PixelHttpHandler phh : handlers)
-            {
-                phh.setApp(this);
-            }
+//            for(PixelHttpHandler phh : handlers)
+//            {
+//                phh.setApp(this);
+//            }
             
 // ARE WE GONNA DO ANYTHING WITH THE HttpContext OBJECTS?            
             HttpContext createContext =     server.createContext("/",     indexHttpHandler);
@@ -291,6 +292,20 @@ public class WebEnabledPixel
         return pixel;
     }
     
+    public List<String> loadAnimationList()
+    {
+        try
+        {
+            animationImageNames = loadImageList("animations");
+        } 
+        catch (Exception ex)
+        {
+            logger.log(Level.SEVERE, "could not load image resources on the filesystem", ex);
+        }
+        
+        return animationImageNames;
+    }
+    
     private List<String> loadImageList(String directoryName) throws Exception
     {
         String dirPath = pixel.getPixelHome() + directoryName;
@@ -326,17 +341,18 @@ public class WebEnabledPixel
         return namesList;
     }
     
-    private void loadImageLists()
+    public List<String> loadImageLists()
     {
         try
         {        
             stillImageNames = loadImageList("images");
-            animationImageNames = loadImageList("animations");
         } 
         catch (Exception ex)
         {
             logger.log(Level.SEVERE, "could not load image resources on the filesystem", ex);
         }
+        
+        return stillImageNames;
     }
     
     public static void main(String[] args)

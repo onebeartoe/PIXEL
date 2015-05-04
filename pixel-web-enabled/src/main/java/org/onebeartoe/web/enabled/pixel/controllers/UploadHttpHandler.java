@@ -11,6 +11,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.eh.core.model.FileInfo;
 import org.eh.core.util.FileUploadContentAnalysis;
+import org.onebeartoe.network.TextHttpHandler;
 
 /**
  * The classes from this Github repository are used:
