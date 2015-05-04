@@ -27,19 +27,20 @@ public class UploadHttpHandler extends TextHttpHandler
     @Override
     protected String getHttpText(HttpExchange exchange)
     {
-        int count = -99;
+        int totalRead = 0;
+        String contentDisposition = null;
+        String contentType = null;
+        
         try
         {
-            Headers requestHeaders = exchange.getRequestHeaders();
-            HttpContext httpContext = exchange.getHttpContext();
-            
             InputStream requestBody = exchange.getRequestBody();
-            InputStreamReader streamReader = new InputStreamReader(requestBody);
+            
+            InputStreamReader streamReader = new InputStreamReader(requestBody);            
             BufferedReader reader = new BufferedReader(streamReader);
             
             String barrier = reader.readLine();
-            String contentDisposition = reader.readLine();
-            String contentType = reader.readLine();
+            contentDisposition = reader.readLine();
+            contentType = reader.readLine();
             
             // blank line
             reader.readLine();
@@ -53,18 +54,22 @@ public class UploadHttpHandler extends TextHttpHandler
             Writer writer = new OutputStreamWriter(outputStream);
             BufferedWriter outputWriter = new BufferedWriter(writer);
             
-            String fileData = reader.readLine();
+            char [] fileData = new char[1024];
+            int readCount = reader.read(fileData);
             
-// figure otu a way to do thiw equals()!!!!!            
-            while( fileData != null)
+
+            while(readCount > 0)
             {
-                if(fileData.contains(barrier))
+                if( String.valueOf(fileData).contains(barrier))
                 {
+                    // the 'end' barrier has been reached
                     break;
                 }
-                outputWriter.write(fileData + System.lineSeparator() );
                 
-                fileData = reader.readLine();
+                outputWriter.write(fileData, 0, readCount);
+                totalRead += readCount;
+                
+                readCount = reader.read(fileData);
             }
             
             reader.close();
@@ -72,7 +77,8 @@ public class UploadHttpHandler extends TextHttpHandler
             outputWriter.flush();
             outputWriter.close();
                         
-//            count = IOUtils.copy(requestBody, outputStream);
+//            IOUtils.copy
+//            totalRead = IOUtils.copy(requestBody, outputStream);
         }
         catch (FileNotFoundException ex)
         {
@@ -83,7 +89,9 @@ public class UploadHttpHandler extends TextHttpHandler
             Logger.getLogger(UploadHttpHandler.class.getName()).log(Level.SEVERE, null, ex);
         }   
         
-        return "upload recived: " + count;
+        return contentDisposition + "\n" + 
+                contentType + "\n" + 
+                "upload recived: " + totalRead;
     }
 
 }
