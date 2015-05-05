@@ -49,6 +49,8 @@ public class UploadHttpHandler extends TextHttpHandler
             InputStream requestBody = httpExchange.getRequestBody();
             Map<String, Object> map = FileUploadContentAnalysis.parse(requestBody, contentType, length);
             
+            
+            
             String paramKey = "animation";
             FileInfo fileInfo = (FileInfo) map.get(paramKey);
             

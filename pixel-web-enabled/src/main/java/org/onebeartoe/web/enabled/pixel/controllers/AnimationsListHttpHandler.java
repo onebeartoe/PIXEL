@@ -19,6 +19,8 @@ public class AnimationsListHttpHandler extends ListHttpHandler
     @Override
     protected List<String> getList()
     {
-        return application.animationImageNames;
+        List<String> animations = application.loadAnimationList();
+        
+        return animations;
     }
 }
