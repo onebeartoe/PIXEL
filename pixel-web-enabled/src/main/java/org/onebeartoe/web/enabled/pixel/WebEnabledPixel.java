@@ -370,8 +370,7 @@ public class WebEnabledPixel
 //      CALL ITS addXxxxxListeners() methods
 //      AND then its initialize() method
     }
-    
-    
+
     /**
      * @deprecated Use the version in pixel-commons from Alinke's github.com repository.
      */
