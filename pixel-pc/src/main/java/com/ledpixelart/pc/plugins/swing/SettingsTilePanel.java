@@ -157,7 +157,10 @@ private static String serialPortInstructionsLinux = "LINUX, Raspberry Pi, and Be
 	
 	String labels[] = { "Seeed 32x16", "Adafruit 32x16", "Seeed 32x32", "PIXEL 32x32 (DEFAULT)", "64x32 (2x1 horz)",
 			"32x64 (1x2 vert)", "Mirrored (2 displays)","Mirrored (4 displays)","128x32 (4x1 horz)",
-			"32x128 (1x4 vert)","SUPER PIXEL 64x64 (2x2 square)"};
+			"32x128 (1x4 vert)","SUPER PIXEL 64x64 (2x2 square)", "Adafruit 32x32", "Adafruit 32x32 Color Swap",
+                        "Adafruit 64x32", "Adafruit 64x64","Adafruit 128x32", "Adafruit 32x128", "Adafruit 64x16"};
+        
+      
 
     final JComboBox ledMatrixCombo = new JComboBox(labels);
     

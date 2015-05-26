@@ -29,7 +29,7 @@ public class RestartPanel extends JPanel
     
     public RestartPanel()
     {
-	String version = "3.0.0";
+	String version = "4.0.0";
 	String text = "PIXEL PC Version " + version;
 	String html = "<html><body><h2>" + "Please close and restart this app for the newly selected PIXEL Model / LED Matrix Type to work" + "</h2></body></html>";
 	JLabel productLabel = new JLabel(html, JLabel.CENTER);
