@@ -52,6 +52,8 @@ import ioio.lib.impl.IncomingState.DisconnectListener;
 import ioio.lib.spi.Log;
 
 import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class IOIOImpl implements IOIO, DisconnectListener {
 	private static final String TAG = "IOIOImpl";
@@ -267,8 +269,11 @@ public class IOIOImpl implements IOIO, DisconnectListener {
 			for (int pin : hardware_.rgbLedMatrixPins()) {
 				openPins_[pin] = false;
 			}
-			protocol_.rgbLedMatrixEnable(0);
-		} catch (IOException e) {
+                    try {
+                        protocol_.rgbLedMatrixEnable(0, 0);
+                    } catch (IOException ex) {
+                        Logger.getLogger(IOIOImpl.class.getName()).log(Level.SEVERE, null, ex);
+                    }
 		} catch (ConnectionLostException e) {
 		}
 	}
@@ -347,7 +352,7 @@ public class IOIOImpl implements IOIO, DisconnectListener {
 		case APP_FIRMWARE_VER:
 			return incomingState_.firmwareId_;
 		case IOIOLIB_VER:
-			return "PIXL0020";
+			return "PIXL0025";
 		}
 		return null;
 	}
@@ -601,12 +606,12 @@ public class IOIOImpl implements IOIO, DisconnectListener {
 		openRgbLedMatrix_ = true;
 		RgbLedMatrixImpl result = new RgbLedMatrixImpl(this, kind);
 		addDisconnectListener(result);
-		try {
-			protocol_.rgbLedMatrixEnable(RgbLedMatrixImpl.getShifterLen(kind));
-		} catch (IOException e) {
-			result.close();
-			throw new ConnectionLostException(e);
-		}
+            try {
+                protocol_.rgbLedMatrixEnable(RgbLedMatrixImpl.getShifterLen(kind),
+                        RgbLedMatrixImpl.getNumRows(kind));
+            } catch (IOException ex) {
+                Logger.getLogger(IOIOImpl.class.getName()).log(Level.SEVERE, null, ex);
+            }
 		return result;
 	}
 
