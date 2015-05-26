@@ -77,8 +77,43 @@ public class PixelEnvironment
                 frame_length = 8192;
                 currentResolution = 128;
                 break;
+             case 11:
+                LED_MATRIX = ioio.lib.api.RgbLedMatrix.Matrix.ADAFRUIT_32x32;
+                frame_length = 2048;
+                currentResolution = 32; 
+                break;	 
+            case 12:
+                LED_MATRIX = ioio.lib.api.RgbLedMatrix.Matrix.ADAFRUIT_32x32_ColorSwap;
+                frame_length = 2048;
+                currentResolution = 32; 
+                break;	 	 
+            case 13:
+                LED_MATRIX = ioio.lib.api.RgbLedMatrix.Matrix.ADAFRUIT_64x32;
+                frame_length = 4096;
+                currentResolution = 64; 
+                break;	
+            case 14:
+                LED_MATRIX = ioio.lib.api.RgbLedMatrix.Matrix.ADAFRUIT_64x64;
+                frame_length = 8192;
+                currentResolution = 128; 
+                break;
+            case 15:
+                LED_MATRIX = ioio.lib.api.RgbLedMatrix.Matrix.ADAFRUIT_128x32;
+                frame_length = 8192;
+                currentResolution = 128; 
+                break;	 	 	
+            case 16:
+                LED_MATRIX = ioio.lib.api.RgbLedMatrix.Matrix.ADAFRUIT_32x128;
+                frame_length = 8192;
+                currentResolution = 128; 
+                break;	
+            case 17:
+                LED_MATRIX = ioio.lib.api.RgbLedMatrix.Matrix.ADAFRUIT_64x16;
+                frame_length = 2048;
+                currentResolution = 6416; 
+                break;	 
             default:
-                LED_MATRIX = ioio.lib.api.RgbLedMatrix.Matrix.SEEEDSTUDIO_32x32; //v2 as the default
+                LED_MATRIX = ioio.lib.api.RgbLedMatrix.Matrix.ADAFRUIT_32x32; //v2 as the default
                 frame_length = 2048;
                 currentResolution = 32;
         }        
