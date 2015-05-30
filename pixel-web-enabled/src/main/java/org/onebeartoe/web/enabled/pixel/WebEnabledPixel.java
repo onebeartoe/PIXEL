@@ -60,15 +60,16 @@ public class WebEnabledPixel
     //  1: 32x16 from Sparkfun - ioio.lib.api.RgbLedMatrix.Matrix.ADAFRUIT_32x16
     //  3: translates to RgbLedMatrix.Matrix.SEEEDSTUDIO_32x32;
     // 10: translates to SEEEDSTUDIO_64x64
-    private final static int LED_MATRIX_ID = 3;
+    private static int LED_MATRIX_ID = 3;
 //TODO: We shoudl invert this and have teh user specicy the matrix label 
 //      (SEEEDSTUDIO_64x64, Matrix.SEEEDSTUDIO_32x32, etc...) instead of an
 //      integer ID.
 //      The lable makes sense if user's are copying and pasting the commands, if not then
-//      integer IDs makes sense, but is harder to maintain.        
-    private static final PixelEnvironment pixelEnvironment = new PixelEnvironment(LED_MATRIX_ID);
+//      integer IDs makes sense, but is harder to maintain.
     
-    public final static RgbLedMatrix.Matrix MATRIX_TYPE = pixelEnvironment.LED_MATRIX;
+    private static PixelEnvironment pixelEnvironment;
+    
+    public  static RgbLedMatrix.Matrix MATRIX_TYPE ;
     
 //TODO: MAKE THIS PRIVATE    
     public List<String> stillImageNames;
@@ -84,6 +85,11 @@ public class WebEnabledPixel
 
         String name = getClass().getName();
         logger = Logger.getLogger(name);
+        
+        LED_MATRIX_ID = cli.getLEDMatrixType(); //let's get this from the command line class (CliPixel.java) and if there is no command line entered, we'll take the default of 3
+        
+        pixelEnvironment = new PixelEnvironment(LED_MATRIX_ID);
+        MATRIX_TYPE = pixelEnvironment.LED_MATRIX;
         
         pixel = new Pixel(pixelEnvironment.LED_MATRIX, pixelEnvironment.currentResolution);
         
@@ -340,6 +346,7 @@ public class WebEnabledPixel
     
     public static void main(String[] args)
     {
+        
         WebEnabledPixel app = new WebEnabledPixel(args);
         app.startServer();
     }
@@ -464,6 +471,8 @@ public class WebEnabledPixel
                     
                     
                     message.append("You may now interact with the PIXEL!\n");
+                    message.append("LED matrix type is: " + LED_MATRIX_ID +"\n");
+                    
 
 //TODO: Load something on startup
 
