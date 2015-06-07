@@ -31,6 +31,7 @@ import org.onebeartoe.pixel.PixelEnvironment;
 import org.onebeartoe.pixel.hardware.Pixel;
 import org.onebeartoe.web.enabled.pixel.controllers.AnimationsHttpHandler;
 import org.onebeartoe.web.enabled.pixel.controllers.AnimationsListHttpHandler;
+import org.onebeartoe.web.enabled.pixel.controllers.ClockHttpHandler;
 import org.onebeartoe.web.enabled.pixel.controllers.IndexHttpHandler;
 import org.onebeartoe.web.enabled.pixel.controllers.ScrollingTextColorHttpHandler;
 import org.onebeartoe.web.enabled.pixel.controllers.ScrollingTextHttpHander;
@@ -128,11 +129,14 @@ public class WebEnabledPixel
 
             HttpHandler uploadHttpHandler = new UploadHttpHandler(this);
             
+            HttpHandler clockHttpHandler = new ClockHttpHandler(this);
+            
 // ARE WE GONNA DO ANYTHING WITH THE HttpContext OBJECTS?            
             HttpContext createContext =     server.createContext("/",     indexHttpHandler);
             
             HttpContext animationsContext = server.createContext("/animation", animationsHttpHandler);
                                             server.createContext("/animation/list", animationsListHttpHandler);
+                                            server.createContext("/animations/save", animationsListHttpHandler);
 
             HttpContext staticContent =     server.createContext("/files", staticFileHttpHandler);
             
@@ -143,7 +147,9 @@ public class WebEnabledPixel
                                             server.createContext("/text/speed", scrollingTextSpeedHttpHander);
                                             server.createContext("/text/color", scrollingTextColorHttpHandler);
                                             
-            HttpContext uploadContext =    server.createContext("/upload", uploadHttpHandler);                                            
+            HttpContext uploadContext =    server.createContext("/upload", uploadHttpHandler);
+            
+            HttpContext clockContext =     server.createContext("/clock", clockHttpHandler);
                                             
         } 
         catch (IOException ex)

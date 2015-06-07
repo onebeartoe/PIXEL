@@ -47,6 +47,10 @@ public abstract class ImageResourceHttpHandler extends TextHttpHandler
                 // this is just a request change to still image mode
                 imageClassPath = defaultImageClassPath;
             }
+            else if( path.contains("/save/") )
+            {
+                imageClassPath = path;
+            }
             else
             {
                 imageClassPath = basePath + name;

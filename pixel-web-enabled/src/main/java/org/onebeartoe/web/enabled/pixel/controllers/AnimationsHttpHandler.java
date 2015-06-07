@@ -12,8 +12,6 @@ import org.onebeartoe.web.enabled.pixel.WebEnabledPixel;
  */
 public class AnimationsHttpHandler extends ImageResourceHttpHandler
 {
-    
-    
     public AnimationsHttpHandler(WebEnabledPixel application)
     {
         super(application);
@@ -27,13 +25,20 @@ public class AnimationsHttpHandler extends ImageResourceHttpHandler
     protected void writeImageResource(String imageClassPath) throws IOException, ConnectionLostException
     {
         logger.log(Level.INFO, "animation handler is writing " + imageClassPath);
-        // the writeAnimation() method just take the name of the file
+        
+        // the writeAnimation() method just takes the name of the file
         int i = imageClassPath.lastIndexOf("/") + 1;
         String animationName = imageClassPath.substring(i);
             
         boolean saveAnimation = false;
         
+        if( imageClassPath.contains("/save/") )
+        {
+            saveAnimation = true;
+        }
+        
         Pixel pixel = application.getPixel();
+        pixel.stopExistingTimer();
         pixel.writeAnimation(animationName, saveAnimation);
     }
 }

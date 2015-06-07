@@ -7,6 +7,7 @@ function changeControls(mode)
         {
             hideElement("stillPanel");
             hideElement("scrollingTextPanel");
+            hideElement("clockPanel");
             
             showElement("animationsPanel");
             
@@ -16,8 +17,19 @@ function changeControls(mode)
         {
             hideElement("animationsPanel");
             hideElement("scrollingTextPanel");
+            hideElement("clockPanel");
             
             showElement("stillPanel");
+            
+            break;
+        }
+        case "clock":
+        {
+            hideElement("animationsPanel");
+            hideElement("stillPanel");
+            hideElement("scrollingTextPanel");
+            
+            showElement("clockPanel");
             
             break;
         }
@@ -26,6 +38,7 @@ function changeControls(mode)
             // scrolling text
             hideElement("animationsPanel");
             hideElement("stillPanel");
+            hideElement("clockPanel");
             
             showElement("scrollingTextPanel");
             
@@ -62,6 +75,11 @@ function displayImage(imagePath, name)
     
     switch(imagePath)
     {
+        case "animations/save/":
+        {
+            mode = "animation/save/";
+            break;
+        }
         case "animations/":
         {
             mode = "animation/";
@@ -134,10 +152,17 @@ function loadImageList(url, elementName, imagePath)
                     html += "<img src=\"/files/" + imagePath + name + "\" " + 
                                    "width=\"50\" height=\"50\" alt=\"" + name +  "\"" +  
                                    ">";
-//                    html += "<br/>";
+
                     html += "<p>" + name + "</p>";                    
                     html += "<center style=\"margin-bottom: 40px;\">";
                     html += "<button onclick=\"displayImage('" + imagePath + "', '" + name + "')\" style=\"margin-left: auto; margin-right: auto;\">Display</button>";
+                    
+                    if(imagePath == "animations/")
+                    {
+                        html += " ";
+                        html += "<button onclick=\"displayImage('" + imagePath + "save/" + "', '" + name + "')\" style=\"margin-left: auto; margin-right: auto;\">Save</button>";
+                    }
+
                     html += "</center>";
                     html += "</div>";
                 }
