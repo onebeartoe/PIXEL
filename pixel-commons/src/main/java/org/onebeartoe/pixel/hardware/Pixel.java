@@ -28,6 +28,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.RandomAccessFile;
 import java.io.StringReader;
+import java.time.Duration;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
@@ -640,6 +641,22 @@ public boolean GIFNeedsDecoding(String decodedDir, String gifName, int currentRe
     	else return false;
     }
     
+    private void runRepeatingTask(TimerTask drawTask, long repeatPeriod)
+    {
+        stopExistingTimer();
+
+        if(timer == null)
+        {
+            timer = new Timer();
+        }
+        
+//        TimerTask drawTask = new TextScroller();
+
+        Date firstTime = new Date();
+
+        timer.schedule(drawTask, firstTime, repeatPeriod);
+    }
+    
     public void sendPixelDecodedFrame(String decodedDir, String gifName, int x, int selectedFileTotalFrames, int selectedFileResolution, int frameWidth, int frameHeight) 
     {
 		 
@@ -769,6 +786,9 @@ public boolean GIFNeedsDecoding(String decodedDir, String gifName, int currentRe
         }
     }
     
+/**
+ * TODO: move this to the runRepeatingTask() method
+ */    
     public void scrollText()
     {
         stopExistingTimer();
@@ -787,6 +807,11 @@ public boolean GIFNeedsDecoding(String decodedDir, String gifName, int currentRe
         this.decodedAnimationsPath = decodedAnimationsPath;
     }
     
+    @Deprecated
+    /**
+     * @deprecated
+     * where is this even used?
+     */
     public void setMode(PixelModes mode)
     {
         if( this.mode.equals(mode) )
@@ -1137,7 +1162,8 @@ public boolean GIFNeedsDecoding(String decodedDir, String gifName, int currentRe
 		   		String filetag = String.valueOf(numFrames) + "," + String.valueOf(frameDelay) + "," + String.valueOf(currentResolution); //current resolution may need to change to led panel type
 		   				
 	     		   File myFile = new File(decodedDir + gifName + ".txt");  				       
-	     		   try {
+	     		   try 
+                           {
 					myFile.createNewFile();
 					FileOutputStream fOut = null;
 					fOut = new FileOutputStream(myFile);
@@ -1145,19 +1171,33 @@ public boolean GIFNeedsDecoding(String decodedDir, String gifName, int currentRe
 					myOutWriter.append(filetag); 
 					myOutWriter.close();
 					fOut.close();	
-				} catch (IOException e) {
+				
+                           } 
+                           catch (IOException e) 
+                           {
 					// TODO Auto-generated catch block
 					System.out.println("ERROR, could not write " + gifName);
 					e.printStackTrace();
-				}
+                           }
 		}
 		else 
                 {
 			System.out.println("ERROR  Could not find " + gifSourcePath + gifName + ".gif in the JAR file");
-		
                 }
-	
-    }  
+    }
+    
+    /**
+     * Currently only analog clock mode is supported
+     * @param mode 
+     */
+    public void displayClock(ClockModes mode)
+    {
+        long oneSecond = Duration.ofSeconds(1).toMillis();
+        
+        TimerTask drawTask = new DrawAnalogClockTask();
+                
+        runRepeatingTask(drawTask, oneSecond);
+    }
 
     public void drawEqualizer(double [] values) throws ConnectionLostException
     {
@@ -1281,7 +1321,7 @@ public boolean GIFNeedsDecoding(String decodedDir, String gifName, int currentRe
     
     public void stopExistingTimer()
     {
-        System.out.println("checking PIXEL activity in " + getClass().getSimpleName() + ".");
+        System.out.println("Checking PIXEL activity in " + getClass().getSimpleName() + ".");
 
         if(timer == null)
         {
@@ -1289,11 +1329,18 @@ public boolean GIFNeedsDecoding(String decodedDir, String gifName, int currentRe
         }
         else
         {
-            System.out.println("Pixel is stopping PIXEL activity in " + getClass().getSimpleName() + ".");
+            System.out.println("Pixel is stopping PIXEL activity in " + getClass().getSimpleName() + "..");
             timer.cancel();
+            timer = null;
         }
     }    
   
+    /**
+     * This method sends an animation to the PIXEL. <b>Be sure to call #stopExistingTimer()</b> 
+     * before calling this method.
+     * @param selectedFileName
+     * @param writeMode 
+     */
     public void writeAnimation(String selectedFileName, boolean writeMode)
     {
         animationFilename = selectedFileName;
@@ -1480,6 +1527,63 @@ public boolean GIFNeedsDecoding(String decodedDir, String gifName, int currentRe
         }
     }
     
+    public enum ClockModes
+    {
+        ANALOG,
+        DIGITAL,
+        TIX
+    }
+    
+    private class DrawAnalogClockTask extends TimerTask
+    {
+        private AnalogClock clock;
+        
+        private final int OFFSCREEN_IMAGE_WIDTH = 500;
+        
+        private final int OFFSCREEN_IMAGE_HEIGHT = 500;
+        
+        public DrawAnalogClockTask()
+        {
+            clock = new AnalogClock(OFFSCREEN_IMAGE_WIDTH, OFFSCREEN_IMAGE_HEIGHT);
+        }
+                
+        @Override
+        public void run()
+        {	    
+            int w = OFFSCREEN_IMAGE_WIDTH;
+            int h = OFFSCREEN_IMAGE_HEIGHT;
+	    
+            BufferedImage img = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
+
+            Graphics2D g2d = img.createGraphics();
+            
+            clock.paint(g2d);
+            
+//TODO: keep this around, just in case            
+//            g2d.dispose();
+
+// uncomment this to see how often the pixel is communicated with the host            
+            System.out.print(".");
+
+            if(matrix == null)
+            {
+// uncomment this for debugging
+                logger.log(Level.INFO, "Analog clock has no matrix.");
+            }
+            else
+            {
+                try 
+                {  
+                    writeImagetoMatrix(img, KIND.width, KIND.height);
+                } 
+                catch (ConnectionLostException ex) 
+                {
+                    logger.log(Level.SEVERE, null, ex);
+                }                
+            }
+        }
+    }
+    
 //TODO: Did this not exist before?
     public enum PixelModes
     {
@@ -1579,12 +1683,12 @@ public boolean GIFNeedsDecoding(String decodedDir, String gifName, int currentRe
             g2d.dispose();
 
 // uncomment this to see how often the pixel is communicated with the host            
-//            System.out.print(".");
+            System.out.print(".");
 
             if(matrix == null)
             {
 // uncomment this for debugging
-//                logger.log(Level.INFO, "There is no matrix for the text scrolller.");
+                logger.log(Level.INFO, "There is no matrix for the text scrolller.");
             }
             else
             {
