@@ -28,7 +28,7 @@ public class CliPixel {
   this.args = args;
 
   options.addOption("h", "help", false, "show help.");
-  options.addOption("p", "port", true, "Listening port. Default Port = 2007");
+  options.addOption("p", "port", true, "Listening port. Default Port = 8080");
   options.addOption("l", "ledmatrix", true, "Sets the LED matrix type. Default = 3\n 0=32x16 Seeed 1=32x16 Adafruit, 2=32x32 Seeed\n" +
                     "3=PIXEL V2, 4=64x32 Seeed, 5=32x64 Seeed, 6=Seeed 2 Mirrored\n" +
                     "7=Seeed 4 Mirrored (does not work), 8=128x32 Seeed, 9=32x128 Seeed\n" +
