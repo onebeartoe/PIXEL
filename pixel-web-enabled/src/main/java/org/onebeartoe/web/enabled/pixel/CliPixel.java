@@ -18,7 +18,7 @@ public class CliPixel {
  private static final Logger log = Logger.getLogger(CliPixel.class.getName());
  private String[] args = null;
  private Options options = new Options();
- private int portOption = 2007;
+ private int portOption = 8080;
  private int ledMatrixType = 3;
  private int ledMatrixTypeDefault = 3;
  private int ledMatrixTypeMax = 17;
