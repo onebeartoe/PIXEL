@@ -112,8 +112,22 @@ public class UploadHttpHandler implements HttpHandler//extends TextHttpHandler
     public void handle(HttpExchange exchange) throws IOException
     {
         handleUpload(exchange);
-        
-        String response = "<META HTTP-EQUIV=REFRESH CONTENT=\"1; URL=files/index.html\">";
+
+//TODO: Pull the HTML document from a static file in the distribution JAR        
+        String response = "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.1//EN\" \"http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd\">\n" +
+"\n" +
+"<html xmlns=\"http://www.w3.org/1999/xhtml\" xml:lang=\"en\" lang=\"en\">\n" +
+"\n" +
+"    <head>\n" +
+"<META HTTP-EQUIV=REFRESH CONTENT=\"1; URL=files/index.html\">" +
+"	            \n" +
+"        <title>Upload Redirect</title>\n" +
+"    </head>\n" +
+"\n" +
+"    <body>\n" +
+"        redirecting...\n" +
+"    </body>\n" +
+"</html>";
         
         exchange.sendResponseHeaders(302, response.length());
         OutputStream os = exchange.getResponseBody();
