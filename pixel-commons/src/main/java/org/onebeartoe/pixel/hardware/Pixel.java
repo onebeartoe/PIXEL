@@ -1538,12 +1538,18 @@ public boolean GIFNeedsDecoding(String decodedDir, String gifName, int currentRe
     {
         private AnalogClock clock;
         
-        private final int OFFSCREEN_IMAGE_WIDTH = 500;
+        private final int OFFSCREEN_IMAGE_WIDTH = 115;
+        private final int OFFSCREEN_IMAGE_HEIGHT = 115;
         
-        private final int OFFSCREEN_IMAGE_HEIGHT = 500;
+//        private final int OFFSCREEN_IMAGE_WIDTH = 100;      
+//        private final int OFFSCREEN_IMAGE_HEIGHT = 100;
+       
+//        private final int OFFSCREEN_IMAGE_WIDTH = 500;      
+//        private final int OFFSCREEN_IMAGE_HEIGHT = 500;
         
         public DrawAnalogClockTask()
         {
+//            clock = new AnalogClock(64,64);
             clock = new AnalogClock(OFFSCREEN_IMAGE_WIDTH, OFFSCREEN_IMAGE_HEIGHT);
         }
                 
@@ -1552,6 +1558,9 @@ public boolean GIFNeedsDecoding(String decodedDir, String gifName, int currentRe
         {	    
             int w = OFFSCREEN_IMAGE_WIDTH;
             int h = OFFSCREEN_IMAGE_HEIGHT;
+            
+//            w = 64;
+//            h = 64;
 	    
             BufferedImage img = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
 

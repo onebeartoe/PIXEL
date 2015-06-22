@@ -3,6 +3,7 @@ package org.onebeartoe.pixel.hardware;
 
 import java.awt.Color;
 import java.awt.Graphics;
+import java.awt.Polygon;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
@@ -15,7 +16,8 @@ import java.util.Locale;
  */
 public class AnalogClock
 {
-    private Color background = Color.orange;
+    private Color background = Color.black;
+//    private Color background = Color.orange;
 
     private int width;
     private int height;
@@ -37,8 +39,10 @@ public class AnalogClock
     private void drawHand(double angle, int radius, Graphics g)
     {
         angle -= 0.5 * Math.PI;
+        
         int x = (int) (radius * Math.cos(angle));
         int y = (int) (radius * Math.sin(angle));
+        
         g.drawLine(width / 2, height / 2, width / 2 + x, height / 2 + y);
     }
 
@@ -53,9 +57,26 @@ public class AnalogClock
         angle += 2 * Math.PI / 3;
         int x3 = (int) (5 * Math.cos(angle));
         int y3 = (int) (5 * Math.sin(angle));
-        g.drawLine(width / 2 + x2, height / 2 + y2, width / 2 + x, height / 2 + y);
-        g.drawLine(width / 2 + x3, height / 2 + y3, width / 2 + x, height / 2 + y);
-        g.drawLine(width / 2 + x2, height / 2 + y2, width / 2 + x3, height / 2 + y3);
+        
+//        g.drawLine(width / 2 + x2, height / 2 + y2, width / 2 + x, height / 2 + y);
+//        g.drawLine(width / 2 + x3, height / 2 + y3, width / 2 + x, height / 2 + y);
+//        g.drawLine(width / 2 + x2, height / 2 + y2, width / 2 + x3, height / 2 + y3);
+        
+        Polygon p = new Polygon();
+        
+        
+        
+        
+        
+        p.addPoint(width / 2 + x2, height / 2 + y2);
+        p.addPoint(width / 2 + x, height / 2 + y);
+        p.addPoint(width / 2 + x3, height / 2 + y3);
+        p.addPoint(width / 2 + x, height / 2 + y);
+        p.addPoint(width / 2 + x2, height / 2 + y2);
+        p.addPoint(width / 2 + x3, height / 2 + y3);
+        
+        
+        g.fillPolygon(p);
     }
 
     public void paint(Graphics g)
@@ -86,6 +107,6 @@ public class AnalogClock
         drawHand(2 * Math.PI * seconds / 60, width / 2, g);
         
         g.setColor(Color.white);
-        g.drawString(timeString, 10, height - 100);
+//        g.drawString(timeString, 10, height - 100);
     }
 }
