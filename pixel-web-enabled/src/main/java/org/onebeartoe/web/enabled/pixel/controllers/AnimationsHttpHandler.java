@@ -3,8 +3,10 @@ package org.onebeartoe.web.enabled.pixel.controllers;
 
 import ioio.lib.api.exception.ConnectionLostException;
 import java.io.IOException;
+import java.time.Duration;
 import java.util.logging.Level;
 import org.onebeartoe.pixel.hardware.Pixel;
+import org.onebeartoe.system.Sleeper;
 import org.onebeartoe.web.enabled.pixel.WebEnabledPixel;
 
 /**
@@ -40,5 +42,11 @@ public class AnimationsHttpHandler extends ImageResourceHttpHandler
         Pixel pixel = application.getPixel();
         pixel.stopExistingTimer();
         pixel.writeAnimation(animationName, saveAnimation);
+        
+        // we should wait a bit before going back to interactive mode, or it jitters
+        long fifteenSeconds = Duration.ofSeconds(15).toMillis();
+        Sleeper.sleepo(fifteenSeconds);
+        
+        pixel.interactiveMode();
     }
 }
