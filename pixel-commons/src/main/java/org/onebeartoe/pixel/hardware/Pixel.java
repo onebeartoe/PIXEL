@@ -41,7 +41,6 @@ import java.util.logging.Logger;
 import org.apache.commons.io.FilenameUtils;
 
 import org.gifdecoder.GifDecoder;
-import org.onebeartoe.pixel.sound.meter.SoundReading;
 
 /**
  * @author Roberto Marquez
@@ -117,9 +116,6 @@ public class Pixel
     
     private HashMap<String, Font> fonts;
 
-//TODO: Why does this need to be static?   
-//    public static final String [] fontNames = GraphicsEnvironment.getLocalGraphicsEnvironment().getAvailableFontFamilyNames();
-
     private String scrollingText;
     
     /**
@@ -181,7 +177,6 @@ public class Pixel
     public void loadRGB565(String raw565ImagePath) throws ConnectionLostException 
     {
 	BitmapInputStream = getClass().getClassLoader().getResourceAsStream(raw565ImagePath);
-//	BitmapInputStream = PixelApp.class.getClassLoader().getResourceAsStream(raw565ImagePath);
 
 	try 
 	{   
@@ -308,8 +303,6 @@ public class Pixel
 			e.printStackTrace();
 		}
     }
-    
-
     
     private static AnalogInput getAnalogInput(int pinNumber) 
     {
@@ -649,8 +642,6 @@ public boolean GIFNeedsDecoding(String decodedDir, String gifName, int currentRe
         {
             timer = new Timer();
         }
-        
-//        TimerTask drawTask = new TextScroller();
 
         Date firstTime = new Date();
 
@@ -1460,8 +1451,7 @@ public boolean GIFNeedsDecoding(String decodedDir, String gifName, int currentRe
             for (j = 0; j < pixelMatrix_width; j++) 
             {
                 Color c = new Color(originalImage.getRGB(j, i));  //i and j were reversed which was rotationg the image by 90 degrees
-//                int aRGBpix = originalImage.getRGB(j, i);  //i and j were reversed which was rotationg the image by 90 degrees
-//                int alpha;
+
                 int red = c.getRed();
                 int green = c.getGreen();
                 int blue = c.getBlue();
@@ -1534,23 +1524,22 @@ public boolean GIFNeedsDecoding(String decodedDir, String gifName, int currentRe
         TIX
     }
     
+//TODO: can this class be moved outside of the Pixel.java class; just like the Edu clock task?     
     private class DrawAnalogClockTask extends TimerTask
     {
-        private AnalogClock clock;
+        private EduAnalogClock clock;
+//        private AnalogClock clock;
+
+        final int OFFSCREEN_IMAGE_WIDTH = 401;
+        final int OFFSCREEN_IMAGE_HEIGHT = 401;
         
-        private final int OFFSCREEN_IMAGE_WIDTH = 115;
-        private final int OFFSCREEN_IMAGE_HEIGHT = 115;
-        
-//        private final int OFFSCREEN_IMAGE_WIDTH = 100;      
-//        private final int OFFSCREEN_IMAGE_HEIGHT = 100;
-       
-//        private final int OFFSCREEN_IMAGE_WIDTH = 500;      
-//        private final int OFFSCREEN_IMAGE_HEIGHT = 500;
-        
+
+                 
         public DrawAnalogClockTask()
         {
-//            clock = new AnalogClock(64,64);
-            clock = new AnalogClock(OFFSCREEN_IMAGE_WIDTH, OFFSCREEN_IMAGE_HEIGHT);
+            clock = new EduAnalogClock(OFFSCREEN_IMAGE_WIDTH, OFFSCREEN_IMAGE_HEIGHT);
+
+            clock.init();
         }
                 
         @Override
@@ -1558,32 +1547,32 @@ public boolean GIFNeedsDecoding(String decodedDir, String gifName, int currentRe
         {	    
             int w = OFFSCREEN_IMAGE_WIDTH;
             int h = OFFSCREEN_IMAGE_HEIGHT;
-            
-//            w = 64;
-//            h = 64;
-	    
+
             BufferedImage img = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
 
             Graphics2D g2d = img.createGraphics();
             
+            System.out.println("paintng clock");
             clock.paint(g2d);
-            
+            System.out.println("clock painted");
 //TODO: keep this around, just in case            
 //            g2d.dispose();
 
 // uncomment this to see how often the pixel is communicated with the host            
-            System.out.print(".");
+//            System.out.print(".");
 
             if(matrix == null)
             {
 // uncomment this for debugging
-                logger.log(Level.INFO, "Analog clock has no matrix.");
+//                logger.log(Level.INFO, "Analog clock has no matrix.");
             }
             else
             {
                 try 
                 {  
+                    System.out.println("writing clock");
                     writeImagetoMatrix(img, KIND.width, KIND.height);
+                    System.out.println("clock written");
                 } 
                 catch (ConnectionLostException ex) 
                 {
@@ -1625,7 +1614,7 @@ public boolean GIFNeedsDecoding(String decodedDir, String gifName, int currentRe
             
             message = "Pixel is in local playback mode.";
             System.out.println(message);  
-
+                        
             //TODO UPDATE THE BROWSER/CLIENTS SOMEHOW
         }
     }
@@ -1637,23 +1626,16 @@ public boolean GIFNeedsDecoding(String decodedDir, String gifName, int currentRe
         {
 	    int delay = 200;//scrollSpeedSlider.getValue();	
 	    delay = 710 - delay;                            // al linke: added this so the higher slider value means faster scrolling
-	    
-//	    ChangeModeServlet.this.timer.setDelay(scrollDelay);
-	    
+	    	    
             int w = 64;
             int h = 64;
 	    
             BufferedImage img = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
-            
-            
-//	    Color textColor = Color.GREEN;//colorPanel.getBackground();
-	    
+            	    
             Graphics2D g2d = img.createGraphics();
             g2d.setPaint(scrollingTextColor);
-                      
-//               Font tr = new Font("Arial", Font.PLAIN, scrollingTextFontSize_);
+
             String fontFamily = "Arial";
-//            String fontFamily = fontNames[0];
             
             Font font = fonts.get(fontFamily);
             if(font == null)
@@ -1676,8 +1658,7 @@ public boolean GIFNeedsDecoding(String decodedDir, String gifName, int currentRe
             {
                 logger.log(Level.SEVERE, null, ex);
             }
-            
-//            set intial value on scrollingText
+
             g2d.drawString(scrollingText, x, y);
             
             try 
