@@ -19,7 +19,7 @@ public class AnimationsHttpHandler extends ImageResourceHttpHandler
         super(application);
         
         basePath = "animations/";
-        defaultImageClassPath = basePath + "arrows.png";
+        defaultImageClassPath = "arrows.png";
         modeName = "animation";
     }
     
@@ -38,6 +38,11 @@ public class AnimationsHttpHandler extends ImageResourceHttpHandler
         {
             saveAnimation = true;
         }
+        
+        if( animationName.equals("animations") )
+        {
+            animationName = defaultImageClassPath;
+        }   
         
         Pixel pixel = application.getPixel();
         pixel.stopExistingTimer();

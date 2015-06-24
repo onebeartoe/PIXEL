@@ -268,7 +268,7 @@ function updateMode()
     var xmlhttp = new XMLHttpRequest();
     xmlhttp.onreadystatechange=function()
     {
-        // dislpalyt eh correct mode UI
+        // display the correct mode UI
         var response = xmlhttp.responseText;
         
         var label = "Scrolling Texttttt";
@@ -279,7 +279,7 @@ function updateMode()
         {
             case "ANIMATED_GIF":
             {
-                changeControls("animations");
+                modeChanged("animations");
 
                 label = "Animations";
                 
@@ -289,7 +289,7 @@ function updateMode()
             }
             case "STILL_IMAGE":
             {
-                changeControls("still");        
+                modeChanged("still");        
                 
                 label = "Still Images";
 
