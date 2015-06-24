@@ -103,6 +103,13 @@ function displayImage(imagePath, name)
     xmlhttp.send("&p=3");    
 }
 
+function getLastUpdateOrigin()
+{
+    
+    
+    
+}
+
 function hideElement(id)
 {
     var element = document.getElementById(id);
@@ -252,4 +259,61 @@ function showElement(id)
 {
     var element = document.getElementById(id);
     element.style.display = 'block';
+}
+
+function updateMode()
+{
+//    alert("in updateMode()");
+    
+    var xmlhttp = new XMLHttpRequest();
+    xmlhttp.onreadystatechange=function()
+    {
+        // dislpalyt eh correct mode UI
+        var response = xmlhttp.responseText;
+        
+        var label = "Scrolling Texttttt";
+        
+        var o = 2
+        
+        switch(response)
+        {
+            case "ANIMATED_GIF":
+            {
+                changeControls("animations");
+
+                label = "Animations";
+                
+                o =0;
+
+                break;
+            }
+            case "STILL_IMAGE":
+            {
+                changeControls("still");        
+                
+                label = "Still Images";
+
+                o = 1;
+                break;
+            }
+            default:
+            {
+                
+                // scrolling text
+                changeScrollingText('Hello, Pixel World');
+
+                break;
+            }
+        }
+        
+        document.getElementById('mode').selectedIndex = o;
+        
+        xmlhttp.responseText += " uploaded";
+        
+        logServerResponse(xmlhttp);
+    }
+    var url = "/upload/origin";
+    xmlhttp.open("POST", url, true);
+    xmlhttp.setRequestHeader("Content-type","application/x-www-form-urlencoded");
+    xmlhttp.send("&p=3");
 }

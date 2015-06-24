@@ -8,12 +8,13 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.eh.core.model.FileInfo;
 import org.eh.core.util.FileUploadContentAnalysis;
-import org.onebeartoe.network.TextHttpHandler;
 import org.onebeartoe.web.enabled.pixel.WebEnabledPixel;
 
 /**
@@ -25,9 +26,13 @@ public class UploadHttpHandler implements HttpHandler//extends TextHttpHandler
 {
     protected WebEnabledPixel application;
     
+    private List<String> uploadOrigins;
+    
     public UploadHttpHandler(WebEnabledPixel application)
     {
         this.application = application;
+        
+        uploadOrigins = new ArrayList();
     }
 
     protected String handleUpload(HttpExchange httpExchange)
@@ -65,6 +70,8 @@ public class UploadHttpHandler implements HttpHandler//extends TextHttpHandler
                 String path = null;
                         
                 UploadType type = UploadType.valueOf(s);
+                
+                uploadOrigins.add(type.name());
                 
                 switch(type)
                 {
@@ -108,6 +115,22 @@ public class UploadHttpHandler implements HttpHandler//extends TextHttpHandler
                issues.toString();
     }
 
+    public String getLastUploadOrigin()
+    {
+        String lastUploadOrigin;
+        
+        if(uploadOrigins.size() < 1)
+        {
+            lastUploadOrigin = "ALL-CONSUMED";
+        }
+        else
+        {
+            lastUploadOrigin = uploadOrigins.remove(0);
+        }
+            
+        return lastUploadOrigin;
+    }
+    
     @Override
     public void handle(HttpExchange exchange) throws IOException
     {

@@ -40,6 +40,7 @@ import org.onebeartoe.web.enabled.pixel.controllers.StaticFileHttpHandler;
 import org.onebeartoe.web.enabled.pixel.controllers.StillImageHttpHandler;
 import org.onebeartoe.web.enabled.pixel.controllers.StillImageListHttpHandler;
 import org.onebeartoe.web.enabled.pixel.controllers.UploadHttpHandler;
+import org.onebeartoe.web.enabled.pixel.controllers.UploadOriginHttpHandler;
 
 /**
  * @author Roberto Marquez
@@ -129,6 +130,8 @@ public class WebEnabledPixel
 
             HttpHandler uploadHttpHandler = new UploadHttpHandler(this);
             
+            HttpHandler uploadOriginHttpHandler = new UploadOriginHttpHandler( (UploadHttpHandler) uploadHttpHandler);
+            
             HttpHandler clockHttpHandler = new ClockHttpHandler(this);
             
 // ARE WE GONNA DO ANYTHING WITH THE HttpContext OBJECTS?            
@@ -148,6 +151,8 @@ public class WebEnabledPixel
                                             server.createContext("/text/color", scrollingTextColorHttpHandler);
                                             
             HttpContext uploadContext =    server.createContext("/upload", uploadHttpHandler);
+                                           server.createContext("/upload/origin", uploadOriginHttpHandler);
+            
             
             HttpContext clockContext =     server.createContext("/clock", clockHttpHandler);
                                             

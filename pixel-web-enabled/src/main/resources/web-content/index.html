@@ -14,7 +14,7 @@
         <title>onebeartoe Pixel Web Application</title>
     </head>
 
-    <body onload="loadImageResources(); changeScrollingText('Hello, Pixel World');">
+    <body onload="loadImageResources(); updateMode();">
         
         <script type="text/javascript" src="pixel.js"></script>
         
@@ -37,7 +37,8 @@
                 Mode:
             </span>
             
-            <select name="mode" 
+            <select name="mode"
+                    id="mode"
                     onchange="modeChanged(this.value);"
                     style="width: 50%; height: 2em; font-size: 3em;">
                 
