@@ -1530,8 +1530,8 @@ public boolean GIFNeedsDecoding(String decodedDir, String gifName, int currentRe
         private EduAnalogClock clock;
 //        private AnalogClock clock;
 
-        final int OFFSCREEN_IMAGE_WIDTH = 401;
-        final int OFFSCREEN_IMAGE_HEIGHT = 401;
+        final int OFFSCREEN_IMAGE_WIDTH = 601;
+        final int OFFSCREEN_IMAGE_HEIGHT = 601;
         
 
                  
@@ -1556,7 +1556,7 @@ public boolean GIFNeedsDecoding(String decodedDir, String gifName, int currentRe
             clock.paint(g2d);
             System.out.println("clock painted");
 //TODO: keep this around, just in case            
-//            g2d.dispose();
+            g2d.dispose();
 
 // uncomment this to see how often the pixel is communicated with the host            
 //            System.out.print(".");

@@ -7,10 +7,8 @@ import java.awt.Graphics;
 import java.awt.Color;
 import java.awt.Image;
 import java.awt.Font;
-import java.awt.FontMetrics;
 import java.awt.image.BufferedImage;
 import java.awt.image.ImageObserver;
-import javax.swing.JApplet;
 
 //Class Definition: clock
 /**
@@ -28,7 +26,7 @@ implements ImageObserver
 	Thread runthread;		//Thread variable
 
 	int htmlradius;			//PARAM - radius of clock face
-	String image;			//PARAM - image file
+//	String image;			//PARAM - image file
 	int horizoffset;		//PARAM - horizontal number offset
 	int vertoffset;			//PARAM - vertical number offset
 
@@ -121,10 +119,11 @@ implements ImageObserver
 //	<PARAM name=voff value="-5">
 	
 		//Get applet PARAM's
-		clockdiameter = 400;
+//		clockdiameter = 400;
+                clockdiameter = iwidth - 1;                
 //		clockdiameter = Integer.parseInt((getParameter("diameter")));
                 
-		image = "hat.jpg";
+//		image = "hat.jpg";
 //                image = getParameter("image");
                 
 		horizoffset = 0;
@@ -140,11 +139,6 @@ implements ImageObserver
 		mradius = 0.7*(clockdiameter/2);
 
 		//Initializa image object
-                
-//                getim
-                
-                
-		
                 offscreenImage = new BufferedImage(iwidth, iheight, BufferedImage.TYPE_INT_ARGB);
 //		offscreenImage = createImage(getSize().width, getSize().height);
 //                offscreenImage = createImage(size().width, size().height);
@@ -236,12 +230,13 @@ implements ImageObserver
 	
 	public void paint(Graphics g) 
         {
+            getDate();
             calculatePoints();
 		
             
 		//Set background color
-            g.setColor(Color.black);
-        g.fillRect(0,0, iwidth, iheight);
+                g.setColor(Color.black);
+                g.fillRect(0,0, iwidth, iheight);
 //		setBackground(Color.black);
 		
 		//Set font
@@ -285,7 +280,7 @@ implements ImageObserver
 //			dy = (int) (ycenter - (0.9*clockdiameter/2)*(Math.cos(2*Math.PI*(i/60))) + (fm.getHeight())/2) + vertoffset;
 			
 			//Draw the face number
-			offscreenGraphics.drawString(t, (int)dx, (int)dy);
+//			offscreenGraphics.drawString(t, (int)dx, (int)dy);
 		}
 
 		//Get image size
@@ -318,7 +313,7 @@ implements ImageObserver
 
 		offscreenGraphics.fillPolygon(sxpts, sypts, pts);
 
-		offscreenGraphics.setColor(Color.black);
+		offscreenGraphics.setColor(Color.blue);
 		offscreenGraphics.fillPolygon(mxpts, mypts, pts);
 
 		offscreenGraphics.setColor(Color.green);
