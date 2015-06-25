@@ -182,11 +182,11 @@ implements ImageObserver
 		mxpts[2] = (int)(xcenter + (mradius*(Math.sin(2*Math.PI*(minute/60)))));
 		mypts[2] = (int)(ycenter + (-1*mradius*(Math.cos(2*Math.PI*(minute/60)))));
 
-		mxpts[1] = (int)(xcenter + (0.5*mradius*(Math.sin(2*Math.PI*(minute/60) - 0.1))));
-		mypts[1] = (int)(ycenter + (-0.5*mradius*(Math.cos(2*Math.PI*(minute/60) - 0.1))));
+		mxpts[1] = (int)(xcenter + (0.8*mradius*(Math.sin(2*Math.PI*(minute/60) - 0.1))));
+		mypts[1] = (int)(ycenter + (-0.6*mradius*(Math.cos(2*Math.PI*(minute/60) - 0.1))));
 
-		mxpts[3] = (int)(xcenter + (0.5*mradius*(Math.sin(2*Math.PI*(minute/60) + 0.1))));
-		mypts[3] = (int)(ycenter + (-0.5*mradius*(Math.cos(2*Math.PI*(minute/60) + 0.1))));
+		mxpts[3] = (int)(xcenter + (0.8*mradius*(Math.sin(2*Math.PI*(minute/60) + 0.1))));
+		mypts[3] = (int)(ycenter + (-0.6*mradius*(Math.cos(2*Math.PI*(minute/60) + 0.1))));
 
 		//To gradually move the hour hand so that it's position reflects the 
 		//position of the minute hand, we need to calculate how many seconds 
@@ -201,13 +201,13 @@ implements ImageObserver
 
                 
 		xAxisHourPoints[2] = (int)(xcenter + (hradius*(Math.sin(2*Math.PI*totalSeconds))));
-		yAxisHourPoints[2] = (int)(ycenter + (-1*hradius*(Math.cos(2*Math.PI*totalSeconds))));
+		yAxisHourPoints[2] = (int)(ycenter + (-1.3*hradius*(Math.cos(2*Math.PI*totalSeconds))));
 
-		xAxisHourPoints[1] = (int)(xcenter + (0.5*hradius*(Math.sin(2*Math.PI*totalSeconds - 0.1))));
-		yAxisHourPoints[1] = (int)(ycenter + (-0.5*hradius*(Math.cos(2*Math.PI*totalSeconds - 0.1))));
+		xAxisHourPoints[1] = (int)(xcenter + (0.8*hradius*(Math.sin(2*Math.PI*totalSeconds - 0.1))));
+		yAxisHourPoints[1] = (int)(ycenter + (-0.6*hradius*(Math.cos(2*Math.PI*totalSeconds - 0.1))));
 
-		xAxisHourPoints[3] = (int)(xcenter + (0.5*hradius*(Math.sin(2*Math.PI*totalSeconds + 0.1))));
-		yAxisHourPoints[3] = (int)(ycenter + (-0.5*hradius*(Math.cos(2*Math.PI*totalSeconds + 0.1))));
+		xAxisHourPoints[3] = (int)(xcenter + (0.8*hradius*(Math.sin(2*Math.PI*totalSeconds + 0.1))));
+		yAxisHourPoints[3] = (int)(ycenter + (-0.6*hradius*(Math.cos(2*Math.PI*totalSeconds + 0.1))));
 	}
 
 	//=============================
@@ -251,7 +251,10 @@ implements ImageObserver
 		offscreenGraphics.fillRect(0,0, (int)clockdiameter+1, (int)clockdiameter+1);
 		
 		offscreenGraphics.setColor(Color.white);
-		offscreenGraphics.drawOval(0,0,(int)clockdiameter, (int)clockdiameter);
+		offscreenGraphics.fillOval(0,0,(int)clockdiameter-1, (int)clockdiameter-1);
+                
+                offscreenGraphics.setColor(Color.black);
+                offscreenGraphics.fillOval(20,20,(int)clockdiameter-40, (int)clockdiameter-40);
 
 		//Each number is first calculated, then converted to a string. The string's height and
 		//width are calculated using font metrics. The string can then be centered at it's 
@@ -270,23 +273,8 @@ implements ImageObserver
 			
 			//Convert to string and remove the ".0"
 			String s = Double.toString(number);
-			String t = s.substring(0, s.length() - 2);
-			
-			//dx = (int) (xcenter + (0.9*clockdiameter/2)*(Math.sin(2*Math.PI*(i/60))) - fm.stringWidth(Double.toString(number))/2 + horizoffset);
-			//dy = (int) (ycenter - (0.9*clockdiameter/2)*(Math.cos(2*Math.PI*(i/60))) + (fm.getHeight())/2) + vertoffset;
-
-			//offscreenGraphics.drawString(Double.toString(number), (int)dx, (int)dy);
-			
-//			dx = (int) (xcenter + (0.9*clockdiameter/2)*(Math.sin(2*Math.PI*(i/60))) - fm.stringWidth(t)/2 + horizoffset);
-//			dy = (int) (ycenter - (0.9*clockdiameter/2)*(Math.cos(2*Math.PI*(i/60))) + (fm.getHeight())/2) + vertoffset;
-			
-			//Draw the face number
-//			offscreenGraphics.drawString(t, (int)dx, (int)dy);
+			String t = s.substring(0, s.length() - 2);		
 		}
-
-		//Get image size
-//		iwidth = clockImage.getWidth(this);
-//		iheight = clockImage.getHeight(this);
 
 		//Get the size of the bounding box
 		imageboxlength = (double)(clockdiameter*(Math.sin(Math.PI/4))*0.8);
@@ -305,9 +293,6 @@ implements ImageObserver
 
 		imagex = (int)(xcenter - (newwidth/2));
 		imagey = (int)(ycenter - (newheight/2));
-
-		//Draw clock image
-//		offscreenGraphics.drawImage(clockImage, imagex, imagey, (int)newwidth, (int)newheight, this);
 
 		//Draw each hand
 		offscreenGraphics.setColor(Color.red); 

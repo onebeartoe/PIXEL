@@ -1530,8 +1530,8 @@ public boolean GIFNeedsDecoding(String decodedDir, String gifName, int currentRe
         private EduAnalogClock clock;
 //        private AnalogClock clock;
 
-        final int OFFSCREEN_IMAGE_WIDTH = 601;
-        final int OFFSCREEN_IMAGE_HEIGHT = 601;
+        final int OFFSCREEN_IMAGE_WIDTH = 401;
+        final int OFFSCREEN_IMAGE_HEIGHT = 401;
         
 
                  
