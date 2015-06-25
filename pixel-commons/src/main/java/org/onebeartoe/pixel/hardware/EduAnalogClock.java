@@ -47,7 +47,7 @@ implements ImageObserver
 	Font f = new Font("TimesRoman", Font.BOLD, 14);	//Font of numbers
 //	FontMetrics fm =  new FontMetrics(f);//getFontMetrics(f); 			//Font details
 
-	int[] sxpts = new int[5];	//X coordinates for each point of the second hand polygon
+	int[] xAxisSecondPoints = new int[5];	//X coordinates for each point of the second hand polygon
 	int[] sypts = new int[5];	//Y coordinates for each point of the second hand polygon
 	
 	int[] mxpts = new int[5];	//X coordinates for each point of the minute hand polygon
@@ -152,7 +152,7 @@ implements ImageObserver
 	//Function:	calculatePoints()
 	//Input:	none
 	//Output:	none
-	//			updates sxpts[], sypts, mxpts[], mypts[],
+	//			updates xAxisSecondPoints[], sypts, mxpts[], mypts[],
 	//			xAxisHourPoints[], yAxisHourPoints[]
 	//=============================
 	
@@ -164,23 +164,26 @@ implements ImageObserver
 		//y endpoint = ycenter - radius*cos(2PI*time/60) for minutes and seconds
 		//The other two midpoints are half the length of the hand offset by 0.1 radians
 		
-		sxpts[0] = sxpts[4] = (int) xcenter;
+		xAxisSecondPoints[0] = xAxisSecondPoints[4] = (int) xcenter;
 		sypts[0] = sypts[4] = (int) ycenter;
 
-		sxpts[2] = (int)(xcenter + (sradius*(Math.sin(2*Math.PI*(second/60)))));
-		sypts[2] = (int)(ycenter + (-1*sradius*(Math.cos(2*Math.PI*(second/60)))));
+		xAxisSecondPoints[2] = (int)(xcenter + (sradius*(Math.sin(2*Math.PI*(second/60)))));
+		sypts[2] = (int)(ycenter + (-1.5*sradius*(Math.cos(2*Math.PI*(second/60)))));
 
-		sxpts[1] = (int)(xcenter + (0.3*sradius*(Math.sin(2*Math.PI*(second/60) - 0.1))));
+		xAxisSecondPoints[1] = (int)(xcenter + (0.3*sradius*(Math.sin(2*Math.PI*(second/60) - 0.1))));
 		sypts[1] = (int)(ycenter + (-0.3*sradius*(Math.cos(2*Math.PI*(second/60) - 0.1))));
 
-		sxpts[3] = (int)(xcenter + (0.3*sradius*(Math.sin(2*Math.PI*(second/60) + 0.1))));
+		xAxisSecondPoints[3] = (int)(xcenter + (0.3*sradius*(Math.sin(2*Math.PI*(second/60) + 0.1))));
 		sypts[3] = (int)(ycenter + (-0.3*sradius*(Math.cos(2*Math.PI*(second/60) + 0.1))));
 
+                
+                
+                
 		mxpts[0] = mxpts[4] = (int) xcenter;
 		mypts[0] = mypts[4] = (int) ycenter;
 
 		mxpts[2] = (int)(xcenter + (mradius*(Math.sin(2*Math.PI*(minute/60)))));
-		mypts[2] = (int)(ycenter + (-1*mradius*(Math.cos(2*Math.PI*(minute/60)))));
+		mypts[2] = (int)(ycenter + (-1.45*mradius*(Math.cos(2*Math.PI*(minute/60)))));
 
 		mxpts[1] = (int)(xcenter + (0.8*mradius*(Math.sin(2*Math.PI*(minute/60) - 0.1))));
 		mypts[1] = (int)(ycenter + (-0.6*mradius*(Math.cos(2*Math.PI*(minute/60) - 0.1))));
@@ -188,6 +191,8 @@ implements ImageObserver
 		mxpts[3] = (int)(xcenter + (0.8*mradius*(Math.sin(2*Math.PI*(minute/60) + 0.1))));
 		mypts[3] = (int)(ycenter + (-0.6*mradius*(Math.cos(2*Math.PI*(minute/60) + 0.1))));
 
+                
+                
 		//To gradually move the hour hand so that it's position reflects the 
 		//position of the minute hand, we need to calculate how many seconds 
 		//out of 12 hours (43,200s) have passed and substitute that value for 
@@ -201,7 +206,7 @@ implements ImageObserver
 
                 
 		xAxisHourPoints[2] = (int)(xcenter + (hradius*(Math.sin(2*Math.PI*totalSeconds))));
-		yAxisHourPoints[2] = (int)(ycenter + (-1.3*hradius*(Math.cos(2*Math.PI*totalSeconds))));
+		yAxisHourPoints[2] = (int)(ycenter + (-1.25*hradius*(Math.cos(2*Math.PI*totalSeconds))));
 
 		xAxisHourPoints[1] = (int)(xcenter + (0.8*hradius*(Math.sin(2*Math.PI*totalSeconds - 0.1))));
 		yAxisHourPoints[1] = (int)(ycenter + (-0.6*hradius*(Math.cos(2*Math.PI*totalSeconds - 0.1))));
@@ -297,7 +302,7 @@ implements ImageObserver
 		//Draw each hand
 		offscreenGraphics.setColor(Color.red); 
 
-		offscreenGraphics.fillPolygon(sxpts, sypts, pts);
+		offscreenGraphics.fillPolygon(xAxisSecondPoints, sypts, pts);
 
 		offscreenGraphics.setColor(Color.blue);
 		offscreenGraphics.fillPolygon(mxpts, mypts, pts);
