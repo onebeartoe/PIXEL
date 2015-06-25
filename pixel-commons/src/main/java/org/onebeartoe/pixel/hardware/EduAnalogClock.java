@@ -53,8 +53,8 @@ implements ImageObserver
 	int[] mxpts = new int[5];	//X coordinates for each point of the minute hand polygon
 	int[] mypts = new int[5];	//Y coordinates for each point of the minute hand polygon
 	
-	int[] hxpts = new int[5];	//X coordinates for each point of the hour hand polygon
-	int[] hypts = new int[5];	//Y coordinates for each point of the hour hand polygon
+	int[] xAxisHourPoints = new int[5];	//X coordinates for each point of the hour hand polygon
+	int[] yAxisHourPoints = new int[5];	//Y coordinates for each point of the hour hand polygon
 	
 	int pts = 5;
 
@@ -153,11 +153,11 @@ implements ImageObserver
 	//Input:	none
 	//Output:	none
 	//			updates sxpts[], sypts, mxpts[], mypts[],
-	//			hxpts[], hypts[]
+	//			xAxisHourPoints[], yAxisHourPoints[]
 	//=============================
 	
-	public void calculatePoints() {
-	
+	public void calculatePoints() 
+        {
 		//Calculates the points which make up each corner of the polygon (hand) based upon
 		//the current time.
 		//x endpoint = xcenter + radius*sin(2PI*time/60) for minutes and seconds
@@ -196,17 +196,18 @@ implements ImageObserver
 
 		double totalSeconds = calculateSeconds();
 
-		hxpts[0] = hxpts[4] = (int) xcenter;
-		hypts[0] = hypts[4] = (int) ycenter;
+		xAxisHourPoints[0] = xAxisHourPoints[4] = (int) xcenter;
+		yAxisHourPoints[0] = yAxisHourPoints[4] = (int) ycenter;
 
-		hxpts[2] = (int)(xcenter + (hradius*(Math.sin(2*Math.PI*totalSeconds))));
-		hypts[2] = (int)(ycenter + (-1*hradius*(Math.cos(2*Math.PI*totalSeconds))));
+                
+		xAxisHourPoints[2] = (int)(xcenter + (hradius*(Math.sin(2*Math.PI*totalSeconds))));
+		yAxisHourPoints[2] = (int)(ycenter + (-1*hradius*(Math.cos(2*Math.PI*totalSeconds))));
 
-		hxpts[1] = (int)(xcenter + (0.5*hradius*(Math.sin(2*Math.PI*totalSeconds - 0.1))));
-		hypts[1] = (int)(ycenter + (-0.5*hradius*(Math.cos(2*Math.PI*totalSeconds - 0.1))));
+		xAxisHourPoints[1] = (int)(xcenter + (0.5*hradius*(Math.sin(2*Math.PI*totalSeconds - 0.1))));
+		yAxisHourPoints[1] = (int)(ycenter + (-0.5*hradius*(Math.cos(2*Math.PI*totalSeconds - 0.1))));
 
-		hxpts[3] = (int)(xcenter + (0.5*hradius*(Math.sin(2*Math.PI*totalSeconds + 0.1))));
-		hypts[3] = (int)(ycenter + (-0.5*hradius*(Math.cos(2*Math.PI*totalSeconds + 0.1))));
+		xAxisHourPoints[3] = (int)(xcenter + (0.5*hradius*(Math.sin(2*Math.PI*totalSeconds + 0.1))));
+		yAxisHourPoints[3] = (int)(ycenter + (-0.5*hradius*(Math.cos(2*Math.PI*totalSeconds + 0.1))));
 	}
 
 	//=============================
@@ -257,8 +258,8 @@ implements ImageObserver
 		//appropriate position using a formula similar to the one that determines where each hand
 		//should be drawn.
 		
-		for (double i=0; i<60; i+=5) {
-			
+		for (double i=0; i<60; i+=5) 
+                {			
 			double number;		//hour
 
 			number = i/5;
@@ -317,7 +318,7 @@ implements ImageObserver
 		offscreenGraphics.fillPolygon(mxpts, mypts, pts);
 
 		offscreenGraphics.setColor(Color.green);
-		offscreenGraphics.fillPolygon(hxpts, hypts, pts);
+		offscreenGraphics.fillPolygon(xAxisHourPoints, yAxisHourPoints, pts);
 
 		lastsecond = second;
 
