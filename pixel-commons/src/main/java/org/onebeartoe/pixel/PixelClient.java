@@ -1,8 +1,6 @@
 
 package org.onebeartoe.pixel;
 
-import javax.media.Player;
-
 import org.onebeartoe.pixel.sound.meter.AllOffSoundMeter;
 import org.onebeartoe.pixel.sound.meter.BlobSoundMeter;
 import org.onebeartoe.pixel.sound.meter.BottomUpSoundMeter;
@@ -18,24 +16,12 @@ import org.onebeartoe.pixel.sound.meter.WaveSoundMeter;
 public abstract class PixelClient 
 {
     public static String currentSongTitle;
-//    protected static String currentSongTitle;
     
     protected static int offscreenImageWidth;
     
     protected static int offscreenImageHeight;
     
     protected static SoundMeter soundMeter;
-    
-    // object reference used to play media
-    protected static Player player;
-
-    public void pausePlayer()
-    {
-        if (player != null)
-        {
-            player.stop();
-        }
-    }        
 
     public void setSoundMeter(SoundMeterModes meterMode)
     {
@@ -72,13 +58,5 @@ public abstract class PixelClient
                 soundMeter = new AllOffSoundMeter(offscreenImageWidth, offscreenImageHeight);
             }
         }
-    }    
-    
-    public void unpausePlayer()
-    {
-        if (player != null)
-        {
-            player.start();
-        }
-    }    
+    }  
 }
