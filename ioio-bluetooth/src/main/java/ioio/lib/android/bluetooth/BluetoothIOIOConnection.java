@@ -93,14 +93,19 @@ public class BluetoothIOIOConnection implements IOIOConnection {
 	}
 
 	public static BluetoothSocket createSocket(final BluetoothDevice device)
-			throws IOException {
-		if (Build.VERSION.SDK_INT >= 10 ) {
+			throws IOException 
+        {
+//		if (Build.VERSION.SDK_INT >= 10 ) 
+                {
+//                    throw new IOException("insecure connections are no longer supported");
 			// We're trying to create an insecure socket, which is only
 			// supported in API 10 and up. Otherwise, we try a secure socket
 			// which is in API 7 and up.
-			return device.createInsecureRfcommSocketToServiceRecord(UUID
-					.fromString("00001101-0000-1000-8000-00805F9B34FB"));
-		} else {
+//			return device.createInsecureRfcommSocketToServiceRecord(UUID
+//					.fromString("00001101-0000-1000-8000-00805F9B34FB"));
+		} 
+  //              else 
+                {
 			return device.createRfcommSocketToServiceRecord(UUID
 					.fromString("00001101-0000-1000-8000-00805F9B34FB"));
 		}
