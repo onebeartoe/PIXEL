@@ -14,6 +14,8 @@
 
     <name>pixel-parent</name>
 
+    <url>http://www.onebeartoe.com/</url>
+
     <repositories>
 	<repository>
             <id>oss-snapshots-repo</id>
