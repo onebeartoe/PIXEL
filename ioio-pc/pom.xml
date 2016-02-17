@@ -4,7 +4,7 @@
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>org.ioio</groupId>
-  <artifactId>pc</artifactId>
+  <artifactId>ioio-pc</artifactId>
   <version>1.0-SNAPSHOT</version>
   
   <packaging>jar</packaging>
