@@ -87,13 +87,18 @@ public class WebEnabledPixel
 
         String name = getClass().getName();
         logger = Logger.getLogger(name);
+
+        int yTextOffset = cli.getyTextOffset();
         
         LED_MATRIX_ID = cli.getLEDMatrixType(); //let's get this from the command line class (CliPixel.java) and if there is no command line entered, we'll take the default of 3
         
         pixelEnvironment = new PixelEnvironment(LED_MATRIX_ID);
+        
         MATRIX_TYPE = pixelEnvironment.LED_MATRIX;
         
         pixel = new Pixel(pixelEnvironment.LED_MATRIX, pixelEnvironment.currentResolution);
+        
+        pixel.setyScrollingTextOffset(yTextOffset);
         
         extractDefaultContent();
         

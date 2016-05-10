@@ -125,6 +125,8 @@ public class Pixel
     
     private Color scrollingTextColor = Color.ORANGE;
     
+    private int yScrollingTextOffset = 0;
+    
     private Logger logger;
     
     /**
@@ -1244,7 +1246,8 @@ public boolean GIFNeedsDecoding(String decodedDir, String gifName, int currentRe
         fos.close();
     }
   
-  public static String getSelectedFilePath(Component command) {
+  public static String getSelectedFilePath(Component command) 
+  {
 	    String path = command.toString();
 		//System.out.println("image comamand: " + path);	
 		path = path.replaceAll(",", "\r\n");
@@ -1271,6 +1274,17 @@ public boolean GIFNeedsDecoding(String decodedDir, String gifName, int currentRe
 		
       return localFileImagePath;
   }
+  
+  
+    public int getyScrollingTextOffset() 
+    {
+        return yScrollingTextOffset;
+    }
+
+    public void setyScrollingTextOffset(int yScrollingTextOffset) 
+    {
+        this.yScrollingTextOffset = yScrollingTextOffset;
+    }
   
     /**
      * resizes our image and preserves hard edges we need for pixel art
@@ -1500,7 +1514,6 @@ public boolean GIFNeedsDecoding(String decodedDir, String gifName, int currentRe
 	}
     }
 
-
 //TODO: this is not a Timer, where is this used?
     private class AnimateTimer extends TimerTask
     {
@@ -1628,7 +1641,10 @@ public boolean GIFNeedsDecoding(String decodedDir, String gifName, int currentRe
 	    delay = 710 - delay;                            // al linke: added this so the higher slider value means faster scrolling
 	    	    
             int w = 64;
+            
             int h = 64;
+// use a height of 32, for the rectangle LED matrix type (32x16 for example)            
+//            int h = 32;
 	    
             BufferedImage img = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
             	    
@@ -1640,7 +1656,10 @@ public boolean GIFNeedsDecoding(String decodedDir, String gifName, int currentRe
             Font font = fonts.get(fontFamily);
             if(font == null)
             {
-                font = new Font(fontFamily, Font.PLAIN, 32);
+                int fontSize = 32;
+//                int fontSize = 28;
+// a font size of 28 looks good on the rectangle type matrix (32x16 for example)                
+                font = new Font(fontFamily, Font.PLAIN, fontSize);
                 fonts.put(fontFamily, font);
             }            
             
@@ -1648,7 +1667,7 @@ public boolean GIFNeedsDecoding(String decodedDir, String gifName, int currentRe
             
             FontMetrics fm = g2d.getFontMetrics();
             
-            int y = fm.getHeight();            
+            int y = fm.getHeight() + yScrollingTextOffset;
 
             try 
             {
@@ -1673,7 +1692,7 @@ public boolean GIFNeedsDecoding(String decodedDir, String gifName, int currentRe
             g2d.dispose();
 
 // uncomment this to see how often the pixel is communicated with the host            
-            System.out.print(".");
+//            System.out.print(".");
 
             if(matrix == null)
             {

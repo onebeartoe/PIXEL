@@ -13,7 +13,8 @@ import org.apache.commons.cli.ParseException;
  *
  * @author curtis-bull
  */
-public class CliPixel {
+public class CliPixel 
+{
 
  private static final Logger log = Logger.getLogger(CliPixel.class.getName());
  private String[] args = null;
@@ -22,8 +23,11 @@ public class CliPixel {
  private int ledMatrixType = 3;
  private int ledMatrixTypeDefault = 3;
  private int ledMatrixTypeMax = 17;
+ 
+ private int yTextOffset = 0;
 
- public CliPixel(String[] args) {
+ public CliPixel(String[] args) 
+ {
 
   this.args = args;
 
@@ -37,9 +41,11 @@ public class CliPixel {
                     "13=64x32 Adafruit, 14=64x64 Adafruit, 15=128x32 Adafruit\n" +
                     "16=32x128 Adafruit, 17=64x16 Adafruit\n");
   options.addOption("m", "matrix", true, "Sets the LED matrix type, same as l option");
+  options.addOption("y", "y text offset", true, "This is the y offset for scrolling text.");
  }
 
- public void parse() {
+ public void parse() 
+ {
   CommandLineParser parser = new BasicParser();
 
   CommandLine cmd = null;
@@ -52,6 +58,13 @@ public class CliPixel {
    if (cmd.hasOption("p")) {
     log.log(Level.INFO, "Using cli argument -p=" + cmd.getOptionValue("p"));
     portOption = Integer.parseInt(cmd.getOptionValue("p"));
+   }
+   
+   if( cmd.hasOption("y") )
+   {
+       String o = cmd.getOptionValue("y");
+       log.log(Level.INFO, "Using cli argument -y: " + o);
+       yTextOffset = Integer.parseInt(o);
    }
    
     if (cmd.hasOption("l")) {
@@ -80,6 +93,14 @@ public class CliPixel {
  {
     return portOption;
  }
+ 
+    public int getyTextOffset() {
+        return yTextOffset;
+    }
+
+    public void setyTextOffset(int yTextOffset) {
+        this.yTextOffset = yTextOffset;
+    } 
  
  public int getLEDMatrixType()
  {
