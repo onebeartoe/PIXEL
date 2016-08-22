@@ -16,6 +16,7 @@ import javax.swing.ImageIcon;
 
 import org.apache.commons.io.FilenameUtils;
 import org.onebeartoe.io.TextFileReader;
+import org.onebeartoe.io.buffered.BufferedTextFileReader;
 
 /**
  * @author rmarquez
@@ -86,7 +87,7 @@ public class ImageTilePanel extends PixelTilePanel
     @Override
     protected List<String> imageNames() throws Exception
     {
-        TextFileReader textFileReader = new TextFileReader();
+        TextFileReader textFileReader = new BufferedTextFileReader();
         List<String> names = textFileReader.readTextLinesFromClasspath(imageListPath); 		
 	
 	return names;

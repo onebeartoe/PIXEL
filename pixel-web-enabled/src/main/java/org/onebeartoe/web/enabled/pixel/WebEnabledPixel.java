@@ -278,7 +278,7 @@ public class WebEnabledPixel
             String outputDirectoryPath = pixel.getPixelHome() + pathPrefix;
             File outputDirectory = new File(outputDirectoryPath);
             
-            TextFileReader tfr = new TextFileReader();
+            TextFileReader tfr = new BufferedTextFileReader();
             List<String> imageNames = tfr.readTextLinesFromClasspath(resourceListClasspath);
             
             for(String name : imageNames)
