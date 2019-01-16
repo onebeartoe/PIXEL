@@ -71,7 +71,8 @@ public class WebEnabledPixel
     //  1: 32x16 from Sparkfun - ioio.lib.api.RgbLedMatrix.Matrix.ADAFRUIT_32x16
     //  3: translates to RgbLedMatrix.Matrix.SEEEDSTUDIO_32x32;
     // 10: translates to SEEEDSTUDIO_64x64
-    private static int LED_MATRIX_ID = 3;
+    //private static int LED_MATRIX_ID = 3;
+    private static int LED_MATRIX_ID = 11;
 //TODO: We shoudl invert this and have teh user specicy the matrix label 
 //      (SEEEDSTUDIO_64x64, Matrix.SEEEDSTUDIO_32x32, etc...) instead of an
 //      integer ID.
