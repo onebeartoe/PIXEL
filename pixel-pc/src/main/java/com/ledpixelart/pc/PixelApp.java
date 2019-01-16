@@ -105,8 +105,10 @@ public class PixelApp extends IOIOSwingApp
 
     public static int currentResolution;
 
-    public static int ledMatrixType = 3; //we'll default to PIXEL 32x32 and change this is a command line option is entered specifying otherwise
+    //public static int ledMatrixType = 3; //we'll default to PIXEL 32x32 and change this is a command line option is entered specifying otherwise
 
+    public static int ledMatrixType = 11;
+    
     public static String pixelFirmware = "Not Found";
 
     public static String pixelHardwareID = "Not Found";

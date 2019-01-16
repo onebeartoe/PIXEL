@@ -29,7 +29,7 @@ public class AboutPanel extends JPanel
     
     public AboutPanel()
     {
-	String version = "4.0.0";
+	String version = "4.1.0";
 	String text = "PIXEL: LED ART " + version;
 	String html = "<html><body><h2>" + text + "</h2></body></html>";
 	JLabel productLabel = new JLabel(html, JLabel.LEFT);

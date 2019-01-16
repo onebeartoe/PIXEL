@@ -29,7 +29,7 @@ public class InstructionsPanel extends JPanel
     
     public InstructionsPanel()
     {
-	String version = "4.0.0";
+	String version = "4.1.0";
 	String text = "Welcome PIXEL User";
 	String html = "<html><body><h1>" + text + "</h1></body></html>";
 	JLabel productLabel = new JLabel(html, JLabel.CENTER);
