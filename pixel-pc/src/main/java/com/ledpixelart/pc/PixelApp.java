@@ -87,7 +87,7 @@ public class PixelApp extends IOIOSwingApp
 
     private static IOIO ioiO;
 
-    public static RgbLedMatrix.Matrix KIND = ioio.lib.api.RgbLedMatrix.Matrix.SEEEDSTUDIO_32x32;
+    public static RgbLedMatrix.Matrix KIND = ioio.lib.api.RgbLedMatrix.Matrix.ADAFRUIT_32x32;
 
     static int pixleType = 1;
     static PixelEnvironment pixelEnvironment = new PixelEnvironment(pixleType);
@@ -97,7 +97,7 @@ public class PixelApp extends IOIOSwingApp
      * We need to get away from using static references, and use getters and setters.  One problem is the mis-import
      * of the duplicate classes in other applications.
      */
-    public static final Pixel pixel = new Pixel(pixelEnvironment.KIND, pixelEnvironment.currentResolution);
+    public static final Pixel pixel = new Pixel(pixelEnvironment.LED_MATRIX, pixelEnvironment.currentResolution);
 
     private static int selectedFileResolution = 32;
 
@@ -105,8 +105,10 @@ public class PixelApp extends IOIOSwingApp
 
     public static int currentResolution;
 
-    public static int ledMatrixType = 3; //we'll default to PIXEL 32x32 and change this is a command line option is entered specifying otherwise
+    //public static int ledMatrixType = 3; //we'll default to PIXEL 32x32 and change this is a command line option is entered specifying otherwise
 
+    public static int ledMatrixType = 11;
+    
     public static String pixelFirmware = "Not Found";
 
     public static String pixelHardwareID = "Not Found";
@@ -186,7 +188,7 @@ public class PixelApp extends IOIOSwingApp
 
         prefs = Preferences.userRoot().node(pixelPrefNode); //let's get our preferences
 
-        int defaultLEDMatrix = 3; //if the pref does not exist yet for the led matrix, use this and default to pixel 32x32
+        int defaultLEDMatrix = 11; //if the pref does not exist yet for the led matrix, use this and default to pixel 32x32
 
         ledMatrixType = prefs.getInt("prefMatrix", defaultLEDMatrix);
         firstTimeUser = prefs.getBoolean("prefFirstTime", true);
@@ -463,7 +465,7 @@ public class PixelApp extends IOIOSwingApp
 
                 PixelApp.this.ioiO = ioio_;
 
-                //pixel.matrix = ioio_.openRgbLedMatrix(pixel.KIND);   //AL could not make this work, did a quick hack, Roberto probably can change back to the right way
+                //pixel.matrix = ioio_.openRgbLedMatrix(pixel.LED_MATRIX);   //AL could not make this work, did a quick hack, Roberto probably can change back to the right way
                 pixel.matrix = ioio_.openRgbLedMatrix(KIND);
                 pixel.ioiO = ioio_;
                 System.out.println("Found PIXEL: " + pixel.matrix + "\n");
@@ -594,8 +596,43 @@ public class PixelApp extends IOIOSwingApp
                 frame_length = 8192;
                 currentResolution = 128;
                 break;
+            case 11:
+                KIND = ioio.lib.api.RgbLedMatrix.Matrix.ADAFRUIT_32x32;
+                frame_length = 2048;
+                currentResolution = 32; 
+                break;	 
+            case 12:
+                KIND = ioio.lib.api.RgbLedMatrix.Matrix.ADAFRUIT_32x32_ColorSwap;
+                frame_length = 2048;
+                currentResolution = 32; 
+                break;	 	 
+            case 13:
+                KIND = ioio.lib.api.RgbLedMatrix.Matrix.ADAFRUIT_64x32;
+                frame_length = 4096;
+                currentResolution = 64; 
+                break;	
+            case 14:
+                KIND = ioio.lib.api.RgbLedMatrix.Matrix.ADAFRUIT_64x64;
+                frame_length = 8192;
+                currentResolution = 128; 
+                break;
+            case 15:
+                KIND = ioio.lib.api.RgbLedMatrix.Matrix.ADAFRUIT_128x32;
+                frame_length = 8192;
+                currentResolution = 128; 
+                break;	 	 	
+            case 16:
+                KIND = ioio.lib.api.RgbLedMatrix.Matrix.ADAFRUIT_32x128;
+                frame_length = 8192;
+                currentResolution = 128; 
+                break;	
+            case 17:
+                KIND = ioio.lib.api.RgbLedMatrix.Matrix.ADAFRUIT_64x16;
+                frame_length = 2048;
+                currentResolution = 6416; 
+                break;	 
             default:
-                KIND = ioio.lib.api.RgbLedMatrix.Matrix.SEEEDSTUDIO_32x32; //v2 as the default
+                KIND = ioio.lib.api.RgbLedMatrix.Matrix.ADAFRUIT_32x32; //v2 as the default
                 frame_length = 2048;
                 currentResolution = 32;
         }

@@ -7,6 +7,7 @@ function changeControls(mode)
         {
             hideElement("stillPanel");
             hideElement("scrollingTextPanel");
+            hideElement("clockPanel");
             
             showElement("animationsPanel");
             
@@ -16,8 +17,19 @@ function changeControls(mode)
         {
             hideElement("animationsPanel");
             hideElement("scrollingTextPanel");
+            hideElement("clockPanel");
             
             showElement("stillPanel");
+            
+            break;
+        }
+        case "clock":
+        {
+            hideElement("animationsPanel");
+            hideElement("stillPanel");
+            hideElement("scrollingTextPanel");
+            
+            showElement("clockPanel");
             
             break;
         }
@@ -26,6 +38,7 @@ function changeControls(mode)
             // scrolling text
             hideElement("animationsPanel");
             hideElement("stillPanel");
+            hideElement("clockPanel");
             
             showElement("scrollingTextPanel");
             
@@ -62,6 +75,11 @@ function displayImage(imagePath, name)
     
     switch(imagePath)
     {
+        case "animations/save/":
+        {
+            mode = "animation/save/";
+            break;
+        }
         case "animations/":
         {
             mode = "animation/";
@@ -83,6 +101,13 @@ function displayImage(imagePath, name)
     xmlhttp.open("POST", url, true);
     xmlhttp.setRequestHeader("Content-type","application/x-www-form-urlencoded");
     xmlhttp.send("&p=3");    
+}
+
+function getLastUpdateOrigin()
+{
+    
+    
+    
 }
 
 function hideElement(id)
@@ -134,10 +159,17 @@ function loadImageList(url, elementName, imagePath)
                     html += "<img src=\"/files/" + imagePath + name + "\" " + 
                                    "width=\"50\" height=\"50\" alt=\"" + name +  "\"" +  
                                    ">";
-//                    html += "<br/>";
+
                     html += "<p>" + name + "</p>";                    
                     html += "<center style=\"margin-bottom: 40px;\">";
                     html += "<button onclick=\"displayImage('" + imagePath + "', '" + name + "')\" style=\"margin-left: auto; margin-right: auto;\">Display</button>";
+                    
+                    if(imagePath == "animations/")
+                    {
+                        html += " ";
+                        html += "<button onclick=\"displayImage('" + imagePath + "save/" + "', '" + name + "')\" style=\"margin-left: auto; margin-right: auto;\">Save</button>";
+                    }
+
                     html += "</center>";
                     html += "</div>";
                 }
@@ -227,4 +259,61 @@ function showElement(id)
 {
     var element = document.getElementById(id);
     element.style.display = 'block';
+}
+
+function updateMode()
+{
+//    alert("in updateMode()");
+    
+    var xmlhttp = new XMLHttpRequest();
+    xmlhttp.onreadystatechange=function()
+    {
+        // display the correct mode UI
+        var response = xmlhttp.responseText;
+        
+        var label = "Scrolling Texttttt";
+        
+        var o = 2
+        
+        switch(response)
+        {
+            case "ANIMATED_GIF":
+            {
+                modeChanged("animations");
+
+                label = "Animations";
+                
+                o =0;
+
+                break;
+            }
+            case "STILL_IMAGE":
+            {
+                modeChanged("still");        
+                
+                label = "Still Images";
+
+                o = 1;
+                break;
+            }
+            default:
+            {
+                
+                // scrolling text
+                changeScrollingText('Hello, Pixel World');
+
+                break;
+            }
+        }
+        
+        document.getElementById('mode').selectedIndex = o;
+        
+        xmlhttp.responseText += " uploaded";
+        
+        logServerResponse(xmlhttp);
+    }
+    var url = "/upload/origin";
+    xmlhttp.open("POST", url, true);
+    xmlhttp.setRequestHeader("Content-type","application/x-www-form-urlencoded");
+    xmlhttp.send("&p=3");
 }

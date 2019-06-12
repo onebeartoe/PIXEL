@@ -500,23 +500,23 @@ class IOIOProtocol {
 		endBatch();
 	}
 
-	synchronized public void rgbLedMatrixEnable(int shifterLen32) throws IOException {
+	synchronized public void rgbLedMatrixEnable(int shifterLen32, int rows) throws IOException {
 		beginBatch();
 		writeByte(RGB_LED_MATRIX_ENABLE);
-		writeByte(shifterLen32 & 0xFF);
+		writeByte(shifterLen32 & 0x0F | ((rows == 8 ? 0 : 1) << 4));  
 		endBatch();
 	}
 	
 	
 	//ADDED BY MANJU
-	synchronized public void rgbLedMatrixWriteFile(float fps, int shifterLen32) throws IOException {
+	synchronized public void rgbLedMatrixWriteFile(float fps, int shifterLen32,  int rows) throws IOException {
 		int delay = Math.round(62500 / fps) - 1;
 		
 		beginBatch();
 		writeByte(RGB_LED_MATRIX_WRITE_FILE);
 		writeByte(delay & 0xFF);
 		writeByte((delay >> 8) & 0xFF);
-		writeByte(shifterLen32 & 0xFF);
+		writeByte(shifterLen32 & 0x0F | ((rows == 8 ? 0 : 1) << 4));
 		endBatch();
 	}
 	

@@ -29,7 +29,7 @@ public class BottomUpSoundMeter extends AllOffSoundMeter
             g2d.fillRect(x, y, COLUMN_WIDTH, f.height);
             
             x += COLUMN_WIDTH;
-        }        
+        }
     }
 
     public static Color randomcolor()

@@ -15,8 +15,8 @@
   
     <packaging>jar</packaging>
 
-    <name>ioio-commons</name>
-  
+    <name>onebeartoe-ioio-commons</name>
+
     <url>http://maven.apache.org</url>
 
     <properties>

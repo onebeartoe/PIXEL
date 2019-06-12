@@ -28,9 +28,29 @@
  */
 package ioio.lib.impl;
 
+import ioio.lib.impl.Board.Hardware;
+
+/*PIXEL V2 supported panels
+I: 32x16 adafruit
+P: 32x32 seeed, the panel for PIXEL V2
+S: 64x64 seeed, super pixel original
+K: 32x32 seeed kiosk no writing
+V: 64x64 seeed kiosk no writing
+
+PIXEL V2.5 additional supported panels
+Q: 32x32 adafruit d pin
+C: 32x32 adafruit color swap
+R: 64x32 adafruit d pin
+T: 64x64 adafruit
+X: 64x64 adafruit kiosk no writing
+Y: 32x32 adafruit d pin kiosk no writing
+Z: 32x32 adafruit d pin iOS Build only supports 32x32 adafruit*/
+
 enum Board {
 	SPRK0015(Hardware.IOIO0002), SPRK0016(Hardware.IOIO0003), MINT0010(Hardware.IOIO0003), SPRK0020(
-			Hardware.IOIO0004), PIXL0020(Hardware.IOIO0004);
+			Hardware.IOIO0004), PIXL0020(Hardware.IOIO0004), PIXL0025(Hardware.PIXL0025), PIXLI025(
+			Hardware.PIXL0025), PIXLQ025(Hardware.PIXL0025), PIXLR025(Hardware.PIXL0025), PIXLT025
+			(Hardware.PIXL0025), PIXLX025(Hardware.PIXL0025), PIXLZ025(Hardware.PIXL0025), PIXLY025(Hardware.PIXL0025),PIXLC025(Hardware.PIXL0025);
 
 	public final Hardware hardware;
 
@@ -150,7 +170,15 @@ enum Board {
 				new int[] { 6, 7, 8 }, new int[][] { { 4, 5 }, { 1, 2 }, { 26, 25 } }, new int[] {
 						36, 37, 38 }, new int[] { 7, 10, 11, 12, 13, 14, 15, 16, 19, 20, 21, 22,
 						23, 24, 25, 26, 27, 28 });
-
+		static final Hardware PIXL0025 = IOIO0004;
+		static final Hardware PIXLI025 = IOIO0004;
+		static final Hardware PIXLQ025 = IOIO0004;
+		static final Hardware PIXLZ025 = IOIO0004;
+		static final Hardware PIXLR025 = IOIO0004;
+		static final Hardware PIXLT025 = IOIO0004;
+		static final Hardware PIXLX025 = IOIO0004;
+		static final Hardware PIXLY025 = IOIO0004;
+		
 		private enum Function {
 			PERIPHERAL_OUT, PERIPHERAL_IN, ANALOG_IN
 		}

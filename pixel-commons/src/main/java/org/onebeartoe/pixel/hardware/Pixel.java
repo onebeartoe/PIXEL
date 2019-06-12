@@ -13,7 +13,6 @@ import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics2D;
-import java.awt.GraphicsEnvironment;
 import java.awt.RenderingHints;
 import java.awt.geom.AffineTransform;
 import java.awt.image.AffineTransformOp;
@@ -29,6 +28,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.RandomAccessFile;
 import java.io.StringReader;
+import java.time.Duration;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
@@ -56,7 +56,8 @@ public class Pixel
     public static IOIO ioiO;
     
     public RgbLedMatrix matrix;
-    
+
+//TODO: rename this matrix_type    
     public final RgbLedMatrix.Matrix KIND;
     
     public static AnalogInput analogInput1;
@@ -115,9 +116,6 @@ public class Pixel
     
     private HashMap<String, Font> fonts;
 
-//TODO: Why does this need to be static?   
-//    public static final String [] fontNames = GraphicsEnvironment.getLocalGraphicsEnvironment().getAvailableFontFamilyNames();
-
     private String scrollingText;
     
     /**
@@ -126,6 +124,8 @@ public class Pixel
     private long scrollDelay = 500; 
     
     private Color scrollingTextColor = Color.ORANGE;
+    
+    private int yScrollingTextOffset = 0;
     
     private Logger logger;
     
@@ -152,7 +152,7 @@ public class Pixel
                 
         fonts = new HashMap();
         
-        scrollingText = "Scolling Text Inital Value";
+        scrollingText = "Scolling Text Initial Value";
         
         try
         {
@@ -179,7 +179,6 @@ public class Pixel
     public void loadRGB565(String raw565ImagePath) throws ConnectionLostException 
     {
 	BitmapInputStream = getClass().getClassLoader().getResourceAsStream(raw565ImagePath);
-//	BitmapInputStream = PixelApp.class.getClassLoader().getResourceAsStream(raw565ImagePath);
 
 	try 
 	{   
@@ -306,8 +305,6 @@ public class Pixel
 			e.printStackTrace();
 		}
     }
-    
-
     
     private static AnalogInput getAnalogInput(int pinNumber) 
     {
@@ -639,6 +636,20 @@ public boolean GIFNeedsDecoding(String decodedDir, String gifName, int currentRe
     	else return false;
     }
     
+    private void runRepeatingTask(TimerTask drawTask, long repeatPeriod)
+    {
+        stopExistingTimer();
+
+        if(timer == null)
+        {
+            timer = new Timer();
+        }
+
+        Date firstTime = new Date();
+
+        timer.schedule(drawTask, firstTime, repeatPeriod);
+    }
+    
     public void sendPixelDecodedFrame(String decodedDir, String gifName, int x, int selectedFileTotalFrames, int selectedFileResolution, int frameWidth, int frameHeight) 
     {
 		 
@@ -768,6 +779,9 @@ public boolean GIFNeedsDecoding(String decodedDir, String gifName, int currentRe
         }
     }
     
+/**
+ * TODO: move this to the runRepeatingTask() method
+ */    
     public void scrollText()
     {
         stopExistingTimer();
@@ -786,6 +800,11 @@ public boolean GIFNeedsDecoding(String decodedDir, String gifName, int currentRe
         this.decodedAnimationsPath = decodedAnimationsPath;
     }
     
+    @Deprecated
+    /**
+     * @deprecated
+     * where is this even used?
+     */
     public void setMode(PixelModes mode)
     {
         if( this.mode.equals(mode) )
@@ -809,7 +828,7 @@ public boolean GIFNeedsDecoding(String decodedDir, String gifName, int currentRe
 		//we're going to decode a native GIF into our RGB565 format
 	    //we'll need to know the resolution of the currently selected matrix type: 16x32, 32x32, 32x64, or 64x64
 		//and then we will receive the gif accordingly as we decode
-		//we also need to get the original width and height of the gif which is easily done from the gif decoder class
+		//we also need to get the original width and vuHeight of the gif which is easily done from the gif decoder class
 		//String gifName = FilenameUtils.removeExtension(gifName); //with no extension
 		
 	    String selectedFileName = FilenameUtils.getName(gifFilePath); 
@@ -977,18 +996,16 @@ public boolean GIFNeedsDecoding(String decodedDir, String gifName, int currentRe
 	} 
 	
 
+//TODO: pass the matrix type, OR BETTER YET, USE THE INSTANCE'S PIXEL ENVIRONMENT OBJECT
     public void decodeGIFJar(final String decodedDir, String gifSourcePath, String gifName, int currentResolution, final int pixelMatrix_width, final int pixelMatrix_height) 
     {  
-
-//pass the matrix type
-		
 	//BitmapBytes = new byte[pixelMatrix_width * pixelMatrix_height * 2]; //512 * 2 = 1024 or 1024 * 2 = 2048
 	//frame_ = new short[pixelMatrix_width * pixelMatrix_height];	
 	
 	//we're going to decode a native GIF into our RGB565 format
 	    //we'll need to know the resolution of the currently selected matrix type: 16x32, 32x32, 32x64, or 64x64
 		//and then we will receive the gif accordingly as we decode
-		//we also need to get the original width and height of the gif which is easily done from the gif decoder class
+		//we also need to get the original width and vuHeight of the gif which is easily done from the gif decoder class
 	//String str3 = new String(str1); 
 	    
 		 gifName = FilenameUtils.removeExtension(gifName); //with no extension
@@ -1138,7 +1155,8 @@ public boolean GIFNeedsDecoding(String decodedDir, String gifName, int currentRe
 		   		String filetag = String.valueOf(numFrames) + "," + String.valueOf(frameDelay) + "," + String.valueOf(currentResolution); //current resolution may need to change to led panel type
 		   				
 	     		   File myFile = new File(decodedDir + gifName + ".txt");  				       
-	     		   try {
+	     		   try 
+                           {
 					myFile.createNewFile();
 					FileOutputStream fOut = null;
 					fOut = new FileOutputStream(myFile);
@@ -1146,21 +1164,62 @@ public boolean GIFNeedsDecoding(String decodedDir, String gifName, int currentRe
 					myOutWriter.append(filetag); 
 					myOutWriter.close();
 					fOut.close();	
-				} catch (IOException e) {
+				
+                           } 
+                           catch (IOException e) 
+                           {
 					// TODO Auto-generated catch block
 					System.out.println("ERROR, could not write " + gifName);
 					e.printStackTrace();
-				}
+                           }
 		}
 		else 
                 {
 			System.out.println("ERROR  Could not find " + gifSourcePath + gifName + ".gif in the JAR file");
-		
                 }
-	
-    }  
+    }
+    
+    /**
+     * Currently only analog clock mode is supported
+     * @param mode 
+     */
+    public void displayClock(ClockModes mode)
+    {
+        long oneSecond = Duration.ofSeconds(1).toMillis();
+        
+        TimerTask drawTask = new DrawAnalogClockTask();
+                
+        runRepeatingTask(drawTask, oneSecond);
+    }
 
+    public void drawEqualizer(double [] values) throws ConnectionLostException
+    {
+        int w = KIND.width;
+        int h = KIND.height;
 
+        BufferedImage vuImage = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
+        
+        Color textColor = Color.RED;
+        
+        Graphics2D g2d = vuImage.createGraphics();
+        g2d.setPaint(textColor);
+        
+        double COLUMN_WIDTH = w / (double) values.length;        
+        int x = 0;
+        
+        for(double f : values)
+        {
+            double vuHeight = h * f;
+                    
+            double y = (double) h - vuHeight;
+                    
+            g2d.fillRect(x, (int) y, (int) COLUMN_WIDTH, (int) vuHeight);
+            
+            x += COLUMN_WIDTH;
+        }
+
+        writeImagetoMatrix(vuImage, w, h);        
+    }
 
     /**
      * Override this to perform any additional background drawing on the image that get sent to the PIXEL
@@ -1187,7 +1246,8 @@ public boolean GIFNeedsDecoding(String decodedDir, String gifName, int currentRe
         fos.close();
     }
   
-  public static String getSelectedFilePath(Component command) {
+  public static String getSelectedFilePath(Component command) 
+  {
 	    String path = command.toString();
 		//System.out.println("image comamand: " + path);	
 		path = path.replaceAll(",", "\r\n");
@@ -1214,6 +1274,17 @@ public boolean GIFNeedsDecoding(String decodedDir, String gifName, int currentRe
 		
       return localFileImagePath;
   }
+  
+  
+    public int getyScrollingTextOffset() 
+    {
+        return yScrollingTextOffset;
+    }
+
+    public void setyScrollingTextOffset(int yScrollingTextOffset) 
+    {
+        this.yScrollingTextOffset = yScrollingTextOffset;
+    }
   
     /**
      * resizes our image and preserves hard edges we need for pixel art
@@ -1255,7 +1326,7 @@ public boolean GIFNeedsDecoding(String decodedDir, String gifName, int currentRe
     
     public void stopExistingTimer()
     {
-        System.out.println("checking PIXEL activity in " + getClass().getSimpleName() + ".");
+        System.out.println("Checking PIXEL activity in " + getClass().getSimpleName() + ".");
 
         if(timer == null)
         {
@@ -1263,11 +1334,18 @@ public boolean GIFNeedsDecoding(String decodedDir, String gifName, int currentRe
         }
         else
         {
-            System.out.println("Pixel is stopping PIXEL activity in " + getClass().getSimpleName() + ".");
+            System.out.println("Pixel is stopping PIXEL activity in " + getClass().getSimpleName() + "..");
             timer.cancel();
+            timer = null;
         }
     }    
   
+    /**
+     * This method sends an animation to the PIXEL. <b>Be sure to call #stopExistingTimer()</b> 
+     * before calling this method.
+     * @param selectedFileName
+     * @param writeMode 
+     */
     public void writeAnimation(String selectedFileName, boolean writeMode)
     {
         animationFilename = selectedFileName;
@@ -1284,7 +1362,7 @@ public boolean GIFNeedsDecoding(String decodedDir, String gifName, int currentRe
 			    
         if (GIFNeedsDecoding(decodedAnimationsPath, selectedFileName, currentResolution) == true) 
         {
-            System.out.println("Selected LED panel is different than the encoded GIF, need to re-enocde...");
+            System.out.println("Selected LED panel is different than the encoded GIF, need to re-encode...");
             decodeGIFJar(decodedAnimationsPath, gifSourcePath, selectedFileName, currentResolution, KIND.width, KIND.height);
         }
 	
@@ -1340,7 +1418,7 @@ public boolean GIFNeedsDecoding(String decodedDir, String gifName, int currentRe
             System.out.println("A non PIXL, version of the timer is starting.");
             
             stopExistingTimer();
-            System.out.println("stopped the existingn timer again.");
+            System.out.println("stopped the existing timer again.");
             
             TimerTask animateTimer = new AnimateTimer();
             timer = new Timer();
@@ -1387,8 +1465,7 @@ public boolean GIFNeedsDecoding(String decodedDir, String gifName, int currentRe
             for (j = 0; j < pixelMatrix_width; j++) 
             {
                 Color c = new Color(originalImage.getRGB(j, i));  //i and j were reversed which was rotationg the image by 90 degrees
-//                int aRGBpix = originalImage.getRGB(j, i);  //i and j were reversed which was rotationg the image by 90 degrees
-//                int alpha;
+
                 int red = c.getRed();
                 int green = c.getGreen();
                 int blue = c.getBlue();
@@ -1437,7 +1514,6 @@ public boolean GIFNeedsDecoding(String decodedDir, String gifName, int currentRe
 	}
     }
 
-
 //TODO: this is not a Timer, where is this used?
     private class AnimateTimer extends TimerTask
     {
@@ -1451,6 +1527,71 @@ public boolean GIFNeedsDecoding(String decodedDir, String gifName, int currentRe
                 i = 0;
             }
             sendPixelDecodedFrame(decodedAnimationsPath, animationFilename, i, GIFnumFrames, GIFresolution, KIND.width,KIND.height);
+        }
+    }
+    
+    public enum ClockModes
+    {
+        ANALOG,
+        DIGITAL,
+        TIX
+    }
+    
+//TODO: can this class be moved outside of the Pixel.java class; just like the Edu clock task?     
+    private class DrawAnalogClockTask extends TimerTask
+    {
+        private EduAnalogClock clock;
+//        private AnalogClock clock;
+
+        final int OFFSCREEN_IMAGE_WIDTH = 401;
+        final int OFFSCREEN_IMAGE_HEIGHT = 401;
+        
+
+                 
+        public DrawAnalogClockTask()
+        {
+            clock = new EduAnalogClock(OFFSCREEN_IMAGE_WIDTH, OFFSCREEN_IMAGE_HEIGHT);
+
+            clock.init();
+        }
+                
+        @Override
+        public void run()
+        {	    
+            int w = OFFSCREEN_IMAGE_WIDTH;
+            int h = OFFSCREEN_IMAGE_HEIGHT;
+
+            BufferedImage img = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
+
+            Graphics2D g2d = img.createGraphics();
+            
+            System.out.println("paintng clock");
+            clock.paint(g2d);
+            System.out.println("clock painted");
+//TODO: keep this around, just in case            
+            g2d.dispose();
+
+// uncomment this to see how often the pixel is communicated with the host            
+//            System.out.print(".");
+
+            if(matrix == null)
+            {
+// uncomment this for debugging
+//                logger.log(Level.INFO, "Analog clock has no matrix.");
+            }
+            else
+            {
+                try 
+                {  
+                    System.out.println("writing clock");
+                    writeImagetoMatrix(img, KIND.width, KIND.height);
+                    System.out.println("clock written");
+                } 
+                catch (ConnectionLostException ex) 
+                {
+                    logger.log(Level.SEVERE, null, ex);
+                }                
+            }
         }
     }
     
@@ -1486,7 +1627,7 @@ public boolean GIFNeedsDecoding(String decodedDir, String gifName, int currentRe
             
             message = "Pixel is in local playback mode.";
             System.out.println(message);  
-
+                        
             //TODO UPDATE THE BROWSER/CLIENTS SOMEHOW
         }
     }
@@ -1498,28 +1639,27 @@ public boolean GIFNeedsDecoding(String decodedDir, String gifName, int currentRe
         {
 	    int delay = 200;//scrollSpeedSlider.getValue();	
 	    delay = 710 - delay;                            // al linke: added this so the higher slider value means faster scrolling
-	    
-//	    ChangeModeServlet.this.timer.setDelay(scrollDelay);
-	    
+	    	    
             int w = 64;
+            
             int h = 64;
+// use a height of 32, for the rectangle LED matrix type (32x16 for example)            
+//            int h = 32;
 	    
             BufferedImage img = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
-            
-            
-//	    Color textColor = Color.GREEN;//colorPanel.getBackground();
-	    
+            	    
             Graphics2D g2d = img.createGraphics();
             g2d.setPaint(scrollingTextColor);
-                      
-//               Font tr = new Font("Arial", Font.PLAIN, scrollingTextFontSize_);
+
             String fontFamily = "Arial";
-//            String fontFamily = fontNames[0];
             
             Font font = fonts.get(fontFamily);
             if(font == null)
             {
-                font = new Font(fontFamily, Font.PLAIN, 32);
+                int fontSize = 32;
+//                int fontSize = 28;
+// a font size of 28 looks good on the rectangle type matrix (32x16 for example)                
+                font = new Font(fontFamily, Font.PLAIN, fontSize);
                 fonts.put(fontFamily, font);
             }            
             
@@ -1527,7 +1667,7 @@ public boolean GIFNeedsDecoding(String decodedDir, String gifName, int currentRe
             
             FontMetrics fm = g2d.getFontMetrics();
             
-            int y = fm.getHeight();            
+            int y = fm.getHeight() + yScrollingTextOffset;
 
             try 
             {
@@ -1537,8 +1677,7 @@ public boolean GIFNeedsDecoding(String decodedDir, String gifName, int currentRe
             {
                 logger.log(Level.SEVERE, null, ex);
             }
-            
-//            set intial value on scrollingText
+
             g2d.drawString(scrollingText, x, y);
             
             try 
@@ -1552,10 +1691,12 @@ public boolean GIFNeedsDecoding(String decodedDir, String gifName, int currentRe
             
             g2d.dispose();
 
+// uncomment this to see how often the pixel is communicated with the host            
 //            System.out.print(".");
 
             if(matrix == null)
             {
+// uncomment this for debugging
                 logger.log(Level.INFO, "There is no matrix for the text scrolller.");
             }
             else

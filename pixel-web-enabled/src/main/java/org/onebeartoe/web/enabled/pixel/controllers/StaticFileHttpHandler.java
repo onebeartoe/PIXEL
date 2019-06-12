@@ -2,26 +2,46 @@
 package org.onebeartoe.web.enabled.pixel.controllers;
 
 import com.sun.net.httpserver.HttpExchange;
+import com.sun.net.httpserver.HttpHandler;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.URI;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.onebeartoe.pixel.hardware.Pixel;
+import org.onebeartoe.web.enabled.pixel.WebEnabledPixel;
 
 /**
+ * @deprecated Use the version in onebeartoe Java libraries
+ * 
  * @author Roberto Marquez
  */
-public class StaticFileHttpHandler extends PixelHttpHandler
+@Deprecated
+public class StaticFileHttpHandler implements HttpHandler//extends PixelHttpHandler
 {
+    protected WebEnabledPixel application;
+    
+    protected Logger logger;
+    
+    public StaticFileHttpHandler(WebEnabledPixel application)
+    {
+        this.application = application;
+        
+        String name = getClass().getName();
+        logger = Logger.getLogger(name);
+    }
+    
     @Override    
     public void handle(HttpExchange t) throws IOException
     {
         logger.log(Level.INFO, "static file handler request: " + t.getRequestURI());
         
-        Pixel pixel = app.getPixel();
+        Pixel pixel = application.getPixel();
         String root = pixel.getPixelHome();
+        File rootDir = new File(root);
+        root = rootDir.getCanonicalPath() + File.separatorChar;
         
         URI uri = t.getRequestURI();
         String request = uri.getPath();

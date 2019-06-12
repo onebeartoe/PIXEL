@@ -5,6 +5,9 @@ import ioio.lib.api.exception.ConnectionLostException;
 import java.io.IOException;
 import java.net.URI;
 import java.util.logging.Level;
+import java.util.logging.Logger;
+import org.onebeartoe.network.TextHttpHandler;
+import org.onebeartoe.web.enabled.pixel.WebEnabledPixel;
 
 /**
  * @author Roberto Marquez
@@ -14,7 +17,19 @@ public abstract class ImageResourceHttpHandler extends TextHttpHandler
     protected String basePath;
     protected String defaultImageClassPath;
     protected String modeName;
+    
+    protected WebEnabledPixel application;
+    
+    protected Logger logger;
         
+    public ImageResourceHttpHandler(WebEnabledPixel application)
+    {
+        String name = getClass().getName();
+        logger = Logger.getLogger(name);
+        
+        this.application = application;
+    }
+    
     @Override
     protected String getHttpText(HttpExchange exchange)
     {        
@@ -32,6 +47,10 @@ public abstract class ImageResourceHttpHandler extends TextHttpHandler
                 // this is just a request change to still image mode
                 imageClassPath = defaultImageClassPath;
             }
+            else if( path.contains("/save/") )
+            {
+                imageClassPath = path;
+            }
             else
             {
                 imageClassPath = basePath + name;
@@ -41,7 +60,7 @@ public abstract class ImageResourceHttpHandler extends TextHttpHandler
         {
             imageClassPath = defaultImageClassPath;
             
-            String message = "An error occured while determining the image from the request.  " +
+            String message = "An error occurred while determining the image from the request.  " +
                              "The default is used now.";
             
             logger.log(Level.SEVERE, message, e);
@@ -57,7 +76,7 @@ public abstract class ImageResourceHttpHandler extends TextHttpHandler
                 
                 writeImageResource(imageClassPath);
                 
-                System.out.println(modeName + " image resouce was written to the Pixel");
+                System.out.println(modeName + " image resource was written to the Pixel");
             } 
             catch (ConnectionLostException ex)
             {
@@ -67,7 +86,7 @@ public abstract class ImageResourceHttpHandler extends TextHttpHandler
         }
         catch (IOException ex)
         {
-            String message = "error with image resouce";
+            String message = "error with image resource";
             logger.log(Level.SEVERE, message, ex);
         }
         finally

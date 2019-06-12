@@ -3,8 +3,7 @@
 
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 
-    <head>
-		
+    <head>		
         <meta name="keywords" content="onebeartoe.com, cross platform remote volume control application">
 	
         <meta name="description" content="onebeartoe.com remote volume control is a Java-powered desktop application.">
@@ -14,7 +13,7 @@
         <title>onebeartoe Pixel Web Application</title>
     </head>
 
-    <body onload="loadImageResources(); changeScrollingText('Hello, Pixel World');">
+    <body onload="loadImageResources(); updateMode();">
         
         <script type="text/javascript" src="pixel.js"></script>
         
@@ -37,17 +36,29 @@
                 Mode:
             </span>
             
-            <select name="mode" 
+            <select name="mode"
+                    id="mode"
                     onchange="modeChanged(this.value);"
                     style="width: 50%; height: 2em; font-size: 3em;">
                 
                 <option value="animations">Animations</option>
                 <option value="still">Still Images</option>
                 <option value="text" selected>Scrolling Text</option>
+                <option value="clock" >Clock</option>
             </select>
         </center>
 
         <div id="stillPanel">
+            <div>
+                <h3>Upload a New Still Image</h3>
+                
+                <form method="POST" enctype="multipart/form-data" action="/upload">
+                    <input type="file" name="upload"/>
+                    <input type="hidden" name="upload-type" value="STILL_IMAGE"/>
+                    <input type="submit" value="Upload"/>
+                </form>
+            </div>
+            
             <br/>
         
             <hr/>
@@ -62,6 +73,15 @@
         </div>
         
         <div id="animationsPanel">
+            <div>
+                <h3>Upload a New Animation</h3>
+                
+                <form method="POST" enctype="multipart/form-data" action="/upload">
+                    <input type="file" name="upload"/>
+                    <input type="hidden" name="upload-type" value="ANIMATED_GIF"/>
+                    <input type="submit" value="Upload"/>
+                </form>
+            </div>
             <hr/>
 
             <h3>Animations</h3>
@@ -76,19 +96,26 @@
 
             <h3>Scrolling Text</h3>
 
-            
-            <input type="text" onchange="changeScrollingText(this.value);"/>
+            <input type="text" 
+                   value="Some text, instead blank."
+                   onchange="changeScrollingText(this.value);"/>
             
             <br/>
             
             <label for="points">Speed:</label>
-            <input type="range" onmouseup="changeScrollingTextSpeed(this.value);" name="points" min="100" max="600">
+            <input type="range" onmouseup="changeScrollingTextSpeed(this.value);" name="points" min="1" max="100">
                 
             <br/>
             
             <label for="color">Color:</label>
             <input type="color" name="color" onchange="changeScrollingTextColor(this.value);">
-        </div>        
+        </div>
+        
+        <div id="clockPanel">
+            <hr/>
+            
+            <h3>Clock Mode</h3>
+        </div>
         
         <hr/>
         
@@ -109,8 +136,6 @@
             text-align: center;											  
             font-size:1.875em; ">
             brought to you by onebeartoe.com
-	</a>
-											 
+	</a>											 
     </body>
-
 </html>

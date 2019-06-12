@@ -29,7 +29,7 @@ public class MacPixelPort extends JPanel
     
     public MacPixelPort()
     {
-	String version = "3.0.0";
+	String version = "4.1.0";
 	String text = "PIXEL PC Version " + version;
 	String html = "<html><body><h2>" + "PIXEL's port has been detected and saved, please now close and restart this app" + "</h2></body></html>";
 	JLabel productLabel = new JLabel(html, JLabel.CENTER);

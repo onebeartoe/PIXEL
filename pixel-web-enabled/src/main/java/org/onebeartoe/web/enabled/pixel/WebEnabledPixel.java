@@ -2,12 +2,15 @@
 package org.onebeartoe.web.enabled.pixel;
 
 import com.sun.net.httpserver.HttpContext;
+import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
+
 import ioio.lib.api.RgbLedMatrix;
 import ioio.lib.api.exception.ConnectionLostException;
 import ioio.lib.util.BaseIOIOLooper;
 import ioio.lib.util.IOIOLooper;
 import ioio.lib.util.pc.IOIOConsoleApp;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -15,7 +18,9 @@ import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+
 import java.net.InetSocketAddress;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -24,21 +29,27 @@ import java.util.TimerTask;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.Timer;
+
 import org.apache.commons.io.IOUtils;
+
 import org.onebeartoe.io.TextFileReader;
 import org.onebeartoe.io.buffered.BufferedTextFileReader;
+
 import org.onebeartoe.pixel.PixelEnvironment;
 import org.onebeartoe.pixel.hardware.Pixel;
+
 import org.onebeartoe.web.enabled.pixel.controllers.AnimationsHttpHandler;
 import org.onebeartoe.web.enabled.pixel.controllers.AnimationsListHttpHandler;
+import org.onebeartoe.web.enabled.pixel.controllers.ClockHttpHandler;
 import org.onebeartoe.web.enabled.pixel.controllers.IndexHttpHandler;
-import org.onebeartoe.web.enabled.pixel.controllers.PixelHttpHandler;
 import org.onebeartoe.web.enabled.pixel.controllers.ScrollingTextColorHttpHandler;
 import org.onebeartoe.web.enabled.pixel.controllers.ScrollingTextHttpHander;
 import org.onebeartoe.web.enabled.pixel.controllers.ScrollingTextSpeedHttpHandler;
 import org.onebeartoe.web.enabled.pixel.controllers.StaticFileHttpHandler;
 import org.onebeartoe.web.enabled.pixel.controllers.StillImageHttpHandler;
 import org.onebeartoe.web.enabled.pixel.controllers.StillImageListHttpHandler;
+import org.onebeartoe.web.enabled.pixel.controllers.UploadHttpHandler;
+import org.onebeartoe.web.enabled.pixel.controllers.UploadOriginHttpHandler;
 
 /**
  * @author Roberto Marquez
@@ -49,19 +60,28 @@ public class WebEnabledPixel
 
     private HttpServer server;
 
+    private int httpPort;
+
+    private CliPixel cli;
+    
     private Timer searchTimer;
     
     private Pixel pixel;
 
-//    public static final String [] fontNames = GraphicsEnvironment.getLocalGraphicsEnvironment().getAvailableFontFamilyNames();
+    //  1: 32x16 from Sparkfun - ioio.lib.api.RgbLedMatrix.Matrix.ADAFRUIT_32x16
+    //  3: translates to RgbLedMatrix.Matrix.SEEEDSTUDIO_32x32;
+    // 10: translates to SEEEDSTUDIO_64x64
+    //private static int LED_MATRIX_ID = 3;
+    private static int LED_MATRIX_ID = 11;
+//TODO: We shoudl invert this and have teh user specicy the matrix label 
+//      (SEEEDSTUDIO_64x64, Matrix.SEEEDSTUDIO_32x32, etc...) instead of an
+//      integer ID.
+//      The lable makes sense if user's are copying and pasting the commands, if not then
+//      integer IDs makes sense, but is harder to maintain.
     
-    //  3 translates to RgbLedMatrix.Matrix.SEEEDSTUDIO_32x32;
-    // 10 translates to SEEEDSTUDIO_64x64
-    private final static int LED_MATRIX_ID = 3;
+    private static PixelEnvironment pixelEnvironment;
     
-    private static final PixelEnvironment pixelEnvironment = new PixelEnvironment(LED_MATRIX_ID);
-    
-    public final static RgbLedMatrix.Matrix MATRIX_TYPE = pixelEnvironment.KIND;
+    public  static RgbLedMatrix.Matrix MATRIX_TYPE ;
     
 //TODO: MAKE THIS PRIVATE    
     public List<String> stillImageNames;
@@ -69,69 +89,72 @@ public class WebEnabledPixel
 //TODO: MAKE THIS PRIVATE    
     public List<String> animationImageNames;
     
-    public WebEnabledPixel()
+    public WebEnabledPixel(String[] args)
     {
+        cli = new CliPixel(args);
+        cli.parse();
+        httpPort = cli.getPort();
+
         String name = getClass().getName();
         logger = Logger.getLogger(name);
+
+        int yTextOffset = cli.getyTextOffset();
         
-        pixel = new Pixel(pixelEnvironment.KIND, pixelEnvironment.currentResolution);
+        LED_MATRIX_ID = cli.getLEDMatrixType(); //let's get this from the command line class (CliPixel.java) and if there is no command line entered, we'll take the default of 3
+        
+        pixelEnvironment = new PixelEnvironment(LED_MATRIX_ID);
+        
+        MATRIX_TYPE = pixelEnvironment.LED_MATRIX;
+        
+        pixel = new Pixel(pixelEnvironment.LED_MATRIX, pixelEnvironment.currentResolution);
+        
+        pixel.setyScrollingTextOffset(yTextOffset);
         
         extractDefaultContent();
         
         loadImageLists();
+        loadAnimationList();
         
         createControllers();
     }
-    
+        
     private void createControllers()
     {
         try
         {
-            InetSocketAddress anyhost = new InetSocketAddress(2007);
+            InetSocketAddress anyhost = new InetSocketAddress(httpPort);
             server = HttpServer.create(anyhost, 0);
             
-            List<PixelHttpHandler> handlers = new ArrayList();
+            HttpHandler indexHttpHandler = new IndexHttpHandler();
             
-            PixelHttpHandler indexHttpHandler = new IndexHttpHandler();
-            handlers.add(indexHttpHandler);
+            HttpHandler scrollingTextHttpHander = new ScrollingTextHttpHander(this);
             
-//            PixelHttpHandler interpolatedHttpHandler = new InterpolatedHttpHandler();
-// add interpolted handelr to the handler list
+            HttpHandler scrollingTextSpeedHttpHander = new ScrollingTextSpeedHttpHandler(this);
             
-            PixelHttpHandler scrollingTextHttpHander = new ScrollingTextHttpHander();
-            handlers.add(scrollingTextHttpHander);
+            HttpHandler scrollingTextColorHttpHandler = new ScrollingTextColorHttpHandler(this);
             
-            PixelHttpHandler scrollingTextSpeedHttpHander = new ScrollingTextSpeedHttpHandler();
-            handlers.add(scrollingTextSpeedHttpHander);
+            HttpHandler staticFileHttpHandler = new StaticFileHttpHandler(this);
             
-            PixelHttpHandler scrollingTextColorHttpHandler = new ScrollingTextColorHttpHandler();
-            handlers.add(scrollingTextColorHttpHandler);
+            HttpHandler stillImageHttpHandler = new StillImageHttpHandler(this) ;
             
-            PixelHttpHandler staticFileHttpHandler = new StaticFileHttpHandler();
-            handlers.add(staticFileHttpHandler);
+            HttpHandler stillImageListHttpHandler = new StillImageListHttpHandler(this);
             
-            PixelHttpHandler stillImageHttpHandler = new StillImageHttpHandler() ;
-            handlers.add(stillImageHttpHandler);
+            HttpHandler animationsHttpHandler = new AnimationsHttpHandler(this);
             
-            PixelHttpHandler stillImageListHttpHandler = new StillImageListHttpHandler();
-            handlers.add(stillImageListHttpHandler);            
-            
-            PixelHttpHandler animationsHttpHandler = new AnimationsHttpHandler();
-            handlers.add(animationsHttpHandler);
-            
-            PixelHttpHandler animationsListHttpHandler = new AnimationsListHttpHandler();
-            handlers.add(animationsListHttpHandler);
+            HttpHandler animationsListHttpHandler = new AnimationsListHttpHandler(this);
 
-            for(PixelHttpHandler phh : handlers)
-            {
-                phh.setApp(this);
-            }
+            HttpHandler uploadHttpHandler = new UploadHttpHandler(this);
+            
+            HttpHandler uploadOriginHttpHandler = new UploadOriginHttpHandler( (UploadHttpHandler) uploadHttpHandler);
+            
+            HttpHandler clockHttpHandler = new ClockHttpHandler(this);
             
 // ARE WE GONNA DO ANYTHING WITH THE HttpContext OBJECTS?            
             HttpContext createContext =     server.createContext("/",     indexHttpHandler);
             
             HttpContext animationsContext = server.createContext("/animation", animationsHttpHandler);
                                             server.createContext("/animation/list", animationsListHttpHandler);
+                                            server.createContext("/animations/save", animationsListHttpHandler);
 
             HttpContext staticContent =     server.createContext("/files", staticFileHttpHandler);
             
@@ -142,10 +165,16 @@ public class WebEnabledPixel
                                             server.createContext("/text/speed", scrollingTextSpeedHttpHander);
                                             server.createContext("/text/color", scrollingTextColorHttpHandler);
                                             
+            HttpContext uploadContext =    server.createContext("/upload", uploadHttpHandler);
+                                           server.createContext("/upload/origin", uploadOriginHttpHandler);
+            
+            
+            HttpContext clockContext =     server.createContext("/clock", clockHttpHandler);
+                                            
         } 
         catch (IOException ex)
         {
-            String message = "An error occured while creating the controllers";
+            String message = "An error occurred while creating the controllers";
             logger.log(Level.SEVERE, message, ex);
         }
     }
@@ -256,8 +285,8 @@ public class WebEnabledPixel
             // extract the list so on next run the app knows not to extract the default content
             extractClasspathResource(resourceListClasspath, resourceListFile);
             
-            String outputDrectoryPath = pixel.getPixelHome() + pathPrefix;
-            File outputDirectory = new File(outputDrectoryPath);
+            String outputDirectoryPath = pixel.getPixelHome() + pathPrefix;
+            File outputDirectory = new File(outputDirectoryPath);
             
             TextFileReader tfr = new BufferedTextFileReader();
             List<String> imageNames = tfr.readTextLinesFromClasspath(resourceListClasspath);
@@ -276,6 +305,20 @@ public class WebEnabledPixel
     public Pixel getPixel()
     {
         return pixel;
+    }
+    
+    public List<String> loadAnimationList()
+    {
+        try
+        {
+            animationImageNames = loadImageList("animations");
+        } 
+        catch (Exception ex)
+        {
+            logger.log(Level.SEVERE, "could not load image resources on the filesystem", ex);
+        }
+        
+        return animationImageNames;
     }
     
     private List<String> loadImageList(String directoryName) throws Exception
@@ -313,22 +356,24 @@ public class WebEnabledPixel
         return namesList;
     }
     
-    private void loadImageLists()
+    public List<String> loadImageLists()
     {
         try
         {        
             stillImageNames = loadImageList("images");
-            animationImageNames = loadImageList("animations");
         } 
         catch (Exception ex)
         {
             logger.log(Level.SEVERE, "could not load image resources on the filesystem", ex);
         }
+        
+        return stillImageNames;
     }
     
     public static void main(String[] args)
     {
-        WebEnabledPixel app = new WebEnabledPixel();
+        
+        WebEnabledPixel app = new WebEnabledPixel(args);
         app.startServer();
     }
 
@@ -354,8 +399,15 @@ public class WebEnabledPixel
         server.start();
         
         PixelIntegration pi = new PixelIntegration();
+//TODO: ONCE USING THE PIXelINTEGRATRION FROM PIXEL-COMMONS
+//      CALL ITS addXxxxxListeners() methods
+//      AND then its initialize() method
     }
-    
+
+    /**
+     * @deprecated Use the version in pixel-commons from Alinke's github.com repository.
+     */
+    @Deprecated
     private class PixelIntegration extends IOIOConsoleApp
     {
         public PixelIntegration()
@@ -363,6 +415,7 @@ public class WebEnabledPixel
             try
             {
                 System.out.println("PixelIntegration is calling go()");
+                
                 go(null);
             } 
             catch (Exception ex)
@@ -426,7 +479,7 @@ public class WebEnabledPixel
                 @Override
                 protected void setup() throws ConnectionLostException, InterruptedException
                 {
-//                    pixel = new Pixel(pixelEnvironment.KIND, pixelEnvironment.currentResolution);
+//                    pixel = new Pixel(pixelEnvironment.LED_MATRIX, pixelEnvironment.currentResolution);
                     pixel.matrix = ioio_.openRgbLedMatrix(pixel.KIND);
                     pixel.ioiO = ioio_;
 
@@ -444,6 +497,8 @@ public class WebEnabledPixel
                     
                     
                     message.append("You may now interact with the PIXEL!\n");
+                    message.append("LED matrix type is: " + LED_MATRIX_ID +"\n");
+                    
 
 //TODO: Load something on startup
 
@@ -516,6 +571,5 @@ public class WebEnabledPixel
                 }
 	    }
 	}        
-    }
-    
+    }    
 }

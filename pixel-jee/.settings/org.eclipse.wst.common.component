@@ -1,13 +1,13 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<project-modules id="moduleCoreId" project-version="1.5.0">
-    <wb-module deploy-name="pixel-jee">
+<?xml version="1.0" encoding="UTF-8"?><project-modules id="moduleCoreId" project-version="1.5.0">
+    <wb-module deploy-name="pixel-jee-1.0-SNAPSHOT">
         <wb-resource deploy-path="/" source-path="/target/m2e-wtp/web-resources"/>
         <wb-resource deploy-path="/" source-path="/src/main/webapp" tag="defaultRootSource"/>
         <wb-resource deploy-path="/WEB-INF/classes" source-path="/src/main/java"/>
-        <dependent-module archiveName="pc-1.0-SNAPSHOT.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/pc/pc">
+        <wb-resource deploy-path="/WEB-INF/classes" source-path="/.apt_generated"/>
+        <dependent-module archiveName="org.ioio-commons-1.0-SNAPSHOT.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/commons/commons">
             <dependency-type>uses</dependency-type>
         </dependent-module>
-        <dependent-module archiveName="commons-1.0-SNAPSHOT.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/commons/commons">
+        <dependent-module archiveName="pixel-pc-0.6.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/pixel-pc/pixel-pc">
             <dependency-type>uses</dependency-type>
         </dependent-module>
         <property name="context-root" value="pixel-jee"/>

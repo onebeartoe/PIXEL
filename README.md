@@ -1,16 +1,20 @@
 
-onebeartoe PIXEL - a collaboration of efforts put forth by some open source projects.
-
 onebeartoe PIXEL is a regrouping of the software of Github users ytai/ioio, alinke's 
 rgb-led-matrix branch of IOIO, plus some scrolling text on RGB LED matrix apps from onebeartoe.org
 
-The APKs for the Android apps are here:
+NOTE: The developement of this project has moved to this project:
 
-    https://onebeartoe.ci.cloudbees.com/job/PIXEL/ws/pixel-touch-android/target/
+https://github.com/alinke/PIXEL/
 
-    https://onebeartoe.ci.cloudbees.com/job/PIXEL/ws/pixel-scrolling-text-android/target/
 
-The executable JAR for the PC version is here:
+Related videos:
 
-    https://onebeartoe.ci.cloudbees.com/job/PIXEL/ws/ioio-pc/target/
+[![PIXEL Scrolling Text with Fonts!](http://img.youtube.com/vi/mAFsbca5T1U/0.jpg)](https://www.youtube.com/watch?v=mAFsbca5T1U "PIXEL Scrolling Text with Fonts!")
 
+More from the author:
+
+https://plus.google.com/u/0/104101484714566033177
+
+https://twitter.com/onebeartoe
+
+https://www.youtube.com/user/onebeartoe/videos
