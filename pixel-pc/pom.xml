@@ -89,13 +89,11 @@
                 <artifactId>maven-jar-plugin</artifactId>
                 <version>2.3.2</version>
                 <configuration>
-                    <archive>
                         <manifest>
                             <addClasspath>true</addClasspath>
                             <classpathPrefix>lib/</classpathPrefix>
                             <mainClass>com.ledpixelart.pc.PixelApp</mainClass>
                         </manifest>
-                    </archive>
                 </configuration>
             </plugin>
         </plugins>
@@ -137,7 +135,7 @@
         <dependency>
             <groupId>org.onebeartoe</groupId>
             <artifactId>onebeartoe-system</artifactId>  
-            <version>1.0-SNAPSHOT</version>
+            <version>1.0</version>
         </dependency>
 		
         <dependency>
@@ -145,14 +143,5 @@
             <artifactId>twitter4j-core</artifactId>
             <version>[4.0,)</version>
         </dependency>
-	
-        <!-- 
-        <dependency>
-            <groupId>org.onebeartoe.pixel.plugins</groupId>
-            <artifactId>pixel-plugin</artifactId>
-            <version>0.1</version> 
-        </dependency> -->
-	
     </dependencies>
-
 </project>

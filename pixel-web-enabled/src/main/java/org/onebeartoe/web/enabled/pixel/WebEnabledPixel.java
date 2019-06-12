@@ -26,6 +26,7 @@ import java.util.logging.Logger;
 import java.util.Timer;
 import org.apache.commons.io.IOUtils;
 import org.onebeartoe.io.TextFileReader;
+import org.onebeartoe.io.buffered.BufferedTextFileReader;
 import org.onebeartoe.pixel.PixelEnvironment;
 import org.onebeartoe.pixel.hardware.Pixel;
 import org.onebeartoe.web.enabled.pixel.controllers.AnimationsHttpHandler;
@@ -258,7 +259,7 @@ public class WebEnabledPixel
             String outputDrectoryPath = pixel.getPixelHome() + pathPrefix;
             File outputDirectory = new File(outputDrectoryPath);
             
-            TextFileReader tfr = new TextFileReader();
+            TextFileReader tfr = new BufferedTextFileReader();
             List<String> imageNames = tfr.readTextLinesFromClasspath(resourceListClasspath);
             
             for(String name : imageNames)
