@@ -32,9 +32,9 @@
 
     <dependencies>
       	<dependency>
-	    <groupId>org.ioio</groupId>
-	    <artifactId>pc</artifactId>
-	    <version>1.0-SNAPSHOT</version>
+            <groupId>org.onebeartoe</groupId>
+            <artifactId>ioio-pc</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
 	</dependency>
             
         <dependency>
