@@ -10,9 +10,9 @@
         <version>0.0.1-SNAPSHOT</version>
     </parent>
 
-    <groupId>org.onebeartoe.pixel</groupId>    
+    
     <artifactId>pixel-pc</artifactId>    
-    <version>0.6</version>
+    
     
     <name>onebeartoe-pixel-pc</name>
 
