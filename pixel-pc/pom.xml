@@ -37,7 +37,7 @@
 	
         <dependency>
             <groupId>org.onebeartoe</groupId>
-            <artifactId>pixel</artifactId>
+            <artifactId>ioio-pc</artifactId>
             <version>0.0.1-SNAPSHOT</version>
         </dependency>
 
