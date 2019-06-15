@@ -689,16 +689,28 @@ public boolean GIFNeedsDecoding(String decodedDir, String gifName, int currentRe
 			int frame_length;
 			
 			 switch (selectedFileResolution) {
-	            case 16: frame_length = 1024;
-	                     break;
-	            case 32: frame_length = 2048;
-	                     break;
-	            case 64: frame_length = 4096;
-	                     break;
-	            case 128: frame_length = 8192;
-                		break;
-	            default: frame_length = 2048;
-	                     break;
+				 case 16: frame_length = 1024;
+	              		break;
+			     case 32: frame_length = 2048;
+			              break;
+			     case 6416: frame_length = 2048;
+						  break;
+			     case 12816: frame_length = 4096;
+					 	  break;
+			     case 25616: frame_length = 8192;
+					      break;
+			     case 64: frame_length = 4096;
+			              break;
+			     case 64999: frame_length = 4096; //had to add unique ones (999) for mirror to force re-encoding when led panel is switched
+			     		  break;
+			     case 128: frame_length = 8192;
+			     		  break;
+			     case 12832: frame_length = 8192;
+						  break;
+			     case 128999: frame_length = 8192; //had to add unique ones (999) for mirror to force re-encoding when led panel is switched
+						  break;
+			     default: frame_length = 2048;
+			              break;
 	          }
 			
 			//now let's see forward to a part of the file
