@@ -66,18 +66,27 @@ public interface RgbLedMatrix extends Closeable {
 		SEEEDSTUDIO_32x32_NEW(32, 32), //these panels had 4 connectors total, there were some bad LEDs with those so we didn't use
 		SEEEDSTUDIO_64x32(64,32), //horizontal
 		SEEEDSTUDIO_32x64(32,64), //vertical
-		SEEEDSTUDIO_2_MIRRORED(32,64), //2 panels mirrored
-		SEEEDSTUDIO_4_MIRRORED(128,32), //4 panels mirrored: was originally (128,32) but this not working
-		SEEEDSTUDIO_64x64(64,64), //2x2 square
-		SEEEDSTUDIO_128x32(128,32), //4x1 horizontal
-		SEEEDSTUDIO_32x128(32,128), //1x4 vertical
+		SEEEDSTUDIO_2_MIRRORED(32, 64), //2 panels mirrored
+		SEEEDSTUDIO_4_MIRRORED(128, 32), //4 panels mirrored: was originally (128,32) but this not working , should be 32,128
+		SEEEDSTUDIO_64x64(64, 64), //2x2 square
+		SEEEDSTUDIO_128x32(128, 32), //4x1 horizontal
+		SEEEDSTUDIO_32x128(32, 128), //1x4 vertical
 		ADAFRUIT_32x32(32,32),
 		ADAFRUIT_32x32_ColorSwap(32,32), //for a 4mm pitch 32x32, 16 row, matrix where the color channels were swapped
 		ADAFRUIT_64x32(64,32),
 		ADAFRUIT_64x64(64,64),
 		ADAFRUIT_128x32(128,32),
 		ADAFRUIT_32x128(32,128),
-		ADAFRUIT_64x16(64,16);
+		ADAFRUIT_64x16(64,16),
+		ADAFRUIT_128x16(128,16),
+		ADAFRUIT_256x16(256,16),
+		ADAFRUIT_64x32_ColorSwap(64,32),
+		ADAFRUIT_64x64_ColorSwap(64,64),
+		SEEEDSTUDIO_32x32_ColorSwap(32,32),  //some customers got a pixel guts kit that has blue and green swapped
+		ALIEXPRESS_RANDOM1_32x32(32,32),  //panel Wilton Wong got from Ali Express and figured out the pixel mapping, have are laid out as two 8x64 panels chained together
+		ADAFRUIT_64x32_MIRRORED(64,64),  //note 128,32 changes to a vertically mirred 32x64
+		ADAFRUIT_32x32_MIRRORED(32,64),
+		ADAFRUIT_32x32_4X_MIRRORED(32,128);
 		
 		public final int width;
 		public final int height;
