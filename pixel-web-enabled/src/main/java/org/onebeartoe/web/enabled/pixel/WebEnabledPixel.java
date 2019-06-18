@@ -50,6 +50,8 @@ import org.onebeartoe.web.enabled.pixel.controllers.StillImageHttpHandler;
 import org.onebeartoe.web.enabled.pixel.controllers.StillImageListHttpHandler;
 import org.onebeartoe.web.enabled.pixel.controllers.UploadHttpHandler;
 import org.onebeartoe.web.enabled.pixel.controllers.UploadOriginHttpHandler;
+import org.onebeartoe.web.enabled.pixel.controllers.ArcadeHttpHandler;
+
 
 /**
  * @author Roberto Marquez
@@ -88,6 +90,8 @@ public class WebEnabledPixel
 
 //TODO: MAKE THIS PRIVATE    
     public List<String> animationImageNames;
+    
+    public static String OS = System.getProperty("os.name").toLowerCase();
     
     public WebEnabledPixel(String[] args)
     {
@@ -149,17 +153,24 @@ public class WebEnabledPixel
             
             HttpHandler clockHttpHandler = new ClockHttpHandler(this);
             
+            HttpHandler arcadeHttpHandler = new ArcadeHttpHandler(this);
+            
+            
+            
 // ARE WE GONNA DO ANYTHING WITH THE HttpContext OBJECTS?            
             HttpContext createContext =     server.createContext("/",     indexHttpHandler);
             
             HttpContext animationsContext = server.createContext("/animation", animationsHttpHandler);
                                             server.createContext("/animation/list", animationsListHttpHandler);
                                             server.createContext("/animations/save", animationsListHttpHandler);
+                                            
+            HttpContext arcadeContext = server.createContext("/arcade", arcadeHttpHandler);
 
             HttpContext staticContent =     server.createContext("/files", staticFileHttpHandler);
             
             HttpContext  stillContext =     server.createContext("/still", stillImageHttpHandler);
                                             server.createContext("/still/list", stillImageListHttpHandler);
+                                            
                                             
             HttpContext   textContext =     server.createContext("/text", scrollingTextHttpHander);
                                             server.createContext("/text/speed", scrollingTextSpeedHttpHander);
@@ -279,6 +290,7 @@ public class WebEnabledPixel
             String message = "Pixel app will not extract the contents of " + resourceListClasspath
                         + ".  The list already exists at " + resourceListFile.getAbsolutePath();
             logger.log(Level.INFO, message);
+            System.out.println(message);
         }
         else
         {

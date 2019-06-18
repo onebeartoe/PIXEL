@@ -51,6 +51,10 @@ public abstract class ImageResourceHttpHandler extends TextHttpHandler
             {
                 imageClassPath = path;
             }
+            else if( path.contains("/arcade/") )
+            {
+                imageClassPath = path; //let's get the whole path as we'll need write or stream, platform name, and arcade game gif 
+            }
             else
             {
                 imageClassPath = basePath + name;
