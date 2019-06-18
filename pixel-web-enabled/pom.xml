@@ -11,6 +11,7 @@
     
     <groupId>org.onebeartoe.pixel.web.enabled</groupId>
     <artifactId>pixel-web-enabled</artifactId>
+    <version>1.0</version>
     
     <packaging>jar</packaging>
     
