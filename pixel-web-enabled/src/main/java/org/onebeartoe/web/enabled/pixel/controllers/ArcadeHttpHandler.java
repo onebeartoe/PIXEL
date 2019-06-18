@@ -6,8 +6,10 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.security.NoSuchAlgorithmException;
 import java.time.Duration;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.imageio.ImageIO;
 import org.onebeartoe.pixel.hardware.Pixel;
 import org.onebeartoe.system.Sleeper;
@@ -28,16 +30,16 @@ public class ArcadeHttpHandler extends ImageResourceHttpHandler
     }
     
     @Override
-    protected void writeImageResource(String imageClassPath) throws IOException, ConnectionLostException
+    protected void writeImageResource(String urlParams) throws IOException, ConnectionLostException
     {
         
     	String streamOrWrite = null ;
  	String platformName = null ;
  	String arcadeName = null ;
  	boolean saveAnimation = false;
- 	String [] arcadeURLarray = imageClassPath.split("/"); 
+ 	String [] arcadeURLarray = urlParams.split("/"); 
     	
-    	logger.log(Level.INFO, "arcade handler received " + imageClassPath);
+    	System.out.println("arcade handler received " + urlParams);
         
         /* for (int i=0; i < arcadeURLarray.length; i++) { 
             System.out.println("Str["+i+"]:"+arcadeURLarray[i]); 
@@ -50,74 +52,90 @@ public class ArcadeHttpHandler extends ImageResourceHttpHandler
         	    streamOrWrite = arcadeURLarray[2];
         	    platformName = arcadeURLarray[3];
         	    arcadeName = arcadeURLarray[4];
-			
-             if (streamOrWrite.toLowerCase().equals("write")) { saveAnimation = true; }
+                    
+            //let's make sure this file exists and skip if not
+            
+            String arcadeFilePath = application.getPixel().getPixelHome() + "arcade/" + platformName + "/" + arcadeName;
+                   
+            File arcadeFile = new File(arcadeFilePath);
+
+            if(arcadeFile.exists() && !arcadeFile.isDirectory()) { 
+                
+                if (streamOrWrite.toLowerCase().equals("write")) { saveAnimation = true; }
 			 
         	     
-             /*logger.log(Level.INFO, streamOrWrite + " Mode");
-             logger.log(Level.INFO, "Platform: " + " platformName");
-             logger.log(Level.INFO, "Game: " + " arcadeName");
-             */
-             
-             System.out.println(streamOrWrite.toUpperCase() + " MODE");
-             System.out.println("Platform: " + platformName);
-             System.out.println("Game: " +  arcadeName);
-             
-             //now let's check if we have a PNG or GIF and handle accordingly 
-             String extension = "";
+                /*logger.log(Level.INFO, streamOrWrite + " Mode");
+                logger.log(Level.INFO, "Platform: " + " platformName");
+                logger.log(Level.INFO, "Game: " + " arcadeName");
+                */
 
-             int i = arcadeName.lastIndexOf('.');
-                if (i > 0) {
-                    extension = arcadeName.substring(i+1);
+                System.out.println(streamOrWrite.toUpperCase() + " MODE");
+                System.out.println("Platform: " + platformName);
+                System.out.println("Game: " +  arcadeName);
+
+                //now let's check if we have a PNG or GIF and handle accordingly 
+                String extension = "";
+
+                int i = arcadeName.lastIndexOf('.');
+                   if (i > 0) {
+                       extension = arcadeName.substring(i+1);
+                   }
+
+                System.out.println("Marquee Type: " +  extension.toLowerCase()); 
+
+                if (extension.toLowerCase().equals("gif")) {
+
+                           try {
+                               Pixel pixel = application.getPixel();
+                               pixel.stopExistingTimer();
+
+                               pixel.writeArcadeAnimation(platformName, arcadeName, saveAnimation);
+
+                               // we should wait a bit before going back to interactive mode, or it jitters
+                               long fifteenSeconds = Duration.ofSeconds(15).toMillis();
+                               Sleeper.sleepo(fifteenSeconds);
+
+                               pixel.interactiveMode();
+                           } catch (NoSuchAlgorithmException ex) {
+                               Logger.getLogger(ArcadeHttpHandler.class.getName()).log(Level.SEVERE, null, ex);
+                           }
+
                 }
-                
-             System.out.println("Marquee Type: " +  extension.toLowerCase()); 
-             
-             if (extension.toLowerCase().equals("gif")) {
-                 
-                  Pixel pixel = application.getPixel();
-                  pixel.stopExistingTimer();
+                else if (extension.toLowerCase().equals("png")) {
 
-                  pixel.writeArcadeAnimation(platformName, arcadeName, saveAnimation);
+                      URL url = null; 
+                      /*System.out.println("loading new classpath URL for still: " + imageClassPath);
+                       URL url = getClass().getClassLoader().getResource(imageClassPath);
+                       System.out.println("URL for " + modeName + " loaded");*/
 
-                    // we should wait a bit before going back to interactive mode, or it jitters
-                  long fifteenSeconds = Duration.ofSeconds(15).toMillis();
-                  Sleeper.sleepo(fifteenSeconds);
+                       BufferedImage image;
 
-                  pixel.interactiveMode();
-                 
-             }
-             else if (extension.toLowerCase().equals("png")) {
-                 
-                   URL url = null; 
-                   /*System.out.println("loading new classpath URL for still: " + imageClassPath);
-                    URL url = getClass().getClassLoader().getResource(imageClassPath);
-                    System.out.println("URL for " + modeName + " loaded");*/
 
-                    BufferedImage image;
-                  
-                      
-                    String path = application.getPixel().getPixelHome() + "arcade/" + platformName + "/" + arcadeName;
-                   
-                   File file = new File(path);
+                      String path = application.getPixel().getPixelHome() + "arcade/" + platformName + "/" + arcadeName;
 
-                   if(file.exists() && !file.isDirectory()) { 
-                       url = file.toURI().toURL();
-                       image = ImageIO.read(url);
+                      File file = new File(path);
 
-                      System.out.println("PNG image found: " + url.toString());
+                      if(file.exists() && !file.isDirectory()) { 
+                          url = file.toURI().toURL();
+                          image = ImageIO.read(url);
 
-                      Pixel pixel = application.getPixel();
-                      pixel.stopExistingTimer();
-                      pixel.writeImagetoMatrix(image, pixel.KIND.width, pixel.KIND.height);
-                   }
-                   else {
-                      System.out.println("** ERROR ** PNG image not found: " + path);
-                   }
-             }
-             else {
-                 System.out.println("** ERROR ** Invalid extension, sorry only gif or png are supported");
-             }
+                         System.out.println("PNG image found: " + url.toString());
+
+                         Pixel pixel = application.getPixel();
+                         pixel.stopExistingTimer();
+                         pixel.writeImagetoMatrix(image, pixel.KIND.width, pixel.KIND.height);
+                      }
+                      else {
+                         System.out.println("** ERROR ** PNG image not found: " + path);
+                      }
+                }
+                else {
+                    System.out.println("** ERROR ** Invalid extension, sorry only gif or png are supported");
+                }
+
+            } else {
+                    System.out.println("** ERROR ** File does not exist: " + arcadeFilePath);
+            }
         }
         else {
              System.out.println("** ERROR ** URL format incorect, use http://localhost:8080/arcade/<stream or write>/<platform name>/<game name .gif or .png>");

@@ -37,6 +37,11 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.security.DigestInputStream;
+
+
 
 import org.apache.commons.io.FilenameUtils;
 
@@ -424,7 +429,7 @@ public boolean GIFNeedsDecoding(String decodedDir, String gifName, int currentRe
 	GIF Path will be c:\animations\tree.gif
 	decdoed path will be c:\animations\tree.gif\decoded\tree.rgb565 and tree.txt
 	*/
-	
+    
 	gifName = FilenameUtils.removeExtension(gifName); //with no extension
 	
 	System.out.println("PIXEL LED panel resolution is: " + currentResolution);
@@ -452,6 +457,112 @@ public boolean GIFNeedsDecoding(String decodedDir, String gifName, int currentRe
 		return true;
 	}
 }
+
+public boolean GIFArcadeNeedsDecoding(String decodedDir, String gifName, int currentResolution, String gifFilePath) throws NoSuchAlgorithmException, IOException {
+	
+	/*In this method we will first check if the decoded files are there
+	if they are present, then let's read them and make sure the resolution in the decoded file matches the current matrix
+	if no match, then we need to re-encode
+	if the files are not there, then we need to re-encode anyway*/
+	
+	/*GIFName will be tree
+	GIF Path will be c:\animations\tree.gif
+	decdoed path will be c:\animations\tree.gif\decoded\tree.rgb565 and tree.txt
+	*/
+	MessageDigest md = MessageDigest.getInstance("MD5");
+        String SelectedFileMD5_ = checksum(gifFilePath, md);
+    
+	gifName = FilenameUtils.removeExtension(gifName); //with no extension
+	
+	System.out.println("PIXEL LED panel resolution is: " + currentResolution);
+	
+	//String decodedGIFPathTXT = currentDir + "/decoded/" + gifName + ".txt";
+	//String decodedGIFPath565 = currentDir + "/decoded/" + gifName + ".rgb565";
+	
+	String decodedGIFPathTXT = decodedDir + gifName + ".txt";
+	String decodedGIFPath565 = decodedDir + gifName + ".rgb565";
+	
+	File filetxt = new File(decodedGIFPathTXT);
+	File file565 = new File(decodedGIFPath565);
+	
+	if (filetxt.exists() && file565.exists()) { //need to ensure both files are there
+		   
+			if ((getDecodedresolution(decodedDir, gifName) == currentResolution) && (getDecodedmd5(decodedDir,gifName).equals(SelectedFileMD5_))) { 
+				
+				return false;
+			}
+			else {
+				return true;
+			}
+	}
+	else {
+		return true;
+	}
+}
+
+private static String checksum(String filepath, MessageDigest md) throws IOException {
+
+        // DigestInputStream is better, but you also can hash file like this.
+        try (InputStream fis = new FileInputStream(filepath)) {
+            byte[] buffer = new byte[1024];
+            int nread;
+            while ((nread = fis.read(buffer)) != -1) {
+                md.update(buffer, 0, nread);
+            }
+        }
+
+        // bytes to hex
+        StringBuilder result = new StringBuilder();
+        for (byte b : md.digest()) {
+            result.append(String.format("%02x", b));
+        }
+        return result.toString();
+
+    }
+
+ public String getDecodedmd5(String decodedDir, String gifName) {  //returns md5 of the target gif
+ 	
+	    String gifDecodedTxtPath = decodedDir + gifName + ".txt"; 
+	    
+	    File filemeta = new File(gifDecodedTxtPath);
+ 	
+ 	FileInputStream decodedFile = null; //fix this
+ 	try {
+			decodedFile = new FileInputStream(gifDecodedTxtPath);
+		} catch (FileNotFoundException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+ 	
+ 	String line = "";
+
+		    try 
+		    {
+				InputStreamReader streamReader = new InputStreamReader(decodedFile);
+				BufferedReader br = new BufferedReader(streamReader);
+				line = br.readLine();
+		    } 
+		    catch (IOException e) 
+		    {
+			    //You'll need to add proper error handling here
+		    }
+
+		    String fileAttribs = line.toString();  //now convert to a string	 
+		    String fdelim = "[,]"; //now parse this string considering the comma split  ie, 32,60,32, 241234123412341234  
+		    String[] fileAttribs2 = fileAttribs.split(fdelim);	
+		    
+		    //since we added the MD5 check later, we need to check that the array has the MD5 in there and if not, we'll put in a dummy value
+		    
+		    String selectedFileMD5String = "999999999999";
+		    
+		    if (fileAttribs2.length > 3) {
+		    	  selectedFileMD5String = fileAttribs2[3].trim(); 
+		    }
+		    
+		    //System.out.println("Get Decoded MD5 is: " + selectedFileMD5String);
+		    return (selectedFileMD5String);
+	}
+    
     
     public float getDecodedfps(String decodedDir, String gifName) {  //need to return the meta data
     	
@@ -544,8 +655,8 @@ public boolean GIFNeedsDecoding(String decodedDir, String gifName, int currentRe
 	    //String framestring = "animations/decoded/" + animation_name + ".rgb565";
 	   // String gifNamePath = gifName + ".txt";
 	    //String gifNamePath = currentDir + "/decoded/" + gifName + ".txt"; 
-    	String gifNamePath = decodedDir + gifName + ".txt"; 
-	    
+    	String gifNamePath = decodedDir + gifName + ".txt";  //arcade/mame/decoded/pacman.txt
+       
     	File filemeta = new File(gifNamePath);
     	
     	FileInputStream decodedFile = null; //fix this
@@ -1201,7 +1312,7 @@ public boolean GIFNeedsDecoding(String decodedDir, String gifName, int currentRe
                 }
     }
     
-    public void decodeArcadeGIF(final String decodedDir, String gifFilePath, String gifName, int currentResolution, final int pixelMatrix_width, final int pixelMatrix_height) 
+    public void decodeArcadeGIF(final String decodedDir, String gifFilePath, String gifName, int currentResolution, final int pixelMatrix_width, final int pixelMatrix_height) throws NoSuchAlgorithmException, IOException 
     {  
 		//we should add another flag here if we're decoding from the jar or user supplied gif
 		
@@ -1224,8 +1335,10 @@ public boolean GIFNeedsDecoding(String decodedDir, String gifName, int currentRe
 		System.out.println("User selected file name path: " + gifFilePath);
 		File file = new File(gifFilePath);
 		if (file.exists()) {
-			
-			  //since we are decoding, we need to first make sure the .rgb565 and .txt decoded file is not there and delete if so.
+                    
+                           MessageDigest md = MessageDigest.getInstance("MD5");
+                           String md5 = checksum(gifFilePath, md);
+                            //since we are decoding, we need to first make sure the .rgb565 and .txt decoded file is not there and delete if so.
 			  String gifName565Path =  decodedDir + gifNameNoExt + ".rgb565";  //   ex. c:\animation\decoded\tree.rgb565
 			  String gifNameTXTPath = decodedDir + gifNameNoExt + ".txt";  //   ex. c:\animation\decoded\tree.txt
 			  
@@ -1346,14 +1459,14 @@ public boolean GIFNeedsDecoding(String decodedDir, String gifName, int currentRe
 				  
 	             
 	          } //end for, we are done with the loop so let's now write the file
-	          
+	          // TO DO may need to add the hack to turn a single frame gif into two frames due to Rasp Pi bug but test first
 	           //********** now let's write the meta-data text file
 		   		
 		   		if (frameDelay == 0 || numFrames == 1) {  //we can't have a 0 frame delay so if so, let's add a 100ms delay by default
 		   			frameDelay = 100;
 		   		}
 		   		
-		   		String filetag = String.valueOf(numFrames) + "," + String.valueOf(frameDelay) + "," + String.valueOf(currentResolution); //current resolution may need to change to led panel type
+		   		String filetag = String.valueOf(numFrames) + "," + String.valueOf(frameDelay) + "," + String.valueOf(currentResolution) + "," + String.valueOf(md5); //current resolution may need to change to led panel type
 		   				
 	     		   File myFile = new File(decodedDir + gifNameNoExt + ".txt");  				       
 	     		   try {
@@ -1625,7 +1738,7 @@ public boolean GIFNeedsDecoding(String decodedDir, String gifName, int currentRe
         } 
     }
     
-    public void writeArcadeAnimation(String selectedPlatformName, String selectedFileName, boolean writeMode)
+    public void writeArcadeAnimation(String selectedPlatformName, String selectedFileName, boolean writeMode) throws NoSuchAlgorithmException
     {
         
         //arcadePath = pixelHome + "arcade/";     //we delcared this up front   
@@ -1643,85 +1756,93 @@ public boolean GIFNeedsDecoding(String decodedDir, String gifName, int currentRe
 
         if(file.exists() && !file.isDirectory()) { 
             
-               animationFilename = selectedFileName;
-               if(gifTxtExists(decodedAnimationsPath,selectedFileName) == true && GIFRGB565Exists(decodedAnimationsPath,selectedFileName) == true) 
-               {
-                   System.out.println("This GIF was already decoded");
-               }
-               else 
-               {
-                   System.out.println("Decoding " + selectedFileName);
-                   System.out.println("Decoding " + gifFilePath);
-                   // the text file is not there so we cannot continue and we must decode, let's first copy the file to home dir
-                   decodeArcadeGIF(decodedAnimationsPath, gifFilePath,selectedFileName, currentResolution, KIND.width, KIND.height);
-               }
-
-               if (GIFNeedsDecoding(decodedAnimationsPath, selectedFileName, currentResolution) == true) 
-               {
-                   System.out.println("Selected LED panel is different than the encoded GIF, need to re-encode...");
-                   decodeArcadeGIF(decodedAnimationsPath, gifFilePath, selectedFileName, currentResolution, KIND.width, KIND.height);
-               }
-
-               //****** Now let's setup the animation ******
-
-       // TODO: replace animation_name with selectedFileName
-               String animation_name = selectedFileName;
-
-               float GIFfps = getDecodedfps(decodedAnimationsPath, animation_name); //get the fps //to do fix this later becaause we are getting from internal path
-               GIFnumFrames = getDecodednumFrames(decodedAnimationsPath, animation_name);
-               int gifSelectedFileDelay = getDecodedframeDelay(decodedAnimationsPath, animation_name);
-
-               currentResolution = getDecodedresolution(decodedAnimationsPath, animation_name);
-               GIFresolution = currentResolution;
-
-               System.out.println("Selected GIF Resolution: " + GIFresolution);
-               System.out.println("Current LED Panel Resolution: " + currentResolution);
-               System.out.println("GIF Width: " + KIND.width);
-               System.out.println("GIF Height: " + KIND.height);
-
-               System.out.println("The existing timer was stopped");
-
-               String pixelHardwareId = "not found";
                try 
                {
-                   pixelHardwareId = ioiO.getImplVersion(v.HARDWARE_VER);
+
+                   animationFilename = selectedFileName;
+                   if(gifTxtExists(decodedAnimationsPath,selectedFileName) == true && GIFRGB565Exists(decodedAnimationsPath,selectedFileName) == true)
+                   {
+                       System.out.println("This GIF was already decoded");
+                   }
+                   else
+                   {
+                       System.out.println("Decoding " + selectedFileName);
+                       System.out.println("Decoding " + gifFilePath);
+                       // the text file is not there so we cannot continue and we must decode, let's first copy the file to home dir
+                       decodeArcadeGIF(decodedAnimationsPath, gifFilePath,selectedFileName, currentResolution, KIND.width, KIND.height);
+                   }
+                   
+                   if (GIFArcadeNeedsDecoding(decodedAnimationsPath, selectedFileName, currentResolution,gifFilePath) == true)
+                   {
+                       System.out.println("Selected LED panel is different than the encoded GIF, need to re-encode...");
+                       decodeArcadeGIF(decodedAnimationsPath, gifFilePath, selectedFileName, currentResolution, KIND.width, KIND.height);
+                   }
+                   
+                   //****** Now let's setup the animation ******
+                   
+                   // TODO: replace animation_name with selectedFileName
+                   String animation_name = selectedFileName;
+                   
+                   float GIFfps = getDecodedfps(decodedAnimationsPath, animation_name); //get the fps //to do fix this later becaause we are getting from internal path
+                   GIFnumFrames = getDecodednumFrames(decodedAnimationsPath, animation_name);
+                   int gifSelectedFileDelay = getDecodedframeDelay(decodedAnimationsPath, animation_name);
+                   
+                   currentResolution = getDecodedresolution(decodedAnimationsPath, animation_name);
+                   GIFresolution = currentResolution;
+                   
+                   System.out.println("Selected GIF Resolution: " + GIFresolution);
+                   System.out.println("Current LED Panel Resolution: " + currentResolution);
+                   System.out.println("GIF Width: " + KIND.width);
+                   System.out.println("GIF Height: " + KIND.height);
+                   
+                   System.out.println("The existing timer was stopped");
+                   
+                   String pixelHardwareId = "not found";
+                   try
+                   {
+                       pixelHardwareId = ioiO.getImplVersion(v.HARDWARE_VER);
+                   }
+                   catch (ConnectionLostException ex)
+                   {
+                       Logger.getLogger(Pixel.class.getName()).log(Level.SEVERE, null, ex);
+                   }
+                   
+                   stopExistingTimer();
+                   
+                   if (pixelHardwareId.substring(0,4).equals("PIXL") && writeMode == true)
+                   {
+                       interactiveMode();
+                       
+                       // need to tell PIXEL the frames per second to use, how fast to play the animations
+                       writeMode(GIFfps);
+                       System.out.println("Now writing to PIXEL's SD card, the screen will go blank until writing has been completed...");
+                       
+                       // we'll run this in the background and also update the UI with progress
+                       System.out.println("The Pixel animation writter is being created");
+                       Date now = new Date();
+                       SendGifAnimationTask wp = new SendGifAnimationTask();
+                       timer = new Timer();
+                       timer.schedule(wp, now);
+                       System.out.println("The Pixel animation writter was created");
+                   }
+                   else
+                   {
+                       System.out.println("A non PIXL, version of the timer is starting.");
+                       
+                       stopExistingTimer();
+                       System.out.println("stopped the existing timer again.");
+                       
+                       TimerTask animateTimer = new AnimateTimer();
+                       timer = new Timer();
+                       Date firstTime = new Date();
+                       timer.schedule(animateTimer, firstTime, gifSelectedFileDelay);
+                       
+                       System.out.println("A non PIXL, version of the timer has started.");
+                   }
                } 
-               catch (ConnectionLostException ex) 
+               catch (IOException ex) 
                {
                    Logger.getLogger(Pixel.class.getName()).log(Level.SEVERE, null, ex);
-               }
-
-               stopExistingTimer();
-
-               if (pixelHardwareId.substring(0,4).equals("PIXL") && writeMode == true) 
-               {
-                   interactiveMode();
-
-                   // need to tell PIXEL the frames per second to use, how fast to play the animations
-                   writeMode(GIFfps); 
-                   System.out.println("Now writing to PIXEL's SD card, the screen will go blank until writing has been completed..."); 
-
-                   // we'll run this in the background and also update the UI with progress
-                   System.out.println("The Pixel animation writter is being created");
-                   Date now = new Date();
-                   SendGifAnimationTask wp = new SendGifAnimationTask();
-                   timer = new Timer();
-                   timer.schedule(wp, now);
-                   System.out.println("The Pixel animation writter was created");
-               }
-               else 
-               {
-                   System.out.println("A non PIXL, version of the timer is starting.");
-
-                   stopExistingTimer();
-                   System.out.println("stopped the existing timer again.");
-
-                   TimerTask animateTimer = new AnimateTimer();
-                   timer = new Timer();
-                   Date firstTime = new Date();
-                   timer.schedule(animateTimer, firstTime, gifSelectedFileDelay);
-
-                   System.out.println("A non PIXL, version of the timer has started.");
                }
         } else {
              System.out.println("** ERROR ** GIF file not found: " + gifFilePath);

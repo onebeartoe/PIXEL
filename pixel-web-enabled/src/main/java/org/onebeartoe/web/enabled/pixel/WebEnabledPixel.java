@@ -93,11 +93,14 @@ public class WebEnabledPixel
     
     public static String OS = System.getProperty("os.name").toLowerCase();
     
+    public static String port_ = null;
+    
     public WebEnabledPixel(String[] args)
     {
         cli = new CliPixel(args);
         cli.parse();
-        httpPort = cli.getPort();
+        httpPort = cli.getWebPort();
+        port_ = cli.getPort();
 
         String name = getClass().getName();
         logger = Logger.getLogger(name);
