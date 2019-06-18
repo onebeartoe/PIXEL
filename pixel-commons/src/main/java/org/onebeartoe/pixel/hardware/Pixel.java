@@ -1637,87 +1637,95 @@ public boolean GIFNeedsDecoding(String decodedDir, String gifName, int currentRe
         
         gifFilePath = pixelHome + "arcade/" + selectedPlatformName + "/" + selectedFileName; //user home/pixel/arcade/mame/digdug.gif
         //gifSourcePath = "animations/gifsource/";
-    	
-        animationFilename = selectedFileName;
-        if(gifTxtExists(decodedAnimationsPath,selectedFileName) == true && GIFRGB565Exists(decodedAnimationsPath,selectedFileName) == true) 
-        {
-            System.out.println("This GIF was already decoded");
-        }
-        else 
-        {
-            System.out.println("Decoding " + selectedFileName);
-            System.out.println("Decoding " + gifFilePath);
-            // the text file is not there so we cannot continue and we must decode, let's first copy the file to home dir
-            decodeArcadeGIF(decodedAnimationsPath, gifFilePath,selectedFileName, currentResolution, KIND.width, KIND.height);
-        }
-			    
-        if (GIFNeedsDecoding(decodedAnimationsPath, selectedFileName, currentResolution) == true) 
-        {
-            System.out.println("Selected LED panel is different than the encoded GIF, need to re-encode...");
-            decodeArcadeGIF(decodedAnimationsPath, gifFilePath, selectedFileName, currentResolution, KIND.width, KIND.height);
-        }
-	
-        //****** Now let's setup the animation ******
+        
+        //let's make sure the target gif exists before proceeding
+        File file = new File(gifFilePath);
 
-// TODO: replace animation_name with selectedFileName
-        String animation_name = selectedFileName;
-
-        float GIFfps = getDecodedfps(decodedAnimationsPath, animation_name); //get the fps //to do fix this later becaause we are getting from internal path
-        GIFnumFrames = getDecodednumFrames(decodedAnimationsPath, animation_name);
-        int gifSelectedFileDelay = getDecodedframeDelay(decodedAnimationsPath, animation_name);
-        
-        currentResolution = getDecodedresolution(decodedAnimationsPath, animation_name);
-        GIFresolution = currentResolution;
-
-        System.out.println("Selected GIF Resolution: " + GIFresolution);
-        System.out.println("Current LED Panel Resolution: " + currentResolution);
-        System.out.println("GIF Width: " + KIND.width);
-        System.out.println("GIF Height: " + KIND.height);
-        
-        System.out.println("The existing timer was stopped");
-		
-        String pixelHardwareId = "not found";
-        try 
-        {
-            pixelHardwareId = ioiO.getImplVersion(v.HARDWARE_VER);
-        } 
-        catch (ConnectionLostException ex) 
-        {
-            Logger.getLogger(Pixel.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        
-        stopExistingTimer();
-        
-        if (pixelHardwareId.substring(0,4).equals("PIXL") && writeMode == true) 
-        {
-            interactiveMode();
+        if(file.exists() && !file.isDirectory()) { 
             
-            // need to tell PIXEL the frames per second to use, how fast to play the animations
-            writeMode(GIFfps); 
-            System.out.println("Now writing to PIXEL's SD card, the screen will go blank until writing has been completed..."); 
+               animationFilename = selectedFileName;
+               if(gifTxtExists(decodedAnimationsPath,selectedFileName) == true && GIFRGB565Exists(decodedAnimationsPath,selectedFileName) == true) 
+               {
+                   System.out.println("This GIF was already decoded");
+               }
+               else 
+               {
+                   System.out.println("Decoding " + selectedFileName);
+                   System.out.println("Decoding " + gifFilePath);
+                   // the text file is not there so we cannot continue and we must decode, let's first copy the file to home dir
+                   decodeArcadeGIF(decodedAnimationsPath, gifFilePath,selectedFileName, currentResolution, KIND.width, KIND.height);
+               }
 
-            // we'll run this in the background and also update the UI with progress
-            System.out.println("The Pixel animation writter is being created");
-            Date now = new Date();
-            SendGifAnimationTask wp = new SendGifAnimationTask();
-            timer = new Timer();
-            timer.schedule(wp, now);
-            System.out.println("The Pixel animation writter was created");
+               if (GIFNeedsDecoding(decodedAnimationsPath, selectedFileName, currentResolution) == true) 
+               {
+                   System.out.println("Selected LED panel is different than the encoded GIF, need to re-encode...");
+                   decodeArcadeGIF(decodedAnimationsPath, gifFilePath, selectedFileName, currentResolution, KIND.width, KIND.height);
+               }
+
+               //****** Now let's setup the animation ******
+
+       // TODO: replace animation_name with selectedFileName
+               String animation_name = selectedFileName;
+
+               float GIFfps = getDecodedfps(decodedAnimationsPath, animation_name); //get the fps //to do fix this later becaause we are getting from internal path
+               GIFnumFrames = getDecodednumFrames(decodedAnimationsPath, animation_name);
+               int gifSelectedFileDelay = getDecodedframeDelay(decodedAnimationsPath, animation_name);
+
+               currentResolution = getDecodedresolution(decodedAnimationsPath, animation_name);
+               GIFresolution = currentResolution;
+
+               System.out.println("Selected GIF Resolution: " + GIFresolution);
+               System.out.println("Current LED Panel Resolution: " + currentResolution);
+               System.out.println("GIF Width: " + KIND.width);
+               System.out.println("GIF Height: " + KIND.height);
+
+               System.out.println("The existing timer was stopped");
+
+               String pixelHardwareId = "not found";
+               try 
+               {
+                   pixelHardwareId = ioiO.getImplVersion(v.HARDWARE_VER);
+               } 
+               catch (ConnectionLostException ex) 
+               {
+                   Logger.getLogger(Pixel.class.getName()).log(Level.SEVERE, null, ex);
+               }
+
+               stopExistingTimer();
+
+               if (pixelHardwareId.substring(0,4).equals("PIXL") && writeMode == true) 
+               {
+                   interactiveMode();
+
+                   // need to tell PIXEL the frames per second to use, how fast to play the animations
+                   writeMode(GIFfps); 
+                   System.out.println("Now writing to PIXEL's SD card, the screen will go blank until writing has been completed..."); 
+
+                   // we'll run this in the background and also update the UI with progress
+                   System.out.println("The Pixel animation writter is being created");
+                   Date now = new Date();
+                   SendGifAnimationTask wp = new SendGifAnimationTask();
+                   timer = new Timer();
+                   timer.schedule(wp, now);
+                   System.out.println("The Pixel animation writter was created");
+               }
+               else 
+               {
+                   System.out.println("A non PIXL, version of the timer is starting.");
+
+                   stopExistingTimer();
+                   System.out.println("stopped the existing timer again.");
+
+                   TimerTask animateTimer = new AnimateTimer();
+                   timer = new Timer();
+                   Date firstTime = new Date();
+                   timer.schedule(animateTimer, firstTime, gifSelectedFileDelay);
+
+                   System.out.println("A non PIXL, version of the timer has started.");
+               }
+        } else {
+             System.out.println("** ERROR ** GIF file not found: " + gifFilePath);
         }
-        else 
-        {
-            System.out.println("A non PIXL, version of the timer is starting.");
-            
-            stopExistingTimer();
-            System.out.println("stopped the existing timer again.");
-            
-            TimerTask animateTimer = new AnimateTimer();
-            timer = new Timer();
-            Date firstTime = new Date();
-            timer.schedule(animateTimer, firstTime, gifSelectedFileDelay);
-        
-            System.out.println("A non PIXL, version of the timer has started.");
-        } 
     }
   
     /**

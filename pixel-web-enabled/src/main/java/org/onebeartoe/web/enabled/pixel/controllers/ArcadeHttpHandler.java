@@ -95,64 +95,33 @@ public class ArcadeHttpHandler extends ImageResourceHttpHandler
                     System.out.println("URL for " + modeName + " loaded");*/
 
                     BufferedImage image;
-                    if(url == null)
-                    {
-                        // image is not in the JAR/classpath
-                       // String path = application.getPixel().getPixelHome() + imageClassPath;
-                         String path = application.getPixel().getPixelHome() + "arcade/" + platformName + "/" + arcadeName;
-                         System.out.println(path);
-                       //  gifFilePath = pixelHome + "arcade/" + selectedPlatformName + "/" + selectedFileName; //user home/pixel/arcade/mame/digdug.gif
-        //gifSourcePath = "animations/gifsource/";
-                        
-                        File file = new File(path);
-                        
-                     //   if (file.exists(path)) {
-                            
-                      //  }
-                        
-                        url = file.toURI().toURL();
-                    }
+                  
+                      
+                    String path = application.getPixel().getPixelHome() + "arcade/" + platformName + "/" + arcadeName;
+                   
+                   File file = new File(path);
 
-                    image = ImageIO.read(url);
+                   if(file.exists() && !file.isDirectory()) { 
+                       url = file.toURI().toURL();
+                       image = ImageIO.read(url);
 
-                    System.out.println("buffered image created for: " + url.toString());
+                      System.out.println("PNG image found: " + url.toString());
 
-                   Pixel pixel = application.getPixel();
-                    pixel.stopExistingTimer();
-                    pixel.writeImagetoMatrix(image, pixel.KIND.width, pixel.KIND.height);
-                 
+                      Pixel pixel = application.getPixel();
+                      pixel.stopExistingTimer();
+                      pixel.writeImagetoMatrix(image, pixel.KIND.width, pixel.KIND.height);
+                   }
+                   else {
+                      System.out.println("** ERROR ** PNG image not found: " + path);
+                   }
              }
              else {
-                 System.out.println("Invalid extension, only gif or png is allowed");
+                 System.out.println("** ERROR ** Invalid extension, sorry only gif or png are supported");
              }
-                     
-            
         }
         else {
-             System.out.println("*** ERROR **** URL format incorect, use http://localhost:8080/arcade/<stream or write>/<platform name>/<game name .gif or .png>");
+             System.out.println("** ERROR ** URL format incorect, use http://localhost:8080/arcade/<stream or write>/<platform name>/<game name .gif or .png>");
              System.out.println("Example: http://localhost:8080/arcade/write/mame/pacman.png or http://localhost:8080/arcade/stream/atari2600/digdug.gif");
         }
-        
-        
-		/*
-		 * // the writeAnimation() method just takes the name of the file int i =
-		 * imageClassPath.lastIndexOf("/") + 1; String arcadeName =
-		 * imageClassPath.substring(i); String platformName =
-		 * imageClassPath.substring(i-1); String streamOrWrite =
-		 * imageClassPath.substring(i-2);
-		 * 
-		 * System.out.println("url: " + imageClassPath);
-		 * 
-		 * System.out.println("stream or write: " + streamOrWrite + "platform: " +
-		 * platformName + "arcade name:" + arcadeName);
-		 * 
-		 * boolean saveAnimation = false;
-		 * 
-		 * if( imageClassPath.contains("/save/") ) { saveAnimation = true; }
-		 * 
-		 * if( arcadeName.equals("arcade") ) { arcadeName = defaultImageClassPath; }
-		 */
-        
-      
     }
 }
