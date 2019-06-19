@@ -19,11 +19,12 @@ public class CliPixel
  private static final Logger log = Logger.getLogger(CliPixel.class.getName());
  private String[] args = null;
  private Options options = new Options();
- private int portOption = 8080;
+ private int WebPortOption = 8080;
+ //private String PortOption = "";
  //private int ledMatrixType = 3;
  //private int ledMatrixTypeDefault = 3;
  private int ledMatrixType = 11;
- private int ledMatrixTypeDefault = 11;
+ private int ledMatrixTypeDefault = 15;
  private int ledMatrixTypeMax = 17;
  
  private int yTextOffset = 0;
@@ -34,7 +35,8 @@ public class CliPixel
   this.args = args;
 
   options.addOption("h", "help", false, "show help.");
-  options.addOption("p", "port", true, "Listening port. Default Port = 8080");
+  options.addOption("w", "webport", true, "Listening port. Default Port = 8080");
+  //options.addOption("p", "port", true, "PIXEL Port. No Default");
   options.addOption("l", "ledmatrix", true, "Sets the LED matrix type. Default = 3\n " +
                     "0=32x16 Seeed 1=32x16 Adafruit, 2=32x32 Seeed\n" +
                     "3=PIXEL V2, 4=64x32 Seeed, 5=32x64 Seeed, 6=Seeed 2 Mirrored\n" +
@@ -57,10 +59,15 @@ public class CliPixel
    if (cmd.hasOption("h"))
     help();
 
-   if (cmd.hasOption("p")) {
-    log.log(Level.INFO, "Using cli argument -p=" + cmd.getOptionValue("p"));
-    portOption = Integer.parseInt(cmd.getOptionValue("p"));
+   if (cmd.hasOption("w")) {
+    log.log(Level.INFO, "Using cli argument -w=" + cmd.getOptionValue("w"));
+    WebPortOption = Integer.parseInt(cmd.getOptionValue("p"));
    }
+   
+  /* if (cmd.hasOption("p")) {
+    log.log(Level.INFO, "Using cli argument -p=" + cmd.getOptionValue("p"));
+    PortOption = cmd.getOptionValue("p");
+   } */
    
    if( cmd.hasOption("y") )
    {
@@ -91,10 +98,15 @@ public class CliPixel
    help();
   }
  }
- public int getPort()
+ public int getWebPort()
  {
-    return portOption;
+    return WebPortOption;
  }
+ 
+ /* public String getPort()
+ {
+    return PortOption;
+ }*/
  
     public int getyTextOffset() {
         return yTextOffset;
