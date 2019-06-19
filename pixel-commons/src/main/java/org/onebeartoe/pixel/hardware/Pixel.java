@@ -1322,17 +1322,16 @@ private static String checksum(String filepath, MessageDigest md) throws IOExcep
 		//we also need to get the original width and vuHeight of the gif which is easily done from the gif decoder class
 		//String gifName = FilenameUtils.removeExtension(gifName); //with no extension
 		
-	    String selectedFileName = FilenameUtils.getName(gifFilePath); 
-	    fileType = FilenameUtils.getExtension(gifFilePath);
-	    gifNameNoExt = FilenameUtils.removeExtension(selectedFileName); //with no extension
+                String selectedFileName = FilenameUtils.getName(gifFilePath); 
+                fileType = FilenameUtils.getExtension(gifFilePath);
+                gifNameNoExt = FilenameUtils.removeExtension(selectedFileName); //with no extension
 		
-		System.out.println("User selected file name: " + selectedFileName);
+		System.out.println("Arcade file name: " + selectedFileName);
 		//System.out.println("User selected file type: " + fileType);
 		//System.out.println("User selected file name no extension: " + gifNameNoExt);
 		
-		
 		//String gifNamePath = currentDir + "/" + gifName + ".gif";  //   ex. c:\animation\tree.gif
-		System.out.println("User selected file name path: " + gifFilePath);
+		System.out.println("Arcade file name path: " + gifFilePath);
 		File file = new File(gifFilePath);
 		if (file.exists()) {
                     
@@ -1369,104 +1368,180 @@ private static String checksum(String filepath, MessageDigest md) throws IOExcep
 	          System.out.println("frame height: " + frameHeight);
 	          System.out.println("frame width: " + frameWidth);
 	          	          
-	          for (int i = 0; i < numFrames; i++) { //loop through all the frames
-	             BufferedImage rotatedFrame = d.getFrame(i);  
-	            // rotatedFrame = Scalr.rotate(rotatedFrame, Scalr.Rotation.CW_90, null); //fixed bug, no longer need to rotate the image
-	            // rotatedFrame = Scalr.rotate(rotatedFrame, Scalr.Rotation.FLIP_HORZ, null); //fixed bug, no longer need to flip the image
-	             
-	             // These worked too but using the scalr library gives quicker results
-	             //rotatedFrame = getFlippedImage(rotatedFrame); //quick hack, for some reason the code below i think is flipping the image so we have to flip it here as a hack
-	             //rotatedFrame = rotate90ToLeft(rotatedFrame);  //quick hack, same as above, have to rotate
-	              
-	    		 if (frameWidth != pixelMatrix_width || frameHeight != pixelMatrix_height) {
-	    			 System.out.println("Resizing and encoding " + selectedFileName + " frame " + i);
-	    			// rotatedFrame = Scalr.resize(rotatedFrame, pixelMatrix_width, pixelMatrix_height); //resize it, need to make sure we do not anti-alias
-	    			 
-	    			 try {
-						rotatedFrame = getScaledImage(rotatedFrame, pixelMatrix_width,pixelMatrix_height);
-					} catch (IOException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
-	    			 
-	    			 
-	    		 }
-	    		 else {
-	    			 System.out.println("Encoding " + selectedFileName + " frame " + i);
-	    		 }
-	            
-	             //this code here to convert a java image to rgb565 taken from stack overflow http://stackoverflow.com/questions/8319770/java-image-conversion-to-rgb565/
-	    		 BufferedImage sendImg  = new BufferedImage(pixelMatrix_width, pixelMatrix_height, BufferedImage.TYPE_USHORT_565_RGB);
-	             sendImg.getGraphics().drawImage(rotatedFrame, 0, 0, pixelMatrix_width, pixelMatrix_height, null);    
+	          if (numFrames == 1) {  //ok this is a hack, for some reason only on raspberry pi, single frame gifs are not writing so the work around is to write 2 frames for a single frame GIF
+                           for (int i = 0; i < 2; i++) { 
+                           BufferedImage rotatedFrame = d.getFrame(i);  
+                               if (frameWidth != pixelMatrix_width || frameHeight != pixelMatrix_height) {
+                                       System.out.println("Resizing and encoding " + selectedFileName + " frame " + i);
+                                      // rotatedFrame = Scalr.resize(rotatedFrame, pixelMatrix_width, pixelMatrix_height); //resize it, need to make sure we do not anti-alias
 
-	             int numByte=0;
-	             BitmapBytes = new byte[pixelMatrix_width*pixelMatrix_height*2];
+                                       try {
+                                                      rotatedFrame = getScaledImage(rotatedFrame, pixelMatrix_width,pixelMatrix_height);
+                                              } catch (IOException e) {
+                                                      // TODO Auto-generated catch block
+                                                      e.printStackTrace();
+                                              }
+                               }
+                               else {
+                                       System.out.println("Encoding " + selectedFileName + " frame " + i);
+                               }
 
-	                int x=0;
-	                int y=0;
-	                int len = BitmapBytes.length;
+                           //this code here to convert a java image to rgb565 taken from stack overflow http://stackoverflow.com/questions/8319770/java-image-conversion-to-rgb565/
+                            BufferedImage sendImg  = new BufferedImage(pixelMatrix_width, pixelMatrix_height, BufferedImage.TYPE_USHORT_565_RGB);
+                            sendImg.getGraphics().drawImage(rotatedFrame, 0, 0, pixelMatrix_width, pixelMatrix_height, null);    
 
-	                for (x=0 ; x < pixelMatrix_height; x++) { //TO DO double check to make this is right
-	                    for (y=0; y < pixelMatrix_width; y++) {
+                            int numByte=0;
+                            BitmapBytes = new byte[pixelMatrix_width*pixelMatrix_height*2];
 
-	                        Color c = new Color(sendImg.getRGB(y, x));  // x and y were switched in the original code which was causing the image to rotate by 90 degrees and was flipped horizontally, switching x and y fixes this bug
-	                        int red = c.getRed();
-	                        int green = c.getGreen();
-	                        int blue = c.getBlue();
+                              int x=0;
+                              int y=0;
+                              int len = BitmapBytes.length;
 
-	                        //RGB565
-	                        red = red >> 3;
-	                        green = green >> 2;
-	                        blue = blue >> 3;    
-     			  		
-	                        //A pixel is represented by a 4-byte (32 bit) integer, like so:
-	                        //00000000 00000000 00000000 11111111
-	                        //^ Alpha  ^Red     ^Green   ^Blue
-	                        //Converting to RGB565
+                              for (x=0 ; x < pixelMatrix_height; x++) { //TO DO double check to make this is right
+                                  for (y=0; y < pixelMatrix_width; y++) {
 
-	                        short pixel_to_send = 0;
-	                        int pixel_to_send_int = 0;
-	                        pixel_to_send_int = (red << 11) | (green << 5) | (blue);
-	                        pixel_to_send = (short) pixel_to_send_int;
-	                        //dividing into bytes
-	                        byte byteH=(byte)((pixel_to_send >> 8) & 0x0FF);
-	                        byte byteL=(byte)(pixel_to_send & 0x0FF);
+                                      Color c = new Color(sendImg.getRGB(y, x));  // x and y were switched in the original code which was causing the image to rotate by 90 degrees and was flipped horizontally, switching x and y fixes this bug
+                                      int red = c.getRed();
+                                      int green = c.getGreen();
+                                      int blue = c.getBlue();
 
-	                        //Writing it to array - High-byte is the first, big endian byte order
-	                        BitmapBytes[numByte]=byteL;
-	                        BitmapBytes[numByte+1]=byteH;
-	                        
-	                        numByte+=2;
-	                    }
-	                }
-			   		    
-			   		 File decodeddir = new File(decodedDir); //this could be gif, gif64, or usergif
-					    if(decodeddir.exists() == false)
-			             {
-					    	decodeddir.mkdirs();
-			             }
-					
-				   			try {
-							
-								appendWrite(BitmapBytes, decodedDir + gifNameNoExt + ".rgb565"); //this writes one big file instead of individual ones
-								
-								
-							} catch (IOException e1) {
-								// TODO Auto-generated catch block
-								//Log.e("PixelAnimate", "Had a problem writing the original unified animation rgb565 file");
-								e1.printStackTrace();
-							}
-				  
+                                      //RGB565
+                                      red = red >> 3;
+                                      green = green >> 2;
+                                      blue = blue >> 3;  
+
+                                      short pixel_to_send = 0;
+                                      int pixel_to_send_int = 0;
+                                      pixel_to_send_int = (red << 11) | (green << 5) | (blue);
+                                      pixel_to_send = (short) pixel_to_send_int;
+                                      //dividing into bytes
+                                      byte byteH=(byte)((pixel_to_send >> 8) & 0x0FF);
+                                      byte byteL=(byte)(pixel_to_send & 0x0FF);
+
+                                      //Writing it to array - High-byte is the first, big endian byte order
+                                      BitmapBytes[numByte]=byteL;
+                                      BitmapBytes[numByte+1]=byteH;
+
+                                      numByte+=2;
+                                  }
+                              }
+
+                                        File decodeddir = new File(decodedDir); //this could be gif, gif64, or usergif
+                                           if(decodeddir.exists() == false) {
+                                                    decodeddir.mkdirs();
+                                            }
+
+                                            try {
+
+                                                    appendWrite(BitmapBytes, decodedDir + gifNameNoExt + ".rgb565"); //this writes one big file instead of individual ones
+
+
+                                            } catch (IOException e1) {
+                                                    // TODO Auto-generated catch block
+                                                    //Log.e("PixelAnimate", "Had a problem writing the original unified animation rgb565 file");
+                                                    e1.printStackTrace();
+                                            }
+                        }
+                  }        
+                   
+                   else {  // we don't have a single frame gif
+                  
+                        for (int i = 0; i < numFrames; i++) { //loop through all the frames
+                           BufferedImage rotatedFrame = d.getFrame(i);  
+                          // rotatedFrame = Scalr.rotate(rotatedFrame, Scalr.Rotation.CW_90, null); //fixed bug, no longer need to rotate the image
+                          // rotatedFrame = Scalr.rotate(rotatedFrame, Scalr.Rotation.FLIP_HORZ, null); //fixed bug, no longer need to flip the image
+
+                           // These worked too but using the scalr library gives quicker results
+                           //rotatedFrame = getFlippedImage(rotatedFrame); //quick hack, for some reason the code below i think is flipping the image so we have to flip it here as a hack
+                           //rotatedFrame = rotate90ToLeft(rotatedFrame);  //quick hack, same as above, have to rotate
+
+                               if (frameWidth != pixelMatrix_width || frameHeight != pixelMatrix_height) {
+                                       System.out.println("Resizing and encoding " + selectedFileName + " frame " + i);
+                                      // rotatedFrame = Scalr.resize(rotatedFrame, pixelMatrix_width, pixelMatrix_height); //resize it, need to make sure we do not anti-alias
+
+                                       try {
+                                                      rotatedFrame = getScaledImage(rotatedFrame, pixelMatrix_width,pixelMatrix_height);
+                                              } catch (IOException e) {
+                                                      // TODO Auto-generated catch block
+                                                      e.printStackTrace();
+                                              }
+
+
+                               }
+                               else {
+                                       System.out.println("Encoding " + selectedFileName + " frame " + i);
+                               }
+
+                           //this code here to convert a java image to rgb565 taken from stack overflow http://stackoverflow.com/questions/8319770/java-image-conversion-to-rgb565/
+                               BufferedImage sendImg  = new BufferedImage(pixelMatrix_width, pixelMatrix_height, BufferedImage.TYPE_USHORT_565_RGB);
+                           sendImg.getGraphics().drawImage(rotatedFrame, 0, 0, pixelMatrix_width, pixelMatrix_height, null);    
+
+                           int numByte=0;
+                           BitmapBytes = new byte[pixelMatrix_width*pixelMatrix_height*2];
+
+                              int x=0;
+                              int y=0;
+                              int len = BitmapBytes.length;
+
+                              for (x=0 ; x < pixelMatrix_height; x++) { //TO DO double check to make this is right
+                                  for (y=0; y < pixelMatrix_width; y++) {
+
+                                      Color c = new Color(sendImg.getRGB(y, x));  // x and y were switched in the original code which was causing the image to rotate by 90 degrees and was flipped horizontally, switching x and y fixes this bug
+                                      int red = c.getRed();
+                                      int green = c.getGreen();
+                                      int blue = c.getBlue();
+
+                                      //RGB565
+                                      red = red >> 3;
+                                      green = green >> 2;
+                                      blue = blue >> 3;    
+
+                                      //A pixel is represented by a 4-byte (32 bit) integer, like so:
+                                      //00000000 00000000 00000000 11111111
+                                      //^ Alpha  ^Red     ^Green   ^Blue
+                                      //Converting to RGB565
+
+                                      short pixel_to_send = 0;
+                                      int pixel_to_send_int = 0;
+                                      pixel_to_send_int = (red << 11) | (green << 5) | (blue);
+                                      pixel_to_send = (short) pixel_to_send_int;
+                                      //dividing into bytes
+                                      byte byteH=(byte)((pixel_to_send >> 8) & 0x0FF);
+                                      byte byteL=(byte)(pixel_to_send & 0x0FF);
+
+                                      //Writing it to array - High-byte is the first, big endian byte order
+                                      BitmapBytes[numByte]=byteL;
+                                      BitmapBytes[numByte+1]=byteH;
+
+                                      numByte+=2;
+                                  }
+                              }
+
+                                        File decodeddir = new File(decodedDir); //this could be gif, gif64, or usergif
+                                           if(decodeddir.exists() == false) {
+                                                 decodeddir.mkdirs();
+                                            }
+
+                                             try {
+
+                                                 appendWrite(BitmapBytes, decodedDir + gifNameNoExt + ".rgb565"); //this writes one big file instead of individual ones
+                                              } catch (IOException e1) {
+                                                     // TODO Auto-generated catch block
+                                                     //Log.e("PixelAnimate", "Had a problem writing the original unified animation rgb565 file");
+                                                     e1.printStackTrace();
+                                             }
+
 	             
 	          } //end for, we are done with the loop so let's now write the file
+                }
 	          // TO DO may need to add the hack to turn a single frame gif into two frames due to Rasp Pi bug but test first
 	           //********** now let's write the meta-data text file
 		   		
-		   		if (frameDelay == 0 || numFrames == 1) {  //we can't have a 0 frame delay so if so, let's add a 100ms delay by default
-		   			frameDelay = 100;
-		   		}
-		   		
-		   		String filetag = String.valueOf(numFrames) + "," + String.valueOf(frameDelay) + "," + String.valueOf(currentResolution) + "," + String.valueOf(md5); //current resolution may need to change to led panel type
+                            if (frameDelay == 0 || numFrames == 1) {  //we can't have a 0 frame delay so if so, let's add a 100ms delay by default
+                                    frameDelay = 100;
+                            }
+
+                            String filetag = String.valueOf(numFrames) + "," + String.valueOf(frameDelay) + "," + String.valueOf(currentResolution) + "," + String.valueOf(md5); //current resolution may need to change to led panel type
 		   				
 	     		   File myFile = new File(decodedDir + gifNameNoExt + ".txt");  				       
 	     		   try {
