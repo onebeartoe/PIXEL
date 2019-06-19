@@ -100,7 +100,7 @@ public class WebEnabledPixel
         cli = new CliPixel(args);
         cli.parse();
         httpPort = cli.getWebPort();
-        port_ = cli.getPort();
+        //port_ = cli.getPort();
 
         String name = getClass().getName();
         logger = Logger.getLogger(name);
@@ -120,6 +120,7 @@ public class WebEnabledPixel
         extractDefaultContent();
         
         loadImageLists();
+        
         loadAnimationList();
         
         createControllers();
@@ -161,13 +162,13 @@ public class WebEnabledPixel
             
             
 // ARE WE GONNA DO ANYTHING WITH THE HttpContext OBJECTS?            
-            HttpContext createContext =     server.createContext("/",     indexHttpHandler);
+            HttpContext createContext =     server.createContext("/", indexHttpHandler);
             
             HttpContext animationsContext = server.createContext("/animation", animationsHttpHandler);
                                             server.createContext("/animation/list", animationsListHttpHandler);
                                             server.createContext("/animations/save", animationsListHttpHandler);
                                             
-            HttpContext arcadeContext = server.createContext("/arcade", arcadeHttpHandler);
+            HttpContext arcadeContext =     server.createContext("/arcade", arcadeHttpHandler);
 
             HttpContext staticContent =     server.createContext("/files", staticFileHttpHandler);
             
@@ -204,6 +205,39 @@ public class WebEnabledPixel
         extractClasspathResourcesList(animationsListFile, animationsListClasspath, pathPrefix);        
     }
     
+     public void extractGifSourceAnimationImages() throws IOException
+    {
+        String animationsListFilesystemPath = pixel.getPixelHome() + "gifsource.text";
+        File animationsListFile = new File(animationsListFilesystemPath);
+        
+        String pathPrefix = "animations/gifsource/";
+        String animationsListClasspath = "/gifsource.text";
+        
+        extractClasspathResourcesList(animationsListFile, animationsListClasspath, pathPrefix);        
+    }
+     
+     public void extractArcadeConsoleGIFs() throws IOException
+    {
+        String animationsListFilesystemPath = pixel.getPixelHome() + "consoles.text";
+        File animationsListFile = new File(animationsListFilesystemPath);
+        
+        String pathPrefix = "arcade/console/";
+        String animationsListClasspath = "/consoles.text";
+        
+        extractClasspathResourcesList(animationsListFile, animationsListClasspath, pathPrefix);        
+    }
+     
+       public void createArcadeDirs() throws IOException
+    {
+        String animationsListFilesystemPath = pixel.getPixelHome() + "arcadedirs.text";
+        File animationsListFile = new File(animationsListFilesystemPath);
+        
+        String pathPrefix = "arcade/";
+        String animationsListClasspath = "/arcadedirs.text";
+        
+        extractArcadeDirs(animationsListFile, animationsListClasspath, pathPrefix);        
+    }
+    
     private void extractDefaultContent()
     {
         try
@@ -212,7 +246,15 @@ public class WebEnabledPixel
                         
             extractStillImages();
             
-            extractAnimationImages();
+            extractAnimationImages();  //generic png thumbs 
+            
+            extractGifSourceAnimationImages(); //the gifsource directory for animations
+            
+            extractArcadeConsoleGIFs();
+            
+            createArcadeDirs();
+            
+            
         } 
         catch (IOException ex)
         {
@@ -272,7 +314,8 @@ public class WebEnabledPixel
 //        }
 //        else
         {
-            logger.log(Level.INFO, "Pixel app is extracting " + classpath);
+            //logger.log(Level.INFO, "Pixel app is extracting " + classpath);
+            //System.out.println("Pixel is extracting " + classpath);
 
             FileOutputStream fos = new FileOutputStream(outfile);
             IOUtils.copy(instream, fos);
@@ -292,7 +335,7 @@ public class WebEnabledPixel
         {
             String message = "Pixel app will not extract the contents of " + resourceListClasspath
                         + ".  The list already exists at " + resourceListFile.getAbsolutePath();
-            logger.log(Level.INFO, message);
+            //logger.log(Level.INFO, message); //logger adds a timestamp line that we don't want
             System.out.println(message);
         }
         else
@@ -313,6 +356,49 @@ public class WebEnabledPixel
                 System.out.println("Extracting " + classpath);
                 
                 extractClasspathResource(classpath, outputDirectory);
+            }
+        }
+    }
+    
+     private void extractArcadeDirs(File resourceListFile, 
+                                                 String resourceListClasspath,
+                                                 String pathPrefix) throws IOException
+    {
+        if(resourceListFile.exists() )
+        {
+            String message = "Pixel app will not extract the contents of " + resourceListClasspath
+                        + ".  The list already exists at " + resourceListFile.getAbsolutePath();
+            //logger.log(Level.INFO, message); //logger adds a timestamp line that we don't want
+            System.out.println(message);
+        }
+        else
+        {
+            // extract the list so on next run the app knows not to extract the default content
+            extractClasspathResource(resourceListClasspath, resourceListFile);
+            
+            String outputDirectoryPath = pixel.getPixelHome() + pathPrefix; //home/arcade
+            File outputDirectory = new File(outputDirectoryPath);
+            
+            TextFileReader tfr = new BufferedTextFileReader();
+            List<String> imageNames = tfr.readTextLinesFromClasspath(resourceListClasspath);
+            
+            for(String name : imageNames)
+            {
+                
+                
+                String outputArcadeDirectoryPath = pixel.getPixelHome() + pathPrefix + name;
+                
+                File outputArcadeDirectory = new File(outputArcadeDirectoryPath);
+                
+                System.out.println("Creating Arcade Directory: " + outputArcadeDirectoryPath);
+                
+                if( !outputArcadeDirectory.exists() )
+                    {
+                        outputArcadeDirectory.mkdirs();
+                    }
+                
+               // new File(dirName).mkdir();
+                //extractClasspathResource(classpath, outputDirectory);
             }
         }
     }
@@ -448,7 +534,7 @@ public class WebEnabledPixel
         @Override
         protected void run(String[] args) throws IOException 
         {
-            System.out.println("now it begins!");
+            //System.out.println("now it begins!");
             
             InputStreamReader isr = new InputStreamReader(System.in);
             BufferedReader reader = new BufferedReader(isr);
