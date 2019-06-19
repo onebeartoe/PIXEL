@@ -49,16 +49,13 @@ import purejavacomm.CommPort;
 import purejavacomm.CommPortIdentifier;
 import purejavacomm.PortInUseException;
 
-
-
-
-
-
 public class SerialPortIOIOConnectionBootstrap implements
 		IOIOConnectionBootstrap {
 	private static final String TAG = "SerialPortIOIOConnectionBootstrap";
 	private static String pixelPrefNode = "/com/ledpixelart/pc";
 	private static Preferences prefs;
+        private static String port_ = null;
+        private static boolean settingsINIExists = false;
 
 	@Override
 	public void getFactories(Collection<IOIOConnectionFactory> result) {
@@ -123,23 +120,33 @@ public class SerialPortIOIOConnectionBootstrap implements
             List<String> result = new LinkedList<String>();
             
             //let's look in settings.ini for the port 
-            Ini ini = null;
-             try {
-                ini = new Ini(new File("settings.ini"));
-             } catch (IOException ex) {
-                Logger.getLogger(SerialPortIOIOConnectionBootstrap.class.getName()).log(Level.SEVERE, null, ex);
-             }
-             System.out.println("Port was found in settings.ini: " + ini.get("PIXELCADE SETTINGS", "port"));
-             String port_ = null;
-             //only go here if settings.ini exists
-             port_ = ini.get("PIXELCADE SETTINGS", "port");
-            
-             if (port_ != null) {
-                 result.add(port_);
-	         return result;
+             File file = new File("settings.ini");
+             if (file.exists() && !file.isDirectory()) { 
                  
-             } else {
-            
+                Ini ini = null;
+                try {
+                   ini = new Ini(new File("settings.ini"));  //uses the ini4j lib
+                } catch (IOException ex) {
+                   Logger.getLogger(SerialPortIOIOConnectionBootstrap.class.getName()).log(Level.SEVERE, null, ex);
+                }
+                //only go here if settings.ini exists
+                port_ = ini.get("PIXELCADE SETTINGS", "port");
+                settingsINIExists = true;
+
+                 if (port_.equals("COM99")) {  //COM99 is the default so this means the user has not specified the port in settings.ini
+                    System.out.println("All ports will be scanned to detect your PIXEL board");
+                    System.out.println("To save time, edit settings.ini in the same directory as this jar or .exe and specify the port");
+                    System.out.println("Examples: port=COM7 for Windows, port=/dev/tty.usbmodemFA131 for Mac, and port=/dev/ACM0 for Raspberry Pi");
+                }
+
+                if (port_ != null && !port_.equals("COM99")) {  //COM99 is the default in settings.ini which means the user didn't touch it so don't use if that's the case
+                    System.out.println("PIXEL port found in settings.ini: port=" + port_);
+                    result.add(port_);
+                    return result;
+                }
+                    
+             } else {   //settings.ini does not exist so let's proceed looking for the port
+               
                 String property = System.getProperty("ioio.SerialPorts"); //if the user specified the port, we should honor that but what if they did that and it's in prefs too, which one to choose?
                     //if the user forced it, then we should take that one
 
@@ -149,9 +156,7 @@ public class SerialPortIOIOConnectionBootstrap implements
                     //	result.add(org.onebeartoe.web.enabled.pixel.WebEnabledPixel.port_);
                     //	return result;
 
-                    //} else {
-
-                    if (property == null) { //the user didn't specify a command line so let's check prefs
+                if (property == null) { //the user didn't specify a command line so let's check prefs which would have been set from the pixel desktop app
                             //and then should we also save it in prefs too? YES but let's not put it here and rather save it during IOIO setup because only then we know it was valid
                         //the user didn't force it in the command line so now let's check the preferences and see if there
                             prefs = Preferences.userRoot().node(pixelPrefNode); //let's get the port from preferences
@@ -159,10 +164,19 @@ public class SerialPortIOIOConnectionBootstrap implements
 
                             if (property.equals("")) {  //but if prefs is also null then we need to get out
                                     property = null;
+                                    
+                                    if (!settingsINIExists) {  //there was no prefs and no settings.ini so let's tell the user about settings.ini
+                                         System.out.println("All ports will be scanned to detect your PIXEL board");
+                                         System.out.println("To save time, you can create a file called settings.ini in the same directory as this jar or .exe in this format:");
+                                         System.out.println("[PIXELCADE SETTINGS]");
+                                         System.out.println("port=COM7");
+                                         System.out.println("ledResolution=128x32");
+                                         System.out.println("Examples: port=COM7 for Windows, port=/dev/tty.usbmodemFA131 for Mac, and port=/dev/ACM0 for Raspberry Pi");
+                                         System.out.println("Examples: ledResolution=64x32 for a single LED panel arcade marquee installation");
+                                         System.out.println("Examples: ledResolution=128x32 for a two LED panel arcade marquee installation");
+                                    }
                                     return null;
                             }
-
-
                     }
 
                     //List<String> result = new LinkedList<String>();
@@ -172,6 +186,7 @@ public class SerialPortIOIOConnectionBootstrap implements
                     }
                     return result;
              }
+            return null;
 	}
 
 	static boolean checkIdentifier(CommPortIdentifier id) {
