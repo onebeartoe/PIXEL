@@ -221,10 +221,32 @@ public class WebEnabledPixel
         String animationsListFilesystemPath = pixel.getPixelHome() + "consoles.text";
         File animationsListFile = new File(animationsListFilesystemPath);
         
-        String pathPrefix = "arcade/console/";
+        //String pathPrefix = "arcade/console/";
+        String pathPrefix = "console/";
         String animationsListClasspath = "/consoles.text";
         
         extractClasspathResourcesList(animationsListFile, animationsListClasspath, pathPrefix);        
+    }
+     
+      public void extractArcadeMAMEGIFs() throws IOException
+    {
+        String animationsListFilesystemPath = pixel.getPixelHome() + "mame.text";
+        File animationsListFile = new File(animationsListFilesystemPath);
+        
+        //String pathPrefix = "arcade/mame/";
+        String pathPrefix = "mame/";
+        String animationsListClasspath = "/mame.text";
+        
+        String mamePath = pixel.getPixelHome() + "mame"; //home/pixelcade/mame
+        File mameDirectory = new File(mamePath);
+        
+        if (!mameDirectory.exists()) {  //let's skip if the mame folder is already there, it will be there on Windows because of the installer but won't be there for Pi users
+            extractClasspathResourcesList(animationsListFile, animationsListClasspath, pathPrefix);   
+        } else {
+            String message = "Pixel app will not extract the contents of " + mamePath
+                        + ".  The folder already exists";
+            System.out.println(message);
+        }
     }
      
        public void createArcadeDirs() throws IOException
@@ -232,7 +254,8 @@ public class WebEnabledPixel
         String animationsListFilesystemPath = pixel.getPixelHome() + "arcadedirs.text";
         File animationsListFile = new File(animationsListFilesystemPath);
         
-        String pathPrefix = "arcade/";
+        //String pathPrefix = "arcade/";
+        String pathPrefix = "";
         String animationsListClasspath = "/arcadedirs.text";
         
         extractArcadeDirs(animationsListFile, animationsListClasspath, pathPrefix);        
@@ -251,6 +274,8 @@ public class WebEnabledPixel
             extractGifSourceAnimationImages(); //the gifsource directory for animations
             
             extractArcadeConsoleGIFs();
+            
+            extractArcadeMAMEGIFs();          //we skip this is the arcade/mame folder is already there
             
             createArcadeDirs();
             
@@ -346,6 +371,8 @@ public class WebEnabledPixel
             String outputDirectoryPath = pixel.getPixelHome() + pathPrefix;
             File outputDirectory = new File(outputDirectoryPath);
             
+            //to do add check if this dir already exists and skip if so
+            
             TextFileReader tfr = new BufferedTextFileReader();
             List<String> imageNames = tfr.readTextLinesFromClasspath(resourceListClasspath);
             
@@ -376,17 +403,17 @@ public class WebEnabledPixel
             // extract the list so on next run the app knows not to extract the default content
             extractClasspathResource(resourceListClasspath, resourceListFile);
             
-            String outputDirectoryPath = pixel.getPixelHome() + pathPrefix; //home/arcade
-            File outputDirectory = new File(outputDirectoryPath);
+            //String outputDirectoryPath = pixel.getPixelHome() + pathPrefix; //home/arcade
+            //String outputDirectoryPath = pixel.getPixelHome(); //home/arcade
+            //File outputDirectory = new File(outputDirectoryPath);
             
             TextFileReader tfr = new BufferedTextFileReader();
             List<String> imageNames = tfr.readTextLinesFromClasspath(resourceListClasspath);
             
             for(String name : imageNames)
-            {
-                
-                
-                String outputArcadeDirectoryPath = pixel.getPixelHome() + pathPrefix + name;
+            { 
+                //String outputArcadeDirectoryPath = pixel.getPixelHome() + pathPrefix + name;
+                String outputArcadeDirectoryPath = pixel.getPixelHome() +  name;
                 
                 File outputArcadeDirectory = new File(outputArcadeDirectoryPath);
                 

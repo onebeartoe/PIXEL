@@ -93,7 +93,7 @@ public class Pixel
     
     private String decodedAnimationsPath;
     
-    private String arcadePath;
+    //private String arcadePath;
     
     private String decodedArcadePath;
     
@@ -129,6 +129,8 @@ public class Pixel
     private HashMap<String, Font> fonts;
 
     private String scrollingText;
+    
+    private String filetag;
     
     /**
      * This is length in milliseconds of the delay between each scrolling text redraw.
@@ -170,12 +172,12 @@ public class Pixel
         {
             userHome = System.getProperty("user.home");
             
-            pixelHome = userHome + "/pixel/";
+            pixelHome = userHome + "/pixelcade/";
             
             animationsPath = pixelHome + "animations/";            
             decodedAnimationsPath = animationsPath + "decoded/";
             
-            arcadePath = pixelHome + "arcade/";            
+            //arcadePath = pixelHome + "arcade/";            
             //decodedArcadePath = arcadePath + "decoded/"; //home/arcade/mame/decoded or /home/arcade/atari2600/decoded
             
             imagesPath = pixelHome + "images/";
@@ -301,6 +303,10 @@ public class Pixel
     {
         return pixelHome;
     }
+    
+    //public String getArcadeHome() {
+    //    return arcadePath;
+    //}
     
     //*** Al added, this code is to support the SD card and local animations
     public void interactiveMode() {  //puts PIXEL into interactive mode
@@ -1106,7 +1112,7 @@ private static String checksum(String filepath, MessageDigest md) throws IOExcep
 		   			frameDelay = 100;
 		   		}
 		   		
-		   		String filetag = String.valueOf(numFrames) + "," + String.valueOf(frameDelay) + "," + String.valueOf(currentResolution); //current resolution may need to change to led panel type
+		   		filetag = String.valueOf(numFrames) + "," + String.valueOf(frameDelay) + "," + String.valueOf(currentResolution); //current resolution may need to change to led panel type
 		   				
 	     		   File myFile = new File(decodedDir + gifNameNoExt + ".txt");  				       
 	     		   try {
@@ -1285,7 +1291,7 @@ private static String checksum(String filepath, MessageDigest md) throws IOExcep
 		   			frameDelay = 100;
 		   		}
 		   		
-		   		String filetag = String.valueOf(numFrames) + "," + String.valueOf(frameDelay) + "," + String.valueOf(currentResolution); //current resolution may need to change to led panel type
+		   		filetag = String.valueOf(numFrames) + "," + String.valueOf(frameDelay) + "," + String.valueOf(currentResolution); //current resolution may need to change to led panel type
 		   				
 	     		   File myFile = new File(decodedDir + gifName + ".txt");  				       
 	     		   try 
@@ -1322,15 +1328,12 @@ private static String checksum(String filepath, MessageDigest md) throws IOExcep
 		//we also need to get the original width and vuHeight of the gif which is easily done from the gif decoder class
 		//String gifName = FilenameUtils.removeExtension(gifName); //with no extension
 		
+       
                 String selectedFileName = FilenameUtils.getName(gifFilePath); 
                 fileType = FilenameUtils.getExtension(gifFilePath);
                 gifNameNoExt = FilenameUtils.removeExtension(selectedFileName); //with no extension
 		
 		System.out.println("Arcade file name: " + selectedFileName);
-		//System.out.println("User selected file type: " + fileType);
-		//System.out.println("User selected file name no extension: " + gifNameNoExt);
-		
-		//String gifNamePath = currentDir + "/" + gifName + ".gif";  //   ex. c:\animation\tree.gif
 		System.out.println("Arcade file name path: " + gifFilePath);
 		File file = new File(gifFilePath);
 		if (file.exists()) {
@@ -1340,10 +1343,9 @@ private static String checksum(String filepath, MessageDigest md) throws IOExcep
                             //since we are decoding, we need to first make sure the .rgb565 and .txt decoded file is not there and delete if so.
 			  String gifName565Path =  decodedDir + gifNameNoExt + ".rgb565";  //   ex. c:\animation\decoded\tree.rgb565
 			  String gifNameTXTPath = decodedDir + gifNameNoExt + ".txt";  //   ex. c:\animation\decoded\tree.txt
-			  
+			 
+                          
 			  //since we are decoding, we need to first make sure the .rgb565 and .txt decoded file is not there and delete if so.
-			//  String gifName565Path = decodedAnimationsPath + gifName + ".rgb565";  //   ex. c:\animation\decoded\tree.rgb565
-			//  String gifNameTXTPath = decodedAnimationsPath + gifName + ".txt";  //   ex. c:\animation\decoded\tree.txt
 			  
 			  File file565 = new File(gifName565Path);
 			  File fileTXT = new File(gifNameTXTPath);
@@ -1370,13 +1372,13 @@ private static String checksum(String filepath, MessageDigest md) throws IOExcep
 	          	          
 	          if (numFrames == 1) {  //ok this is a hack, for some reason only on raspberry pi, single frame gifs are not writing so the work around is to write 2 frames for a single frame GIF
                            for (int i = 0; i < 2; i++) { 
-                           BufferedImage rotatedFrame = d.getFrame(i);  
+                           BufferedImage rotatedFrame = d.getFrame(0);  
                                if (frameWidth != pixelMatrix_width || frameHeight != pixelMatrix_height) {
                                        System.out.println("Resizing and encoding " + selectedFileName + " frame " + i);
-                                      // rotatedFrame = Scalr.resize(rotatedFrame, pixelMatrix_width, pixelMatrix_height); //resize it, need to make sure we do not anti-alias
 
                                        try {
                                                       rotatedFrame = getScaledImage(rotatedFrame, pixelMatrix_width,pixelMatrix_height);
+                                                     
                                               } catch (IOException e) {
                                                       // TODO Auto-generated catch block
                                                       e.printStackTrace();
@@ -1534,16 +1536,24 @@ private static String checksum(String filepath, MessageDigest md) throws IOExcep
 	             
 	          } //end for, we are done with the loop so let's now write the file
                 }
-	          // TO DO may need to add the hack to turn a single frame gif into two frames due to Rasp Pi bug but test first
+	       
 	           //********** now let's write the meta-data text file
 		   		
                             if (frameDelay == 0 || numFrames == 1) {  //we can't have a 0 frame delay so if so, let's add a 100ms delay by default
-                                    frameDelay = 100;
+                                    frameDelay = 100; //to do fix there is some frame delay issue on some gifs
                             }
+                            
+                            if (numFrames == 1) {  //again because of the above hack where single frame gifs aren't writing on raspberry pi, we'll turn a single frame gif into two frames
+		   			filetag = "2" + "," + String.valueOf(frameDelay) + "," + String.valueOf(currentResolution) + "," + String.valueOf(md5); //current resolution may need to change to led panel type, we're adding the md5 here so we can check if unique file
+		   		}
+		   		else {
+		   			filetag = String.valueOf(numFrames) + "," + String.valueOf(frameDelay) + "," + String.valueOf(currentResolution) + "," + String.valueOf(md5); //current resolution may need to change to led panel type
+		   	   }
 
-                            String filetag = String.valueOf(numFrames) + "," + String.valueOf(frameDelay) + "," + String.valueOf(currentResolution) + "," + String.valueOf(md5); //current resolution may need to change to led panel type
+                           // String filetag = String.valueOf(numFrames) + "," + String.valueOf(frameDelay) + "," + String.valueOf(currentResolution) + "," + String.valueOf(md5); //current resolution may need to change to led panel type
 		   				
-	     		   File myFile = new File(decodedDir + gifNameNoExt + ".txt");  				       
+	     		   File myFile = new File(decodedDir + gifNameNoExt + ".txt");  
+                         
 	     		   try {
 					myFile.createNewFile();
 					FileOutputStream fOut = null;
@@ -1819,11 +1829,11 @@ private static String checksum(String filepath, MessageDigest md) throws IOExcep
         //arcadePath = pixelHome + "arcade/";     //we delcared this up front   
         // animationsPath = pixelHome + "animations/";            
         //    decodedAnimationsPath = animationsPath + "decoded/";
-        decodedAnimationsPath =  arcadePath + selectedPlatformName + "/decoded/";   //pixelhome/arcade/mame/decoded
-        
+        //decodedAnimationsPath =  arcadePath + selectedPlatformName + "/decoded/";   //pixelhome/arcade/mame/decoded
+        decodedAnimationsPath =  pixelHome + selectedPlatformName + "/decoded/";   //pixelcade/mame/decoded
         //pixelHome = userHome + "/pixel/";
-        
-        gifFilePath = pixelHome + "arcade/" + selectedPlatformName + "/" + selectedFileName; //user home/pixel/arcade/mame/digdug.gif
+        //gifFilePath = pixelHome + "arcade/" + selectedPlatformName + "/" + selectedFileName; //user home/pixel/arcade/mame/digdug.gif
+        gifFilePath = pixelHome + selectedPlatformName + "/" + selectedFileName; //user home/pixelcade/mame/digdug.gif
         //gifSourcePath = "animations/gifsource/";
         
         //let's make sure the target gif exists before proceeding

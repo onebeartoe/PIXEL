@@ -24,7 +24,8 @@ public class ArcadeHttpHandler extends ImageResourceHttpHandler
     {
         super(application);
         
-        basePath = "arcade/";
+        //basePath = "arcade/";
+        basePath = "";
         defaultImageClassPath = "arrows.png"; //to do change this
         modeName = "arcade";
     }
@@ -55,7 +56,8 @@ public class ArcadeHttpHandler extends ImageResourceHttpHandler
                     
             //let's make sure this file exists and skip if not
             
-            String arcadeFilePath = application.getPixel().getPixelHome() + "arcade/" + platformName + "/" + arcadeName;
+            //String arcadeFilePath = application.getPixel().getPixelHome() + "arcade/" + platformName + "/" + arcadeName;
+            String arcadeFilePath = application.getPixel().getPixelHome() + platformName + "/" + arcadeName;
                    
             File arcadeFile = new File(arcadeFilePath);
 
@@ -111,7 +113,8 @@ public class ArcadeHttpHandler extends ImageResourceHttpHandler
                        BufferedImage image;
 
 
-                      String path = application.getPixel().getPixelHome() + "arcade/" + platformName + "/" + arcadeName;
+                      //String path = application.getPixel().getPixelHome() + "arcade/" + platformName + "/" + arcadeName;
+                      String path = application.getPixel().getPixelHome() + platformName + "/" + arcadeName;
 
                       File file = new File(path);
 
