@@ -248,6 +248,43 @@ public class WebEnabledPixel
             System.out.println(message);
         }
     }
+      
+       public void extractRetroPie() throws IOException
+    {
+        String contentClasspath = "/retropie/";
+        String inpath = contentClasspath + "mame.csv";
+
+        String pixelHomePath = pixel.getPixelHome();
+        File pixelHomeDirectory = new File(pixelHomePath);
+            
+       extractClasspathResource(inpath, pixelHomeDirectory);
+        
+        inpath = contentClasspath + "pixel-logo.txt";
+        extractClasspathResource(inpath, pixelHomeDirectory);
+        
+        inpath = contentClasspath + "pixelc.jar";
+        extractClasspathResource(inpath, pixelHomeDirectory);
+        
+        inpath = contentClasspath + "retrogame.cfg";
+        extractClasspathResource(inpath, pixelHomeDirectory);
+        
+        inpath = contentClasspath + "runcommand-onend.sh";
+        extractClasspathResource(inpath, pixelHomeDirectory);
+        
+          inpath = contentClasspath + "runcommand-onstart.sh";
+        extractClasspathResource(inpath, pixelHomeDirectory);
+        
+          inpath = contentClasspath + "shutdown_button.py";
+        extractClasspathResource(inpath, pixelHomeDirectory);
+        
+          inpath = contentClasspath + "shutdown_button.service";
+        extractClasspathResource(inpath, pixelHomeDirectory);
+        
+          inpath = contentClasspath + "test1.sh";
+        extractClasspathResource(inpath, pixelHomeDirectory);
+    }
+      
+  
      
        public void createArcadeDirs() throws IOException
     {
@@ -276,6 +313,10 @@ public class WebEnabledPixel
             extractArcadeConsoleGIFs();
             
             extractArcadeMAMEGIFs();          //we skip this is the arcade/mame folder is already there
+            
+            if (isMac() || isUnix())  {       //extract RetroPie files if mac or Pi, we don't do this for windows as the installer takes care of that
+                extractRetroPie();
+            }
             
             createArcadeDirs();
             
@@ -368,7 +409,15 @@ public class WebEnabledPixel
             // extract the list so on next run the app knows not to extract the default content
             extractClasspathResource(resourceListClasspath, resourceListFile);
             
-            String outputDirectoryPath = pixel.getPixelHome() + pathPrefix;
+            String outputDirectoryPath = "";
+            
+            if (pathPrefix == "") {
+                outputDirectoryPath = pixel.getPixelHome();  //this means we're copying into the root of pixelcade
+            } else {
+                outputDirectoryPath = pixel.getPixelHome() + pathPrefix;
+            }
+            
+            //String outputDirectoryPath = pixel.getPixelHome() + pathPrefix;
             File outputDirectory = new File(outputDirectoryPath);
             
             //to do add check if this dir already exists and skip if so
@@ -379,6 +428,49 @@ public class WebEnabledPixel
             for(String name : imageNames)
             {
                 String classpath = "/" + pathPrefix + name;
+                
+                System.out.println("Extracting " + classpath);
+                
+                extractClasspathResource(classpath, outputDirectory);
+            }
+        }
+    }
+    
+    private void extractClasspathResourcesListRoot (File resourceListFile, 
+                                                 String resourceListClasspath
+                                                 ) throws IOException
+    {
+        if(resourceListFile.exists() )
+        {
+            String message = "Pixel app will not extract the contents of " + resourceListClasspath
+                        + ".  The list already exists at " + resourceListFile.getAbsolutePath();
+            //logger.log(Level.INFO, message); //logger adds a timestamp line that we don't want
+            System.out.println(message);
+        }
+        else
+        {
+            // extract the list so on next run the app knows not to extract the default content
+            extractClasspathResource(resourceListClasspath, resourceListFile);
+            
+       //     inpath = contentClasspath + "pixel.js";
+       // extractClasspathResource(inpath, pixelHomeDirectory);
+        
+       // inpath = contentClasspath + "images.css";
+       // extractClasspathResource(inpath, pixelHomeDirectory);
+            
+            String outputDirectoryPath = pixel.getPixelHome() ; 
+            File outputDirectory = new File(outputDirectoryPath);
+            
+            //to do add check if this dir already exists and skip if so
+            
+            TextFileReader tfr = new BufferedTextFileReader();
+            List<String> imageNames = tfr.readTextLinesFromClasspath(resourceListClasspath);
+            
+            for(String name : imageNames)
+            {
+               // String classpath = "/" + pathPrefix + name;
+                
+                String classpath = name;
                 
                 System.out.println("Extracting " + classpath);
                 
@@ -429,6 +521,24 @@ public class WebEnabledPixel
             }
         }
     }
+     
+     public static boolean isWindows() {
+
+		return (OS.indexOf("win") >= 0);
+
+	}
+
+	public static boolean isMac() {
+
+		return (OS.indexOf("mac") >= 0);
+
+	}
+
+	public static boolean isUnix() {
+
+		return (OS.indexOf("nix") >= 0 || OS.indexOf("nux") >= 0 || OS.indexOf("aix") > 0 );
+		
+	}
 
     public Pixel getPixel()
     {
