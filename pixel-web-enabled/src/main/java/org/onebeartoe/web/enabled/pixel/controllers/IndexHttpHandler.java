@@ -1,5 +1,3 @@
-/*
- */
 package org.onebeartoe.web.enabled.pixel.controllers;
 
 import com.sun.net.httpserver.HttpExchange;
@@ -20,5 +18,4 @@ public class IndexHttpHandler extends TextHttpHandler
         return response;
     }
 }
-
 

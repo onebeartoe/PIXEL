@@ -22,3 +22,5 @@
 /pixel-plugins/target/
 /pixel-commons/target/
 /pixel-web-enabled/target/
+/pixel-web-enabled copy/target/
+/pixelcade-frontend/target/
