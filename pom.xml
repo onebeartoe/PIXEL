@@ -34,6 +34,7 @@
         <module>pixel-pc</module>
         <module>pixel-jee</module>
         <module>pixel-web-enabled</module>
+      <!--  <module>pixelcade-front-end</module> -->
     </modules>
 
     <properties>
