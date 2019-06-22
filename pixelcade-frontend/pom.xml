@@ -67,7 +67,7 @@
 		<configuration>
 		    <archive>
 			<manifest>
-			    <mainClass>org.onebeartoe.front.end.pixelcade.WebEnabledPixel</mainClass>
+			    <mainClass>org.onebeartoe.front.end.pixelcade.PixelcadeFrontEnd</mainClass>
 			</manifest>
 		    </archive>
                     

@@ -31,14 +31,10 @@ import org.ini4j.Ini;
 import org.onebeartoe.io.TextFileReader;
 import org.onebeartoe.io.buffered.BufferedTextFileReader;
 
-
-
-
-
 /**
  * @author Roberto Marquez
  */
-public class WebEnabledPixel
+public class PixelcadeFrontEnd
 {
     protected Logger logger;
 
@@ -57,7 +53,7 @@ public class WebEnabledPixel
     public static void main(String[] args) throws MalformedURLException, IOException
     {
         
-        WebEnabledPixel app = new WebEnabledPixel(args);
+        PixelcadeFrontEnd app = new PixelcadeFrontEnd(args);
         //app.startServer();
         //System.out.println("hello there");
         
@@ -99,7 +95,7 @@ public class WebEnabledPixel
         }
     }
     
-     public WebEnabledPixel(String[] args)
+     public PixelcadeFrontEnd(String[] args)
     {
         cli = new CliPixel(args);
         cli.parse();
