@@ -143,6 +143,8 @@ public class Pixel
     
     private Logger logger;
     
+    private String pixelHardwareId = null;
+    
     /**
      * @param KIND
      * @param resolution 
@@ -1680,6 +1682,9 @@ private static String checksum(String filepath, MessageDigest md) throws IOExcep
       return localFileImagePath;
   }
   
+   public String getPIXELHardwareID() {
+       return pixelHardwareId;
+   }
   
     public int getyScrollingTextOffset() 
     {
@@ -1790,7 +1795,7 @@ private static String checksum(String filepath, MessageDigest md) throws IOExcep
         
         System.out.println("The existing timer was stopped");
 		
-        String pixelHardwareId = "not found";
+        pixelHardwareId = "not found";
         try 
         {
             pixelHardwareId = ioiO.getImplVersion(v.HARDWARE_VER);

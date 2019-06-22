@@ -41,11 +41,12 @@ public class ArcadeHttpHandler extends ImageResourceHttpHandler
         Pixel pixel = application.getPixel();
         pixel.stopExistingTimer();
         
-        if (saveAnimation) {
+        if (saveAnimation && pixel.getPIXELHardwareID().substring(0,4).equals("PIXL")) {
             pixel.interactiveMode();
+            pixel.writeMode(10);
             pixel.writeImagetoMatrix(image, pixel.KIND.width, pixel.KIND.height); //to do add save parameter here
+            pixel.playLocalMode();
         } else {
-
             pixel.writeImagetoMatrix(image, pixel.KIND.width, pixel.KIND.height); //to do add save parameter here
         }
     }
