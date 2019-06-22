@@ -55,6 +55,7 @@ public class SerialPortIOIOConnectionBootstrap implements
 	private static String pixelPrefNode = "/com/ledpixelart/pc";
 	private static Preferences prefs;
         private static String port_ = null;
+        public static String ledResolution_=null;
         private static boolean settingsINIExists = false;
 
 	@Override
@@ -123,15 +124,16 @@ public class SerialPortIOIOConnectionBootstrap implements
              File file = new File("settings.ini");
              if (file.exists() && !file.isDirectory()) { 
                  
-                Ini ini = null;
+               Ini ini = null;
                 try {
                    ini = new Ini(new File("settings.ini"));  //uses the ini4j lib
                 } catch (IOException ex) {
                    Logger.getLogger(SerialPortIOIOConnectionBootstrap.class.getName()).log(Level.SEVERE, null, ex);
                 }
                 //only go here if settings.ini exists
-                port_ = ini.get("PIXELCADE SETTINGS", "port");
-                settingsINIExists = true;
+                port_ = ini.get("PIXELCADE SETTINGS", "port");  
+                ledResolution_=ini.get("PIXELCADE SETTINGS", "ledResolution"); 
+                settingsINIExists = true; 
 
                  if (port_.equals("COM99")) {  //COM99 is the default so this means the user has not specified the port in settings.ini
                     System.out.println("All ports will be scanned to detect your PIXEL board");
@@ -203,4 +205,5 @@ public class SerialPortIOIOConnectionBootstrap implements
 		}
 		return true;
 	}
+         
 }
