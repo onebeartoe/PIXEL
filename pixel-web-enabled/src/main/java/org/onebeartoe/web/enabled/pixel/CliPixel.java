@@ -24,8 +24,8 @@ public class CliPixel
  //private int ledMatrixType = 3;
  //private int ledMatrixTypeDefault = 3;
  private int ledMatrixType = 11;
- private int ledMatrixTypeDefault = 15;
- private int ledMatrixTypeMax = 17;
+ private int ledMatrixTypeDefault = 11;
+ private int ledMatrixTypeMax = 25;
  
  private int yTextOffset = 0;
 
@@ -37,13 +37,20 @@ public class CliPixel
   options.addOption("h", "help", false, "show help.");
   options.addOption("w", "webport", true, "Listening port. Default Port = 8080");
   //options.addOption("p", "port", true, "PIXEL Port. No Default");
-  options.addOption("l", "ledmatrix", true, "Sets the LED matrix type. Default = 3\n " +
-                    "0=32x16 Seeed 1=32x16 Adafruit, 2=32x32 Seeed\n" +
-                    "3=PIXEL V2, 4=64x32 Seeed, 5=32x64 Seeed, 6=Seeed 2 Mirrored\n" +
-                    "7=Seeed 4 Mirrored (does not work), 8=128x32 Seeed, 9=32x128 Seeed\n" +
-                    "10=SUPER PIXEL 64x64, 11=32x32 Adafruit, 12=32x32 Adafruit Color Swap\n" +
-                    "13=64x32 Adafruit, 14=64x64 Adafruit, 15=128x32 Adafruit\n" +
-                    "16=32x128 Adafruit, 17=64x16 Adafruit\n");
+  options.addOption("l", "ledmatrix", true, "Sets the LED matrix type. Default = 11\n " +
+                    "Example -l 15 or --ledmatrix 15\n" +
+                    "0=32x16 Old 1=32x16, 2=32x32 Old\n" +
+                    "3=PIXEL V2 32x32 Old, 4=64x32 Old, 5=32x64 Old, 6=Old 2 Mirrored\n" +
+                    "7=Old 4 Mirrored (does not work), 8=128x32 Old, 9=32x128 Old\n" +
+                    "10=SUPER PIXEL 64x64, 11=32x32, 12=32x32 Color Swap\n" +
+                    "13=64x32, 14=64x64, 15=128x32\n" +
+                    "16=32x128, 17=64x16, \n" +
+                    "18=64x32 Mirrored, 19=256x16, \n" +
+                    "20=32x32 Mirrored, 21=32x32 4x Mirrored, \n" +
+                    "22=128x16, 23=ALIEXPRESS RANDOM1 32x32, \n" +
+                    "24=64x32 COLOR SWAP, 25=64x32 COLOR SWAP\n");
+  
+  
   options.addOption("m", "matrix", true, "Sets the LED matrix type, same as l option");
   options.addOption("y", "y text offset", true, "This is the y offset for scrolling text.");
  }
