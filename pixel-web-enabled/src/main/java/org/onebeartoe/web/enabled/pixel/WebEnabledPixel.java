@@ -7,6 +7,8 @@ import com.sun.net.httpserver.HttpServer;
 
 import ioio.lib.api.RgbLedMatrix;
 import ioio.lib.api.exception.ConnectionLostException;
+import ioio.lib.pc.SerialPortIOIOConnectionBootstrap;
+//import static ioio.lib.pc.SerialPortIOIOConnectionBootstrap.ledResolution_;
 import ioio.lib.util.BaseIOIOLooper;
 import ioio.lib.util.IOIOLooper;
 import ioio.lib.util.pc.IOIOConsoleApp;
@@ -31,6 +33,7 @@ import java.util.logging.Logger;
 import java.util.Timer;
 
 import org.apache.commons.io.IOUtils;
+import org.ini4j.Ini;
 
 import org.onebeartoe.io.TextFileReader;
 import org.onebeartoe.io.buffered.BufferedTextFileReader;
@@ -69,6 +72,8 @@ public class WebEnabledPixel
     private Timer searchTimer;
     
     private Pixel pixel;
+    
+    private String ledResolution_ = "";
 
     //  1: 32x16 from Sparkfun - ioio.lib.api.RgbLedMatrix.Matrix.ADAFRUIT_32x16
     //  3: translates to RgbLedMatrix.Matrix.SEEEDSTUDIO_32x32;
@@ -100,7 +105,7 @@ public class WebEnabledPixel
         cli = new CliPixel(args);
         cli.parse();
         httpPort = cli.getWebPort();
-        //port_ = cli.getPort();
+        //port_ = cli.getPort();  //didn't work out from command line
 
         String name = getClass().getName();
         logger = Logger.getLogger(name);
@@ -108,6 +113,31 @@ public class WebEnabledPixel
         int yTextOffset = cli.getyTextOffset();
         
         LED_MATRIX_ID = cli.getLEDMatrixType(); //let's get this from the command line class (CliPixel.java) and if there is no command line entered, we'll take the default of 3
+        
+        //we can use the led matrix from the command line but let's override it if there is a settings.ini
+         File file = new File("settings.ini");
+             if (file.exists() && !file.isDirectory()) { 
+                 
+                Ini ini = null;
+                try {
+                   ini = new Ini(new File("settings.ini"));  //uses the ini4j lib
+                } catch (IOException ex) {
+                   Logger.getLogger(SerialPortIOIOConnectionBootstrap.class.getName()).log(Level.SEVERE, null, ex);
+                }
+                //only go here if settings.ini exists
+                
+                ledResolution_=ini.get("PIXELCADE SETTINGS", "ledResolution"); 
+                
+                if (ledResolution_.equals("128x32")) {
+                    System.out.println("PIXEL resolution found in settings.ini: resolution=" + ledResolution_);
+                    LED_MATRIX_ID = 15;
+                } 
+                
+                if (ledResolution_.equals("64x32")) {
+                    System.out.println("PIXEL resolution found in settings.ini: resolution=" + ledResolution_);
+                    LED_MATRIX_ID = 13;
+                } 
+         }
         
         pixelEnvironment = new PixelEnvironment(LED_MATRIX_ID);
         
@@ -161,8 +191,9 @@ public class WebEnabledPixel
             
             
             
-// ARE WE GONNA DO ANYTHING WITH THE HttpContext OBJECTS?            
-            HttpContext createContext =     server.createContext("/", indexHttpHandler);
+// ARE WE GONNA DO ANYTHING WITH THE HttpContext OBJECTS?   
+            
+            HttpContext createContext =    server.createContext("/", indexHttpHandler);
             
             HttpContext animationsContext = server.createContext("/animation", animationsHttpHandler);
                                             server.createContext("/animation/list", animationsListHttpHandler);
@@ -271,16 +302,19 @@ public class WebEnabledPixel
         inpath = contentClasspath + "runcommand-onend.sh";
         extractClasspathResource(inpath, pixelHomeDirectory);
         
-          inpath = contentClasspath + "runcommand-onstart.sh";
+        inpath = contentClasspath + "runcommand-onstart.sh";
         extractClasspathResource(inpath, pixelHomeDirectory);
         
-          inpath = contentClasspath + "shutdown_button.py";
+        inpath = contentClasspath + "shutdown_button.py";
         extractClasspathResource(inpath, pixelHomeDirectory);
         
-          inpath = contentClasspath + "shutdown_button.service";
+        inpath = contentClasspath + "shutdown_button.service";
         extractClasspathResource(inpath, pixelHomeDirectory);
         
-          inpath = contentClasspath + "test1.sh";
+        inpath = contentClasspath + "testwrite.sh";
+        extractClasspathResource(inpath, pixelHomeDirectory);
+        
+        inpath = contentClasspath + "settings.ini";
         extractClasspathResource(inpath, pixelHomeDirectory);
     }
       
@@ -641,7 +675,15 @@ public class WebEnabledPixel
 //      CALL ITS addXxxxxListeners() methods
 //      AND then its initialize() method
     }
-
+    
+     
+    /* public String getPixelResolution()
+        {
+            return ledResolution_;
+        }
+     */ 
+    
+       
     /**
      * @deprecated Use the version in pixel-commons from Alinke's github.com repository.
      */
@@ -717,7 +759,7 @@ public class WebEnabledPixel
                 @Override
                 protected void setup() throws ConnectionLostException, InterruptedException
                 {
-//                    pixel = new Pixel(pixelEnvironment.LED_MATRIX, pixelEnvironment.currentResolution);
+//                  pixel = new Pixel(pixelEnvironment.LED_MATRIX, pixelEnvironment.currentResolution);
                     pixel.matrix = ioio_.openRgbLedMatrix(pixel.KIND);
                     pixel.ioiO = ioio_;
 
@@ -731,8 +773,6 @@ public class WebEnabledPixel
                     {
                         message.append("Found PIXEL: " + pixel.matrix + "\n");
                     }
-                    
-                    
                     
                     message.append("You may now interact with the PIXEL!\n");
                     message.append("LED matrix type is: " + LED_MATRIX_ID +"\n");
