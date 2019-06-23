@@ -172,9 +172,11 @@ public class Pixel
         
         try
         {
-            userHome = System.getProperty("user.home");
+            //userHome = System.getProperty("user.home");
+            userHome = System.getProperty("user.dir");
             
-            pixelHome = userHome + "/pixelcade/";
+            //pixelHome = userHome + "/pixelcade/";
+            pixelHome = userHome + "/";
             
             animationsPath = pixelHome + "animations/";            
             decodedAnimationsPath = animationsPath + "decoded/";
