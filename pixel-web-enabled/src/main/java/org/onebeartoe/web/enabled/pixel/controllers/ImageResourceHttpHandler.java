@@ -53,7 +53,8 @@ public abstract class ImageResourceHttpHandler extends TextHttpHandler
             }
             else if( path.contains("/arcade/") )
             {
-                imageClassPath = path; //let's get the whole path as we'll need write or stream, platform name, and arcade game gif 
+                imageClassPath = path; //let's get the whole path as we'll need write or stream, platform name, and arcade game gif
+               
             }
             else
             {
@@ -77,7 +78,6 @@ public abstract class ImageResourceHttpHandler extends TextHttpHandler
             try
             {
                 System.out.println("writing image resource to the Pixel");
-                
                 writeImageResource(imageClassPath);
                 
                 System.out.println(modeName + " image resource was written to the Pixel");
