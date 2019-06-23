@@ -23,15 +23,29 @@ public class CliPixel
  private String gameName = null; //this can be a full path, just filename, or just basefilename with no extension, what about quotes?
  private String mode = null; //for streaming or writing 
  private int yTextOffset = 0;
+ private static String instructions = "usage: Pixelcade\n" +
+"                    -m,--mode <arg>  Sets stream or write mode, options are stream or write\n" +
+"                    -c,--console <arg>  Sets the console or platform name, ex. mame, atari2600, nes\n" +
+"                    -g,--game <arg>  Sets game / rom name, can be a full path, file name,\n" +
+"                        or just the basename without the extension\n" +
+"                    -h,--help  show help.\n" +
+"                    \n" +
+"                    Examples\n" +
+"                    VERY IMPORTANT: Enclose any parameters with spaces in double quotes, for example\n" +
+"                           Atari 2600 must be enclosed in double quotes\n" +
+"                    pixelcade.exe -m stream -p \"Atari 2600\" -g Rampage.bin\n" +
+"                    pixelcade.exe -m write -p mame -g d:\\roms\\pacman.zip\n" +
+"                    java -jar pixelcade.jar -m stream -p c64 -g \"Video Vermin (World).zip\" \n" +
+"                    java -jar pixelcade.jar -m write -p \"Nintendo Entertain System\" -g \"Zelda II - The Adventure of Link (U).zip\"";
 
  public CliPixel(String[] args) 
  {
 
   this.args = args;
   
-  options.addOption("c", "console", true, "Ex. -c=atari2600 or --console='Atari 2600' Sets the console or platform name");
-  options.addOption("g", "rom", true, "Sets game or rom name, this can be a full path, just the filename only, or just the basename without the extension");
-  options.addOption("m", "mode", true, "Sets stream or write mode");
+  options.addOption("m", "mode", true, "Sets stream or write mode, use stream or write");
+  options.addOption("c", "console", true, "Sets the console or platform name, examples atari2600, mame, Nintendo Entertaintment System");
+  options.addOption("g", "game", true, "Sets game or rom name, this can be a full path, just the filename only, or just the basename without the extension");
   options.addOption("h", "help", false, "show help.");
   //to do add for streaming text too
  }
@@ -48,24 +62,23 @@ public class CliPixel
           help();
       }
       
+      if (cmd.hasOption("m")) {
+          //log.log(Level.INFO, "Using cli argument -m=" + cmd.getOptionValue("m"));
+          mode = cmd.getOptionValue("m");
+      }
+      
       if (cmd.hasOption("c")) {
           //log.log(Level.INFO, "Using cli argument -c=" + cmd.getOptionValue("c"));
-          System.out.println("Using cli argument -c=" + cmd.getOptionValue("c"));
           consoleName = cmd.getOptionValue("c");
           //to do need to handle spaces without having to add quotes
       }
 
       if (cmd.hasOption("g")) {
           //log.log(Level.INFO, "Using cli argument -g=" + cmd.getOptionValue("g"));
-          System.out.println("Using cli argument -g=" + cmd.getOptionValue("g"));
           gameName = cmd.getOptionValue("g");
       }
 
-      if (cmd.hasOption("m")) {
-          //log.log(Level.INFO, "Using cli argument -m=" + cmd.getOptionValue("m"));
-          System.out.println("Using cli argument -m=" + cmd.getOptionValue("m"));
-          mode = cmd.getOptionValue("m");
-      }
+      
 
   } catch (ParseException e) {
    log.log(Level.SEVERE, "Failed to parse command line properties", e);
@@ -90,18 +103,34 @@ public class CliPixel
     return mode;
  }
  
-    public int getyTextOffset() {
-        return yTextOffset;
-    }
-
-    public void setyTextOffset(int yTextOffset) {
-        this.yTextOffset = yTextOffset;
-    } 
- 
- private void help() {
-  // This prints out some help
-  HelpFormatter formater = new HelpFormatter();
-
-  formater.printHelp("Main", options);
+ public static String getInstructions() {
+     return instructions;
  }
+ 
+public int getyTextOffset() {
+    return yTextOffset;
+}
+
+public void setyTextOffset(int yTextOffset) {
+    this.yTextOffset = yTextOffset;
+} 
+ 
+private void help() {
+  
+   System.out.println(instructions); 
+    
+  /*
+  HelpFormatter formater = new HelpFormatter();
+  formater.printHelp("Pixelcade", options);
+  System.out.println("" );
+  System.out.println("Examples" );
+  System.out.println("VERY IMPORTANT: Enclose any parameters with spaces in double quotes, for example Atari 2600 must be enclosed in double quotes" );
+  System.out.println("pixelcade.exe -m stream -p \"Atari 2600\" -g Rampage.bin");
+  System.out.println("pixelcade.exe -m write -p mame -g d:\\roms\\pacman.zip");
+  System.out.println("java -jar pixelcade.jar -m stream -p c64 -g \"Video Vermin (World).zip\"");
+  System.out.println("java -jar pixelcade.jar -m write -p \"Nintendo Entertain System\" -g \"Zelda II - The Adventure of Link (U).zip\"");
+  */
+}
+ 
+ 
 }
