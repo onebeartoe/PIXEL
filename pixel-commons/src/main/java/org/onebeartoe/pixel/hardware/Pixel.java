@@ -1816,12 +1816,12 @@ private static String checksum(String filepath, MessageDigest md) throws IOExcep
             System.out.println("Now writing to PIXEL's SD card, the screen will go blank until writing has been completed..."); 
 
             // we'll run this in the background and also update the UI with progress
-            System.out.println("The Pixel animation writter is being created");
+            System.out.println("The Pixel animation writer is being created");
             Date now = new Date();
             SendGifAnimationTask wp = new SendGifAnimationTask();
             timer = new Timer();
             timer.schedule(wp, now);
-            System.out.println("The Pixel animation writter was created");
+            System.out.println("The Pixel animation writer was created");
         }
         else 
         {
@@ -1850,7 +1850,7 @@ private static String checksum(String filepath, MessageDigest md) throws IOExcep
         //pixelHome = userHome + "/pixel/";
         //gifFilePath = pixelHome + "arcade/" + selectedPlatformName + "/" + selectedFileName; //user home/pixel/arcade/mame/digdug.gif
         gifFilePath = pixelHome + selectedPlatformName + "/" + selectedFileName; //user home/pixelcade/mame/digdug.gif
-        System.out.println("went here " + gifFilePath);
+       
         //gifSourcePath = "animations/gifsource/";
         
         //let's make sure the target gif exists before proceeding
@@ -1920,12 +1920,12 @@ private static String checksum(String filepath, MessageDigest md) throws IOExcep
                        System.out.println("Now writing to PIXEL's SD card, the screen will go blank until writing has been completed...");
                        
                        // we'll run this in the background and also update the UI with progress
-                       System.out.println("The Pixel animation writter is being created");
+                       System.out.println("The Pixel animation writer is being created");
                        Date now = new Date();
                        SendGifAnimationTask wp = new SendGifAnimationTask();
                        timer = new Timer();
                        timer.schedule(wp, now);
-                       System.out.println("The Pixel animation writter was created");
+                       System.out.println("The Pixel animation writer was created");
                    }
                    else
                    {
