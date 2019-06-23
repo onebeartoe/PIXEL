@@ -332,25 +332,24 @@ public class WebEnabledPixel
     {
         try
         {
-            extractHtmlAndJavascript();
+            extractHtmlAndJavascript();  //web server basic files
                         
-            extractStillImages();
+            extractStillImages();      //for the web server functions
             
-            extractAnimationImages();  //generic png thumbs 
+            extractAnimationImages();  //for the web server functions
             
             extractGifSourceAnimationImages(); //the gifsource directory for animations
             
-            extractArcadeConsoleGIFs();
-            
-            extractArcadeMAMEGIFs();          //we skip this is the arcade/mame folder is already there
-            
-            if (isMac() || isUnix())  {       //extract RetroPie files if mac or Pi, we don't do this for windows as the installer takes care of that
+            if (isMac() || isUnix())  {       //extract RetroPie files if mac or Pi, we don't do this for windows as the installer takes care of these files already
+                
                 extractRetroPie();
+                
+                extractArcadeConsoleGIFs();
+            
+                extractArcadeMAMEGIFs();          //we skip this is the arcade/mame folder is already there
+                
+                createArcadeDirs();
             }
-            
-            createArcadeDirs();
-            
-            
         } 
         catch (IOException ex)
         {
