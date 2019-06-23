@@ -33,33 +33,50 @@ public class ArcadeHttpHandler extends ImageResourceHttpHandler
     }
     
     private void handlePNG(File file, Boolean saveAnimation) throws MalformedURLException, IOException, ConnectionLostException {
+        
         URL url = null; 
         BufferedImage image;
         url = file.toURI().toURL();
         image = ImageIO.read(url);
         System.out.println("PNG image found: " + url.toString());
-        Pixel pixel = application.getPixel();
-        pixel.stopExistingTimer();
         
-        if (saveAnimation && pixel.getPIXELHardwareID().substring(0,4).equals("PIXL")) {
+        //if (saveAnimation && pixel.getPIXELHardwareID().substring(0,4).equals("PIXL")) {
+        if (saveAnimation) {
+            
+            Pixel pixel = application.getPixel();
+            pixel.stopExistingTimer();
             pixel.interactiveMode();
             pixel.writeMode(10);
-            pixel.writeImagetoMatrix(image, pixel.KIND.width, pixel.KIND.height); //to do add save parameter here
+            
+             try {
+                   pixel.writeImagetoMatrix(image, pixel.KIND.width, pixel.KIND.height);
+            } catch (ConnectionLostException e1) {
+                    // TODO Auto-generated catch block
+                    e1.printStackTrace();
+            } 
+             
             pixel.playLocalMode();
+            
         } else {
+            
+            Pixel pixel = application.getPixel();
+            pixel.stopExistingTimer();
+            pixel.interactiveMode();
             pixel.writeImagetoMatrix(image, pixel.KIND.width, pixel.KIND.height); //to do add save parameter here
         }
+        
     }
     
     private void handleGIF(String consoleName, String arcadeName, Boolean saveAnimation) {
          try {
             Pixel pixel = application.getPixel();
             pixel.stopExistingTimer();
+            pixel.interactiveMode(); //if we don't add this, things will not working when going from write to stream
             pixel.writeArcadeAnimation(consoleName, arcadeName , saveAnimation);
             // we should wait a bit before going back to interactive mode, or it jitters
-            long fifteenSeconds = Duration.ofSeconds(15).toMillis();
-            Sleeper.sleepo(fifteenSeconds);
-            pixel.interactiveMode(); //not sure we need this ?
+            //long fifteenSeconds = Duration.ofSeconds(15).toMillis();
+            //Sleeper.sleepo(fifteenSeconds);
+            //pixel.interactiveMode(); //al removed as was causing animations to stop after 15s
         } catch (NoSuchAlgorithmException ex) {
             Logger.getLogger(ArcadeHttpHandler.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -84,7 +101,7 @@ public class ArcadeHttpHandler extends ImageResourceHttpHandler
         String consoleNameMapped = null;
                     
  	boolean saveAnimation = false;
-        String extension=null;
+        //String extension=null;
         
         //to do the slashes will screw up this logic, we could remove the / first or switch to another convention
         
@@ -150,20 +167,20 @@ public class ArcadeHttpHandler extends ImageResourceHttpHandler
              arcadeFilePathGIF = application.getPixel().getPixelHome() + consoleNameMapped + "/" + arcadeNameOnly +".gif";
              File arcadeFileGIF = new File(arcadeFilePathGIF);
              
-             System.out.println("delete PNG path " + arcadeFilePathPNG);
-             System.out.println("delete GiF path " + arcadeFilePathGIF);
+             //System.out.println("delete PNG path " + arcadeFilePathPNG);
+             //System.out.println("delete GiF path " + arcadeFilePathGIF);
             
             if (streamOrWrite.equals("write")) {  //we're in write mode so gif gets the priority if both gif and png exist, never should write mode be used for front end scrolling
                 saveAnimation = true;
                 
                
                 if (arcadeFileGIF.exists() && !arcadeFileGIF.isDirectory()) {
-                        System.out.println("delete went here GIF");
+                        //System.out.println("delete went here GIF");
                         handleGIF(consoleNameMapped, arcadeNameOnly +".gif", saveAnimation);
                 }
                         
                 else if(arcadeFilePNG.exists() && !arcadeFilePNG.isDirectory()) { 
-                        System.out.println("delete went here PNG");
+                        //System.out.println("delete went here PNG");
                         handlePNG(arcadeFilePNG, saveAnimation);
                 }
                 else { //nothing is there so let's use the console
@@ -174,7 +191,7 @@ public class ArcadeHttpHandler extends ImageResourceHttpHandler
                         consoleFilePathPNG = application.getPixel().getPixelHome() + "console/" + "default-" + consoleNameMapped + ".png"; 
                         File consoleFilePNG = new File(consoleFilePathPNG);
                        
-                        System.out.println("delete console gif: " + consoleFilePathGIF);
+                        //System.out.println("delete console gif: " + consoleFilePathGIF);
                         
                         if(consoleFileGIF.exists() && !consoleFileGIF.isDirectory()) { 
 
@@ -206,11 +223,11 @@ public class ArcadeHttpHandler extends ImageResourceHttpHandler
                 saveAnimation = false;
                 
                 if(arcadeFilePNG.exists() && !arcadeFilePNG.isDirectory()) { 
-                        System.out.println("delete went here PNG");
+                        //System.out.println("delete went here PNG");
                         handlePNG(arcadeFilePNG, saveAnimation);
                 }
                 else if (arcadeFileGIF.exists() && !arcadeFileGIF.isDirectory()) {
-                        System.out.println("delete went here GIF");
+                        //System.out.println("delete went here GIF");
                         handleGIF(consoleNameMapped, arcadeNameOnly +".gif", saveAnimation);
                 }
                 else { //nothing is there so let's use the console
@@ -221,7 +238,7 @@ public class ArcadeHttpHandler extends ImageResourceHttpHandler
                         consoleFilePathGIF = application.getPixel().getPixelHome() + "console/" + "default-" + consoleNameMapped + ".gif"; 
                         File consoleFileGIF = new File(consoleFilePathGIF);
                        
-                        System.out.println("delete console gif: " + consoleFilePathGIF);
+                        //System.out.println("delete console gif: " + consoleFilePathGIF);
                     
                         if(consoleFilePNG.exists() && !consoleFilePNG.isDirectory()) { 
 
