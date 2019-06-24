@@ -1,2 +1,2 @@
-cd /Users/mina/pixelc/
+cd /Users/al/pi/
 java -jar pixelweb.jar
