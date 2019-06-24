@@ -145,6 +145,8 @@ public class Pixel
     
     private String pixelHardwareId = null;
     
+    public static String OS = System.getProperty("os.name").toLowerCase();
+    
     /**
      * @param KIND
      * @param resolution 
@@ -173,18 +175,28 @@ public class Pixel
         try
         {
             //userHome = System.getProperty("user.home");
-            userHome = System.getProperty("user.dir");
+            userHome = System.getProperty("user.dir"); //the current directory which would be pixelcade for windows
             
             //pixelHome = userHome + "/pixelcade/";
-            pixelHome = userHome + "/";
             
-            animationsPath = pixelHome + "animations/";            
-            decodedAnimationsPath = animationsPath + "decoded/";
+            if (isWindows()) {
+                pixelHome = userHome + "\\";
+                animationsPath = pixelHome + "animations\\";            
+                decodedAnimationsPath = animationsPath + "decoded\\";
+                imagesPath = pixelHome + "images\\";
+            } 
+            else {
+                pixelHome = userHome + "/";
+                animationsPath = pixelHome + "animations/";            
+                decodedAnimationsPath = animationsPath + "decoded/";
+                imagesPath = pixelHome + "images/";
+            }
             
-            //arcadePath = pixelHome + "arcade/";            
-            //decodedArcadePath = arcadePath + "decoded/"; //home/arcade/mame/decoded or /home/arcade/atari2600/decoded
+            //pixelHome = userHome + "/";
+            //animationsPath = pixelHome + "animations/";            
+            //decodedAnimationsPath = animationsPath + "decoded/";
+            //imagesPath = pixelHome + "images/";
             
-            imagesPath = pixelHome + "images/";
         }
         catch(Exception e)
         {
@@ -374,6 +386,10 @@ public class Pixel
         return animationsPath;
     }
     
+    public String getHomePath() {
+        return pixelHome;
+    }
+    
     public String getDecodedAnimationsPath()
     {
         return decodedAnimationsPath;
@@ -484,7 +500,7 @@ public boolean GIFArcadeNeedsDecoding(String decodedDir, String gifName, int cur
     
 	gifName = FilenameUtils.removeExtension(gifName); //with no extension
 	
-	System.out.println("PIXEL LED panel resolution is: " + currentResolution);
+	//System.out.println("PIXEL LED panel resolution is: " + currentResolution);
 	
 	//String decodedGIFPathTXT = currentDir + "/decoded/" + gifName + ".txt";
 	//String decodedGIFPath565 = currentDir + "/decoded/" + gifName + ".rgb565";
@@ -738,10 +754,10 @@ private static String checksum(String filepath, MessageDigest md) throws IOExcep
     
     public boolean GIFRGB565Exists(String decodedDir, String selectedFileName) {
     	
-    	System.out.println("selected file name: " + selectedFileName);
+    	//System.out.println("selected file name: " + selectedFileName);
     	int i = selectedFileName.lastIndexOf(".");
     	selectedFileName = selectedFileName.substring(0, i);
-    	System.out.println("corrected file name: " + selectedFileName);
+    	//System.out.println("corrected file name: " + selectedFileName);
     	
     	//now let's check if this file exists
     	
@@ -1848,13 +1864,24 @@ private static String checksum(String filepath, MessageDigest md) throws IOExcep
         // animationsPath = pixelHome + "animations/";            
         //    decodedAnimationsPath = animationsPath + "decoded/";
         //decodedAnimationsPath =  arcadePath + selectedPlatformName + "/decoded/";   //pixelhome/arcade/mame/decoded
+        
+        /*
+        
+        if (isWindows()) {
+            decodedAnimationsPath =  pixelHome + selectedPlatformName + "\\decoded\\";   //pixelcade/mame/decoded
+            gifFilePath = pixelHome + selectedPlatformName + "\\" + selectedFileName; //user home/pixelcade/mame/digdug.gif
+        }
+        
+        else {
+            decodedAnimationsPath =  pixelHome + selectedPlatformName + "/decoded/";   //pixelcade/mame/decoded
+            gifFilePath = pixelHome + selectedPlatformName + "/" + selectedFileName; //user home/pixelcade/mame/digdug.gif
+        }
+        */
+        
         decodedAnimationsPath =  pixelHome + selectedPlatformName + "/decoded/";   //pixelcade/mame/decoded
-        //pixelHome = userHome + "/pixel/";
-        //gifFilePath = pixelHome + "arcade/" + selectedPlatformName + "/" + selectedFileName; //user home/pixel/arcade/mame/digdug.gif
         gifFilePath = pixelHome + selectedPlatformName + "/" + selectedFileName; //user home/pixelcade/mame/digdug.gif
        
-        //gifSourcePath = "animations/gifsource/";
-        
+       
         //let's make sure the target gif exists before proceeding
         File file = new File(gifFilePath);
 
@@ -1862,7 +1889,7 @@ private static String checksum(String filepath, MessageDigest md) throws IOExcep
             
                try 
                {
-
+                   System.out.println("Found GIF: " + gifFilePath);
                    animationFilename = selectedFileName;
                    if(gifTxtExists(decodedAnimationsPath,selectedFileName) == true && GIFRGB565Exists(decodedAnimationsPath,selectedFileName) == true)
                    {
@@ -1894,11 +1921,9 @@ private static String checksum(String filepath, MessageDigest md) throws IOExcep
                    currentResolution = getDecodedresolution(decodedAnimationsPath, animation_name);
                    GIFresolution = currentResolution;
                    
-                   System.out.println("Selected GIF Resolution: " + GIFresolution);
-                   System.out.println("Current LED Panel Resolution: " + currentResolution);
-                   System.out.println("GIF Width: " + KIND.width);
-                   System.out.println("GIF Height: " + KIND.height);
-                   
+                   //System.out.println("Selected GIF Resolution: " + GIFresolution);
+                   //System.out.println("Current LED Panel Resolution: " + currentResolution);
+                   System.out.println("GIF Width: " + KIND.width + ", GIF Height: " + KIND.height);
                    System.out.println("The existing timer was stopped");
                    
                    String pixelHardwareId = "not found";
@@ -2155,6 +2180,24 @@ private static String checksum(String filepath, MessageDigest md) throws IOExcep
             //TODO UPDATE THE BROWSER/CLIENTS SOMEHOW
         }
     }
+    
+     public static boolean isWindows() {
+
+		return (OS.indexOf("win") >= 0);
+
+	}
+
+	public static boolean isMac() {
+
+		return (OS.indexOf("mac") >= 0);
+
+	}
+
+	public static boolean isUnix() {
+
+		return (OS.indexOf("nix") >= 0 || OS.indexOf("nux") >= 0 || OS.indexOf("aix") > 0 );
+		
+	}
     
     private class TextScroller extends TimerTask
     {
