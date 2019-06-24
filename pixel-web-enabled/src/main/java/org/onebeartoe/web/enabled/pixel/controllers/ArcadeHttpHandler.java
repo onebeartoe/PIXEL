@@ -40,11 +40,14 @@ public class ArcadeHttpHandler extends ImageResourceHttpHandler
         image = ImageIO.read(url);
         System.out.println("PNG image found: " + url.toString());
         
+        Pixel pixel = application.getPixel();
+        //pixel.stopExistingTimer();  //a timer could be running from a gif so we need to kill it here
+        
         //if (saveAnimation && pixel.getPIXELHardwareID().substring(0,4).equals("PIXL")) {
         if (saveAnimation) {
             
-            Pixel pixel = application.getPixel();
-            pixel.stopExistingTimer();
+            //Pixel pixel = application.getPixel();
+            //pixel.stopExistingTimer();
             pixel.interactiveMode();
             pixel.writeMode(10);
             
@@ -59,20 +62,41 @@ public class ArcadeHttpHandler extends ImageResourceHttpHandler
             
         } else {
             
-            Pixel pixel = application.getPixel();
-            pixel.stopExistingTimer();
-            pixel.interactiveMode();
+            //Pixel pixel = application.getPixel();
+            //pixel.stopExistingTimer();
+            //pixel.interactiveMode();
             pixel.writeImagetoMatrix(image, pixel.KIND.width, pixel.KIND.height); //to do add save parameter here
         }
         
     }
     
     private void handleGIF(String consoleName, String arcadeName, Boolean saveAnimation) {
-         try {
-            Pixel pixel = application.getPixel();
-            pixel.stopExistingTimer();
-            pixel.interactiveMode(); //if we don't add this, things will not working when going from write to stream
+         
+        
+        Pixel pixel = application.getPixel();
+        pixel.stopExistingTimer();
+        try {
             pixel.writeArcadeAnimation(consoleName, arcadeName , saveAnimation);
+        } catch (NoSuchAlgorithmException ex) {
+            Logger.getLogger(ArcadeHttpHandler.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        
+        // we should wait a bit before going back to interactive mode, or it jitters
+        long fifteenSeconds = Duration.ofSeconds(15).toMillis();
+        //Sleeper.sleepo(fifteenSeconds);
+        Sleeper.sleepo(100);
+        
+        pixel.interactiveMode();
+        
+        
+        /*
+        try {
+            
+            Pixel pixel = application.getPixel();
+            //pixel.interactiveMode();
+            pixel.stopExistingTimer();
+            //pixel.interactiveMode(); //if we don't add this, things will not working when going from write to stream
+            pixel.writeArcadeAnimation(consoleName, arcadeName , saveAnimation);  // in this call, we stop timer, set interactive mode, write mode, write, and playlocal
             // we should wait a bit before going back to interactive mode, or it jitters
             //long fifteenSeconds = Duration.ofSeconds(15).toMillis();
             //Sleeper.sleepo(fifteenSeconds);
@@ -80,6 +104,7 @@ public class ArcadeHttpHandler extends ImageResourceHttpHandler
         } catch (NoSuchAlgorithmException ex) {
             Logger.getLogger(ArcadeHttpHandler.class.getName()).log(Level.SEVERE, null, ex);
         }
+        */
     }
     
     @Override
@@ -105,7 +130,9 @@ public class ArcadeHttpHandler extends ImageResourceHttpHandler
         
         //to do the slashes will screw up this logic, we could remove the / first or switch to another convention
         
- 	String [] arcadeURLarray = urlParams.split("/"); 
+ 	
+        
+        String [] arcadeURLarray = urlParams.split("/"); 
         //String [] arcadeURLarray = urlParams.split("&"); 
         
         //&m=stream or write , &c=console , &g=game
@@ -130,9 +157,6 @@ public class ArcadeHttpHandler extends ImageResourceHttpHandler
             String name1 = FilenameUtils.getName(arcadeName);
             String name2 = FilenameUtils.getBaseName(arcadeName);
             //String name3 = FilenameUtils.getExtension(arcadeName);
-            
-            System.out.println("getname: " + name1);
-            System.out.println("getbasename: " + name2);
                     
             //let's make sure this file exists and skip if not
             //arcadeNameExtension = FilenameUtils.getExtension(arcadeName); 
@@ -146,7 +170,7 @@ public class ArcadeHttpHandler extends ImageResourceHttpHandler
             
             //or let's first check against the mapping table
             //and if no match, we'll go the end of the switch statement and the console will stay the same, this will be expensive
-             System.out.println("Console before mapping: " + consoleName);
+             //System.out.println("Console before mapping: " + consoleName);
              //let's add some common mappings here and if match we can skip the expensive mapping
              //so first do we have a match vs. an array of retropie dirs
              //if yes, we're good
@@ -154,9 +178,10 @@ public class ArcadeHttpHandler extends ImageResourceHttpHandler
              
              consoleNameMapped = getConsoleNamefromMapping(consoleName); //will return original console if no matcn
             
-             System.out.println("Console after mapping: " + consoleNameMapped);
+             //System.out.println("Console after mapping: " + consoleNameMapped);
              System.out.println(streamOrWrite.toUpperCase() + " MODE");
-             System.out.println("Console: " + consoleNameMapped);
+             System.out.println("Console Before Mapping: " + consoleName);
+             System.out.println("Console Mapped: " + consoleNameMapped);
              System.out.println("Game Name Only: " +  arcadeNameOnly);
            
             //now let's decide if we're going to find the png or gif 

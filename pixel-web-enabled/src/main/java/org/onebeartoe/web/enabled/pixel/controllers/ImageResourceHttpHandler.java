@@ -73,14 +73,14 @@ public abstract class ImageResourceHttpHandler extends TextHttpHandler
 
         try
         {
-            System.out.println("loading " + modeName + " image");
+            //System.out.println("loading " + modeName + " image");
 
             try
             {
-                System.out.println("writing image resource to the Pixel");
+                //System.out.println("writing image resource to the Pixel");
                 writeImageResource(imageClassPath);
                 
-                System.out.println(modeName + " image resource was written to the Pixel");
+                //System.out.println(modeName + " image resource was written to the Pixel");
             } 
             catch (ConnectionLostException ex)
             {

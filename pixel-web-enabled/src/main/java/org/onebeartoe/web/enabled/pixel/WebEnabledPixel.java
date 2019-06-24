@@ -778,6 +778,8 @@ public class WebEnabledPixel
                     searchTimer.cancel(); //need to stop the timer so we don't still display the pixel searching message
                     
                     message.append("PIXEL Status: Connected");
+                    
+                    System.out.println("PIXELCADE HOME DIRECTORY = " + pixel.getHomePath());
 
                     logger.log(Level.INFO, message.toString());
                 }
