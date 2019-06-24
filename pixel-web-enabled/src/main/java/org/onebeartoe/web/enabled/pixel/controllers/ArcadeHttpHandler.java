@@ -41,13 +41,11 @@ public class ArcadeHttpHandler extends ImageResourceHttpHandler
         System.out.println("PNG image found: " + url.toString());
         
         Pixel pixel = application.getPixel();
-        //pixel.stopExistingTimer();  //a timer could be running from a gif so we need to kill it here
+        pixel.stopExistingTimer();  //a timer could be running from a gif so we need to kill it here
         
         //if (saveAnimation && pixel.getPIXELHardwareID().substring(0,4).equals("PIXL")) {
         if (saveAnimation) {
             
-            //Pixel pixel = application.getPixel();
-            //pixel.stopExistingTimer();
             pixel.interactiveMode();
             pixel.writeMode(10);
             
@@ -58,13 +56,17 @@ public class ArcadeHttpHandler extends ImageResourceHttpHandler
                     e1.printStackTrace();
             } 
              
-            pixel.playLocalMode();
+            try {
+                Thread.sleep(100); //this may not be needed but was causing a problem on the writes for the gif animations so adding here to be safe
+            } catch (InterruptedException ex) {
+                Logger.getLogger(ArcadeHttpHandler.class.getName()).log(Level.SEVERE, null, ex);
+            }
+            
+             pixel.playLocalMode();
             
         } else {
             
-            //Pixel pixel = application.getPixel();
-            //pixel.stopExistingTimer();
-            //pixel.interactiveMode();
+            pixel.interactiveMode();
             pixel.writeImagetoMatrix(image, pixel.KIND.width, pixel.KIND.height); //to do add save parameter here
         }
         
@@ -74,37 +76,15 @@ public class ArcadeHttpHandler extends ImageResourceHttpHandler
          
         
         Pixel pixel = application.getPixel();
-        pixel.stopExistingTimer();
+        
         try {
             pixel.writeArcadeAnimation(consoleName, arcadeName , saveAnimation);
         } catch (NoSuchAlgorithmException ex) {
             Logger.getLogger(ArcadeHttpHandler.class.getName()).log(Level.SEVERE, null, ex);
         }
-        
-        // we should wait a bit before going back to interactive mode, or it jitters
-        long fifteenSeconds = Duration.ofSeconds(15).toMillis();
+       
         //Sleeper.sleepo(fifteenSeconds);
-        Sleeper.sleepo(100);
-        
-        pixel.interactiveMode();
-        
-        
-        /*
-        try {
-            
-            Pixel pixel = application.getPixel();
-            //pixel.interactiveMode();
-            pixel.stopExistingTimer();
-            //pixel.interactiveMode(); //if we don't add this, things will not working when going from write to stream
-            pixel.writeArcadeAnimation(consoleName, arcadeName , saveAnimation);  // in this call, we stop timer, set interactive mode, write mode, write, and playlocal
-            // we should wait a bit before going back to interactive mode, or it jitters
-            //long fifteenSeconds = Duration.ofSeconds(15).toMillis();
-            //Sleeper.sleepo(fifteenSeconds);
-            //pixel.interactiveMode(); //al removed as was causing animations to stop after 15s
-        } catch (NoSuchAlgorithmException ex) {
-            Logger.getLogger(ArcadeHttpHandler.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        */
+        //Sleeper.sleepo(100);
     }
     
     @Override

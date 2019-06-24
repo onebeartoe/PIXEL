@@ -75,7 +75,7 @@ public class PixelcadeFrontEnd
                         + "cd " + System.getProperty("user.dir") + "\n"
                         + "java -jar pixelweb.jar";
                 
-                exePath = "cd " + System.getProperty("user.dir") + " && java -jar pixelweb.jar";
+                exePath = "cd " + System.getProperty("user.dir") + " && java -jar pixelweb.jar"; //this didn't work, looks like concantenated doesn't work here
             }
             
             if (!mode_.equals("stream") && !mode_.equals("write")) {   

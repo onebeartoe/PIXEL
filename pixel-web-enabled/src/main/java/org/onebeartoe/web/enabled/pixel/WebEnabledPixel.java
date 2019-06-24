@@ -780,6 +780,7 @@ public class WebEnabledPixel
                     message.append("PIXEL Status: Connected");
                     
                     System.out.println("PIXELCADE HOME DIRECTORY = " + pixel.getHomePath());
+                    System.out.println("PIXELCADE Version = 2.0.5");
 
                     logger.log(Level.INFO, message.toString());
                 }
