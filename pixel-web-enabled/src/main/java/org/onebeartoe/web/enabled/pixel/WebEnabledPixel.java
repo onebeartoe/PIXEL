@@ -31,6 +31,8 @@ import java.util.TimerTask;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.Timer;
+import javax.swing.JFrame;
+import javax.swing.JOptionPane;
 
 import org.apache.commons.io.IOUtils;
 import org.ini4j.Ini;
@@ -96,12 +98,13 @@ public class WebEnabledPixel
     
     public static String port_ = null;
     
+    private static String alreadyRunningErrorMsg = "";
+    
     public WebEnabledPixel(String[] args)
     {
         cli = new CliPixel(args);
         cli.parse();
         httpPort = cli.getWebPort();
-        //port_ = cli.getPort();  //didn't work out from command line
 
         String name = getClass().getName();
         logger = Logger.getLogger(name);
@@ -109,6 +112,19 @@ public class WebEnabledPixel
         int yTextOffset = cli.getyTextOffset();
         
         LED_MATRIX_ID = cli.getLEDMatrixType(); //let's get this from the command line class (CliPixel.java) and if there is no command line entered, we'll take the default of 3
+        
+        if (isWindows()) {
+        
+                alreadyRunningErrorMsg = "*** ERROR *** \n"
+                        + "Pixel Listener is already running\n"
+                        + "You don't need to launch it again\n"
+                        + "You may also want to add the Pixel Listener to your Windows Startup Folder";
+        } else {
+                alreadyRunningErrorMsg = "*** ERROR *** \n"
+                        + "Pixel Listener is already running\n"
+                        + "You don't need to launch it again\n"
+                        + "You may also want to add the Pixel Listener to your init.d startup";
+        }
         
         //we can use the led matrix from the command line but let's override it if there is a settings.ini
          File file = new File("settings.ini");
@@ -216,8 +232,21 @@ public class WebEnabledPixel
         } 
         catch (IOException ex)
         {
-            String message = "An error occurred while creating the controllers";
-            logger.log(Level.SEVERE, message, ex);
+            //if we got here, most likely the pixel listener was already running so let's give a message and then exit gracefully
+            
+             System.out.println(alreadyRunningErrorMsg);
+             System.out.println("Exiting...");
+
+             JFrame frame = new JFrame("JOptionPane showMessageDialog example");  //let's show a pop up too so the user doesn't miss it
+             JOptionPane.showMessageDialog(frame,
+                alreadyRunningErrorMsg,
+                "Pixelcade Listener Already Running",
+                JOptionPane.ERROR_MESSAGE);
+        
+             System.exit(1);                       //we can't continue because the pixel listener is already running
+            
+            //String message = "An error occurred while creating the controllers";
+            //logger.log(Level.SEVERE, message, ex);
         }
     }
     
