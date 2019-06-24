@@ -3,33 +3,22 @@ package org.onebeartoe.front.end.pixelcade;
 
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.FilenameFilter;
+
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.ConnectException;
 import java.net.HttpURLConnection;
 
-import java.net.InetSocketAddress;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.net.URLConnection;
-import java.net.URLEncoder;
-import java.net.URLStreamHandler;
 import java.nio.charset.StandardCharsets;
+import java.util.logging.Level;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 import java.util.logging.Logger;
-import static javafx.css.StyleOrigin.USER_AGENT;
-import javax.net.ssl.HttpsURLConnection;
-
+import javax.swing.JFrame;
+import javax.swing.JOptionPane;
 import org.apache.commons.io.FilenameUtils;
 
-import org.apache.commons.io.IOUtils;
-//import org.ini4j.Ini;
 
 
 /**
@@ -51,6 +40,12 @@ public class PixelcadeFrontEnd
     
     private static HttpURLConnection con;
     
+    public static String OS = System.getProperty("os.name").toLowerCase();
+    
+    private static String errorMsg = "";
+    
+    private static String exePath = "";
+    
     public static void main(String[] args) throws MalformedURLException, IOException
     {
         
@@ -66,6 +61,22 @@ public class PixelcadeFrontEnd
             System.out.println("Original Game Name: " + gameName_.toLowerCase());
             System.out.println("Base Game Name (no extension): " + BaseGameName_.toLowerCase());
             System.out.println("Mode: " + mode_.toLowerCase());
+
+            if (isWindows()) {
+                errorMsg = "Please launch the Pixelcade listener first : \n"
+                        + "\n"
+                        + System.getProperty("user.dir") + "\\pixelweb.exe";
+                
+                exePath = System.getProperty("user.dir") + "\\pixelweb.exe";
+                
+            } else {
+                errorMsg = "Please launch the Pixelcade listener first using this command : \n"
+                        + "\n"
+                        + "cd " + System.getProperty("user.dir") + "\n"
+                        + "java -jar pixelweb.jar";
+                
+                exePath = "cd " + System.getProperty("user.dir") + " && java -jar pixelweb.jar";
+            }
             
             if (!mode_.equals("stream") && !mode_.equals("write")) {   
                  System.out.println("stream or write for mode was not entered so defaulting to stream mode");
@@ -92,9 +103,16 @@ public class PixelcadeFrontEnd
                     con.setRequestProperty("User-Agent", "Java client");
                     con.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
 
-                    try (DataOutputStream wr = new DataOutputStream(con.getOutputStream())) {
-                        wr.write(postData);
-                    }
+                  try (DataOutputStream wr = new DataOutputStream(con.getOutputStream())) {
+                    wr.write(postData);
+                } catch (ConnectException exception) {
+                    
+                    exceptionHandler();
+                    
+                } catch (Throwable throwable) {
+                    exceptionHandler();
+                    
+                }
 
                     StringBuilder content;
 
@@ -109,7 +127,7 @@ public class PixelcadeFrontEnd
                             content.append(System.lineSeparator());
                         }
                     }
-
+                    
                     System.out.println(content.toString());
 
                 } finally {
@@ -137,4 +155,47 @@ public class PixelcadeFrontEnd
         gameName_ = cli.getGameName();
         mode_ = cli.getMode();
     }
+     
+     private static void exceptionHandler() {
+        System.out.println("*** ERROR ***");
+        System.out.println("The Pixelcade Listener is not running");
+        System.out.println(errorMsg);
+
+        JFrame frame = new JFrame("JOptionPane showMessageDialog example");  //let's show a pop up too so the user doesn't miss it
+        JOptionPane.showMessageDialog(frame,
+                errorMsg,
+                "Pixelcade Listener",
+                JOptionPane.ERROR_MESSAGE);
+       
+        //TO DO get the auto-launch going if pixelweb not running, code below didn't work on windows
+        /* try {
+            Process process = new ProcessBuilder(exePath).start();
+        } catch (IOException ex) {
+            Logger.getLogger(PixelcadeFrontEnd.class.getName()).log(Level.SEVERE, null, ex);
+        } */
+        
+        System.exit(1);                       //we can't continue because pixelweb is not running
+        
+        //TO DO possibly could auto-launch the listener using shell cmd from Java, set a timer delay, and then re-run
+     }
+     
+     public static boolean isWindows() {
+
+		return (OS.indexOf("win") >= 0);
+
+	}
+
+	public static boolean isMac() {
+
+		return (OS.indexOf("mac") >= 0);
+
+	}
+
+	public static boolean isUnix() {
+
+		return (OS.indexOf("nix") >= 0 || OS.indexOf("nux") >= 0 || OS.indexOf("aix") > 0 );
+		
+	}
+     
+     
 }
