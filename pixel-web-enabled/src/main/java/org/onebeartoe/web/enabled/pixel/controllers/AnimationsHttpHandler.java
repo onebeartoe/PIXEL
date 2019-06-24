@@ -50,7 +50,7 @@ public class AnimationsHttpHandler extends ImageResourceHttpHandler
         
         // we should wait a bit before going back to interactive mode, or it jitters
         long fifteenSeconds = Duration.ofSeconds(15).toMillis();
-        Sleeper.sleepo(fifteenSeconds);
+        Sleeper.sleepo(100);
         
         pixel.interactiveMode();
     }
