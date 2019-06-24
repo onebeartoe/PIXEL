@@ -43,6 +43,7 @@ import java.security.DigestInputStream;
 
 
 
+
 import org.apache.commons.io.FilenameUtils;
 
 import org.gifdecoder.GifDecoder;
@@ -1860,15 +1861,8 @@ private static String checksum(String filepath, MessageDigest md) throws IOExcep
     public void writeArcadeAnimation(String selectedPlatformName, String selectedFileName, boolean writeMode) throws NoSuchAlgorithmException
     {
         
-        //arcadePath = pixelHome + "arcade/";     //we delcared this up front   
-        // animationsPath = pixelHome + "animations/";            
-        //    decodedAnimationsPath = animationsPath + "decoded/";
-        //decodedAnimationsPath =  arcadePath + selectedPlatformName + "/decoded/";   //pixelhome/arcade/mame/decoded
-        
-        /*
-        
         if (isWindows()) {
-            decodedAnimationsPath =  pixelHome + selectedPlatformName + "\\decoded\\";   //pixelcade/mame/decoded
+            decodedAnimationsPath =  pixelHome + selectedPlatformName + "\\decoded\\";  //don't have to do this technically, just for display purposes
             gifFilePath = pixelHome + selectedPlatformName + "\\" + selectedFileName; //user home/pixelcade/mame/digdug.gif
         }
         
@@ -1876,11 +1870,12 @@ private static String checksum(String filepath, MessageDigest md) throws IOExcep
             decodedAnimationsPath =  pixelHome + selectedPlatformName + "/decoded/";   //pixelcade/mame/decoded
             gifFilePath = pixelHome + selectedPlatformName + "/" + selectedFileName; //user home/pixelcade/mame/digdug.gif
         }
-        */
         
-        decodedAnimationsPath =  pixelHome + selectedPlatformName + "/decoded/";   //pixelcade/mame/decoded
-        gifFilePath = pixelHome + selectedPlatformName + "/" + selectedFileName; //user home/pixelcade/mame/digdug.gif
-       
+        stopExistingTimer();
+        System.out.println("The existing timer was stopped");
+        
+        //decodedAnimationsPath =  pixelHome + selectedPlatformName + "/decoded/";   //pixelcade/mame/decoded
+        //gifFilePath = pixelHome + selectedPlatformName + "/" + selectedFileName; //user home/pixelcade/mame/digdug.gif
        
         //let's make sure the target gif exists before proceeding
         File file = new File(gifFilePath);
@@ -1921,10 +1916,8 @@ private static String checksum(String filepath, MessageDigest md) throws IOExcep
                    currentResolution = getDecodedresolution(decodedAnimationsPath, animation_name);
                    GIFresolution = currentResolution;
                    
-                   //System.out.println("Selected GIF Resolution: " + GIFresolution);
-                   //System.out.println("Current LED Panel Resolution: " + currentResolution);
+                  
                    System.out.println("GIF Width: " + KIND.width + ", GIF Height: " + KIND.height);
-                   System.out.println("The existing timer was stopped");
                    
                    String pixelHardwareId = "not found";
                    try
@@ -1936,12 +1929,12 @@ private static String checksum(String filepath, MessageDigest md) throws IOExcep
                        Logger.getLogger(Pixel.class.getName()).log(Level.SEVERE, null, ex);
                    }
                    
-                   stopExistingTimer();
+                   //stopExistingTimer();
+                   //System.out.println("The existing timer was stopped");
                    
                    if (pixelHardwareId.substring(0,4).equals("PIXL") && writeMode == true)
                    {
-                       interactiveMode();
-                       
+                       interactiveMode();         //have to put back into interactive mode, otherwise we were playing locally
                        // need to tell PIXEL the frames per second to use, how fast to play the animations
                        writeMode(GIFfps);
                        System.out.println("Now writing to PIXEL's SD card, the screen will go blank until writing has been completed...");
@@ -1949,24 +1942,31 @@ private static String checksum(String filepath, MessageDigest md) throws IOExcep
                        // we'll run this in the background and also update the UI with progress
                        System.out.println("The Pixel animation writer is being created");
                        Date now = new Date();
-                       SendGifAnimationTask wp = new SendGifAnimationTask();
+                       SendGifAnimationTask wp = new SendGifAnimationTask();   //starts a timer which loops through frames doing a write and playlocal when time done
                        timer = new Timer();
                        timer.schedule(wp, now);
                        System.out.println("The Pixel animation writer was created");
                    }
                    else
                    {
-                       System.out.println("A non PIXL, version of the timer is starting.");
+                       System.out.println("Streaming version of the timer is starting.");
                        
-                       stopExistingTimer();
+                       //stopExistingTimer();
                        System.out.println("stopped the existing timer again.");
                        
-                       TimerTask animateTimer = new AnimateTimer();
+                       interactiveMode();  //we are streaming here so need to put in interactive mode first , otherwise we're just playing locally
+                       
+                       TimerTask animateTimer = new AnimateTimer();  //this timer loops indefinitely until we kill it
                        timer = new Timer();
                        Date firstTime = new Date();
                        timer.schedule(animateTimer, firstTime, gifSelectedFileDelay);
                        
-                       System.out.println("A non PIXL, version of the timer has started.");
+                       //Date now = new Date();
+                       //StreamGifAnimationTask wp1 = new StreamGifAnimationTask();   //starts a timer which loops through frames continuously
+                       //timer = new Timer();
+                       //timer.schedule(wp1, now, gifSelectedFileDelay);
+                       
+                       System.out.println("Streaming version of the timer has started.");
                    }
                } 
                catch (IOException ex) 
@@ -2063,21 +2063,7 @@ private static String checksum(String filepath, MessageDigest md) throws IOExcep
 	}
     }
 
-//TODO: this is not a Timer, where is this used?
-    private class AnimateTimer extends TimerTask
-    {
-        @Override
-        public void run()
-        {
-            i++;
 
-            if (i >= GIFnumFrames - 1) 
-            {
-                i = 0;
-            }
-            sendPixelDecodedFrame(decodedAnimationsPath, animationFilename, i, GIFnumFrames, GIFresolution, KIND.width,KIND.height);
-        }
-    }
     
     public enum ClockModes
     {
@@ -2172,6 +2158,13 @@ private static String checksum(String filepath, MessageDigest md) throws IOExcep
 
             message = "Pixel is done writing the animation, setting PIXEL to local playback mode.";
             System.out.println(message);
+            
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException ex) {
+                Logger.getLogger(Pixel.class.getName()).log(Level.SEVERE, null, ex);
+            }
+            
             playLocalMode();
             
             message = "Pixel is in local playback mode.";
@@ -2181,6 +2174,48 @@ private static String checksum(String filepath, MessageDigest md) throws IOExcep
         }
     }
     
+    
+     class StreamGifAnimationTask extends TimerTask
+    {
+        @Override
+        public void run()
+        {
+            String message = "Pixel is streaming an animation to the hardware.";
+            System.out.println(message);
+            
+            //let's loop through and send frame to PIXEL with no delay
+            for(int y=0; y<GIFnumFrames; y++) 
+            { 
+                //Al removed the -1, make sure to test that!!!!!
+                sendPixelDecodedFrame(decodedAnimationsPath, animationFilename, y, GIFnumFrames, GIFresolution, KIND.width,KIND.height);
+            }
+            
+            //try {
+            //    Thread.sleep(100);
+            //} catch (InterruptedException ex) {
+            //    Logger.getLogger(Pixel.class.getName()).log(Level.SEVERE, null, ex);
+            // }
+        }
+    }
+     
+     //TODO: this is not a Timer, where is this used?
+    private class AnimateTimer extends TimerTask
+    {
+        @Override
+        public void run()
+        {
+            i++;
+
+            if (i >= GIFnumFrames - 1) 
+            {
+                i = 0;
+            }
+            sendPixelDecodedFrame(decodedAnimationsPath, animationFilename, i, GIFnumFrames, GIFresolution, KIND.width,KIND.height);
+        }
+        
+         
+    }
+     
      public static boolean isWindows() {
 
 		return (OS.indexOf("win") >= 0);
