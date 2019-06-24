@@ -28,6 +28,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.RandomAccessFile;
 import java.io.StringReader;
+import java.net.URLDecoder;
 import java.time.Duration;
 import java.util.Arrays;
 import java.util.Date;
@@ -176,18 +177,27 @@ public class Pixel
         try
         {
             //userHome = System.getProperty("user.home");
-            userHome = System.getProperty("user.dir"); //the current directory which would be pixelcade for windows
+            //userHome = System.getProperty("user.dir"); //this isn't working if user not launched from current dir
             
+            //String path = Pixel.class.getProtectionDomain().getCodeSource().getLocation().getPath();
+            //String decodedPath = URLDecoder.decode(path, "UTF-8"); //path/pixelweb.jar , so we need just the path
+            
+            //String pixelwebHomePath = FilenameUtils.getFullPath(decodedPath);
+            
+            //userHome = pixelwebHomePath;
+
             //pixelHome = userHome + "/pixelcade/";
             
             if (isWindows()) {
-                pixelHome = userHome + "\\";
+                //pixelHome = userHome + "\\";
+                pixelHome = System.getProperty("user.dir") + "\\";  //user dir is the folder where pixelweb.jar lives and would be placed there by the windows installer
                 animationsPath = pixelHome + "animations\\";            
                 decodedAnimationsPath = animationsPath + "decoded\\";
                 imagesPath = pixelHome + "images\\";
             } 
             else {
-                pixelHome = userHome + "/";
+                //pixelHome = userHome + "/";                 
+                pixelHome = System.getProperty("user.home") + "/pixelcade/";  //let's force user.home since we don't have an installer for Pi or Mac
                 animationsPath = pixelHome + "animations/";            
                 decodedAnimationsPath = animationsPath + "decoded/";
                 imagesPath = pixelHome + "images/";
@@ -1755,7 +1765,7 @@ private static String checksum(String filepath, MessageDigest md) throws IOExcep
     
     public void stopExistingTimer()
     {
-        System.out.println("Checking PIXEL activity in " + getClass().getSimpleName() + ".");
+        System.out.println("Checking for Timers in PIXEL activity in " + getClass().getSimpleName() + ".");
 
         if(timer == null)
         {
@@ -1763,7 +1773,7 @@ private static String checksum(String filepath, MessageDigest md) throws IOExcep
         }
         else
         {
-            System.out.println("Pixel is stopping PIXEL activity in " + getClass().getSimpleName() + "..");
+            System.out.println("Stopping timer PIXEL activity in " + getClass().getSimpleName() + "..");
             timer.cancel();
             timer = null;
         }
@@ -1872,7 +1882,7 @@ private static String checksum(String filepath, MessageDigest md) throws IOExcep
         }
         
         stopExistingTimer();
-        System.out.println("The existing timer was stopped");
+        System.out.println("Sending request to stop existing timer...");
         
         //decodedAnimationsPath =  pixelHome + selectedPlatformName + "/decoded/";   //pixelcade/mame/decoded
         //gifFilePath = pixelHome + selectedPlatformName + "/" + selectedFileName; //user home/pixelcade/mame/digdug.gif
@@ -1943,28 +1953,33 @@ private static String checksum(String filepath, MessageDigest md) throws IOExcep
                        System.out.println("The Pixel animation writer is being created");
                        Date now = new Date();
                        SendGifAnimationTask wp = new SendGifAnimationTask();   //starts a timer which loops through frames doing a write and playlocal when time done
-                       timer = new Timer();
+                       timer = new Timer(); //note that this timer only runs through one loop and then stops
                        timer.schedule(wp, now);
                        System.out.println("The Pixel animation writer was created");
                    }
                    else
                    {
-                       System.out.println("Streaming version of the timer is starting.");
+                       
                        
                        //stopExistingTimer();
-                       System.out.println("stopped the existing timer again.");
+                       //System.out.println("stopped the existing timer again.");
                        
                        interactiveMode();  //we are streaming here so need to put in interactive mode first , otherwise we're just playing locally
+                       //it's crashing here!!!! try it without this and just stream to stream
+                       //also if the timer only runs once, then it doesn't crash so still something with the active timer
+                       //how to check if the stop timer is actually killing the timer?
                        
-                       TimerTask animateTimer = new AnimateTimer();  //this timer loops indefinitely until we kill it
+                       System.out.println("Streaming version of the timer is starting.");
+                       
+                       //TimerTask animateTimer = new AnimateTimer();  //this timer loops indefinitely until we kill it
+                      // timer = new Timer();
+                      // Date firstTime = new Date();
+                      // timer.schedule(animateTimer, firstTime, gifSelectedFileDelay);
+                       
+                       Date now = new Date();
+                       StreamGifAnimationTask wp1 = new StreamGifAnimationTask();   //starts a timer which loops through frames continuously
                        timer = new Timer();
-                       Date firstTime = new Date();
-                       timer.schedule(animateTimer, firstTime, gifSelectedFileDelay);
-                       
-                       //Date now = new Date();
-                       //StreamGifAnimationTask wp1 = new StreamGifAnimationTask();   //starts a timer which loops through frames continuously
-                       //timer = new Timer();
-                       //timer.schedule(wp1, now, gifSelectedFileDelay);
+                       timer.schedule(wp1, now, gifSelectedFileDelay);
                        
                        System.out.println("Streaming version of the timer has started.");
                    }
@@ -2141,7 +2156,7 @@ private static String checksum(String filepath, MessageDigest md) throws IOExcep
     /**
      * When this task is executed, it sends an animated GIF to the the Pixel.
      */
-    class SendGifAnimationTask extends TimerTask
+    class SendGifAnimationTask extends TimerTask   //this timer ends after one loop through the GIF
     {
         @Override
         public void run()
@@ -2245,6 +2260,8 @@ private static String checksum(String filepath, MessageDigest md) throws IOExcep
             int w = 64;
             
             int h = 64;
+            
+            //to do should we be hard coding 64 and 64?
 // use a height of 32, for the rectangle LED matrix type (32x16 for example)            
 //            int h = 32;
 	    
