@@ -116,12 +116,12 @@ public class WebEnabledPixel
         if (isWindows()) {
         
                 alreadyRunningErrorMsg = "*** ERROR *** \n"
-                        + "Pixel Listener is already running\n"
+                        + "Pixel Listener (pixelweb.exe) is already running\n"
                         + "You don't need to launch it again\n"
                         + "You may also want to add the Pixel Listener to your Windows Startup Folder";
         } else {
                 alreadyRunningErrorMsg = "*** ERROR *** \n"
-                        + "Pixel Listener is already running\n"
+                        + "Pixel Listener (pixelweb.jar) is already running\n"
                         + "You don't need to launch it again\n"
                         + "You may also want to add the Pixel Listener to your init.d startup";
         }
@@ -205,7 +205,7 @@ public class WebEnabledPixel
             
 // ARE WE GONNA DO ANYTHING WITH THE HttpContext OBJECTS?   
             
-            HttpContext createContext =    server.createContext("/", indexHttpHandler);
+            HttpContext createContext =     server.createContext("/", indexHttpHandler);
             
             HttpContext animationsContext = server.createContext("/animation", animationsHttpHandler);
                                             server.createContext("/animation/list", animationsListHttpHandler);
@@ -223,11 +223,11 @@ public class WebEnabledPixel
                                             server.createContext("/text/speed", scrollingTextSpeedHttpHander);
                                             server.createContext("/text/color", scrollingTextColorHttpHandler);
                                             
-            HttpContext uploadContext =    server.createContext("/upload", uploadHttpHandler);
-                                           server.createContext("/upload/origin", uploadOriginHttpHandler);
+            HttpContext uploadContext =     server.createContext("/upload", uploadHttpHandler);
+                                            server.createContext("/upload/origin", uploadOriginHttpHandler);
             
             
-            HttpContext clockContext =     server.createContext("/clock", clockHttpHandler);
+            HttpContext clockContext =      server.createContext("/clock", clockHttpHandler);
                                             
         } 
         catch (IOException ex)
@@ -809,7 +809,7 @@ public class WebEnabledPixel
                     message.append("PIXEL Status: Connected");
                     
                     System.out.println("PIXELCADE HOME DIRECTORY = " + pixel.getHomePath());
-                    System.out.println("PIXELCADE Version = 2.0.5");
+                    System.out.println("PIXELCADE Version = 2.0.1");
 
                     logger.log(Level.INFO, message.toString());
                 }

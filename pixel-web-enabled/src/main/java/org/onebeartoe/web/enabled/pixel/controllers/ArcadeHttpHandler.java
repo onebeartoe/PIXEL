@@ -58,6 +58,7 @@ public class ArcadeHttpHandler extends ImageResourceHttpHandler
              
             try {
                 Thread.sleep(100); //this may not be needed but was causing a problem on the writes for the gif animations so adding here to be safe
+                //TO DO will a smaller delay still work too?
             } catch (InterruptedException ex) {
                 Logger.getLogger(ArcadeHttpHandler.class.getName()).log(Level.SEVERE, null, ex);
             }
@@ -74,7 +75,8 @@ public class ArcadeHttpHandler extends ImageResourceHttpHandler
     
     private void handleGIF(String consoleName, String arcadeName, Boolean saveAnimation) {
          
-        
+       
+         
         Pixel pixel = application.getPixel();
         
         try {
@@ -83,7 +85,7 @@ public class ArcadeHttpHandler extends ImageResourceHttpHandler
             Logger.getLogger(ArcadeHttpHandler.class.getName()).log(Level.SEVERE, null, ex);
         }
        
-        //Sleeper.sleepo(fifteenSeconds);
+        //Sleeper.sleepo(15);
         //Sleeper.sleepo(100);
     }
     
@@ -91,7 +93,10 @@ public class ArcadeHttpHandler extends ImageResourceHttpHandler
     protected void writeImageResource(String urlParams) throws IOException, ConnectionLostException
     {
         
-    	String streamOrWrite = null ;
+    	
+        
+        
+        String streamOrWrite = null ;
  	String consoleName = null ;
  	String arcadeName = null ;
         String arcadeNameExtension = null; 

@@ -20,7 +20,6 @@ import javax.swing.JOptionPane;
 import org.apache.commons.io.FilenameUtils;
 
 
-
 /**
  * @author Al Linke
  */
@@ -84,6 +83,8 @@ public class PixelcadeFrontEnd
              }
              
             String URLString = "http://localhost:8080/arcade/" + mode_.toLowerCase() + "/" + consoleName_.toLowerCase() + "/" + BaseGameName_.toLowerCase();
+            //TO DO we could add localhost to settings.ini in case somoene wants to enable their system remote via an IP address or domain name instead
+            
             
             //replace the spaces with %20 as the URL call will fail without this
             URLString=URLString.replaceAll(" ","%20");
@@ -111,7 +112,6 @@ public class PixelcadeFrontEnd
                     
                 } catch (Throwable throwable) {
                     exceptionHandler();
-                    
                 }
 
                     StringBuilder content;
