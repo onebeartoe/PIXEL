@@ -44,7 +44,8 @@
         <dependency>
             <groupId>com.sparetimelabs</groupId>
             <artifactId>purejavacomm</artifactId>
-            <version>0.0.22</version>
+           <!-- <version>0.0.22</version> -->
+            <version>1.0.1</version>
         </dependency>
    
         <dependency>
