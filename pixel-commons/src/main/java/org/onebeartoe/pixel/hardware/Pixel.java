@@ -41,12 +41,12 @@ import java.util.logging.Logger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.DigestInputStream;
-
-
-
-
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import org.apache.commons.io.FilenameUtils;
-
 import org.gifdecoder.GifDecoder;
 
 /**
@@ -59,6 +59,10 @@ public class Pixel
      * This is for the animations.
      */
     private int i;
+    
+    private int z;
+    
+    private Boolean timerRunningFlag = false;
         
     public static IOIO ioiO;
     
@@ -149,6 +153,19 @@ public class Pixel
     
     public static String OS = System.getProperty("os.name").toLowerCase();
     
+    private static int framecount = 0;
+    
+    private ScheduledExecutorService scheduledExecutorService = Executors
+                                .newSingleThreadScheduledExecutor();
+        
+    private StreamGIFTask streamgifTask = new StreamGIFTask();
+    
+    private  ScheduledFuture<?> future ;
+    
+    private final AtomicBoolean streamGIFTimerRunningFlag = new AtomicBoolean();
+    
+    //private TimerTask animateTimer = new AnimateTimer();
+    
     /**
      * @param KIND
      * @param resolution 
@@ -173,6 +190,8 @@ public class Pixel
         fonts = new HashMap();
         
         scrollingText = "Scolling Text Initial Value";
+        
+        
         
         try
         {
@@ -1765,19 +1784,226 @@ private static String checksum(String filepath, MessageDigest md) throws IOExcep
     
     public void stopExistingTimer()
     {
+       
         System.out.println("Checking for Timers in PIXEL activity in " + getClass().getSimpleName() + ".");
+
+        //testing if we need to kill the timer task before the timer 
+        
+       /*
+        
+        if(animateTimer == null)
+        {
+            System.out.println("No need to stop animation timer");
+        }
+          else
+        {
+            System.out.println("**** Stopping animation timer TASK!!!! ");
+            animateTimer.cancel();
+            animateTimer = null;
+            z = 0;             //we use this counter in the streaming gif timer, important that it gets reset when a new gif is started
+        }
+      
+       
+        if (!future.isCancelled()) {
+            streamgifTask.shutdown();                  
+            future.cancel(true);
+            z = 0; 
+            System.out.println("Shutdown streamgiftask and future executor service");
+            streamGIFTimerRunningFlag.set(false);
+        }
+          */
+        
+          if (streamGIFTimerRunningFlag.get() == true) {
+            streamgifTask.shutdown();                  
+            future.cancel(true);
+            z = 0; 
+            System.out.println("Shutdown streamgiftask and future executor service");
+            streamGIFTimerRunningFlag.set(false);
+        }
+       
+       /*
+        if (streamGIFTimerRunningFlag.get() == true) {
+            //streamgifTask.shutdown();                  
+            //scheduledExecutorService.shutdown();       //shutdown kills and cannot be used again
+             streamgifTask.shutdown();
+            future.cancel(true);
+            z = 0; 
+            System.out.println("Shutdown streamgiftask and scheduledexecutor service");
+            streamGIFTimerRunningFlag.set(false);
+       }
+        */
 
         if(timer == null)
         {
             System.out.println("No timer stop needed at Pixel mode change.");
+             z = 0; //to be safe
         }
         else
         {
             System.out.println("Stopping timer PIXEL activity in " + getClass().getSimpleName() + "..");
+            //animateTimer.cancel();
             timer.cancel();
             timer = null;
+            z = 0;             //we use this counter in the streaming gif timer, important that it gets reset when a new gif is started
         }
+        
     }    
+    
+    public void writeArcadeAnimation(String selectedPlatformName, String selectedFileName, boolean writeMode) throws NoSuchAlgorithmException
+    {
+        
+        if (isWindows()) {
+            decodedAnimationsPath =  pixelHome + selectedPlatformName + "\\decoded\\";  //don't have to do this technically, just for display purposes
+            gifFilePath = pixelHome + selectedPlatformName + "\\" + selectedFileName; //user home/pixelcade/mame/digdug.gif
+        }
+        
+        else {
+            decodedAnimationsPath =  pixelHome + selectedPlatformName + "/decoded/";   //pixelcade/mame/decoded
+            gifFilePath = pixelHome + selectedPlatformName + "/" + selectedFileName; //user home/pixelcade/mame/digdug.gif
+        }
+        
+        stopExistingTimer();
+        System.out.println("Sending request to stop existing timer...");
+        
+        //decodedAnimationsPath =  pixelHome + selectedPlatformName + "/decoded/";   //pixelcade/mame/decoded
+        //gifFilePath = pixelHome + selectedPlatformName + "/" + selectedFileName; //user home/pixelcade/mame/digdug.gif
+       
+        //let's make sure the target gif exists before proceeding
+        File file = new File(gifFilePath);
+
+        if(file.exists() && !file.isDirectory()) { 
+            
+               try 
+               {
+                   System.out.println("Found GIF: " + gifFilePath);
+                   animationFilename = selectedFileName;
+                   if(gifTxtExists(decodedAnimationsPath,selectedFileName) == true && GIFRGB565Exists(decodedAnimationsPath,selectedFileName) == true)
+                   {
+                       System.out.println("This GIF was already decoded");
+                   }
+                   else
+                   {
+                       System.out.println("Decoding " + selectedFileName);
+                       System.out.println("Decoding " + gifFilePath);
+                       // the text file is not there so we cannot continue and we must decode, let's first copy the file to home dir
+                       decodeArcadeGIF(decodedAnimationsPath, gifFilePath,selectedFileName, currentResolution, KIND.width, KIND.height);
+                   }
+                   
+                   if (GIFArcadeNeedsDecoding(decodedAnimationsPath, selectedFileName, currentResolution,gifFilePath) == true)
+                   {
+                       System.out.println("Selected LED panel is different than the encoded GIF, need to re-encode...");
+                       decodeArcadeGIF(decodedAnimationsPath, gifFilePath, selectedFileName, currentResolution, KIND.width, KIND.height);
+                   }
+                   
+                   //****** Now let's setup the animation ******
+                   
+                   // TODO: replace animation_name with selectedFileName
+                   String animation_name = selectedFileName;
+                   
+                   float GIFfps = getDecodedfps(decodedAnimationsPath, animation_name); //get the fps //to do fix this later becaause we are getting from internal path
+                   GIFnumFrames = getDecodednumFrames(decodedAnimationsPath, animation_name);
+                   int gifSelectedFileDelay = getDecodedframeDelay(decodedAnimationsPath, animation_name);
+                   
+                   currentResolution = getDecodedresolution(decodedAnimationsPath, animation_name);
+                   GIFresolution = currentResolution;
+                  
+                   System.out.println("GIF Width: " + KIND.width + ", GIF Height: " + KIND.height);
+                   
+                   String pixelHardwareId = "not found";
+                   try
+                   {
+                       pixelHardwareId = ioiO.getImplVersion(v.HARDWARE_VER);
+                   }
+                   catch (ConnectionLostException ex)
+                   {
+                       Logger.getLogger(Pixel.class.getName()).log(Level.SEVERE, null, ex);
+                   }
+                   
+                   //stopExistingTimer();
+                   //System.out.println("The existing timer was stopped");
+                   
+                   if (pixelHardwareId.substring(0,4).equals("PIXL") && writeMode == true)
+                   {
+                       interactiveMode();         //have to put back into interactive mode, otherwise we were playing locally
+                       // need to tell PIXEL the frames per second to use, how fast to play the animations
+                       writeMode(GIFfps);
+                       System.out.println("Now writing to PIXEL's SD card, the screen will go blank until writing has been completed...");
+                       
+                       // we'll run this in the background and also update the UI with progress
+                       System.out.println("The Pixel animation writer is being created");
+                       Date now = new Date();
+                       SendGifAnimationTask wp = new SendGifAnimationTask();   //starts a timer which loops through frames doing a write and playlocal when time done
+                       timer = new Timer(); //note that this timer only runs through one loop and then stops
+                       timer.schedule(wp, now);
+                       System.out.println("The Pixel animation writer was created");
+                   }
+                   else
+                   {
+                       
+                       interactiveMode();  //we are streaming here so need to put in interactive mode first , otherwise we're just playing locally
+                       
+                       System.out.println("Future version of the timer is starting.");
+                       //scheduledExecutorService.scheduleAtFixedRate(streamgifTask, 0, gifSelectedFileDelay, TimeUnit.MILLISECONDS);
+                       
+                      //define and get reference
+                       ScheduledExecutorService streamGIFservice = Executors.newScheduledThreadPool(1);
+                       future = streamGIFservice.scheduleAtFixedRate(streamgifTask, 0, gifSelectedFileDelay, TimeUnit.MILLISECONDS);
+                       
+                       //future = streamGIFservice.scheduleAtFixedRate(streamgifTask, 0, gifSelectedFileDelay, TimeUnit.MILLISECONDS);
+                       
+                       
+                       streamGIFTimerRunningFlag.set(true);  //atomic boolean , better for threads
+                       
+                    /*
+                       try {
+                            scheduledExecutorService.scheduleAtFixedRate(streamgifTask, 0, 10,
+                                    TimeUnit.MILLISECONDS);
+                                           try {
+                                               Thread.sleep(8000);
+                                           } catch (InterruptedException ex) {
+                                               Logger.getLogger(Pixel.class.getName()).log(Level.SEVERE, null, ex);
+                                           }
+                        } finally {
+                            System.out.println("Shutdown scheduledExecutorService");
+                            streamgifTask.shutdown();
+                            scheduledExecutorService.shutdownNow();
+                        }
+                    */
+                   
+
+
+                        //TimerTask animateTimer = new AnimateTimer();  //this timer loops indefinitely until we kill it
+                       //timer = new Timer();
+                       //Date firstTime = new Date();
+                       //timer.schedule(animateTimer, firstTime, gifSelectedFileDelay);  //second parameter means start now and third parameter is how often to fire the task
+                       //timerRunningFlag = true;
+                       
+                      
+                       //timer = new Timer();
+                       //TimerTask animateTimer = new AnimateTimer(); 
+                       //Date firstTime = new Date();
+                       //timer.schedule(animateTimer, firstTime, gifSelectedFileDelay);  //
+                      
+
+                        //stopExistingTimer();
+                       //Date now = new Date();
+                       //StreamGifAnimationTask wp1 = new StreamGifAnimationTask();   //starts a timer which loops through frames continuously
+                       //timer = new Timer();
+                       //timer.schedule(wp, now, gifSelectedFileDelay);
+                       //timer.schedule(wp1, now, 10000);
+                     
+                       
+                       System.out.println("Streaming version of the timer has started.");
+                   }
+               } 
+               catch (IOException ex) 
+               {
+                   Logger.getLogger(Pixel.class.getName()).log(Level.SEVERE, null, ex);
+               }
+        } else {
+             System.out.println("** ERROR ** GIF file not found: " + gifFilePath);
+        }
+    }
   
     /**
      * This method sends an animation to the PIXEL. <b>Be sure to call #stopExistingTimer()</b> 
@@ -1857,141 +2083,22 @@ private static String checksum(String filepath, MessageDigest md) throws IOExcep
             System.out.println("A non PIXL, version of the timer is starting.");
             
             stopExistingTimer();
+            
             System.out.println("stopped the existing timer again.");
+            
             
             TimerTask animateTimer = new AnimateTimer();
             timer = new Timer();
             Date firstTime = new Date();
             timer.schedule(animateTimer, firstTime, gifSelectedFileDelay);
+            
+            
         
             System.out.println("A non PIXL, version of the timer has started.");
         } 
     }
     
-    public void writeArcadeAnimation(String selectedPlatformName, String selectedFileName, boolean writeMode) throws NoSuchAlgorithmException
-    {
-        
-        if (isWindows()) {
-            decodedAnimationsPath =  pixelHome + selectedPlatformName + "\\decoded\\";  //don't have to do this technically, just for display purposes
-            gifFilePath = pixelHome + selectedPlatformName + "\\" + selectedFileName; //user home/pixelcade/mame/digdug.gif
-        }
-        
-        else {
-            decodedAnimationsPath =  pixelHome + selectedPlatformName + "/decoded/";   //pixelcade/mame/decoded
-            gifFilePath = pixelHome + selectedPlatformName + "/" + selectedFileName; //user home/pixelcade/mame/digdug.gif
-        }
-        
-        stopExistingTimer();
-        System.out.println("Sending request to stop existing timer...");
-        
-        //decodedAnimationsPath =  pixelHome + selectedPlatformName + "/decoded/";   //pixelcade/mame/decoded
-        //gifFilePath = pixelHome + selectedPlatformName + "/" + selectedFileName; //user home/pixelcade/mame/digdug.gif
-       
-        //let's make sure the target gif exists before proceeding
-        File file = new File(gifFilePath);
-
-        if(file.exists() && !file.isDirectory()) { 
-            
-               try 
-               {
-                   System.out.println("Found GIF: " + gifFilePath);
-                   animationFilename = selectedFileName;
-                   if(gifTxtExists(decodedAnimationsPath,selectedFileName) == true && GIFRGB565Exists(decodedAnimationsPath,selectedFileName) == true)
-                   {
-                       System.out.println("This GIF was already decoded");
-                   }
-                   else
-                   {
-                       System.out.println("Decoding " + selectedFileName);
-                       System.out.println("Decoding " + gifFilePath);
-                       // the text file is not there so we cannot continue and we must decode, let's first copy the file to home dir
-                       decodeArcadeGIF(decodedAnimationsPath, gifFilePath,selectedFileName, currentResolution, KIND.width, KIND.height);
-                   }
-                   
-                   if (GIFArcadeNeedsDecoding(decodedAnimationsPath, selectedFileName, currentResolution,gifFilePath) == true)
-                   {
-                       System.out.println("Selected LED panel is different than the encoded GIF, need to re-encode...");
-                       decodeArcadeGIF(decodedAnimationsPath, gifFilePath, selectedFileName, currentResolution, KIND.width, KIND.height);
-                   }
-                   
-                   //****** Now let's setup the animation ******
-                   
-                   // TODO: replace animation_name with selectedFileName
-                   String animation_name = selectedFileName;
-                   
-                   float GIFfps = getDecodedfps(decodedAnimationsPath, animation_name); //get the fps //to do fix this later becaause we are getting from internal path
-                   GIFnumFrames = getDecodednumFrames(decodedAnimationsPath, animation_name);
-                   int gifSelectedFileDelay = getDecodedframeDelay(decodedAnimationsPath, animation_name);
-                   
-                   currentResolution = getDecodedresolution(decodedAnimationsPath, animation_name);
-                   GIFresolution = currentResolution;
-                   
-                  
-                   System.out.println("GIF Width: " + KIND.width + ", GIF Height: " + KIND.height);
-                   
-                   String pixelHardwareId = "not found";
-                   try
-                   {
-                       pixelHardwareId = ioiO.getImplVersion(v.HARDWARE_VER);
-                   }
-                   catch (ConnectionLostException ex)
-                   {
-                       Logger.getLogger(Pixel.class.getName()).log(Level.SEVERE, null, ex);
-                   }
-                   
-                   //stopExistingTimer();
-                   //System.out.println("The existing timer was stopped");
-                   
-                   if (pixelHardwareId.substring(0,4).equals("PIXL") && writeMode == true)
-                   {
-                       interactiveMode();         //have to put back into interactive mode, otherwise we were playing locally
-                       // need to tell PIXEL the frames per second to use, how fast to play the animations
-                       writeMode(GIFfps);
-                       System.out.println("Now writing to PIXEL's SD card, the screen will go blank until writing has been completed...");
-                       
-                       // we'll run this in the background and also update the UI with progress
-                       System.out.println("The Pixel animation writer is being created");
-                       Date now = new Date();
-                       SendGifAnimationTask wp = new SendGifAnimationTask();   //starts a timer which loops through frames doing a write and playlocal when time done
-                       timer = new Timer(); //note that this timer only runs through one loop and then stops
-                       timer.schedule(wp, now);
-                       System.out.println("The Pixel animation writer was created");
-                   }
-                   else
-                   {
-                       
-                       
-                       //stopExistingTimer();
-                       //System.out.println("stopped the existing timer again.");
-                       
-                       interactiveMode();  //we are streaming here so need to put in interactive mode first , otherwise we're just playing locally
-                       //it's crashing here!!!! try it without this and just stream to stream
-                       //also if the timer only runs once, then it doesn't crash so still something with the active timer
-                       //how to check if the stop timer is actually killing the timer?
-                       
-                       System.out.println("Streaming version of the timer is starting.");
-                       
-                       //TimerTask animateTimer = new AnimateTimer();  //this timer loops indefinitely until we kill it
-                      // timer = new Timer();
-                      // Date firstTime = new Date();
-                      // timer.schedule(animateTimer, firstTime, gifSelectedFileDelay);
-                       
-                       Date now = new Date();
-                       StreamGifAnimationTask wp1 = new StreamGifAnimationTask();   //starts a timer which loops through frames continuously
-                       timer = new Timer();
-                       timer.schedule(wp1, now, gifSelectedFileDelay);
-                       
-                       System.out.println("Streaming version of the timer has started.");
-                   }
-               } 
-               catch (IOException ex) 
-               {
-                   Logger.getLogger(Pixel.class.getName()).log(Level.SEVERE, null, ex);
-               }
-        } else {
-             System.out.println("** ERROR ** GIF file not found: " + gifFilePath);
-        }
-    }
+    
   
     /**
      * This method is used to write a single frame to the pixel.
@@ -2195,15 +2302,21 @@ private static String checksum(String filepath, MessageDigest md) throws IOExcep
         @Override
         public void run()
         {
-            String message = "Pixel is streaming an animation to the hardware.";
+            
+           
+            String message = "timer instance loop";
+            //System.out.println(message);
             System.out.println(message);
             
             //let's loop through and send frame to PIXEL with no delay
-            for(int y=0; y<GIFnumFrames; y++) 
+            for(int y=0; y<GIFnumFrames-1; y++) 
             { 
                 //Al removed the -1, make sure to test that!!!!!
                 sendPixelDecodedFrame(decodedAnimationsPath, animationFilename, y, GIFnumFrames, GIFresolution, KIND.width,KIND.height);
+                System.out.println("counter : " + y);
             }
+            
+            //!!!!! if the cancel is happening in the middle of the for loop, we're in trouble
             
             //try {
             //    Thread.sleep(100);
@@ -2213,20 +2326,93 @@ private static String checksum(String filepath, MessageDigest md) throws IOExcep
         }
     }
      
+    private class BeeperControl {
+        
+            private final ScheduledExecutorService scheduler =
+              Executors.newScheduledThreadPool(1);
+
+            public void beepForAnHour() {
+              final Runnable beeper = new Runnable() {
+                public void run() { 
+                    System.out.println("beep"); 
+                }
+              };
+              
+              final ScheduledFuture<?> beeperHandle =
+              scheduler.scheduleAtFixedRate(beeper, 10, 10, TimeUnit.SECONDS);
+              
+              scheduler.schedule(new Runnable() {
+                public void run() { 
+                    beeperHandle.cancel(true); 
+                }
+              }, 60 * 60, TimeUnit.SECONDS);
+            }
+    }
+
+     
+    public class StreamGIFTask implements Runnable {
+
+        public void run() {
+            
+              if (z >= GIFnumFrames) 
+            {
+                z = 0;
+                System.out.println("reset z to: " + z);
+            }
+            
+            String message = "frame:" + z; //should start at 0 in counter reset but is staritng at 1
+            //System.out.println(message);
+            System.out.println(message);
+            sendPixelDecodedFrame(decodedAnimationsPath, animationFilename, z, GIFnumFrames, GIFresolution, KIND.width,KIND.height); //if z is not reset, then we could be sending a frame that doesn't exist and hence ioio disconnect
+            
+            z++;
+            
+        }
+
+        void shutdown() {
+           
+        }
+}
+
+    
+    
      //TODO: this is not a Timer, where is this used?
-    private class AnimateTimer extends TimerTask
+    //private class AnimateTimer extends TimerTask
+    public class AnimateTimer extends TimerTask
     {
         @Override
         public void run()
         {
-            i++;
+            //String message = "timer instance loop:" + z;
+            //System.out.println(message);
+            //System.out.println(message);
+            
+            //z++;
 
-            if (i >= GIFnumFrames - 1) 
+            //if (z >= GIFnumFrames - 1) 
+            //{
+            //    z = 0;
+            //    System.out.println("reset to 0");
+            //}
+            //sendPixelDecodedFrame(decodedAnimationsPath, animationFilename, z, GIFnumFrames, GIFresolution, KIND.width,KIND.height); //if z is not reset, then we could be sending a frame that doesn't exist and hence ioio disconnect
+            //z++;
+            
+            if (z >= GIFnumFrames) 
             {
-                i = 0;
+                z = 0;
+                System.out.println("reset z to: " + z);
             }
-            sendPixelDecodedFrame(decodedAnimationsPath, animationFilename, i, GIFnumFrames, GIFresolution, KIND.width,KIND.height);
+            
+            String message = "frame:" + z; //should start at 0 in counter reset but is staritng at 1
+            //System.out.println(message);
+            System.out.println(message);
+            sendPixelDecodedFrame(decodedAnimationsPath, animationFilename, z, GIFnumFrames, GIFresolution, KIND.width,KIND.height); //if z is not reset, then we could be sending a frame that doesn't exist and hence ioio disconnect
+            
+            z++;
+            
         }
+        
+       
         
          
     }
