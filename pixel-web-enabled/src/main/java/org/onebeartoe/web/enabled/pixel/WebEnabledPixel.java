@@ -630,8 +630,8 @@ public class WebEnabledPixel
         try
         {
             arcadeImageNames = loadImageList("mame");
-            arcadeImageNames = loadImageList("atari2600");
             //TO DO how to concatenate or should we not do that and have separate for each console?
+            //how to modify to generic the pngs?
         } 
         catch (Exception ex)
         {
