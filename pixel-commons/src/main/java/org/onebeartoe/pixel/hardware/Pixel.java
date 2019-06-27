@@ -155,14 +155,20 @@ public class Pixel
     
     private static int framecount = 0;
     
-    private ScheduledExecutorService scheduledExecutorService = Executors
-                                .newSingleThreadScheduledExecutor();
+    //private ScheduledExecutorService scheduledExecutorService = Executors  //to do is this needed?
+    //                            .newSingleThreadScheduledExecutor();
         
     private StreamGIFTask streamgifTask = new StreamGIFTask();
+    private TextScroller drawTask = new TextScroller();
+    private DrawAnalogClockTask clockTask = new DrawAnalogClockTask();
     
     private  ScheduledFuture<?> future ;
+    private  ScheduledFuture<?> futurescroll ;
+    private  ScheduledFuture<?> futureclock ;
     
     private final AtomicBoolean streamGIFTimerRunningFlag = new AtomicBoolean();
+    private final AtomicBoolean scrollingTextTimerRunningFlag = new AtomicBoolean();
+    private final AtomicBoolean clockTimerRunningFlag = new AtomicBoolean();
     
     //private TimerTask animateTimer = new AnimateTimer();
     
@@ -190,8 +196,6 @@ public class Pixel
         fonts = new HashMap();
         
         scrollingText = "Scolling Text Initial Value";
-        
-        
         
         try
         {
@@ -813,7 +817,7 @@ private static String checksum(String filepath, MessageDigest md) throws IOExcep
     	else return false;
     }
     
-    private void runRepeatingTask(TimerTask drawTask, long repeatPeriod)
+    private void runRepeatingTask(TimerTask drawTask, long repeatPeriod)  //**** NO LONGER USED ******
     {
         stopExistingTimer();
 
@@ -825,6 +829,7 @@ private static String checksum(String filepath, MessageDigest md) throws IOExcep
         Date firstTime = new Date();
 
         timer.schedule(drawTask, firstTime, repeatPeriod);
+        
     }
     
     public void sendPixelDecodedFrame(String decodedDir, String gifName, int x, int selectedFileTotalFrames, int selectedFileResolution, int frameWidth, int frameHeight) 
@@ -978,21 +983,20 @@ private static String checksum(String filepath, MessageDigest md) throws IOExcep
             // do nothing huh?
         }
     }
-    
-/**
- * TODO: move this to the runRepeatingTask() method
- */    
+   
     public void scrollText()
     {
         stopExistingTimer();
 
-        timer = new Timer();
-
-        TimerTask drawTask = new TextScroller();
-
-        Date firstTime = new Date();
-
-        timer.schedule(drawTask, firstTime, scrollDelay);
+        //timer = new Timer();
+        //TimerTask drawTask = new TextScroller();
+        //Date firstTime = new Date();
+        //timer.schedule(drawTask, firstTime, scrollDelay);
+        
+        ScheduledExecutorService scrollTextService = Executors.newScheduledThreadPool(1);
+        futurescroll = scrollTextService.scheduleAtFixedRate(drawTask, 0, scrollDelay, TimeUnit.MILLISECONDS);
+        scrollingTextTimerRunningFlag.set(true);  //atomic boolean , better for threads
+        
     }
     
     public void setDecodedAnimationsPath(String decodedAnimationsPath)
@@ -1640,11 +1644,19 @@ private static String checksum(String filepath, MessageDigest md) throws IOExcep
      */
     public void displayClock(ClockModes mode)
     {
-        long oneSecond = Duration.ofSeconds(1).toMillis();
+        //long oneSecond = Duration.ofSeconds(1).toMillis();
         
-        TimerTask drawTask = new DrawAnalogClockTask();
+        //TimerTask drawTask = new DrawAnalogClockTask();
                 
-        runRepeatingTask(drawTask, oneSecond);
+        //runRepeatingTask(drawTask, oneSecond);
+        
+         //let's move this to new timer architecture and skip repeating task
+        
+        ScheduledExecutorService clockService = Executors.newScheduledThreadPool(1);
+        futureclock = clockService.scheduleAtFixedRate(clockTask, 0, 1, TimeUnit.SECONDS);
+        clockTimerRunningFlag.set(true);  //atomic boolean , better for threads
+        
+       
     }
 
     public void drawEqualizer(double [] values) throws ConnectionLostException
@@ -1786,52 +1798,28 @@ private static String checksum(String filepath, MessageDigest md) throws IOExcep
     {
        
         System.out.println("Checking for Timers in PIXEL activity in " + getClass().getSimpleName() + ".");
-
-        //testing if we need to kill the timer task before the timer 
-        
-       /*
-        
-        if(animateTimer == null)
-        {
-            System.out.println("No need to stop animation timer");
-        }
-          else
-        {
-            System.out.println("**** Stopping animation timer TASK!!!! ");
-            animateTimer.cancel();
-            animateTimer = null;
-            z = 0;             //we use this counter in the streaming gif timer, important that it gets reset when a new gif is started
-        }
-      
        
-        if (!future.isCancelled()) {
-            streamgifTask.shutdown();                  
-            future.cancel(true);
-            z = 0; 
-            System.out.println("Shutdown streamgiftask and future executor service");
-            streamGIFTimerRunningFlag.set(false);
-        }
-          */
-        
-          if (streamGIFTimerRunningFlag.get() == true) {
-            streamgifTask.shutdown();                  
-            future.cancel(true);
-            z = 0; 
-            System.out.println("Shutdown streamgiftask and future executor service");
-            streamGIFTimerRunningFlag.set(false);
-        }
-       
-       /*
         if (streamGIFTimerRunningFlag.get() == true) {
-            //streamgifTask.shutdown();                  
-            //scheduledExecutorService.shutdown();       //shutdown kills and cannot be used again
-             streamgifTask.shutdown();
-            future.cancel(true);
+            //streamgifTask.shutdown();    //looks like this is not needed
+            future.cancel(false); //dont' interrupt if busy
             z = 0; 
-            System.out.println("Shutdown streamgiftask and scheduledexecutor service");
+            System.out.println("Shutdown streamgiftask timer");
             streamGIFTimerRunningFlag.set(false);
-       }
-        */
+        }
+        
+        if (scrollingTextTimerRunningFlag.get() == true) {
+            //drawktask.shutdown();    //looks like this is not needed
+            futurescroll.cancel(false); //dont' interrupt if busy
+            System.out.println("Shutdown drawtask timer");
+            scrollingTextTimerRunningFlag.set(false);
+        }
+        
+         if (clockTimerRunningFlag.get() == true) {
+            //clocktask.shutdown();    //looks like this is not needed
+            futureclock.cancel(false); //dont' interrupt if busy
+            System.out.println("Shutdown clock timer");
+            clockTimerRunningFlag.set(false);
+        }
 
         if(timer == null)
         {
@@ -1864,9 +1852,6 @@ private static String checksum(String filepath, MessageDigest md) throws IOExcep
         
         stopExistingTimer();
         System.out.println("Sending request to stop existing timer...");
-        
-        //decodedAnimationsPath =  pixelHome + selectedPlatformName + "/decoded/";   //pixelcade/mame/decoded
-        //gifFilePath = pixelHome + selectedPlatformName + "/" + selectedFileName; //user home/pixelcade/mame/digdug.gif
        
         //let's make sure the target gif exists before proceeding
         File file = new File(gifFilePath);
@@ -1931,10 +1916,14 @@ private static String checksum(String filepath, MessageDigest md) throws IOExcep
                        
                        // we'll run this in the background and also update the UI with progress
                        System.out.println("The Pixel animation writer is being created");
-                       Date now = new Date();
-                       SendGifAnimationTask wp = new SendGifAnimationTask();   //starts a timer which loops through frames doing a write and playlocal when time done
-                       timer = new Timer(); //note that this timer only runs through one loop and then stops
-                       timer.schedule(wp, now);
+                       
+                       //Date now = new Date();
+                       //SendGifAnimationTask wp = new SendGifAnimationTask();   //starts a timer which loops through frames doing a write and playlocal when time done
+                       //timer = new Timer(); //note that this timer only runs through one loop and then stops
+                       //timer.schedule(wp, now);
+                       
+                        WriteGIFAnimationTask();
+                       
                        System.out.println("The Pixel animation writer was created");
                    }
                    else
@@ -1945,53 +1934,15 @@ private static String checksum(String filepath, MessageDigest md) throws IOExcep
                        System.out.println("Future version of the timer is starting.");
                        //scheduledExecutorService.scheduleAtFixedRate(streamgifTask, 0, gifSelectedFileDelay, TimeUnit.MILLISECONDS);
                        
-                      //define and get reference
+                       //define and get reference
                        ScheduledExecutorService streamGIFservice = Executors.newScheduledThreadPool(1);
                        future = streamGIFservice.scheduleAtFixedRate(streamgifTask, 0, gifSelectedFileDelay, TimeUnit.MILLISECONDS);
-                       
-                       //future = streamGIFservice.scheduleAtFixedRate(streamgifTask, 0, gifSelectedFileDelay, TimeUnit.MILLISECONDS);
-                       
-                       
                        streamGIFTimerRunningFlag.set(true);  //atomic boolean , better for threads
-                       
-                    /*
-                       try {
-                            scheduledExecutorService.scheduleAtFixedRate(streamgifTask, 0, 10,
-                                    TimeUnit.MILLISECONDS);
-                                           try {
-                                               Thread.sleep(8000);
-                                           } catch (InterruptedException ex) {
-                                               Logger.getLogger(Pixel.class.getName()).log(Level.SEVERE, null, ex);
-                                           }
-                        } finally {
-                            System.out.println("Shutdown scheduledExecutorService");
-                            streamgifTask.shutdown();
-                            scheduledExecutorService.shutdownNow();
-                        }
-                    */
-                   
-
-
-                        //TimerTask animateTimer = new AnimateTimer();  //this timer loops indefinitely until we kill it
-                       //timer = new Timer();
-                       //Date firstTime = new Date();
-                       //timer.schedule(animateTimer, firstTime, gifSelectedFileDelay);  //second parameter means start now and third parameter is how often to fire the task
-                       //timerRunningFlag = true;
-                       
                       
                        //timer = new Timer();
                        //TimerTask animateTimer = new AnimateTimer(); 
                        //Date firstTime = new Date();
                        //timer.schedule(animateTimer, firstTime, gifSelectedFileDelay);  //
-                      
-
-                        //stopExistingTimer();
-                       //Date now = new Date();
-                       //StreamGifAnimationTask wp1 = new StreamGifAnimationTask();   //starts a timer which loops through frames continuously
-                       //timer = new Timer();
-                       //timer.schedule(wp, now, gifSelectedFileDelay);
-                       //timer.schedule(wp1, now, 10000);
-                     
                        
                        System.out.println("Streaming version of the timer has started.");
                    }
@@ -2013,6 +1964,9 @@ private static String checksum(String filepath, MessageDigest md) throws IOExcep
      */
     public void writeAnimation(String selectedFileName, boolean writeMode)
     {
+        
+        stopExistingTimer();
+        
         animationFilename = selectedFileName;
         if(gifTxtExists(decodedAnimationsPath,selectedFileName) == true && GIFRGB565Exists(decodedAnimationsPath,selectedFileName) == true) 
         {
@@ -2033,7 +1987,7 @@ private static String checksum(String filepath, MessageDigest md) throws IOExcep
 	
         //****** Now let's setup the animation ******
 
-// TODO: replace animation_name with selectedFileName
+        // TODO: replace animation_name with selectedFileName
         String animation_name = selectedFileName;
 
         float GIFfps = getDecodedfps(decodedAnimationsPath, animation_name); //get the fps //to do fix this later becaause we are getting from internal path
@@ -2060,8 +2014,6 @@ private static String checksum(String filepath, MessageDigest md) throws IOExcep
             Logger.getLogger(Pixel.class.getName()).log(Level.SEVERE, null, ex);
         }
         
-        stopExistingTimer();
-        
         if (pixelHardwareId.substring(0,4).equals("PIXL") && writeMode == true) 
         {
             interactiveMode();
@@ -2072,34 +2024,32 @@ private static String checksum(String filepath, MessageDigest md) throws IOExcep
 
             // we'll run this in the background and also update the UI with progress
             System.out.println("The Pixel animation writer is being created");
-            Date now = new Date();
-            SendGifAnimationTask wp = new SendGifAnimationTask();
-            timer = new Timer();
-            timer.schedule(wp, now);
+            //Date now = new Date();
+            //SendGifAnimationTask wp = new SendGifAnimationTask();
+            //timer = new Timer();
+            //timer.schedule(wp, now);
+            WriteGIFAnimationTask();
             System.out.println("The Pixel animation writer was created");
         }
         else 
         {
             System.out.println("A non PIXL, version of the timer is starting.");
-            
-            stopExistingTimer();
-            
             System.out.println("stopped the existing timer again.");
             
+            //TimerTask animateTimer = new AnimateTimer();  //this was causing ioio disconnects on windows (worked on mac and Pi)
+            //timer = new Timer();
+            //Date firstTime = new Date();
+            //timer.schedule(animateTimer, firstTime, gifSelectedFileDelay);
             
-            TimerTask animateTimer = new AnimateTimer();
-            timer = new Timer();
-            Date firstTime = new Date();
-            timer.schedule(animateTimer, firstTime, gifSelectedFileDelay);
-            
-            
+            ScheduledExecutorService streamGIFservice = Executors.newScheduledThreadPool(1);
+            future = streamGIFservice.scheduleAtFixedRate(streamgifTask, 0, gifSelectedFileDelay, TimeUnit.MILLISECONDS);
+            streamGIFTimerRunningFlag.set(true); 
         
             System.out.println("A non PIXL, version of the timer has started.");
         } 
     }
     
     
-  
     /**
      * This method is used to write a single frame to the pixel.
      * @param originalImage
@@ -2195,7 +2145,9 @@ private static String checksum(String filepath, MessageDigest md) throws IOExcep
     }
     
 //TODO: can this class be moved outside of the Pixel.java class; just like the Edu clock task?     
-    private class DrawAnalogClockTask extends TimerTask
+    //private class DrawAnalogClockTask extends TimerTask
+    private class DrawAnalogClockTask implements Runnable 
+            
     {
         private EduAnalogClock clock;
 //        private AnalogClock clock;
@@ -2260,10 +2212,44 @@ private static String checksum(String filepath, MessageDigest md) throws IOExcep
         STILL_IMAGE
     }
     
+     private void WriteGIFAnimationTask()   //this timer ends after one loop through the GIF but doesn't need to be a timer
+    
+    {
+            String message = "Pixel is writing an animation to the hardware.";
+            System.out.println(message);
+            
+            //let's loop through and send frame to PIXEL with no delay
+            for(int y=0; y<GIFnumFrames; y++) 
+            { 
+                //Al removed the -1, make sure to test that!!!!!
+                sendPixelDecodedFrame(decodedAnimationsPath, animationFilename, y, GIFnumFrames, GIFresolution, KIND.width,KIND.height);
+            }
+
+            message = "Pixel is done writing the animation, setting PIXEL to local playback mode.";
+            System.out.println(message);
+            
+            try {                                 //this delay seems to help as we were getting a ioio disconnect without this
+                Thread.sleep(100);
+            } catch (InterruptedException ex) {
+                Logger.getLogger(Pixel.class.getName()).log(Level.SEVERE, null, ex);
+            }
+            
+            playLocalMode();
+            
+            message = "Pixel is in local playback mode.";
+            System.out.println(message);  
+                        
+            //TODO UPDATE THE BROWSER/CLIENTS SOMEHOW
+        
+    }
+    
     /**
      * When this task is executed, it sends an animated GIF to the the Pixel.
      */
-    class SendGifAnimationTask extends TimerTask   //this timer ends after one loop through the GIF
+    /*
+     // had this as a timer originally but as it only needs to loop through all the frames one time with no delay, we don't actually need it to be a timer
+    class SendGifAnimationTask extends TimerTask   //this timer ends after one loop through the GIF but doesn't need to be a timer
+    
     {
         @Override
         public void run()
@@ -2295,9 +2281,9 @@ private static String checksum(String filepath, MessageDigest md) throws IOExcep
             //TODO UPDATE THE BROWSER/CLIENTS SOMEHOW
         }
     }
+    */
     
-    
-     class StreamGifAnimationTask extends TimerTask
+    /*  class StreamGifAnimationTask extends TimerTask  //**** NO LONGER USED ****
     {
         @Override
         public void run()
@@ -2324,31 +2310,8 @@ private static String checksum(String filepath, MessageDigest md) throws IOExcep
             //    Logger.getLogger(Pixel.class.getName()).log(Level.SEVERE, null, ex);
             // }
         }
-    }
-     
-    private class BeeperControl {
-        
-            private final ScheduledExecutorService scheduler =
-              Executors.newScheduledThreadPool(1);
-
-            public void beepForAnHour() {
-              final Runnable beeper = new Runnable() {
-                public void run() { 
-                    System.out.println("beep"); 
-                }
-              };
-              
-              final ScheduledFuture<?> beeperHandle =
-              scheduler.scheduleAtFixedRate(beeper, 10, 10, TimeUnit.SECONDS);
-              
-              scheduler.schedule(new Runnable() {
-                public void run() { 
-                    beeperHandle.cancel(true); 
-                }
-              }, 60 * 60, TimeUnit.SECONDS);
-            }
-    }
-
+    } */
+         
      
     public class StreamGIFTask implements Runnable {
 
@@ -2372,30 +2335,14 @@ private static String checksum(String filepath, MessageDigest md) throws IOExcep
         void shutdown() {
            
         }
-}
-
-    
-    
-     //TODO: this is not a Timer, where is this used?
+} 
+     
     //private class AnimateTimer extends TimerTask
-    public class AnimateTimer extends TimerTask
+    /* public class AnimateTimer extends TimerTask //***** NO LONGER USED ******
     {
         @Override
         public void run()
         {
-            //String message = "timer instance loop:" + z;
-            //System.out.println(message);
-            //System.out.println(message);
-            
-            //z++;
-
-            //if (z >= GIFnumFrames - 1) 
-            //{
-            //    z = 0;
-            //    System.out.println("reset to 0");
-            //}
-            //sendPixelDecodedFrame(decodedAnimationsPath, animationFilename, z, GIFnumFrames, GIFresolution, KIND.width,KIND.height); //if z is not reset, then we could be sending a frame that doesn't exist and hence ioio disconnect
-            //z++;
             
             if (z >= GIFnumFrames) 
             {
@@ -2411,11 +2358,8 @@ private static String checksum(String filepath, MessageDigest md) throws IOExcep
             z++;
             
         }
-        
-       
-        
          
-    }
+    } */
      
      public static boolean isWindows() {
 
@@ -2435,7 +2379,8 @@ private static String checksum(String filepath, MessageDigest md) throws IOExcep
 		
 	}
     
-    private class TextScroller extends TimerTask
+    //private class TextScroller extends TimerTask
+     public class TextScroller implements Runnable 
     {
         @Override
         public void run()
@@ -2527,6 +2472,10 @@ private static String checksum(String filepath, MessageDigest md) throws IOExcep
             {
                 x--;
             }
+        }
+        
+         void shutdown() {
+           
         }
     }
 }

@@ -45,6 +45,7 @@ import org.onebeartoe.pixel.hardware.Pixel;
 
 import org.onebeartoe.web.enabled.pixel.controllers.AnimationsHttpHandler;
 import org.onebeartoe.web.enabled.pixel.controllers.AnimationsListHttpHandler;
+import org.onebeartoe.web.enabled.pixel.controllers.ArcadeListHttpHandler;
 import org.onebeartoe.web.enabled.pixel.controllers.ClockHttpHandler;
 import org.onebeartoe.web.enabled.pixel.controllers.IndexHttpHandler;
 import org.onebeartoe.web.enabled.pixel.controllers.ScrollingTextColorHttpHandler;
@@ -93,6 +94,8 @@ public class WebEnabledPixel
 
 //TODO: MAKE THIS PRIVATE    
     public List<String> animationImageNames;
+    
+    public List<String> arcadeImageNames;
     
     public static String OS = System.getProperty("os.name").toLowerCase();
     
@@ -165,6 +168,8 @@ public class WebEnabledPixel
         
         loadAnimationList();
         
+        loadArcadeList();
+        
         createControllers();
     }
         
@@ -192,6 +197,8 @@ public class WebEnabledPixel
             HttpHandler animationsHttpHandler = new AnimationsHttpHandler(this);
             
             HttpHandler animationsListHttpHandler = new AnimationsListHttpHandler(this);
+            
+            HttpHandler arcadeListHttpHandler = new ArcadeListHttpHandler(this);
 
             HttpHandler uploadHttpHandler = new UploadHttpHandler(this);
             
@@ -212,6 +219,7 @@ public class WebEnabledPixel
                                             server.createContext("/animations/save", animationsListHttpHandler);
                                             
             HttpContext arcadeContext =     server.createContext("/arcade", arcadeHttpHandler);
+                                            server.createContext("/arcade/list", arcadeListHttpHandler);
 
             HttpContext staticContent =     server.createContext("/files", staticFileHttpHandler);
             
@@ -617,7 +625,23 @@ public class WebEnabledPixel
         return animationImageNames;
     }
     
-    private List<String> loadImageList(String directoryName) throws Exception
+    public List<String> loadArcadeList()
+    {
+        try
+        {
+            arcadeImageNames = loadImageList("mame");
+            arcadeImageNames = loadImageList("atari2600");
+            //TO DO how to concatenate or should we not do that and have separate for each console?
+        } 
+        catch (Exception ex)
+        {
+            logger.log(Level.SEVERE, "could not load image resources on the filesystem", ex);
+        }
+        
+        return arcadeImageNames;
+    }
+    
+    private List<String> loadImageList(String directoryName) throws Exception  //TO DO alphabetize this list
     {
         String dirPath = pixel.getPixelHome() + directoryName;
         File parent = new File(dirPath);
