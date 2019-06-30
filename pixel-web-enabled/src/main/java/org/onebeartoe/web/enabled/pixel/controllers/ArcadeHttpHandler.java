@@ -15,6 +15,8 @@ import javax.imageio.ImageIO;
 import org.onebeartoe.pixel.hardware.Pixel;
 import org.onebeartoe.system.Sleeper;
 import org.onebeartoe.web.enabled.pixel.WebEnabledPixel;
+import org.onebeartoe.pixel.LogMe;
+import org.onebeartoe.pixel.PixelLogFormatter;
 import org.apache.commons.io.FilenameUtils;
 
 /**
@@ -92,10 +94,7 @@ public class ArcadeHttpHandler extends ImageResourceHttpHandler
     @Override
     protected void writeImageResource(String urlParams) throws IOException, ConnectionLostException
     {
-        
-    	
-        
-        
+         
         String streamOrWrite = null ;
  	String consoleName = null ;
  	String arcadeName = null ;
@@ -114,9 +113,7 @@ public class ArcadeHttpHandler extends ImageResourceHttpHandler
         //String extension=null;
         
         //to do the slashes will screw up this logic, we could remove the / first or switch to another convention
-        
- 	
-        
+       
         String [] arcadeURLarray = urlParams.split("/"); 
         //String [] arcadeURLarray = urlParams.split("&"); 
         
@@ -129,6 +126,9 @@ public class ArcadeHttpHandler extends ImageResourceHttpHandler
         } 
         System.out.println(arcadeURLarray.length); //should be 5
         */
+        
+        LogMe logMe = LogMe.getInstance();
+        logMe.aLogger.info("arcade handler received " + urlParams);
         
         if (arcadeURLarray.length == 5) {
         	
@@ -168,6 +168,11 @@ public class ArcadeHttpHandler extends ImageResourceHttpHandler
              System.out.println("Console Before Mapping: " + consoleName);
              System.out.println("Console Mapped: " + consoleNameMapped);
              System.out.println("Game Name Only: " +  arcadeNameOnly);
+             
+             logMe.aLogger.info(streamOrWrite.toUpperCase() + " MODE");
+             logMe.aLogger.info("Console Before Mapping: " + consoleName);
+             logMe.aLogger.info("Console Mapped: " + consoleNameMapped);
+             logMe.aLogger.info("Game Name Only: " +  arcadeNameOnly);
            
             //now let's decide if we're going to find the png or gif 
             
@@ -206,6 +211,7 @@ public class ArcadeHttpHandler extends ImageResourceHttpHandler
                         if(consoleFileGIF.exists() && !consoleFileGIF.isDirectory()) { 
 
                               System.out.println("PNG default console LED Marquee file not found, looking for GIF version: " + consoleFilePathPNG);
+                              logMe.aLogger.info("PNG default console LED Marquee file not found, looking for GIF version: " + consoleFilePathPNG);
                               handleGIF("console", "default-" + consoleNameMapped + ".gif", saveAnimation);
                         }
                                 
@@ -216,6 +222,7 @@ public class ArcadeHttpHandler extends ImageResourceHttpHandler
                         }
                         else {
                                System.out.println("GIF default console LED Marquee file not found, looking for default marquee: " + consoleFilePathGIF);
+                               logMe.aLogger.info("GIF default console LED Marquee file not found, looking for default marquee: " + consoleFilePathGIF);
                                defaultConsoleFilePathPNG = application.getPixel().getPixelHome() + "console/" + "default-marquee.png"; 
                                File defaultConsoleFilePNG = new File(defaultConsoleFilePathPNG);
                                
@@ -225,6 +232,8 @@ public class ArcadeHttpHandler extends ImageResourceHttpHandler
                                else {
                                        System.out.println("Default console LED Marquee file not found: " + defaultConsoleFilePathPNG);
                                        System.out.println("Skipping LED marquee " + streamOrWrite + ", please check the files");
+                                       logMe.aLogger.info("Default console LED Marquee file not found: " + defaultConsoleFilePathPNG);
+                                       logMe.aLogger.info("Skipping LED marquee " + streamOrWrite + ", please check the files");
                                }
                         }
                 }
@@ -257,10 +266,12 @@ public class ArcadeHttpHandler extends ImageResourceHttpHandler
                         else if(consoleFileGIF.exists() && !consoleFileGIF.isDirectory()) { 
 
                                 System.out.println("PNG default console LED Marquee file not found, looking for GIF version: " + consoleFilePathPNG);
+                                logMe.aLogger.info("PNG default console LED Marquee file not found, looking for GIF version: " + consoleFilePathPNG);
                                 handleGIF("console", "default-" + consoleNameMapped + ".gif", saveAnimation);
                         }
                         else {
                                System.out.println("GIF default console LED Marquee file not found, looking for default marquee: " + consoleFilePathGIF);
+                               logMe.aLogger.info("GIF default console LED Marquee file not found, looking for default marquee: " + consoleFilePathGIF);
                                defaultConsoleFilePathPNG = application.getPixel().getPixelHome() + "console/" + "default-marquee.png"; 
                                File defaultConsoleFilePNG = new File(defaultConsoleFilePathPNG);
                                
@@ -270,6 +281,8 @@ public class ArcadeHttpHandler extends ImageResourceHttpHandler
                                else {
                                        System.out.println("Default console LED Marquee file not found: " + defaultConsoleFilePathPNG);
                                        System.out.println("Skipping LED marquee " + streamOrWrite + ", please check the files");
+                                       logMe.aLogger.info("Default console LED Marquee file not found: " + defaultConsoleFilePathPNG);
+                                       logMe.aLogger.info("Skipping LED marquee " + streamOrWrite + ", please check the files");
                                }
                         }
                 }
@@ -283,6 +296,8 @@ public class ArcadeHttpHandler extends ImageResourceHttpHandler
         else {
              System.out.println("** ERROR ** URL format incorect, use http://localhost:8080/arcade/<stream or write>/<platform name>/<game name .gif or .png>");
              System.out.println("Example: http://localhost:8080/arcade/write/mame/pacman.png or http://localhost:8080/arcade/stream/atari2600/digdug.gif");
+             logMe.aLogger.info("** ERROR ** URL format incorect, use http://localhost:8080/arcade/<stream or write>/<platform name>/<game name .gif or .png>");
+             logMe.aLogger.info("Example: http://localhost:8080/arcade/write/mame/pacman.png or http://localhost:8080/arcade/stream/atari2600/digdug.gif");
         }
     }
 

@@ -22,12 +22,14 @@ public class CliPixel
  private String consoleName = null;
  private String gameName = null; //this can be a full path, just filename, or just basefilename with no extension, what about quotes?
  private String mode = null; //for streaming or writing 
+ private Boolean quit = false;
  private int yTextOffset = 0;
  private static String instructions = "usage: Pixelcade\n" +
 "                    -m,--mode <arg>  Sets stream or write mode, options are stream or write\n" +
 "                    -c,--console <arg>  Sets the console or platform name, ex. mame, atari2600, nes\n" +
 "                    -g,--game <arg>  Sets game / rom name, can be a full path, file name,\n" +
 "                        or just the basename without the extension\n" +
+"                    -q,--quit Shuts down the Pixelcade Listener (pixelweb.exe)\n" +
 "                    -h,--help  show help.\n" +
 "                    \n" +
 "                    Examples\n" +
@@ -35,6 +37,7 @@ public class CliPixel
 "                           Atari 2600 must be enclosed in double quotes\n" +
 "                    pixelcade.exe -m stream -p \"Atari 2600\" -g Rampage.bin\n" +
 "                    pixelcade.exe -m write -p mame -g d:\\roms\\pacman.zip\n" +
+"                    pixelcade.exe -q\n" +
 "                    java -jar pixelcade.jar -m stream -p c64 -g \"Video Vermin (World).zip\" \n" +
 "                    java -jar pixelcade.jar -m write -p \"Nintendo Entertain System\" -g \"Zelda II - The Adventure of Link (U).zip\"";
 
@@ -46,6 +49,7 @@ public class CliPixel
   options.addOption("m", "mode", true, "Sets stream or write mode, use stream or write");
   options.addOption("c", "console", true, "Sets the console or platform name, examples atari2600, mame, Nintendo Entertaintment System");
   options.addOption("g", "game", true, "Sets game or rom name, this can be a full path, just the filename only, or just the basename without the extension");
+  options.addOption("q", "quit", false, "Shuts down the Pixelcade Listener (pixelweb.exe)");
   options.addOption("h", "help", false, "show help.");
   //to do add for streaming text too
  }
@@ -77,6 +81,11 @@ public class CliPixel
           //log.log(Level.INFO, "Using cli argument -g=" + cmd.getOptionValue("g"));
           gameName = cmd.getOptionValue("g");
       }
+      
+      if (cmd.hasOption("q")) {
+          //log.log(Level.INFO, "Using cli argument -q=" + cmd.getOptionValue("q"));
+          quit = true;
+      }
 
       
 
@@ -102,6 +111,11 @@ public class CliPixel
  {
     return mode;
  }
+ 
+ public boolean getQuit()
+{
+    return quit;
+}
  
  public static String getInstructions() {
      return instructions;

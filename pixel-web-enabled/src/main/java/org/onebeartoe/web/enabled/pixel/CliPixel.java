@@ -88,6 +88,8 @@ public class CliPixel
     ledMatrixType = Integer.parseInt(cmd.getOptionValue("l"));
    }
     
+   
+    
     if (cmd.hasOption("m")) {
     log.log(Level.INFO, "Using cli argument -m=" + cmd.getOptionValue("m"));
     ledMatrixType = Integer.parseInt(cmd.getOptionValue("m"));

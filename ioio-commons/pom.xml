@@ -3,11 +3,12 @@
     
     <modelVersion>4.0.0</modelVersion>
   
+   
     <parent>
         <groupId>org.onebeartoe</groupId>
         <artifactId>pixel</artifactId>
         <version>0.0.1-SNAPSHOT</version>
-    </parent>
+    </parent> 
 
     <groupId>org.ioio</groupId>  
     <artifactId>commons</artifactId>
@@ -38,6 +39,7 @@
             <scope>test</scope>
         </dependency>
      
+     
         <!--version>0.0.10/version changed to 10 as it was more reliable at the time
         version>0.0.17</version was originally 17 -->
      
@@ -47,6 +49,7 @@
            <!-- <version>0.0.22</version> -->
             <version>1.0.1</version>
         </dependency>
+       
    
         <dependency>
             <groupId>org.imgscalr</groupId>

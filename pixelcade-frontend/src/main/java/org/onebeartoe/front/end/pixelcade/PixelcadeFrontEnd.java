@@ -3,6 +3,7 @@ package org.onebeartoe.front.end.pixelcade;
 
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
+import java.io.File;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -18,6 +19,8 @@ import java.util.logging.Logger;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import org.apache.commons.io.FilenameUtils;
+import org.onebeartoe.pixel.LogMe;
+import org.onebeartoe.pixel.hardware.Pixel;
 
 
 /**
@@ -35,6 +38,8 @@ public class PixelcadeFrontEnd
     
     private static String mode_ = null;
     
+    private static Boolean quit_ = false;
+    
     private static String BaseGameName_ = "";
     
     private static HttpURLConnection con;
@@ -45,52 +50,93 @@ public class PixelcadeFrontEnd
     
     private static String exePath = "";
     
+    private static String pixelwebLaunchPath = "";
+    
+    private static String pixelwebWorkingPath = "";
+    
+    private static File exeWorkingPath;
+    
+    //public static LogMe logMe = null;
+    
+    private static String URLString = "";
+       
+    
+    
     public static void main(String[] args) throws MalformedURLException, IOException
     {
         
+        //logMe = LogMe.getInstance();
+        
         PixelcadeFrontEnd app = new PixelcadeFrontEnd(args);
         
-        
-        if ( mode_!=null && consoleName_ !=null && BaseGameName_ != null) {  //let's make sure we have valid command lines before proceeding
+        if (quit_ == true) {
             
-             
-            BaseGameName_ = FilenameUtils.getBaseName(gameName_); //stripping out the extension
-        
-            System.out.println("Console Name: " + consoleName_.toLowerCase());
-            System.out.println("Original Game Name: " + gameName_.toLowerCase());
-            System.out.println("Base Game Name (no extension): " + BaseGameName_.toLowerCase());
-            System.out.println("Mode: " + mode_.toLowerCase());
+            System.out.println("Sending shutdown command to Pixelcade Listener");
+            String quitURLString = "http://localhost:8080/quit/";
+            makeRESTCall(quitURLString);
+            
+        } else {
+            
+                if ( mode_!=null && consoleName_ !=null && BaseGameName_ != null) {  //let's make sure we have valid command lines before proceeding
+                    
+                    BaseGameName_ = FilenameUtils.getBaseName(gameName_); //stripping out the extension
 
-            if (isWindows()) {
-                errorMsg = "Please launch the Pixelcade listener first : \n"
-                        + "\n"
-                        + System.getProperty("user.dir") + "\\pixelweb.exe";
-                
-                exePath = System.getProperty("user.dir") + "\\pixelweb.exe";
-                
-            } else {
-                errorMsg = "Please launch the Pixelcade listener first using this command : \n"
-                        + "\n"
-                        + "cd " + System.getProperty("user.dir") + "\n"
-                        + "java -jar pixelweb.jar";
-                
-                exePath = "cd " + System.getProperty("user.dir") + " && java -jar pixelweb.jar"; //this didn't work, looks like concantenated doesn't work here
-            }
+                    System.out.println("Console Name: " + consoleName_.toLowerCase());
+                    System.out.println("Original Game Name: " + gameName_.toLowerCase());
+                    System.out.println("Base Game Name (no extension): " + BaseGameName_.toLowerCase());
+                    System.out.println("Mode: " + mode_.toLowerCase());
+
+                    if (isWindows()) {
+                        errorMsg = "Pixelcade Listener (pixelweb) is not running: \n"
+                                + "We'll attempt to launch it now but it's better going forward\n"
+                                + "that you add the listender to your Windnows startup\n" 
+                                + System.getProperty("user.dir") + "\\pixelweb.exe";
+
+                        exePath = System.getProperty("user.dir") + "\\pixelweb.exe";
+                        pixelwebLaunchPath = System.getProperty("user.dir") + "\\pixelweb.exe";
+                        exeWorkingPath = new File(System.getProperty("user.dir")); 
+                        pixelwebWorkingPath = System.getProperty("user.dir");
+
+                    } else {
+                       
+                        exePath = "cd " + System.getProperty("user.home") + " && java -jar pixelweb.jar"; //this didn't work, looks like concantenated doesn't work here
+                        pixelwebLaunchPath = "java -jar " + System.getProperty("user.home") + "/pixelcade/" + "pixelweb.jar";  //java -jar /Users/al/pixelcade/pixelweb.jar
+                        exeWorkingPath = new File(System.getProperty("user.home") + "/pixelcade/"); 
+                        pixelwebWorkingPath = System.getProperty("user.home") + "/pixelcade/";
+                        
+                         errorMsg = "Please launch the Pixelcade listener first using this command : \n"
+                                + pixelwebLaunchPath  ;
+
+                    }
+
+                    if (!mode_.equals("stream") && !mode_.equals("write")) {   
+                         System.out.println("stream or write for mode was not entered so defaulting to stream mode");
+                         mode_ = "stream";
+                     }
+
+                    URLString = "http://localhost:8080/arcade/" + mode_.toLowerCase() + "/" + consoleName_.toLowerCase() + "/" + BaseGameName_.toLowerCase();
+                    //TO DO we could add localhost to settings.ini in case somoene wants to enable their system remote via an IP address or domain name instead
+
+                    makeRESTCall(URLString);
+                }
+                else {
+
+                    System.out.println("INCORRECT PARAMETERS");
+                    System.out.println(CliPixel.getInstructions());
+                }
+        }
             
-            if (!mode_.equals("stream") && !mode_.equals("write")) {   
-                 System.out.println("stream or write for mode was not entered so defaulting to stream mode");
-                 mode_ = "stream";
-             }
-             
-            String URLString = "http://localhost:8080/arcade/" + mode_.toLowerCase() + "/" + consoleName_.toLowerCase() + "/" + BaseGameName_.toLowerCase();
-            //TO DO we could add localhost to settings.ini in case somoene wants to enable their system remote via an IP address or domain name instead
-            
-            
-            //replace the spaces with %20 as the URL call will fail without this
+        
+    }
+    
+    private static void makeRESTCall(String URLString) throws MalformedURLException, IOException {
+        //replace the spaces with %20 as the URL call will fail without this
             URLString=URLString.replaceAll(" ","%20");
             System.out.println("REST Call URL: " + URLString);
+           // logMe.aLogger.info("REST Call URL: " + URLString);
                     
             String urlParameters = "";
+            StringBuilder content = null;
             //String urlParameters = "name=Jack&occupation=programmer";
             byte[] postData = urlParameters.getBytes(StandardCharsets.UTF_8);
              
@@ -114,8 +160,6 @@ public class PixelcadeFrontEnd
                     exceptionHandler();
                 }
 
-                    StringBuilder content;
-
                     try (BufferedReader in = new BufferedReader(
                             new InputStreamReader(con.getInputStream()))) {
 
@@ -126,7 +170,9 @@ public class PixelcadeFrontEnd
                             content.append(line);
                             content.append(System.lineSeparator());
                         }
-                    }
+                    } catch (Throwable throwable) {
+                    quitExceptionHandler();   //this one happens when the shutdown command is sent so let's catch it
+                } 
                     
                     System.out.println(content.toString());
 
@@ -134,14 +180,6 @@ public class PixelcadeFrontEnd
 
                     con.disconnect();
                 } 
-             
-        }
-        else {
-            
-            System.out.println("INCORRECT PARAMETERS");
-            System.out.println(CliPixel.getInstructions());
-        }
-        
     }
     
      public PixelcadeFrontEnd(String[] args)
@@ -154,18 +192,116 @@ public class PixelcadeFrontEnd
         consoleName_ = cli.getConsoleName();
         gameName_ = cli.getGameName();
         mode_ = cli.getMode();
+        quit_ = cli.getQuit();
+       
     }
      
      private static void exceptionHandler() {
-        System.out.println("*** ERROR ***");
-        System.out.println("The Pixelcade Listener is not running");
-        System.out.println(errorMsg);
+        
+        if (!quit_) {
+           
+            System.out.println(errorMsg);
+            //logMe.aLogger.info(errorMsg);
+ 
+                try
+                {
+                   
+                    //System.out.println("Please run your command again");
+                    //runtime.exec(pixelwebLaunchPath, null ,exeWorkingPath);        //run pixelweb.exe in it's working directory
+                    
+                    //final ProcessBuilder pb = new ProcessBuilder(pixelwebLaunchPath);
+                    //pb.directory(new File(pixelwebWorkingPath));
+                    //final Process p = pb.start();
+                    
+                   if (isWindows()) {
+                        //String[] cmd = { pixelwebLaunchPath };
+                        //Process run = Runtime.getRuntime().exec(cmd);
+                        
+                        Process run = Runtime.getRuntime().exec(pixelwebLaunchPath,null,exeWorkingPath);
+                       // logMe.aLogger.info("Launching " + pixelwebLaunchPath);
+                        try {
+                            run.waitFor();
+                        } catch (InterruptedException ex) {
+                            Logger.getLogger(PixelcadeFrontEnd.class.getName()).log(Level.SEVERE, null, ex);
+                           // logMe.aLogger.log(Level.SEVERE, "could not run pixelweb", ex);
+                        }
+                    }  else {
+                      
+                           
+                           
+                            JFrame frame = new JFrame("JOptionPane showMessageDialog example");  //let's show a pop up too so the user doesn't miss it
+                            JOptionPane.showMessageDialog(frame,
+                                    errorMsg,
+                                    "Pixelcade Listener",
+                                    JOptionPane.ERROR_MESSAGE);
+                            
+                            //System.exit(1);  
+                       
+            
+                        /*
+                        ProcessBuilder pb = new ProcessBuilder(pixelwebLaunchPath);
+                        //pb.directory(new File(pixelwebWorkingPath));
+                        
+                        try {
 
-        JFrame frame = new JFrame("JOptionPane showMessageDialog example");  //let's show a pop up too so the user doesn't miss it
-        JOptionPane.showMessageDialog(frame,
-                errorMsg,
-                "Pixelcade Listener",
-                JOptionPane.ERROR_MESSAGE);
+                                Process process = pb.start();
+
+                                StringBuilder output = new StringBuilder();
+
+                                BufferedReader reader = new BufferedReader(
+                                                new InputStreamReader(process.getInputStream()));
+
+                                String line;
+                                while ((line = reader.readLine()) != null) {
+                                        output.append(line + "\n");
+                                }
+
+                                int exitVal = process.waitFor();
+                                if (exitVal == 0) {
+                                        System.out.println("Success!");
+                                        System.out.println(output);
+                                        System.exit(0);
+                                } else {
+                                        //abnormal...
+                                }
+
+                                } catch (IOException e) {
+                                        e.printStackTrace();
+                                } catch (InterruptedException e) {
+                                        e.printStackTrace();
+                                }
+                            */
+                       
+                   }
+                    
+                    /* try {
+                        //we launched pixelweb so let's sleep a bit to give time to load before making the rest call
+                        Thread.sleep(3000);
+                    } catch (InterruptedException ex) {
+                        Logger.getLogger(PixelcadeFrontEnd.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                    
+                    makeRESTCall(URLString);
+                   */
+                    
+                    
+                }
+                catch (IOException e)
+                {
+                    e.printStackTrace();
+                }
+            
+            
+            /*
+            JFrame frame = new JFrame("JOptionPane showMessageDialog example");  //let's show a pop up too so the user doesn't miss it
+            JOptionPane.showMessageDialog(frame,
+                    errorMsg,
+                    "Pixelcade Listener",
+                    JOptionPane.ERROR_MESSAGE);
+            */
+            }
+        
+        
        
         //TO DO get the auto-launch going if pixelweb not running, code below didn't work on windows
         /* try {
@@ -177,6 +313,14 @@ public class PixelcadeFrontEnd
         System.exit(1);                       //we can't continue because pixelweb is not running
         
         //TO DO possibly could auto-launch the listener using shell cmd from Java, set a timer delay, and then re-run
+     }
+     
+       private static void quitExceptionHandler() {
+       
+        
+        System.exit(1);                      
+        
+      
      }
      
      public static boolean isWindows() {

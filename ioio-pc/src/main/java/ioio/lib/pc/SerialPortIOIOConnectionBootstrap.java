@@ -48,6 +48,8 @@ import java.util.prefs.Preferences;
 import purejavacomm.CommPort;
 import purejavacomm.CommPortIdentifier;
 import purejavacomm.PortInUseException;
+import org.onebeartoe.pixel.LogMe;
+import org.onebeartoe.pixel.hardware.Pixel;
 
 public class SerialPortIOIOConnectionBootstrap implements
 		IOIOConnectionBootstrap {
@@ -57,17 +59,26 @@ public class SerialPortIOIOConnectionBootstrap implements
         private static String port_ = null;
         public static String ledResolution_=null;
         private static boolean settingsINIExists = false;
+        public static LogMe logMe = null;
 
 	@Override
 	public void getFactories(Collection<IOIOConnectionFactory> result) {
-		Collection<String> ports = getExplicitPorts();
+		
+                logMe = LogMe.getInstance();
+            
+                Collection<String> ports = getExplicitPorts();
 		if (ports == null) {
-			Log.w(TAG, "ioio.SerialPorts not defined.\n"
+			
+                        String msg = "ioio.SerialPorts not defined.\n"
 					+ "Will attempt to enumerate all possible ports (slow) "
 					+ "and connect to PIXEL over each one.\n"
 					+ "To fix, add the -Dioio.SerialPorts=xyz argument to "
 					+ "the java command line, where xyz is a colon-separated "
-					+ "list of port identifiers, e.g. COM1:COM2. for Windows or /dev/tty.usbmodem1411 on Mac OSX");
+					+ "list of port identifiers, e.g. COM1:COM2. for Windows or /dev/tty.usbmodem1411 on Mac OSX";
+                        
+                        Log.w(TAG, msg);
+                        logMe.aLogger.info(msg);
+                        
 			ports = getAllOpenablePorts();
 		}
 		for (final String port : ports) {
@@ -104,10 +115,13 @@ public class SerialPortIOIOConnectionBootstrap implements
 			if (identifier.getPortType() == CommPortIdentifier.PORT_SERIAL) {
 				if (checkIdentifier(identifier)) {
 					Log.d(TAG, "Adding serial port " + identifier.getName());
+                                        logMe.aLogger.info("Adding serial port " + identifier.getName());
 					result.add(identifier.getName());
 			    	
 				} else {
 					Log.w(TAG, "Serial port " + identifier.getName()
+							+ " cannot be opened. Not adding.");
+                                        logMe.aLogger.info("Serial port " + identifier.getName()
 							+ " cannot be opened. Not adding.");
 				}
 			}
@@ -123,10 +137,9 @@ public class SerialPortIOIOConnectionBootstrap implements
             //let's look in settings.ini for the port 
              File file = new File("settings.ini");
              if (file.exists() && !file.isDirectory()) { 
-                 
                Ini ini = null;
                 try {
-                   ini = new Ini(new File("settings.ini"));  //uses the ini4j lib
+                   ini = new Ini(new File(Pixel.getHomePath() + "settings.ini"));  //uses the ini4j lib
                 } catch (IOException ex) {
                    Logger.getLogger(SerialPortIOIOConnectionBootstrap.class.getName()).log(Level.SEVERE, null, ex);
                 }
@@ -136,13 +149,17 @@ public class SerialPortIOIOConnectionBootstrap implements
                 settingsINIExists = true; 
 
                  if (port_.equals("COM99")) {  //COM99 is the default so this means the user has not specified the port in settings.ini
-                    System.out.println("All ports will be scanned to detect your PIXEL board");
-                    System.out.println("To save time, edit settings.ini in the same directory as this jar or .exe and specify the port");
-                    System.out.println("Examples: port=COM7 for Windows, port=/dev/tty.usbmodemFA131 for Mac, and port=/dev/ACM0 for Raspberry Pi");
+                    String msgport = "The default port has not been changed, all ports will be scanned to detect your PIXEL board\n"
+					+ "To save time, edit settings.ini in the same directory as this jar or .exe and specify the port\n"
+					+ "and connect to PIXEL over each one.\n"
+					+ "Examples: port=COM7 for Windows, port=/dev/tty.usbmodemFA131 for Mac, and port=/dev/ACM0 for Raspberry Pi";
+                    System.out.println(msgport);
+                    logMe.aLogger.info(msgport);
                 }
 
                 if (port_ != null && !port_.equals("COM99")) {  //COM99 is the default in settings.ini which means the user didn't touch it so don't use if that's the case
                     System.out.println("PIXEL port found in settings.ini: port=" + port_);
+                    logMe.aLogger.info("PIXEL port found in settings.ini: port=" + port_);
                     result.add(port_);
                     return result;
                 }
@@ -168,14 +185,18 @@ public class SerialPortIOIOConnectionBootstrap implements
                                     property = null;
                                     
                                     if (!settingsINIExists) {  //there was no prefs and no settings.ini so let's tell the user about settings.ini
-                                         System.out.println("All ports will be scanned to detect your PIXEL board");
-                                         System.out.println("To save time, you can create a file called settings.ini in the same directory as this jar or .exe in this format:");
-                                         System.out.println("[PIXELCADE SETTINGS]");
-                                         System.out.println("port=COM7");
-                                         System.out.println("ledResolution=128x32");
-                                         System.out.println("Examples: port=COM7 for Windows, port=/dev/tty.usbmodemFA131 for Mac, and port=/dev/ACM0 for Raspberry Pi");
-                                         System.out.println("Examples: ledResolution=64x32 for a single LED panel arcade marquee installation");
-                                         System.out.println("Examples: ledResolution=128x32 for a two LED panel arcade marquee installation");
+                                        
+                                         String msgsettingsini = "All ports will be scanned to detect your PIXEL board\n"
+                                            + "To save time, you can create a file called settings.ini in the same directory as this jar or .exe in this format:\n"
+                                            + "[PIXELCADE SETTINGS]\n"
+                                            + "port=COM7\n"
+                                            + "ledResolution=128x32\n"
+                                            + "Examples: port=COM7 for Windows, port=/dev/tty.usbmodemFA131 for Mac, and port=/dev/ACM0 for Raspberry Pi\n"
+                                            + "Examples: ledResolution=64x32 for a single LED panel arcade marquee installation\n"
+                                            + "Examples: ledResolution=128x32 for a two LED panel arcade marquee installation\n";
+                                        
+                                         System.out.println(msgsettingsini);
+                                         logMe.aLogger.info(msgsettingsini);
                                     }
                                     return null;
                             }
@@ -205,5 +226,4 @@ public class SerialPortIOIOConnectionBootstrap implements
 		}
 		return true;
 	}
-         
 }

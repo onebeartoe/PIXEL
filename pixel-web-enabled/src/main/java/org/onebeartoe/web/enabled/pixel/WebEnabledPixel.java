@@ -31,6 +31,8 @@ import java.util.TimerTask;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.Timer;
+import java.util.logging.FileHandler;
+import java.util.logging.SimpleFormatter;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 
@@ -57,14 +59,17 @@ import org.onebeartoe.web.enabled.pixel.controllers.StillImageListHttpHandler;
 import org.onebeartoe.web.enabled.pixel.controllers.UploadHttpHandler;
 import org.onebeartoe.web.enabled.pixel.controllers.UploadOriginHttpHandler;
 import org.onebeartoe.web.enabled.pixel.controllers.ArcadeHttpHandler;
+import org.onebeartoe.web.enabled.pixel.controllers.QuitHttpHandler;
 
-
+import org.onebeartoe.pixel.LogMe;
 /**
  * @author Roberto Marquez
  */
 public class WebEnabledPixel
 {
-    protected Logger logger;
+    //public static final Logger logger = null;
+    
+    public static LogMe logMe = null;
 
     private HttpServer server;
 
@@ -103,14 +108,37 @@ public class WebEnabledPixel
     
     private static String alreadyRunningErrorMsg = "";
     
+    public static String pixelwebVersion = "2.0.2";
+    
     public WebEnabledPixel(String[] args)
     {
         cli = new CliPixel(args);
         cli.parse();
         httpPort = cli.getWebPort();
+        
+        //Using our common logger across multiple classes
+        //LogMe logMe = LogMe.getInstance();
+        logMe = LogMe.getInstance();
+        logMe.aLogger.info( "Pixelcade Listender (pixelweb) Version " + pixelwebVersion);
 
-        String name = getClass().getName();
+        /* String name = getClass().getName();
         logger = Logger.getLogger(name);
+        
+        logger.setUseParentHandlers(false);
+        
+        // define the logfile
+        FileHandler fh = null;
+        try {
+            fh = new FileHandler("pixelcade2.log");
+        } catch (IOException ex) {
+            Logger.getLogger(Pixel.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (SecurityException ex) {
+            Logger.getLogger(Pixel.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        logger.addHandler(fh);
+        SimpleFormatter formatter = new SimpleFormatter();  
+        fh.setFormatter(formatter);
+        */
 
         int yTextOffset = cli.getyTextOffset();
         
@@ -138,6 +166,7 @@ public class WebEnabledPixel
                    ini = new Ini(new File("settings.ini"));  //uses the ini4j lib
                 } catch (IOException ex) {
                    Logger.getLogger(SerialPortIOIOConnectionBootstrap.class.getName()).log(Level.SEVERE, null, ex);
+                   logMe.aLogger.severe("Could not open settings.ini" + ex);
                 }
                 //only go here if settings.ini exists
                 
@@ -145,11 +174,13 @@ public class WebEnabledPixel
                 
                 if (ledResolution_.equals("128x32")) {
                     System.out.println("PIXEL resolution found in settings.ini: resolution=" + ledResolution_);
+                    logMe.aLogger.info("PIXEL resolution found in settings.ini: resolution=" + ledResolution_);
                     LED_MATRIX_ID = 15;
                 } 
                 
                 if (ledResolution_.equals("64x32")) {
                     System.out.println("PIXEL resolution found in settings.ini: resolution=" + ledResolution_);
+                    logMe.aLogger.info("PIXEL resolution found in settings.ini: resolution=" + ledResolution_);
                     LED_MATRIX_ID = 13;
                 } 
          }
@@ -162,7 +193,9 @@ public class WebEnabledPixel
         
         pixel.setyScrollingTextOffset(yTextOffset);
         
-        extractDefaultContent();
+        logMe.aLogger.info( "Pixelcade HOME DIRECTORY: " +    pixel.getPixelHome());
+        
+        extractDefaultContent();  //to keep this file smaller, moved this to pixelcade-installer?
         
         loadImageLists();
         
@@ -208,6 +241,10 @@ public class WebEnabledPixel
             
             HttpHandler arcadeHttpHandler = new ArcadeHttpHandler(this);
             
+             HttpHandler quitHttpHandler = new QuitHttpHandler(this);
+            
+            
+            
             
             
 // ARE WE GONNA DO ANYTHING WITH THE HttpContext OBJECTS?   
@@ -219,7 +256,11 @@ public class WebEnabledPixel
                                             server.createContext("/animations/save", animationsListHttpHandler);
                                             
             HttpContext arcadeContext =     server.createContext("/arcade", arcadeHttpHandler);
+                                            server.createContext("/quit", quitHttpHandler);
+                                            server.createContext("/shutdown", quitHttpHandler);
                                             server.createContext("/arcade/list", arcadeListHttpHandler);
+                                            
+                                            
 
             HttpContext staticContent =     server.createContext("/files", staticFileHttpHandler);
             
@@ -321,7 +362,7 @@ public class WebEnabledPixel
         String pixelHomePath = pixel.getPixelHome();
         File pixelHomeDirectory = new File(pixelHomePath);
             
-       extractClasspathResource(inpath, pixelHomeDirectory);
+        extractClasspathResource(inpath, pixelHomeDirectory);
         
         inpath = contentClasspath + "pixel-logo.txt";
         extractClasspathResource(inpath, pixelHomeDirectory);
@@ -379,7 +420,10 @@ public class WebEnabledPixel
             
             if (isMac() || isUnix())  {       //extract RetroPie files if mac or Pi, we don't do this for windows as the installer takes care of these files already
                 
-                extractRetroPie();
+                File settings = new File(pixel.getPixelHome() + "settings.ini");
+                if (!settings.exists()) {
+                    extractRetroPie();
+                } 
                 
                 extractArcadeConsoleGIFs();
             
@@ -390,7 +434,8 @@ public class WebEnabledPixel
         } 
         catch (IOException ex)
         {
-            logger.log(Level.SEVERE, "could not extract all default content", ex);
+            //logger.log(Level.SEVERE, "could not extract all default content", ex);
+            logMe.aLogger.log(Level.SEVERE, "could not extract all default content", ex);
         }
     }
     
@@ -619,7 +664,8 @@ public class WebEnabledPixel
         } 
         catch (Exception ex)
         {
-            logger.log(Level.SEVERE, "could not load image resources on the filesystem", ex);
+            //logger.log(Level.SEVERE, "could not load image resources on the filesystem", ex);
+            logMe.aLogger.log(Level.SEVERE, "could not load image resources on the filesystem", ex);
         }
         
         return animationImageNames;
@@ -635,7 +681,8 @@ public class WebEnabledPixel
         } 
         catch (Exception ex)
         {
-            logger.log(Level.SEVERE, "could not load image resources on the filesystem", ex);
+            //logger.log(Level.SEVERE, "could not load image resources on the filesystem", ex);
+            logMe.aLogger.log(Level.SEVERE, "could not load image resources on the filesystem", ex);
         }
         
         return arcadeImageNames;
@@ -684,7 +731,8 @@ public class WebEnabledPixel
         } 
         catch (Exception ex)
         {
-            logger.log(Level.SEVERE, "could not load image resources on the filesystem", ex);
+            //logger.log(Level.SEVERE, "could not load image resources on the filesystem", ex);
+            logMe.aLogger.log(Level.SEVERE, "could not load image resources on the filesystem", ex);
         }
         
         return stillImageNames;
@@ -749,7 +797,8 @@ public class WebEnabledPixel
             catch (Exception ex)
             {
                 String message = "Could not initialize Pixel: " + ex.getMessage();
-                logger.log(Level.INFO, message);
+                //logger.log(Level.INFO, message);
+                logMe.aLogger.info(message);
             }
         }
         
@@ -833,9 +882,10 @@ public class WebEnabledPixel
                     message.append("PIXEL Status: Connected");
                     
                     System.out.println("PIXELCADE HOME DIRECTORY = " + pixel.getHomePath());
-                    System.out.println("PIXELCADE Version = 2.0.1");
+                    System.out.println("PIXELCADE Version = 2.0.2");
 
-                    logger.log(Level.INFO, message.toString());
+                    //logger.log(Level.INFO, message.toString());
+                    logMe.aLogger.info(message.toString());
                 }
             };
                     
@@ -892,11 +942,13 @@ public class WebEnabledPixel
 		    message = "A connection to PIXEL could not be established.";
 		    String title = "PIXEL Connection Unsuccessful: ";
                     message = title + message;
-                    logger.log(Level.SEVERE, message);
+                    //logger.log(Level.SEVERE, message);
+                    logMe.aLogger.severe(message);
 		}
                 else
                 {
-                    logger.log(Level.INFO, "Looks like we have a PIXEL connection!");
+                    //logger.log(Level.INFO, "Looks like we have a PIXEL connection!");
+                    logMe.aLogger.info("Looks like we have a PIXEL connection!");
                 }
 	    }
 	}        

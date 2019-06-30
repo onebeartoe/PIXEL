@@ -46,8 +46,13 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.logging.FileHandler;
+import java.util.logging.SimpleFormatter;
 import org.apache.commons.io.FilenameUtils;
 import org.gifdecoder.GifDecoder;
+import org.onebeartoe.pixel.LogMe;
+
+
 
 /**
  * @author Roberto Marquez
@@ -93,7 +98,7 @@ public class Pixel
     
     private String userHome;
     
-    private String pixelHome;
+    private static String pixelHome;
   
     private String animationsPath;
     
@@ -149,6 +154,8 @@ public class Pixel
     
     private Logger logger;
     
+    public static LogMe logMe = null;
+    
     private String pixelHardwareId = null;
     
     public static String OS = System.getProperty("os.name").toLowerCase();
@@ -178,8 +185,29 @@ public class Pixel
      */
     public Pixel(RgbLedMatrix.Matrix KIND, int resolution)
     {
+        
         String name = getClass().getName();
         logger = Logger.getLogger(name);
+        
+        logMe = LogMe.getInstance();
+        
+        /* String name = getClass().getName();
+        logger = Logger.getLogger(name);
+        logger.setUseParentHandlers(false);
+        
+        // define the logfile
+        FileHandler fh = null;
+        try {
+            fh = new FileHandler("pixelcade.log");
+        } catch (IOException ex) {
+            Logger.getLogger(Pixel.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (SecurityException ex) {
+            Logger.getLogger(Pixel.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        logger.addHandler(fh);
+        SimpleFormatter formatter = new SimpleFormatter();  
+        fh.setFormatter(formatter);
+        */
         
         mode = PixelModes.STILL_IMAGE;
         
@@ -225,6 +253,8 @@ public class Pixel
                 decodedAnimationsPath = animationsPath + "decoded/";
                 imagesPath = pixelHome + "images/";
             }
+            
+            //logger.info("Home Directory: " + pixelHome);  
             
             //pixelHome = userHome + "/";
             //animationsPath = pixelHome + "animations/";            
@@ -420,7 +450,7 @@ public class Pixel
         return animationsPath;
     }
     
-    public String getHomePath() {
+    public static String getHomePath() {
         return pixelHome;
     }
     
@@ -493,6 +523,7 @@ public boolean GIFNeedsDecoding(String decodedDir, String gifName, int currentRe
 	gifName = FilenameUtils.removeExtension(gifName); //with no extension
 	
 	System.out.println("PIXEL LED panel resolution is: " + currentResolution);
+        logMe.aLogger.info("PIXEL LED panel resolution is: " + currentResolution);
 	
 	//String decodedGIFPathTXT = currentDir + "/decoded/" + gifName + ".txt";
 	//String decodedGIFPath565 = currentDir + "/decoded/" + gifName + ".rgb565";
@@ -1039,13 +1070,13 @@ private static String checksum(String filepath, MessageDigest md) throws IOExcep
 	    fileType = FilenameUtils.getExtension(gifFilePath);
 	    gifNameNoExt = FilenameUtils.removeExtension(selectedFileName); //with no extension
 		
-		System.out.println("User selected file name: " + selectedFileName);
+		//System.out.println("User selected file name: " + selectedFileName);
 		//System.out.println("User selected file type: " + fileType);
 		//System.out.println("User selected file name no extension: " + gifNameNoExt);
 		
 		
 		//String gifNamePath = currentDir + "/" + gifName + ".gif";  //   ex. c:\animation\tree.gif
-		System.out.println("User selected file name path: " + gifFilePath);
+		//System.out.println("User selected file name path: " + gifFilePath);
 		File file = new File(gifFilePath);
 		if (file.exists()) {
 			
@@ -1079,6 +1110,10 @@ private static String checksum(String filepath, MessageDigest md) throws IOExcep
 	          System.out.println("frame delay: " + frameDelay);
 	          System.out.println("frame height: " + frameHeight);
 	          System.out.println("frame width: " + frameWidth);
+                  //logMe.aLogger.info("frame count: " + numFrames);
+                  //logMe.aLogger.info("frame delay: " + frameDelay);
+                  //logMe.aLogger.info("frame height: " + frameHeight);
+                  //logMe.aLogger.info("frame width: " + frameWidth);
 	          	          
 	          for (int i = 0; i < numFrames; i++) { //loop through all the frames
 	             BufferedImage rotatedFrame = d.getFrame(i);  
@@ -1091,6 +1126,7 @@ private static String checksum(String filepath, MessageDigest md) throws IOExcep
 	              
 	    		 if (frameWidth != pixelMatrix_width || frameHeight != pixelMatrix_height) {
 	    			 System.out.println("Resizing and encoding " + selectedFileName + " frame " + i);
+                                  logMe.aLogger.info("Resizing and encoding " + selectedFileName + " frame " + i);
 	    			// rotatedFrame = Scalr.resize(rotatedFrame, pixelMatrix_width, pixelMatrix_height); //resize it, need to make sure we do not anti-alias
 	    			 
 	    			 try {
@@ -1104,6 +1140,7 @@ private static String checksum(String filepath, MessageDigest md) throws IOExcep
 	    		 }
 	    		 else {
 	    			 System.out.println("Encoding " + selectedFileName + " frame " + i);
+                                 logMe.aLogger.info("Encoding " + selectedFileName + " frame " + i);
 	    		 }
 	            
 	             //this code here to convert a java image to rgb565 taken from stack overflow http://stackoverflow.com/questions/8319770/java-image-conversion-to-rgb565/
@@ -1191,11 +1228,13 @@ private static String checksum(String filepath, MessageDigest md) throws IOExcep
 				} catch (IOException e) {
 					// TODO Auto-generated catch block
 					System.out.println("ERROR, could not write " + selectedFileName);
+                                        logMe.aLogger.severe("ERROR, could not write " + selectedFileName);
 					e.printStackTrace();
 				}
 		}
 		else {
 			System.out.println("ERROR  Could not find file " + gifFilePath);
+                        logMe.aLogger.severe("Could not find file " + gifFilePath);
 		}
 	} 
 	
@@ -1253,6 +1292,7 @@ private static String checksum(String filepath, MessageDigest md) throws IOExcep
 	          System.out.println("frame delay: " + frameDelay);
 	          System.out.println("frame height: " + frameHeight);
 	          System.out.println("frame width: " + frameWidth);
+                 
 	          
 	          
                 for (int i = 0; i < numFrames; i++)
@@ -1270,6 +1310,7 @@ private static String checksum(String filepath, MessageDigest md) throws IOExcep
     	              
     	    		 if (frameWidth != pixelMatrix_width || frameHeight != pixelMatrix_height) {
     	    			 System.out.println("Resizing and encoding " + gifName + ".gif" + " frame " + i);
+                                 //logMe.aLogger.info("Resizing and encoding " + gifName + ".gif" + " frame " + i);
     	    			// rotatedFrame = Scalr.resize(rotatedFrame, pixelMatrix_width, pixelMatrix_height); //resize it, need to make sure we do not anti-alias
     	    			 
     	    			 try {
@@ -1283,6 +1324,7 @@ private static String checksum(String filepath, MessageDigest md) throws IOExcep
     	    		 }
     	    		 else {
     	    			 System.out.println("DO NOT INTERRUPT: Encoding " + gifName + ".gif" + " frame " + i);
+                                 //logMe.aLogger.info("DO NOT INTERRUPT: Encoding " + gifName + ".gif" + " frame " + i);
     	    		 }
     	            
     	             //this code here to convert a java image to rgb565 taken from stack overflow http://stackoverflow.com/questions/8319770/java-image-conversion-to-rgb565/
@@ -1374,12 +1416,14 @@ private static String checksum(String filepath, MessageDigest md) throws IOExcep
                            {
 					// TODO Auto-generated catch block
 					System.out.println("ERROR, could not write " + gifName);
+                                        //logMe.aLogger.severe("Could not write " + gifName);
 					e.printStackTrace();
                            }
 		}
 		else 
                 {
 			System.out.println("ERROR  Could not find " + gifSourcePath + gifName + ".gif in the JAR file");
+                        //logMe.aLogger.severe("Could not write " + gifName);
                 }
     }
     
@@ -1400,6 +1444,9 @@ private static String checksum(String filepath, MessageDigest md) throws IOExcep
 		
 		System.out.println("Arcade file name: " + selectedFileName);
 		System.out.println("Arcade file name path: " + gifFilePath);
+                logMe.aLogger.info("Arcade file name: " + selectedFileName);
+                logMe.aLogger.info("Arcade file name path: " + gifFilePath);
+               
 		File file = new File(gifFilePath);
 		if (file.exists()) {
                     
@@ -1434,12 +1481,17 @@ private static String checksum(String filepath, MessageDigest md) throws IOExcep
 	          System.out.println("frame delay: " + frameDelay);
 	          System.out.println("frame height: " + frameHeight);
 	          System.out.println("frame width: " + frameWidth);
+                  logMe.aLogger.info("frame count: " + numFrames);
+                  logMe.aLogger.info("frame delay: " + frameDelay);
+                  logMe.aLogger.info("frame height: " + frameHeight);
+                  logMe.aLogger.info("frame width: " + frameWidth);
 	          	          
 	          if (numFrames == 1) {  //ok this is a hack, for some reason only on raspberry pi, single frame gifs are not writing so the work around is to write 2 frames for a single frame GIF
                            for (int i = 0; i < 2; i++) { 
                            BufferedImage rotatedFrame = d.getFrame(0);  
                                if (frameWidth != pixelMatrix_width || frameHeight != pixelMatrix_height) {
                                        System.out.println("Resizing and encoding " + selectedFileName + " frame " + i);
+                                       logMe.aLogger.info("Resizing and encoding " + selectedFileName + " frame " + i);
 
                                        try {
                                                       rotatedFrame = getScaledImage(rotatedFrame, pixelMatrix_width,pixelMatrix_height);
@@ -1451,6 +1503,7 @@ private static String checksum(String filepath, MessageDigest md) throws IOExcep
                                }
                                else {
                                        System.out.println("Encoding " + selectedFileName + " frame " + i);
+                                       logMe.aLogger.info("Encoding " + selectedFileName + " frame " + i);
                                }
 
                            //this code here to convert a java image to rgb565 taken from stack overflow http://stackoverflow.com/questions/8319770/java-image-conversion-to-rgb565/
@@ -1524,6 +1577,7 @@ private static String checksum(String filepath, MessageDigest md) throws IOExcep
 
                                if (frameWidth != pixelMatrix_width || frameHeight != pixelMatrix_height) {
                                        System.out.println("Resizing and encoding " + selectedFileName + " frame " + i);
+                                       logMe.aLogger.info("Resizing and encoding " + selectedFileName + " frame " + i);
                                       // rotatedFrame = Scalr.resize(rotatedFrame, pixelMatrix_width, pixelMatrix_height); //resize it, need to make sure we do not anti-alias
 
                                        try {
@@ -1537,6 +1591,7 @@ private static String checksum(String filepath, MessageDigest md) throws IOExcep
                                }
                                else {
                                        System.out.println("Encoding " + selectedFileName + " frame " + i);
+                                       logMe.aLogger.info("Encoding " + selectedFileName + " frame " + i);
                                }
 
                            //this code here to convert a java image to rgb565 taken from stack overflow http://stackoverflow.com/questions/8319770/java-image-conversion-to-rgb565/
@@ -1630,11 +1685,13 @@ private static String checksum(String filepath, MessageDigest md) throws IOExcep
 				} catch (IOException e) {
 					// TODO Auto-generated catch block
 					System.out.println("ERROR, could not write " + selectedFileName);
+                                        logMe.aLogger.severe("Could not write " + selectedFileName);
 					e.printStackTrace();
 				}
 		}
 		else {
 			System.out.println("ERROR  Could not find file " + gifFilePath);
+                        logMe.aLogger.severe("Could not write " + selectedFileName);
 		}
     }
     
@@ -1863,15 +1920,18 @@ private static String checksum(String filepath, MessageDigest md) throws IOExcep
                try 
                {
                    System.out.println("Found GIF: " + gifFilePath);
+                   logMe.aLogger.info("Found GIF: " + gifFilePath);
                    animationFilename = selectedFileName;
                    if(gifTxtExists(decodedAnimationsPath,selectedFileName) == true && GIFRGB565Exists(decodedAnimationsPath,selectedFileName) == true)
                    {
                        System.out.println("This GIF was already decoded");
+                       logMe.aLogger.info("This GIF was already decoded");
                    }
                    else
                    {
                        System.out.println("Decoding " + selectedFileName);
                        System.out.println("Decoding " + gifFilePath);
+                       logMe.aLogger.info("Decoding " + gifFilePath);
                        // the text file is not there so we cannot continue and we must decode, let's first copy the file to home dir
                        decodeArcadeGIF(decodedAnimationsPath, gifFilePath,selectedFileName, currentResolution, KIND.width, KIND.height);
                    }
@@ -1879,6 +1939,7 @@ private static String checksum(String filepath, MessageDigest md) throws IOExcep
                    if (GIFArcadeNeedsDecoding(decodedAnimationsPath, selectedFileName, currentResolution,gifFilePath) == true)
                    {
                        System.out.println("Selected LED panel is different than the encoded GIF, need to re-encode...");
+                       logMe.aLogger.info("Selected LED panel is different than the encoded GIF, need to re-encode...");
                        decodeArcadeGIF(decodedAnimationsPath, gifFilePath, selectedFileName, currentResolution, KIND.width, KIND.height);
                    }
                    
@@ -1895,6 +1956,8 @@ private static String checksum(String filepath, MessageDigest md) throws IOExcep
                    GIFresolution = currentResolution;
                   
                    System.out.println("GIF Width: " + KIND.width + ", GIF Height: " + KIND.height);
+                   logMe.aLogger.info("GIF Width: " + KIND.width + ", GIF Height: " + KIND.height);
+                   
                    
                    String pixelHardwareId = "not found";
                    try
@@ -1904,6 +1967,7 @@ private static String checksum(String filepath, MessageDigest md) throws IOExcep
                    catch (ConnectionLostException ex)
                    {
                        Logger.getLogger(Pixel.class.getName()).log(Level.SEVERE, null, ex);
+                       logMe.aLogger.log(Level.SEVERE, Pixel.class.getName(), ex);
                    }
                    
                    //stopExistingTimer();
@@ -1915,6 +1979,7 @@ private static String checksum(String filepath, MessageDigest md) throws IOExcep
                        // need to tell PIXEL the frames per second to use, how fast to play the animations
                        writeMode(GIFfps);
                        System.out.println("Now writing to PIXEL's SD card, the screen will go blank until writing has been completed...");
+                       logMe.aLogger.info("Now writing to PIXEL's SD card, the screen will go blank until writing has been completed...");
                        
                        // we'll run this in the background and also update the UI with progress
                        //System.out.println("The Pixel animation writer is being created");
@@ -1955,6 +2020,7 @@ private static String checksum(String filepath, MessageDigest md) throws IOExcep
                }
         } else {
              System.out.println("** ERROR ** GIF file not found: " + gifFilePath);
+             logMe.aLogger.severe("GIF file not found: " + gifFilePath);
         }
     }
   
@@ -2211,6 +2277,7 @@ private static String checksum(String filepath, MessageDigest md) throws IOExcep
     {
         ANIMATED_GIF,
         SCROLLING_TEXT,
+        ARCADE,          //TO DO how to use this later?
         STILL_IMAGE
     }
     

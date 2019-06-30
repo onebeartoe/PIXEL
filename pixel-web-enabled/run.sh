@@ -1,2 +1,2 @@
-cd /Users/al/pi/
+cd /Users/al/pixelcade/
 java -jar pixelweb.jar
