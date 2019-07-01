@@ -108,7 +108,7 @@ public class WebEnabledPixel
     
     private static String alreadyRunningErrorMsg = "";
     
-    public static String pixelwebVersion = "2.0.2";
+    public static String pixelwebVersion = "2.0.3";
     
     public WebEnabledPixel(String[] args)
     {
