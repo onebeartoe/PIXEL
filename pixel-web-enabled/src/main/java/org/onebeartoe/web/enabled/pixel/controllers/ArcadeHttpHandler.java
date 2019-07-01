@@ -36,12 +36,15 @@ public class ArcadeHttpHandler extends ImageResourceHttpHandler
     
     private void handlePNG(File file, Boolean saveAnimation) throws MalformedURLException, IOException, ConnectionLostException {
         
+        LogMe logMe = LogMe.getInstance();
+        
         URL url = null; 
         BufferedImage image;
         url = file.toURI().toURL();
         image = ImageIO.read(url);
         System.out.println("PNG image found: " + url.toString());
-        
+        logMe.aLogger.info("PNG image found: " + url.toString());
+         
         Pixel pixel = application.getPixel();
         pixel.stopExistingTimer();  //a timer could be running from a gif so we need to kill it here
         
@@ -108,6 +111,7 @@ public class ArcadeHttpHandler extends ImageResourceHttpHandler
         String consoleFilePathGIF = null;
         String defaultConsoleFilePathPNG = null;
         String consoleNameMapped = null;
+        LogMe logMe = null;
                     
  	boolean saveAnimation = false;
         //String extension=null;
@@ -127,7 +131,7 @@ public class ArcadeHttpHandler extends ImageResourceHttpHandler
         System.out.println(arcadeURLarray.length); //should be 5
         */
         
-        LogMe logMe = LogMe.getInstance();
+        logMe = LogMe.getInstance();
         logMe.aLogger.info("arcade handler received " + urlParams);
         
         if (arcadeURLarray.length == 5) {
