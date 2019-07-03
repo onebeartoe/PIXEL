@@ -9,22 +9,15 @@ import java.util.logging.Logger;
 import java.util.logging.SimpleFormatter;
 import org.onebeartoe.pixel.hardware.Pixel;
 
-/* Then in your classes you will be using it like this:
 
- class MyClass1 {
-    LogMe logMe1 = new LogMe();
-    Logger logger2 = logMe1.getLogger();
-    logger.info("X 01");
-} */
+public class LogMePixelcade {        
 
-public class LogMe {        
-
-  public static final Logger aLogger = Logger.getLogger("myLogger");
-    private static LogMe instance = null;
-    public static LogMe getInstance(){
+  public static final Logger pLogger = Logger.getLogger("pixelcadeLogger");
+    private static LogMePixelcade instance = null;
+    public static LogMePixelcade getInstance(){
         if(instance==null){
             getLoggerReady();
-            instance = new LogMe();
+            instance = new LogMePixelcade();
         }
         return instance;
     }
@@ -32,12 +25,12 @@ public class LogMe {
         try{
             
             //FileHandler fh = new FileHandler(Pixel.getHomePath() + "pixelcade.log"); //this is returning null
-            FileHandler fh = new FileHandler("pixelcade.log");
+            FileHandler fh = new FileHandler("pixelcade.log", true);
             //fh.setFormatter(new SimpleFormatter());
             fh.setFormatter(new PixelLogFormatter());
-            aLogger.addHandler(fh);
-            aLogger.setUseParentHandlers(false);
-            aLogger.setLevel(Level.ALL);
+            pLogger.addHandler(fh);
+            pLogger.setUseParentHandlers(false);
+            pLogger.setLevel(Level.ALL);
         } catch(Exception e){
             System.out.print("Error: Logger creation issue: "+e);
         }           

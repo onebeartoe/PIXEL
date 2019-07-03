@@ -32,7 +32,7 @@ public class LogMe {
         try{
             
             //FileHandler fh = new FileHandler(Pixel.getHomePath() + "pixelcade.log"); //this is returning null
-            FileHandler fh = new FileHandler("pixelcade.log");
+            FileHandler fh = new FileHandler("pixelweb.log");
             //fh.setFormatter(new SimpleFormatter());
             fh.setFormatter(new PixelLogFormatter());
             aLogger.addHandler(fh);

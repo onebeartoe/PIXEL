@@ -30,6 +30,12 @@
             <version>3.8.1</version>
             <scope>test</scope>
         </dependency>
+        
+        <!-- <dependency>
+            <groupId>org.onebeartoe.pixel.web.enabled</groupId>
+            <artifactId>pixel-web-enabled</artifactId>
+            <version>1.0</version>
+        </dependency> -->
     
         <dependency>
             <groupId>com.google.android</groupId>
