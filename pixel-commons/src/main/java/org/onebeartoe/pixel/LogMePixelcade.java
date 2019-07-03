@@ -25,12 +25,14 @@ public class LogMePixelcade {
         try{
             
             //FileHandler fh = new FileHandler(Pixel.getHomePath() + "pixelcade.log"); //this is returning null
-            FileHandler fh = new FileHandler("pixelcade.log", true);
+            int FILE_SIZE = 2000 * 1024;  //limit log file to 2 MB
+            FileHandler fh = new FileHandler("pixelcade.log", FILE_SIZE, 1, true);
             //fh.setFormatter(new SimpleFormatter());
             fh.setFormatter(new PixelLogFormatter());
             pLogger.addHandler(fh);
             pLogger.setUseParentHandlers(false);
             pLogger.setLevel(Level.ALL);
+            
         } catch(Exception e){
             System.out.print("Error: Logger creation issue: "+e);
         }           
