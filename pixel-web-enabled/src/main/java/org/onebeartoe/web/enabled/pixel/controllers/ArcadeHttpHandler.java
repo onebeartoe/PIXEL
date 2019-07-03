@@ -18,6 +18,7 @@ import org.onebeartoe.web.enabled.pixel.WebEnabledPixel;
 import org.onebeartoe.pixel.LogMe;
 import org.onebeartoe.pixel.PixelLogFormatter;
 import org.apache.commons.io.FilenameUtils;
+import org.onebeartoe.web.enabled.pixel.CliPixel;
 
 /**
  * @author Roberto Marquez
@@ -42,8 +43,10 @@ public class ArcadeHttpHandler extends ImageResourceHttpHandler
         BufferedImage image;
         url = file.toURI().toURL();
         image = ImageIO.read(url);
-        System.out.println("PNG image found: " + url.toString());
-        logMe.aLogger.info("PNG image found: " + url.toString());
+        if (!CliPixel.getSilentMode()) {
+            System.out.println("PNG image found: " + url.toString());
+            logMe.aLogger.info("PNG image found: " + url.toString());
+        }
          
         Pixel pixel = application.getPixel();
         pixel.stopExistingTimer();  //a timer could be running from a gif so we need to kill it here
@@ -90,7 +93,7 @@ public class ArcadeHttpHandler extends ImageResourceHttpHandler
             Logger.getLogger(ArcadeHttpHandler.class.getName()).log(Level.SEVERE, null, ex);
         }
        
-        //Sleeper.sleepo(15);
+        //Sleeper.sleepo(15);  //roberto had this but we don't need anymore now that we switched to new timer
         //Sleeper.sleepo(100);
     }
     
@@ -112,7 +115,17 @@ public class ArcadeHttpHandler extends ImageResourceHttpHandler
         String defaultConsoleFilePathPNG = null;
         String consoleNameMapped = null;
         LogMe logMe = null;
-                    
+        String[] consoleArray = new String[] {  "mame",  "atari2600", "daphne", "nes", "neogeo", "atarilynx",
+                                                "snes", "atari5200", "atari7800", "atarijaguar", "c64", 
+                                                "genesis", "capcom", "n64", "psp", "psx", "coleco", "dreamcast",
+                                                "fba", "gb", "gba", "ngp", "ngpc", "odyssey",
+                                                "saturn", "megadrive", "gbc", "gamegear", "mastersystem", 
+                                                "sega32x", "3do", "msx", "atari800", "pc",
+                                                "nds", "amiga", "fds", "futurepinball", "amstradcpc",
+                                                "apple2", "intellivision", "macintosh", "ps2", "pcengine",
+                                                "segacd", "sg-1000", "ti99", "vectrex", "virtualboy",
+                                                "visualpinball", "wonderswan", "wonderswancolor", "zinc", "sss",
+                                                "zmachine", "zxspectrum"};
  	boolean saveAnimation = false;
         //String extension=null;
         
@@ -123,7 +136,7 @@ public class ArcadeHttpHandler extends ImageResourceHttpHandler
         
         //&m=stream or write , &c=console , &g=game
     	
-    	System.out.println("arcade handler received " + urlParams);
+    	  if (!CliPixel.getSilentMode()) System.out.println("arcade handler received " + urlParams);
         
         /* for (int i=0; i < arcadeURLarray.length; i++) { 
             System.out.println("Str["+i+"]:"+arcadeURLarray[i]); 
@@ -132,7 +145,7 @@ public class ArcadeHttpHandler extends ImageResourceHttpHandler
         */
         
         logMe = LogMe.getInstance();
-        logMe.aLogger.info("arcade handler received " + urlParams);
+        if (!CliPixel.getSilentMode()) logMe.aLogger.info("arcade handler received " + urlParams);
         
         if (arcadeURLarray.length == 5) {
         	
@@ -165,18 +178,24 @@ public class ArcadeHttpHandler extends ImageResourceHttpHandler
              //if yes, we're good
              //if no, let's check & map a couple common hyperspin and skip the expesive mapping table
              
-             consoleNameMapped = getConsoleNamefromMapping(consoleName); //will return original console if no matcn
+            if (!consoleMatch(consoleArray,consoleName)) {  //if our console already matches, we are good but if not, we need to check it against mapping table
+                consoleNameMapped = getConsoleNamefromMapping(consoleName);     //will return original console if no matcn
+            } else {
+                 consoleNameMapped = consoleName;                               //we were already mapped so let's use it
+            }
             
              //System.out.println("Console after mapping: " + consoleNameMapped);
-             System.out.println(streamOrWrite.toUpperCase() + " MODE");
-             System.out.println("Console Before Mapping: " + consoleName);
-             System.out.println("Console Mapped: " + consoleNameMapped);
-             System.out.println("Game Name Only: " +  arcadeNameOnly);
-             
-             logMe.aLogger.info(streamOrWrite.toUpperCase() + " MODE");
-             logMe.aLogger.info("Console Before Mapping: " + consoleName);
-             logMe.aLogger.info("Console Mapped: " + consoleNameMapped);
-             logMe.aLogger.info("Game Name Only: " +  arcadeNameOnly);
+             if (!CliPixel.getSilentMode()) {
+                System.out.println(streamOrWrite.toUpperCase() + " MODE");
+                System.out.println("Console Before Mapping: " + consoleName);
+                System.out.println("Console Mapped: " + consoleNameMapped);
+                System.out.println("Game Name Only: " +  arcadeNameOnly);
+
+                logMe.aLogger.info(streamOrWrite.toUpperCase() + " MODE");
+                logMe.aLogger.info("Console Before Mapping: " + consoleName);
+                logMe.aLogger.info("Console Mapped: " + consoleNameMapped);
+                logMe.aLogger.info("Game Name Only: " +  arcadeNameOnly);
+             }
            
             //now let's decide if we're going to find the png or gif 
             
@@ -214,8 +233,10 @@ public class ArcadeHttpHandler extends ImageResourceHttpHandler
                         
                         if(consoleFileGIF.exists() && !consoleFileGIF.isDirectory()) { 
 
-                              System.out.println("PNG default console LED Marquee file not found, looking for GIF version: " + consoleFilePathPNG);
-                              logMe.aLogger.info("PNG default console LED Marquee file not found, looking for GIF version: " + consoleFilePathPNG);
+                              if (!CliPixel.getSilentMode()) {
+                                    System.out.println("PNG default console LED Marquee file not found, looking for GIF version: " + consoleFilePathPNG);
+                                    logMe.aLogger.info("PNG default console LED Marquee file not found, looking for GIF version: " + consoleFilePathPNG);
+                              }
                               handleGIF("console", "default-" + consoleNameMapped + ".gif", saveAnimation);
                         }
                                 
@@ -225,8 +246,10 @@ public class ArcadeHttpHandler extends ImageResourceHttpHandler
                               handlePNG(consoleFilePNG, saveAnimation);
                         }
                         else {
-                               System.out.println("GIF default console LED Marquee file not found, looking for default marquee: " + consoleFilePathGIF);
-                               logMe.aLogger.info("GIF default console LED Marquee file not found, looking for default marquee: " + consoleFilePathGIF);
+                               if (!CliPixel.getSilentMode()) {
+                                    System.out.println("GIF default console LED Marquee file not found, looking for default marquee: " + consoleFilePathGIF);
+                                    logMe.aLogger.info("GIF default console LED Marquee file not found, looking for default marquee: " + consoleFilePathGIF);
+                               }
                                defaultConsoleFilePathPNG = application.getPixel().getPixelHome() + "console/" + "default-marquee.png"; 
                                File defaultConsoleFilePNG = new File(defaultConsoleFilePathPNG);
                                
@@ -234,10 +257,12 @@ public class ArcadeHttpHandler extends ImageResourceHttpHandler
                                        handlePNG(defaultConsoleFilePNG, saveAnimation);
                                }
                                else {
-                                       System.out.println("Default console LED Marquee file not found: " + defaultConsoleFilePathPNG);
-                                       System.out.println("Skipping LED marquee " + streamOrWrite + ", please check the files");
-                                       logMe.aLogger.info("Default console LED Marquee file not found: " + defaultConsoleFilePathPNG);
-                                       logMe.aLogger.info("Skipping LED marquee " + streamOrWrite + ", please check the files");
+                                       if (!CliPixel.getSilentMode()) {
+                                            System.out.println("Default console LED Marquee file not found: " + defaultConsoleFilePathPNG);
+                                            System.out.println("Skipping LED marquee " + streamOrWrite + ", please check the files");
+                                            logMe.aLogger.info("Default console LED Marquee file not found: " + defaultConsoleFilePathPNG);
+                                            logMe.aLogger.info("Skipping LED marquee " + streamOrWrite + ", please check the files");
+                                       }
                                }
                         }
                 }
@@ -268,14 +293,17 @@ public class ArcadeHttpHandler extends ImageResourceHttpHandler
                               handlePNG(consoleFilePNG, saveAnimation);
                         }
                         else if(consoleFileGIF.exists() && !consoleFileGIF.isDirectory()) { 
-
-                                System.out.println("PNG default console LED Marquee file not found, looking for GIF version: " + consoleFilePathPNG);
-                                logMe.aLogger.info("PNG default console LED Marquee file not found, looking for GIF version: " + consoleFilePathPNG);
+                                if (!CliPixel.getSilentMode()) {
+                                    System.out.println("PNG default console LED Marquee file not found, looking for GIF version: " + consoleFilePathPNG);
+                                    logMe.aLogger.info("PNG default console LED Marquee file not found, looking for GIF version: " + consoleFilePathPNG);
+                                }
                                 handleGIF("console", "default-" + consoleNameMapped + ".gif", saveAnimation);
                         }
                         else {
-                               System.out.println("GIF default console LED Marquee file not found, looking for default marquee: " + consoleFilePathGIF);
-                               logMe.aLogger.info("GIF default console LED Marquee file not found, looking for default marquee: " + consoleFilePathGIF);
+                               if (!CliPixel.getSilentMode()) {
+                                    System.out.println("GIF default console LED Marquee file not found, looking for default marquee: " + consoleFilePathGIF);
+                                    logMe.aLogger.info("GIF default console LED Marquee file not found, looking for default marquee: " + consoleFilePathGIF);
+                               }
                                defaultConsoleFilePathPNG = application.getPixel().getPixelHome() + "console/" + "default-marquee.png"; 
                                File defaultConsoleFilePNG = new File(defaultConsoleFilePathPNG);
                                
@@ -283,10 +311,12 @@ public class ArcadeHttpHandler extends ImageResourceHttpHandler
                                        handlePNG(defaultConsoleFilePNG, saveAnimation);
                                }
                                else {
-                                       System.out.println("Default console LED Marquee file not found: " + defaultConsoleFilePathPNG);
-                                       System.out.println("Skipping LED marquee " + streamOrWrite + ", please check the files");
-                                       logMe.aLogger.info("Default console LED Marquee file not found: " + defaultConsoleFilePathPNG);
-                                       logMe.aLogger.info("Skipping LED marquee " + streamOrWrite + ", please check the files");
+                                         if (!CliPixel.getSilentMode()) {
+                                                System.out.println("Default console LED Marquee file not found: " + defaultConsoleFilePathPNG);
+                                                System.out.println("Skipping LED marquee " + streamOrWrite + ", please check the files");
+                                                logMe.aLogger.info("Default console LED Marquee file not found: " + defaultConsoleFilePathPNG);
+                                                logMe.aLogger.info("Skipping LED marquee " + streamOrWrite + ", please check the files");
+                                         }
                                }
                         }
                 }
@@ -300,21 +330,53 @@ public class ArcadeHttpHandler extends ImageResourceHttpHandler
         else {
              System.out.println("** ERROR ** URL format incorect, use http://localhost:8080/arcade/<stream or write>/<platform name>/<game name .gif or .png>");
              System.out.println("Example: http://localhost:8080/arcade/write/mame/pacman.png or http://localhost:8080/arcade/stream/atari2600/digdug.gif");
-             logMe.aLogger.info("** ERROR ** URL format incorect, use http://localhost:8080/arcade/<stream or write>/<platform name>/<game name .gif or .png>");
-             logMe.aLogger.info("Example: http://localhost:8080/arcade/write/mame/pacman.png or http://localhost:8080/arcade/stream/atari2600/digdug.gif");
+             logMe.aLogger.severe("** ERROR ** URL format incorect, use http://localhost:8080/arcade/<stream or write>/<platform name>/<game name .gif or .png>");
+             logMe.aLogger.severe("Example: http://localhost:8080/arcade/write/mame/pacman.png or http://localhost:8080/arcade/stream/atari2600/digdug.gif");
         }
     }
 
-     
+    public static boolean consoleMatch(String[] arr, String targetValue) {
+	for(String s: arr){
+		if(s.equals(targetValue))
+			return true;
+	}
+	return false;
+    } 
+    
+    
       public String getConsoleNamefromMapping(String originalConsoleName)
     {
          String consoleNameMapped = null; //to do set this if null?
          
          originalConsoleName = originalConsoleName.toLowerCase();
          //add the popular ones first to save time
-         //but thsi is not good as is as if we have a retropi, it will go all the way through
           
          switch (originalConsoleName) {
+            
+            case "snk neo geo":
+                consoleNameMapped = "neogeo";
+                 return consoleNameMapped;
+            case "atari 2600":
+                consoleNameMapped = "atari2600";
+                return consoleNameMapped;
+            case "nintendo entertainment system":
+                consoleNameMapped = "nes";
+                return consoleNameMapped;
+            case "nintendo 64":
+                consoleNameMapped = "n64";
+                return consoleNameMapped;
+            case "sony playstation":
+                 consoleNameMapped = "psx";
+                 return consoleNameMapped;
+            case "sony playstation 2":
+                consoleNameMapped = "ps2";
+                 return consoleNameMapped;
+            case "sony pocketstation":
+                consoleNameMapped = "psp";
+                 return consoleNameMapped;
+            case "sony psp":
+                consoleNameMapped = "psp";
+                 return consoleNameMapped;
             case "amstrad cpc":
                 consoleNameMapped = "amstradcpc";
                  return consoleNameMapped;
@@ -323,9 +385,6 @@ public class ArcadeHttpHandler extends ImageResourceHttpHandler
                  return consoleNameMapped;
             case "apple II":
                 consoleNameMapped = "apple2";
-                 return consoleNameMapped;
-            case "atari 2600":
-                consoleNameMapped = "atari2600";
                  return consoleNameMapped;
             case "atari 5200":
                 consoleNameMapped = "atari5200";
@@ -441,14 +500,8 @@ public class ArcadeHttpHandler extends ImageResourceHttpHandler
             case "nec turbografx-cd":
                 consoleNameMapped = "pcengine";
                  return consoleNameMapped;
-            case "nintendo 64":
-                consoleNameMapped = "n64";
-                 return consoleNameMapped;
             case "nintendo 64dd":
                 consoleNameMapped = "n64";
-                 return consoleNameMapped;
-            case "nintendo entertainment system":
-                consoleNameMapped = "nes";
                  return consoleNameMapped;
             case "nintendo famicom":
                 consoleNameMapped = "nes";
@@ -578,18 +631,6 @@ public class ArcadeHttpHandler extends ImageResourceHttpHandler
                  return consoleNameMapped;
             case "snk neo geo pocket color":
                 consoleNameMapped = "ngpc";
-                 return consoleNameMapped;
-            case "sony playstation":
-                consoleNameMapped = "psx";
-                 return consoleNameMapped;
-            case "sony playstation 2":
-                consoleNameMapped = "ps2";
-                 return consoleNameMapped;
-            case "sony pocketstation":
-                consoleNameMapped = "psp";
-                 return consoleNameMapped;
-            case "sony psp":
-                consoleNameMapped = "psp";
                  return consoleNameMapped;
             case "sony psp minis":
                 consoleNameMapped = "psp";

@@ -4,7 +4,9 @@ package org.onebeartoe.web.enabled.pixel.controllers;
 import com.sun.net.httpserver.HttpExchange;
 import java.net.URI;
 import org.onebeartoe.network.TextHttpHandler;
+import org.onebeartoe.pixel.LogMe;
 import org.onebeartoe.pixel.hardware.Pixel;
+import org.onebeartoe.web.enabled.pixel.CliPixel;
 import org.onebeartoe.web.enabled.pixel.WebEnabledPixel;
 
 /**
@@ -22,6 +24,8 @@ public class ScrollingTextSpeedHttpHandler extends TextHttpHandler
     @Override
     protected String getHttpText(HttpExchange exchange)
     {
+        LogMe logMe = LogMe.getInstance();
+        
         URI requestURI = exchange.getRequestURI();
         String path = requestURI.getPath();
         int i = path.lastIndexOf("/") + 1;
@@ -44,6 +48,11 @@ public class ScrollingTextSpeedHttpHandler extends TextHttpHandler
         pixel.stopExistingTimer();
         pixel.setScrollDelay(speed);
         pixel.scrollText();
+        
+        if (!CliPixel.getSilentMode()) {
+            System.out.println("scrolling text speed update received:" + speed);
+            logMe.aLogger.info("scrolling text speed update received:" + speed);
+         }
         
         return "scrolling text speed update received:" + speed;
     }

@@ -12,6 +12,7 @@ import ioio.lib.pc.SerialPortIOIOConnectionBootstrap;
 import ioio.lib.util.BaseIOIOLooper;
 import ioio.lib.util.IOIOLooper;
 import ioio.lib.util.pc.IOIOConsoleApp;
+import java.awt.Color;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -29,7 +30,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.TimerTask;
 import java.util.logging.Level;
-import java.util.logging.Logger;
+//import java.util.logging.Logger;
 import java.util.Timer;
 import java.util.logging.FileHandler;
 import java.util.logging.SimpleFormatter;
@@ -92,7 +93,9 @@ public class WebEnabledPixel
     
     private static PixelEnvironment pixelEnvironment;
     
-    public  static RgbLedMatrix.Matrix MATRIX_TYPE ;
+    public static RgbLedMatrix.Matrix MATRIX_TYPE ;
+    
+    public static boolean silentMode_ = false;
     
 //TODO: MAKE THIS PRIVATE    
     public List<String> stillImageNames;
@@ -108,39 +111,27 @@ public class WebEnabledPixel
     
     private static String alreadyRunningErrorMsg = "";
     
-    public static String pixelwebVersion = "2.0.3";
+    private int yTextOffset = 0;
+    
+    private int fontSize_ = 32;
+    
+    private int speed_ = 10;
+    
+    public static String pixelwebVersion = "2.0.4";
     
     public WebEnabledPixel(String[] args)
     {
         cli = new CliPixel(args);
         cli.parse();
         httpPort = cli.getWebPort();
+        silentMode_ = cli.getSilentMode();
         
         //Using our common logger across multiple classes
         //LogMe logMe = LogMe.getInstance();
         logMe = LogMe.getInstance();
-        logMe.aLogger.info( "Pixelcade Listender (pixelweb) Version " + pixelwebVersion);
+        if (!silentMode_) logMe.aLogger.info( "Pixelcade Listender (pixelweb) Version " + pixelwebVersion);
 
-        /* String name = getClass().getName();
-        logger = Logger.getLogger(name);
-        
-        logger.setUseParentHandlers(false);
-        
-        // define the logfile
-        FileHandler fh = null;
-        try {
-            fh = new FileHandler("pixelcade2.log");
-        } catch (IOException ex) {
-            Logger.getLogger(Pixel.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (SecurityException ex) {
-            Logger.getLogger(Pixel.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        logger.addHandler(fh);
-        SimpleFormatter formatter = new SimpleFormatter();  
-        fh.setFormatter(formatter);
-        */
-
-        int yTextOffset = cli.getyTextOffset();
+        yTextOffset = cli.getyTextOffset();
         
         LED_MATRIX_ID = cli.getLEDMatrixType(); //let's get this from the command line class (CliPixel.java) and if there is no command line entered, we'll take the default of 3
         
@@ -165,23 +156,35 @@ public class WebEnabledPixel
                 try {
                    ini = new Ini(new File("settings.ini"));  //uses the ini4j lib
                 } catch (IOException ex) {
-                   Logger.getLogger(SerialPortIOIOConnectionBootstrap.class.getName()).log(Level.SEVERE, null, ex);
-                   logMe.aLogger.severe("Could not open settings.ini" + ex);
+                   logMe.aLogger.log(Level.SEVERE, "could not load settings.ini", ex);
+                    if (!silentMode_) logMe.aLogger.severe("Could not open settings.ini" + ex);
                 }
                 //only go here if settings.ini exists
                 
                 ledResolution_=ini.get("PIXELCADE SETTINGS", "ledResolution"); 
                 
                 if (ledResolution_.equals("128x32")) {
-                    System.out.println("PIXEL resolution found in settings.ini: resolution=" + ledResolution_);
-                    logMe.aLogger.info("PIXEL resolution found in settings.ini: resolution=" + ledResolution_);
+                    if (!silentMode_) {
+                        System.out.println("PIXEL resolution found in settings.ini: resolution=" + ledResolution_);
+                        logMe.aLogger.info("PIXEL resolution found in settings.ini: resolution=" + ledResolution_);
+                    }
                     LED_MATRIX_ID = 15;
                 } 
                 
                 if (ledResolution_.equals("64x32")) {
-                    System.out.println("PIXEL resolution found in settings.ini: resolution=" + ledResolution_);
-                    logMe.aLogger.info("PIXEL resolution found in settings.ini: resolution=" + ledResolution_);
+                     if (!silentMode_) {
+                        System.out.println("PIXEL resolution found in settings.ini: resolution=" + ledResolution_);
+                        logMe.aLogger.info("PIXEL resolution found in settings.ini: resolution=" + ledResolution_);
+                     }
                     LED_MATRIX_ID = 13;
+                } 
+                
+                 if (ledResolution_.equals("32x32")) {
+                     if (!silentMode_) {
+                        System.out.println("PIXEL resolution found in settings.ini: resolution=" + ledResolution_);
+                        logMe.aLogger.info("PIXEL resolution found in settings.ini: resolution=" + ledResolution_);
+                     }
+                    LED_MATRIX_ID = 11;
                 } 
          }
         
@@ -191,20 +194,47 @@ public class WebEnabledPixel
         
         pixel = new Pixel(pixelEnvironment.LED_MATRIX, pixelEnvironment.currentResolution);
         
+        //for the y positioning, font size, and speed on scrolling text, looks like arial works out best so we'll stick with it
+        switch (LED_MATRIX_ID) {
+            
+            case 11: //32x32
+                yTextOffset = -4;
+                fontSize_ = 22;
+                speed_ = 38;
+                break;
+            case 13: //64x32
+                yTextOffset = -12;
+                fontSize_ = 32;
+                speed_ = 18;       //smaller the frame, faster the scrolling so slowing it down relative to 128x32
+                break;
+            case 15: //128x32
+                yTextOffset = -12;
+                fontSize_ = 32;
+                speed_ = 10;
+                break;
+            default: 
+                yTextOffset = -4;  
+                fontSize_ = 22;
+                speed_ = 38;
+        }
+        
         pixel.setyScrollingTextOffset(yTextOffset);
+        pixel.setFontSize(fontSize_);
+        pixel.setScrollDelay(speed_);
+        pixel.setScrollTextColor(Color.red);
         
-        logMe.aLogger.info( "Pixelcade HOME DIRECTORY: " +    pixel.getPixelHome());
+        if (!silentMode_) logMe.aLogger.info( "Pixelcade HOME DIRECTORY: " +    pixel.getPixelHome());
         
-        extractDefaultContent();  //to keep this file smaller, moved this to pixelcade-installer?
-        
-        loadImageLists();
-        
-        loadAnimationList();
-        
-        loadArcadeList();
-        
-        createControllers();
-    }
+            extractDefaultContent();  //to do :  keep this file smaller, moved this to pixelcade-installer?
+
+            loadImageLists();
+
+            loadAnimationList();
+
+            loadArcadeList();
+
+            createControllers();
+        }
         
     private void createControllers()
     {
@@ -370,6 +400,9 @@ public class WebEnabledPixel
         inpath = contentClasspath + "pixelc.jar";
         extractClasspathResource(inpath, pixelHomeDirectory);
         
+        inpath = contentClasspath + "pixelcade.jar";
+        extractClasspathResource(inpath, pixelHomeDirectory);
+        
         inpath = contentClasspath + "retrogame.cfg";
         extractClasspathResource(inpath, pixelHomeDirectory);
         
@@ -410,6 +443,7 @@ public class WebEnabledPixel
     {
         try
         {
+ 
             extractHtmlAndJavascript();  //web server basic files
                         
             extractStillImages();      //for the web server functions
@@ -442,19 +476,22 @@ public class WebEnabledPixel
 // AND CSS OR RENAME!    
     private void extractHtmlAndJavascript() throws IOException
     {
-        String contentClasspath = "/web-content/";
-        String inpath = contentClasspath + "index.html";
+        File indexHTMLFile = new File(pixel.getPixelHome() + "index.html");
+        if (!indexHTMLFile.exists()) {
+             String contentClasspath = "/web-content/";
+            String inpath = contentClasspath + "index.html";
 
-        String pixelHomePath = pixel.getPixelHome();
-        File pixelHomeDirectory = new File(pixelHomePath);
-            
-        extractClasspathResource(inpath, pixelHomeDirectory);
-        
-        inpath = contentClasspath + "pixel.js";
-        extractClasspathResource(inpath, pixelHomeDirectory);
-        
-        inpath = contentClasspath + "images.css";
-        extractClasspathResource(inpath, pixelHomeDirectory);
+            String pixelHomePath = pixel.getPixelHome();
+            File pixelHomeDirectory = new File(pixelHomePath);
+
+            extractClasspathResource(inpath, pixelHomeDirectory);
+
+            inpath = contentClasspath + "pixel.js";
+            extractClasspathResource(inpath, pixelHomeDirectory);
+
+            inpath = contentClasspath + "images.css";
+            extractClasspathResource(inpath, pixelHomeDirectory);
+        }
     }
     
     private void extractStillImages() throws IOException
@@ -512,8 +549,7 @@ public class WebEnabledPixel
         {
             String message = "Pixel app will not extract the contents of " + resourceListClasspath
                         + ".  The list already exists at " + resourceListFile.getAbsolutePath();
-            //logger.log(Level.INFO, message); //logger adds a timestamp line that we don't want
-            System.out.println(message);
+             if (!silentMode_) System.out.println(message);
         }
         else
         {
@@ -540,7 +576,7 @@ public class WebEnabledPixel
             {
                 String classpath = "/" + pathPrefix + name;
                 
-                System.out.println("Extracting " + classpath);
+                 if (!silentMode_) System.out.println("Extracting " + classpath);
                 
                 extractClasspathResource(classpath, outputDirectory);
             }
@@ -555,19 +591,12 @@ public class WebEnabledPixel
         {
             String message = "Pixel app will not extract the contents of " + resourceListClasspath
                         + ".  The list already exists at " + resourceListFile.getAbsolutePath();
-            //logger.log(Level.INFO, message); //logger adds a timestamp line that we don't want
-            System.out.println(message);
+                        if (!silentMode_) System.out.println(message);
         }
         else
         {
             // extract the list so on next run the app knows not to extract the default content
             extractClasspathResource(resourceListClasspath, resourceListFile);
-            
-       //     inpath = contentClasspath + "pixel.js";
-       // extractClasspathResource(inpath, pixelHomeDirectory);
-        
-       // inpath = contentClasspath + "images.css";
-       // extractClasspathResource(inpath, pixelHomeDirectory);
             
             String outputDirectoryPath = pixel.getPixelHome() ; 
             File outputDirectory = new File(outputDirectoryPath);
@@ -579,11 +608,10 @@ public class WebEnabledPixel
             
             for(String name : imageNames)
             {
-               // String classpath = "/" + pathPrefix + name;
-                
+               
                 String classpath = name;
                 
-                System.out.println("Extracting " + classpath);
+                if (!silentMode_) System.out.println("Extracting " + classpath);
                 
                 extractClasspathResource(classpath, outputDirectory);
             }
@@ -598,37 +626,29 @@ public class WebEnabledPixel
         {
             String message = "Pixel app will not extract the contents of " + resourceListClasspath
                         + ".  The list already exists at " + resourceListFile.getAbsolutePath();
-            //logger.log(Level.INFO, message); //logger adds a timestamp line that we don't want
-            System.out.println(message);
+                        if (!silentMode_) System.out.println(message);
         }
         else
         {
             // extract the list so on next run the app knows not to extract the default content
             extractClasspathResource(resourceListClasspath, resourceListFile);
             
-            //String outputDirectoryPath = pixel.getPixelHome() + pathPrefix; //home/arcade
-            //String outputDirectoryPath = pixel.getPixelHome(); //home/arcade
-            //File outputDirectory = new File(outputDirectoryPath);
-            
             TextFileReader tfr = new BufferedTextFileReader();
             List<String> imageNames = tfr.readTextLinesFromClasspath(resourceListClasspath);
             
             for(String name : imageNames)
             { 
-                //String outputArcadeDirectoryPath = pixel.getPixelHome() + pathPrefix + name;
+              
                 String outputArcadeDirectoryPath = pixel.getPixelHome() +  name;
                 
                 File outputArcadeDirectory = new File(outputArcadeDirectoryPath);
                 
-                System.out.println("Creating Arcade Directory: " + outputArcadeDirectoryPath);
+                if (!silentMode_) System.out.println("Creating Arcade Directory: " + outputArcadeDirectoryPath);
                 
                 if( !outputArcadeDirectory.exists() )
                     {
                         outputArcadeDirectory.mkdirs();
                     }
-                
-               // new File(dirName).mkdir();
-                //extractClasspathResource(classpath, outputDirectory);
             }
         }
     }
@@ -790,7 +810,7 @@ public class WebEnabledPixel
         {
             try
             {
-                System.out.println("PixelIntegration is calling go()");
+                 if (!silentMode_) System.out.println("PixelIntegration is calling go()");
                 
                 go(null);
             } 
@@ -841,9 +861,10 @@ public class WebEnabledPixel
             
                 @Override
                 public void disconnected() 
-                {
-                    String message = "PIXEL was Disconnected";
-                    System.out.println(message);
+                { 
+                        String message = "PIXEL was Disconnected";
+                        System.out.println(message);
+                        logMe.aLogger.severe(message);
                 }
 
                 @Override
@@ -851,6 +872,7 @@ public class WebEnabledPixel
                 {
                     String message = "Incompatible Firmware Detected";
                     System.out.println(message);
+                    logMe.aLogger.severe(message);
                 }
 
                 @Override
@@ -871,21 +893,21 @@ public class WebEnabledPixel
                         message.append("Found PIXEL: " + pixel.matrix + "\n");
                     }
                     
-                    message.append("You may now interact with the PIXEL!\n");
+                    message.append("You may now interact with PIXEL!\n");
                     message.append("LED matrix type is: " + LED_MATRIX_ID +"\n");
                     
 
-//TODO: Load something on startup
+                    //TODO: Load something on startup
 
                     searchTimer.cancel(); //need to stop the timer so we don't still display the pixel searching message
                     
                     message.append("PIXEL Status: Connected");
-                    
-                    System.out.println("PIXELCADE HOME DIRECTORY = " + pixel.getHomePath());
-                    System.out.println("PIXELCADE Version = 2.0.2");
-
-                    //logger.log(Level.INFO, message.toString());
-                    logMe.aLogger.info(message.toString());
+                   
+                     if (!silentMode_)  {
+                         System.out.println(message);
+                         logMe.aLogger.info(message.toString());
+                     }
+                     
                 }
             };
                     
@@ -948,7 +970,7 @@ public class WebEnabledPixel
                 else
                 {
                     //logger.log(Level.INFO, "Looks like we have a PIXEL connection!");
-                    logMe.aLogger.info("Looks like we have a PIXEL connection!");
+                     if (!silentMode_) logMe.aLogger.info("Looks like we have a PIXEL connection!");
                 }
 	    }
 	}        

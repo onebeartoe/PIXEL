@@ -10,20 +10,22 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.onebeartoe.network.TextHttpHandler;
 import org.onebeartoe.web.enabled.pixel.WebEnabledPixel;
+import org.onebeartoe.pixel.LogMe;
+import org.onebeartoe.web.enabled.pixel.CliPixel;
 
 /**
  * @author Roberto Marquez
  */
 public class ScrollingTextHttpHander extends TextHttpHandler
 {
-    private Logger logger;
+    //private Logger logger;
     
     protected WebEnabledPixel app;
     
     public ScrollingTextHttpHander(WebEnabledPixel application)
     {
         String name = getClass().getName();
-        logger = Logger.getLogger(name);
+       // logger = Logger.getLogger(name);
         
         this.app = application;
     }
@@ -31,10 +33,17 @@ public class ScrollingTextHttpHander extends TextHttpHandler
     @Override
     protected String getHttpText(HttpExchange exchange)
     {
+        
+        LogMe logMe = LogMe.getInstance();
         URI requestURI = exchange.getRequestURI();
         
-        logger.log(Level.INFO, "Scrolling text handler received a request: " + requestURI);
-
+        
+         if (!CliPixel.getSilentMode()) {
+             logMe.aLogger.info("Scrolling text handler received a request: " + requestURI);
+             System.out.println("Scrolling text handler received a request: " + requestURI);
+         }
+        
+        
         String encodedQuery = requestURI.getQuery();
 
         String text = null;
@@ -43,7 +52,11 @@ public class ScrollingTextHttpHander extends TextHttpHandler
         {
             text = "scolling text is not set";
 
-            logger.log(Level.INFO, "scrolling default text");            
+            //logger.log(Level.INFO, "scrolling default text"); 
+             if (!CliPixel.getSilentMode()) {
+                logMe.aLogger.info("scrolling default text");
+                System.out.println("scrolling default text");
+            }
         }
         else
         {
@@ -51,7 +64,11 @@ public class ScrollingTextHttpHander extends TextHttpHandler
             {
                 String query = URLDecoder.decode(encodedQuery, "UTF-8");
                 String[] parameters = query.split("&");
-                logger.log(Level.INFO, "parameters: " + parameters);
+                //logger.log(Level.INFO, "parameters: " + parameters);
+                //if (!CliPixel.getSilentMode()) {
+                //    logMe.aLogger.info("parameters: " + parameters);
+                //    System.out.println("parameters: " + parameters);
+                //}
                 if(parameters != null && parameters.length > 0)
                 {
                     String command = parameters[0];
@@ -59,7 +76,11 @@ public class ScrollingTextHttpHander extends TextHttpHandler
                     String t = strs[0];
                     text = strs[1];
 
-                    logger.log(Level.INFO, "scrolling custom message:" + text);
+                    //logger.log(Level.INFO, "scrolling custom message:" + text);
+                    if (!CliPixel.getSilentMode()) {
+                        logMe.aLogger.info("scrolling custom message:" + text);
+                        System.out.println("scrolling custom message:" + text);
+                    }
                 }
                 else
                 {
@@ -68,7 +89,8 @@ public class ScrollingTextHttpHander extends TextHttpHandler
             } 
             catch (UnsupportedEncodingException ex)
             {
-                logger.log(Level.SEVERE, "The scrolling text parameters could not be decoded.", ex);
+                //logger.log(Level.SEVERE, "The scrolling text parameters could not be decoded.", ex);
+                logMe.aLogger.log(Level.SEVERE, "The scrolling text parameters could not be decoded.", ex);
             }
         }
         

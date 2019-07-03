@@ -19,10 +19,15 @@ public class CliPixel
  private static final Logger log = Logger.getLogger(CliPixel.class.getName());
  private String[] args = null;
  private Options options = new Options();
- private String consoleName = null;
- private String gameName = null; //this can be a full path, just filename, or just basefilename with no extension, what about quotes?
- private String mode = null; //for streaming or writing 
+ private String mode = ""; //for streaming or writing 
+ private String consoleName = "";
+ private String gameName = ""; //this can be a full path, just filename, or just basefilename with no extension, what about quotes?
+ private String eventID = ""; 
+ private String text = "";
+ private String color = "";
+ private String speed = "";
  private Boolean quit = false;
+ private Boolean silent = false;
  private int yTextOffset = 0;
  private static String instructions = "usage: Pixelcade\n" +
 "                    -m,--mode <arg>  Sets stream or write mode, options are stream or write\n" +
@@ -49,6 +54,11 @@ public class CliPixel
   options.addOption("m", "mode", true, "Sets stream or write mode, use stream or write");
   options.addOption("c", "console", true, "Sets the console or platform name, examples atari2600, mame, Nintendo Entertaintment System");
   options.addOption("g", "game", true, "Sets game or rom name, this can be a full path, just the filename only, or just the basename without the extension");
+  options.addOption("e", "event", true, "The event id from EDS");
+  options.addOption("t", "text", true, "Scrolling text");
+  options.addOption("color", "color", true, "Scrolling text color");
+  options.addOption("speed", "speed", true, "Scrolling text speed");
+  options.addOption("s", "silent", false, "Run in silent mode");
   options.addOption("q", "quit", false, "Shuts down the Pixelcade Listener (pixelweb.exe)");
   options.addOption("h", "help", false, "show help.");
   //to do add for streaming text too
@@ -76,17 +86,37 @@ public class CliPixel
           consoleName = cmd.getOptionValue("c");
           //to do need to handle spaces without having to add quotes
       }
+      
+      if (cmd.hasOption("t")) {
+          text = cmd.getOptionValue("t");
+      }
+      
+      if (cmd.hasOption("color")) {
+          color = cmd.getOptionValue("color");
+      }
+      
+       if (cmd.hasOption("speed")) {
+          speed = cmd.getOptionValue("speed");
+      }
 
       if (cmd.hasOption("g")) {
           //log.log(Level.INFO, "Using cli argument -g=" + cmd.getOptionValue("g"));
           gameName = cmd.getOptionValue("g");
       }
       
+      if (cmd.hasOption("e")) {
+          eventID = cmd.getOptionValue("e");
+      }
+      
       if (cmd.hasOption("q")) {
           //log.log(Level.INFO, "Using cli argument -q=" + cmd.getOptionValue("q"));
           quit = true;
       }
-
+      
+       if (cmd.hasOption("s")) {
+          //log.log(Level.INFO, "Using cli argument -q=" + cmd.getOptionValue("q"));
+          silent = true;
+      }
       
 
   } catch (ParseException e) {
@@ -97,6 +127,12 @@ public class CliPixel
    help();
   }
  }
+ 
+ public String getMode()
+ {
+    return mode;
+ }
+ 
  public String getConsoleName()
  {
     return consoleName;
@@ -107,14 +143,34 @@ public class CliPixel
     return gameName;
  }
  
- public String getMode()
+   public String getText()
  {
-    return mode;
+    return text;
+ }
+   
+  public String getColor()
+ {
+    return color;
+ }
+     
+  public String getSpeed()
+ {
+    return speed;
+ }
+ 
+  public String getGEventID()
+ {
+    return eventID;
  }
  
  public boolean getQuit()
 {
     return quit;
+}
+ 
+ public boolean getSilentMode()
+{
+    return silent;
 }
  
  public static String getInstructions() {
@@ -132,18 +188,7 @@ public void setyTextOffset(int yTextOffset) {
 private void help() {
   
    System.out.println(instructions); 
-    
-  /*
-  HelpFormatter formater = new HelpFormatter();
-  formater.printHelp("Pixelcade", options);
-  System.out.println("" );
-  System.out.println("Examples" );
-  System.out.println("VERY IMPORTANT: Enclose any parameters with spaces in double quotes, for example Atari 2600 must be enclosed in double quotes" );
-  System.out.println("pixelcade.exe -m stream -p \"Atari 2600\" -g Rampage.bin");
-  System.out.println("pixelcade.exe -m write -p mame -g d:\\roms\\pacman.zip");
-  System.out.println("java -jar pixelcade.jar -m stream -p c64 -g \"Video Vermin (World).zip\"");
-  System.out.println("java -jar pixelcade.jar -m write -p \"Nintendo Entertain System\" -g \"Zelda II - The Adventure of Link (U).zip\"");
-  */
+ 
 }
  
  

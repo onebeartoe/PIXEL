@@ -26,6 +26,7 @@ public class CliPixel
  private int ledMatrixType = 11;
  private int ledMatrixTypeDefault = 11;
  private int ledMatrixTypeMax = 25;
+ private static boolean silentMode = false;
  
  private int yTextOffset = 0;
 
@@ -53,6 +54,7 @@ public class CliPixel
   
   options.addOption("m", "matrix", true, "Sets the LED matrix type, same as l option");
   options.addOption("y", "y text offset", true, "This is the y offset for scrolling text.");
+  options.addOption("s", "silent", false, "No console messages or logging to pixelcade.log");
  }
 
  public void parse() 
@@ -75,6 +77,10 @@ public class CliPixel
     log.log(Level.INFO, "Using cli argument -p=" + cmd.getOptionValue("p"));
     PortOption = cmd.getOptionValue("p");
    } */
+  
+   if (cmd.hasOption("s")) {
+        silentMode = true;
+   }
    
    if( cmd.hasOption("y") )
    {
@@ -87,8 +93,6 @@ public class CliPixel
     log.log(Level.INFO, "Using cli argument -l=" + cmd.getOptionValue("l"));
     ledMatrixType = Integer.parseInt(cmd.getOptionValue("l"));
    }
-    
-   
     
     if (cmd.hasOption("m")) {
     log.log(Level.INFO, "Using cli argument -m=" + cmd.getOptionValue("m"));
@@ -112,6 +116,8 @@ public class CliPixel
     return WebPortOption;
  }
  
+ 
+ 
  /* public String getPort()
  {
     return PortOption;
@@ -124,7 +130,8 @@ public class CliPixel
     public void setyTextOffset(int yTextOffset) {
         this.yTextOffset = yTextOffset;
     } 
- 
+    
+     
  public int getLEDMatrixType()
  {
     return ledMatrixType;
@@ -135,4 +142,9 @@ public class CliPixel
 
   formater.printHelp("Main", options);
  }
+
+   public static boolean getSilentMode() {
+        return silentMode;
+    }
+ 
 }
