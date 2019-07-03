@@ -53,7 +53,6 @@ import org.gifdecoder.GifDecoder;
 import org.onebeartoe.pixel.LogMe;
 
 
-
 /**
  * @author Roberto Marquez
  * @author Al Linke
@@ -161,6 +160,8 @@ public class Pixel
     public static String OS = System.getProperty("os.name").toLowerCase();
     
     private static int framecount = 0;
+    
+    private int fontSize = 32;
     
     //private ScheduledExecutorService scheduledExecutorService = Executors  //to do is this needed?
     //                            .newSingleThreadScheduledExecutor();
@@ -1803,7 +1804,7 @@ private static String checksum(String filepath, MessageDigest md) throws IOExcep
        return pixelHardwareId;
    }
   
-    public int getyScrollingTextOffset() 
+    public int getyScrollingTextOffset()  
     {
         return yScrollingTextOffset;
     }
@@ -1812,6 +1813,17 @@ private static String checksum(String filepath, MessageDigest md) throws IOExcep
     {
         this.yScrollingTextOffset = yScrollingTextOffset;
     }
+    
+     public int getFontSize() 
+    {
+        return fontSize;
+    }
+    
+    public void setFontSize(int fontSize) 
+    {
+        this.fontSize = fontSize;
+    }
+    
   
     /**
      * resizes our image and preserves hard edges we need for pixel art
@@ -2457,13 +2469,16 @@ private static String checksum(String filepath, MessageDigest md) throws IOExcep
 	    int delay = 200;//scrollSpeedSlider.getValue();	
 	    delay = 710 - delay;                            // al linke: added this so the higher slider value means faster scrolling
 	    	    
-            int w = 64;
+            //int w = 32;
+            int w = KIND.width;
             
-            int h = 64;
+            //int h = 64;
+            
+            int h = KIND.height;
             
             //to do should we be hard coding 64 and 64?
-// use a height of 32, for the rectangle LED matrix type (32x16 for example)            
-//            int h = 32;
+            // use a height of 32, for the rectangle LED matrix type (32x16 for example)            
+            // int h = 32;
 	    
             BufferedImage img = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
             	    
@@ -2471,13 +2486,14 @@ private static String checksum(String filepath, MessageDigest md) throws IOExcep
             g2d.setPaint(scrollingTextColor);
 
             String fontFamily = "Arial";
+            //String fontFamily = "Times";
             
             Font font = fonts.get(fontFamily);
             if(font == null)
             {
-                int fontSize = 32;
-//                int fontSize = 28;
-// a font size of 28 looks good on the rectangle type matrix (32x16 for example)                
+                //default font size is 32 but we also set it from WebEnabledPixel
+                //int fontSize = 28;
+                // a font size of 28 looks good on the rectangle type matrix (32x16 for example)                
                 font = new Font(fontFamily, Font.PLAIN, fontSize);
                 fonts.put(fontFamily, font);
             }            
@@ -2510,12 +2526,12 @@ private static String checksum(String filepath, MessageDigest md) throws IOExcep
             
             g2d.dispose();
 
-// uncomment this to see how often the pixel is communicated with the host            
-//            System.out.print(".");
+            // uncomment this to see how often the pixel is communicated with the host            
+            // System.out.print(".");
 
             if(matrix == null)
             {
-// uncomment this for debugging
+                // uncomment this for debugging
                 logger.log(Level.INFO, "There is no matrix for the text scrolller.");
             }
             else
