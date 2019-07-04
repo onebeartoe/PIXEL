@@ -33,50 +33,68 @@ public class ScrollingTextColorHttpHandler extends TextHttpHandler
         //String hex = path.substring(i);
         String color_ = path.substring(i);
         Color color = Color.red;
+        Boolean colorTextMatch = false;
         
         switch (color_) {
             
             case "red":
                 color = Color.RED;
+                colorTextMatch = true;
                 break;
             case "blue":
                 color = Color.BLUE;
+                colorTextMatch = true;
                 break;
              case "cyan":
                 color = Color.CYAN;
+                colorTextMatch = true;
                 break;
              case "gray":
                 color = Color.GRAY;
+                colorTextMatch = true;
                 break;
              case "darkgray":
                 color = Color.DARK_GRAY;
+                colorTextMatch = true;
                 break;
             case "green":
                 color = Color.GREEN;
+                colorTextMatch = true;
                 break;
              case "lightgray":
                 color = Color.LIGHT_GRAY;
+                colorTextMatch = true;
                 break;
             case "magenta":
                 color = Color.MAGENTA;
+                colorTextMatch = true;
                 break;
             case "orange":
                 color = Color.ORANGE;
+                colorTextMatch = true;
                 break;
              case "pink":
                 color = Color.PINK;
+                colorTextMatch = true;
                 break;
             case "yellow":
                 color = Color.YELLOW;
+                colorTextMatch = true;
                 break;
             case "white":
                 color = Color.WHITE;
+                colorTextMatch = true;
                 break;
             default: 
                 color = Color.RED;
+                colorTextMatch = false;
         }
         
-
+        
+        if (!colorTextMatch) {           //this means we have a hex code vs. color string text
+            color = hex2Rgb(color_);
+        }
+        
         //Color color = hex2Rgb(hex); //roberto had a hex code, changed to color to make it simpler for the user
      
         
