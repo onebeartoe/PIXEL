@@ -7,58 +7,52 @@ function changeControls(mode)
         {
             hideElement("stillPanel");
             hideElement("scrollingTextPanel");
-            hideElement("clockPanel");
-            hideElement("arcadePanel");
-            
             showElement("animationsPanel");
-            
+            //hideElement("clockPanel");
+            //hideElement("arcadePanel");
             break;
         }
         case "still":
         {
             hideElement("animationsPanel");
             hideElement("scrollingTextPanel");
-            hideElement("clockPanel");
-            hideElement("arcadePanel");   
-            
             showElement("stillPanel");
-            
+            //hideElement("clockPanel");
+            //hideElement("arcadePanel"); 
             break;
         }
-        case "clock":
-        {
-            hideElement("animationsPanel");
-            hideElement("stillPanel");
-            hideElement("scrollingTextPanel");
-            hideElement("arcadePanel");
+       // case "clock":
+       // {
+       //     hideElement("animationsPanel");
+       //     hideElement("stillPanel");
+       //     hideElement("scrollingTextPanel");
+       //     hideElement("arcadePanel");
             
-            showElement("clockPanel");
+       //     showElement("clockPanel");
             
-            break;
-        }
+       //     break;
+       // }
 
-        case "arcade":
-        {
-            hideElement("animationsPanel");
-            hideElement("stillPanel");
-            hideElement("scrollingTextPanel");
-            hideElement("clockPanel");
+       // case "arcade":
+       // {
+       //     hideElement("animationsPanel");
+       //     hideElement("stillPanel");
+       //     hideElement("scrollingTextPanel");
+       //     hideElement("clockPanel");
 
-            showElement("arcadePanel");
+       //     showElement("arcadePanel");
 
-            break;
-        }
+       //     break;
+       // }
 
         default:
         {
             // scrolling text
             hideElement("animationsPanel");
             hideElement("stillPanel");
-            hideElement("clockPanel");
-            hideElement("arcadePanel");
-            
             showElement("scrollingTextPanel");
-            
+            //hideElement("clockPanel");
+            //hideElement("arcadePanel");
             break;
         }
     }
@@ -103,11 +97,17 @@ function displayImage(imagePath, name)
             break;
         }
         
-        case "arcade/":
+        case "images/save/":
         {
-            mode = "arcade/";
+            mode = "still/save/";
             break;
         }
+        
+       // case "arcade/":
+       // {
+       //     mode = "arcade/";
+       //     break;
+       // }
 
         default:
         {
@@ -121,7 +121,7 @@ function displayImage(imagePath, name)
     {
         logServerResponse(xmlhttp);
     }
-    var url = "/" + mode + name;
+    var url = "/" + mode + name; 
     xmlhttp.open("POST", url, true);
     xmlhttp.setRequestHeader("Content-type","application/x-www-form-urlencoded");
     xmlhttp.send("&p=3");    
@@ -149,14 +149,14 @@ function loadAnimations()
     loadImageList(url, elementName, imagePath);
 }
 
-function loadArcade()
-{
-    var url = "/arcade/list";
-    var elementName = "arcade";
-    var imagePath = "arcade/";
-    
-    loadImageList(url, elementName, imagePath);
-}
+//function loadArcade()
+//{
+//    var url = "/arcade/list";
+//    var elementName = "arcade";
+//    var imagePath = "arcade/";
+//    
+//    loadImageList(url, elementName, imagePath);
+//}
 
 
 function loadImageList(url, elementName, imagePath)
@@ -191,12 +191,17 @@ function loadImageList(url, elementName, imagePath)
                 {
                     html += "<div class='thumb'>";
                     html += "<img src=\"/files/" + imagePath + name + "\" " + 
-                                   "width=\"50\" height=\"50\" alt=\"" + name +  "\"" +  
-                                   ">";
+                                   "width=\"100\" height=\"50\" alt=\"" + name +  "\"" + ">";
 
                     html += "<p>" + name + "</p>";                    
                     html += "<center style=\"margin-bottom: 40px;\">";
                     html += "<button onclick=\"displayImage('" + imagePath + "', '" + name + "')\" style=\"margin-left: auto; margin-right: auto;\">Display</button>";
+                    
+                    if(imagePath == "images/")
+                    {
+                        html += " ";
+                        html += "<button onclick=\"displayImage('" + imagePath + "save/" + "', '" + name + "')\" style=\"margin-left: auto; margin-right: auto;\">Save</button>";
+                    }
                     
                     if(imagePath == "animations/")
                     {
@@ -204,11 +209,11 @@ function loadImageList(url, elementName, imagePath)
                         html += "<button onclick=\"displayImage('" + imagePath + "save/" + "', '" + name + "')\" style=\"margin-left: auto; margin-right: auto;\">Save</button>";
                     }
 
-                     if(imagePath == "arcade/")
-                    {
-                        html += " ";
-                        html += "<button onclick=\"displayImage('" + imagePath + "', '" + name + "')\" style=\"margin-left: auto; margin-right: auto;\">Save</button>";
-                    }
+                    // if(imagePath == "arcade/")
+                    //{
+                    //    html += " ";
+                    //    html += "<button onclick=\"displayImage('" + imagePath + "', '" + name + "')\" style=\"margin-left: auto; margin-right: auto;\">Save</button>";
+                    //}
 
                     html += "</center>";
                     html += "</div>";
@@ -239,7 +244,7 @@ function loadImageList(url, elementName, imagePath)
 function loadImageResources()
 {
     loadStillImages();
-    loadArcade();
+    //loadArcade();
     loadAnimations();
 }
 
@@ -341,7 +346,7 @@ function updateMode()
             {
                 
                 // scrolling text
-                changeScrollingText('Hello, Pixel World');
+                changeScrollingText('Pixelcade');
 
                 break;
             }
