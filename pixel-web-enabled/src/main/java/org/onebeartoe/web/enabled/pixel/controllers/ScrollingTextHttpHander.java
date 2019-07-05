@@ -50,7 +50,7 @@ public class ScrollingTextHttpHander extends TextHttpHandler
         
         if(encodedQuery == null)
         {
-            text = "scolling text is not set";
+            text = "scrolling text";
 
             //logger.log(Level.INFO, "scrolling default text"); 
              if (!CliPixel.getSilentMode()) {
@@ -93,6 +93,9 @@ public class ScrollingTextHttpHander extends TextHttpHandler
                 logMe.aLogger.log(Level.SEVERE, "The scrolling text parameters could not be decoded.", ex);
             }
         }
+        
+        
+        app.getPixel().interactiveMode(); //few cases text wasn't working, think it was because this was missing
         
         app.getPixel().setScrollingText(text);
         app.getPixel().scrollText();
