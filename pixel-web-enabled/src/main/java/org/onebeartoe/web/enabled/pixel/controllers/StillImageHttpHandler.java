@@ -6,8 +6,14 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.security.NoSuchAlgorithmException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.imageio.ImageIO;
+import org.apache.commons.io.FilenameUtils;
+import org.onebeartoe.pixel.LogMe;
 import org.onebeartoe.pixel.hardware.Pixel;
+import org.onebeartoe.web.enabled.pixel.CliPixel;
 import org.onebeartoe.web.enabled.pixel.WebEnabledPixel;
 
 /**
@@ -20,32 +26,116 @@ public class StillImageHttpHandler extends ImageResourceHttpHandler
         super(application);
         
         basePath = "images/";
-        defaultImageClassPath = basePath + "Robot.png";
+        defaultImageClassPath = basePath + "pacman.png";
         modeName = "still";
     }
     
     @Override
     protected void writeImageResource(String imageClassPath) throws IOException, ConnectionLostException
     {
-        System.out.println("loading new classpath URL for still: " + imageClassPath);
+        //ImageClassPath is for example /images/1941.png
+        
+        LogMe logMe = LogMe.getInstance();
+        
+         if (!CliPixel.getSilentMode()) {
+            System.out.println("loading new classpath URL for still: " + imageClassPath);
+            logMe.aLogger.info("loading new classpath URL for still: " + imageClassPath);
+        }
+         
         URL url = getClass().getClassLoader().getResource(imageClassPath);
-        System.out.println("URL for " + modeName + " loaded");
-
-        BufferedImage image;
-        if(url == null)
-        {
-            // image is not in the JAR/classpath
-            String path = application.getPixel().getPixelHome() + imageClassPath;
-            File file = new File(path);
-            url = file.toURI().toURL();
+        
+        if (!CliPixel.getSilentMode()) {
+            System.out.println("URL for " + modeName + " loaded");
+            logMe.aLogger.info("URL for " + modeName + " loaded");
         }
         
-        image = ImageIO.read(url);
+        String path = "";
+        boolean saveAnimation = false;  //TO DO: get the save working here
+        BufferedImage image;
         
-        System.out.println("buffered image created for: " + url.toString());
+        //imageClassPath will be either images/1942.png or /still/save/1942.png
         
-        Pixel pixel = application.getPixel();
-        pixel.stopExistingTimer();
-        pixel.writeImagetoMatrix(image, pixel.KIND.width, pixel.KIND.height);
+        String arcadeName = FilenameUtils.getName(imageClassPath); //get the name only WITH extension
+        String ext = FilenameUtils.getExtension(imageClassPath); //get the extension, we want to know if PNG or GIF   
+            
+        //path = application.getPixel().getPixelHome() + imageClassPath; //home/pixelcade/images/1941.gif so full path
+        path = application.getPixel().getPixelHome() + "images/" + arcadeName;
+        File file = new File(path);
+        url = file.toURI().toURL();
+        
+        if( imageClassPath.contains("/save/"))  saveAnimation = true;
+          
+        //now let's find out if PNG or GIF
+        
+        System.out.println("arcadeNameOnly: " + arcadeName);
+        System.out.println("ext: " + ext);
+        System.out.println("path to file: " + path);
+        
+        if (ext.equals("gif")) {
+            
+            try {
+               
+                if (!CliPixel.getSilentMode()) {
+                    System.out.println("Arcade Marquee Handler sending GIF: " + path);
+                    logMe.aLogger.info("Arcade Marquee Handler sending GIF: " + path);
+                }
+
+                Pixel pixel = application.getPixel();
+                
+                pixel.writeArcadeAnimation("images",arcadeName,saveAnimation); 
+                    } catch (NoSuchAlgorithmException ex) {
+                        Logger.getLogger(StillImageHttpHandler.class.getName()).log(Level.SEVERE, null, ex);
+                 }
+        } 
+        else if (ext.equals("png")) {
+            
+            image = ImageIO.read(url);
+        
+            if (!CliPixel.getSilentMode()) {
+                    System.out.println("buffered image created for: " + url.toString());
+                    logMe.aLogger.info("buffered image created for: " + url.toString());
+            }
+            
+             Pixel pixel = application.getPixel();
+             pixel.stopExistingTimer();  //a timer could be running from a gif so we need to kill it here
+        
+            //if (saveAnimation && pixel.getPIXELHardwareID().substring(0,4).equals("PIXL")) {
+            if (saveAnimation) {
+            
+                pixel.interactiveMode();
+                pixel.writeMode(10);
+
+                 try {
+                       pixel.writeImagetoMatrix(image, pixel.KIND.width, pixel.KIND.height);
+                } catch (ConnectionLostException e1) {
+                        // TODO Auto-generated catch block
+                        e1.printStackTrace();
+                } 
+
+                try {
+                    Thread.sleep(100); //this may not be needed but was causing a problem on the writes for the gif animations so adding here to be safe
+                    //TO DO will a smaller delay still work too?
+                } catch (InterruptedException ex) {
+                    Logger.getLogger(ArcadeHttpHandler.class.getName()).log(Level.SEVERE, null, ex);
+                }
+
+                 pixel.playLocalMode();
+            
+            } else {
+
+                pixel.interactiveMode();
+                pixel.writeImagetoMatrix(image, pixel.KIND.width, pixel.KIND.height); //to do add save parameter here
+            }
+            
+            
+            //Pixel pixel = application.getPixel();
+            //pixel.stopExistingTimer();
+            //pixel.writeImagetoMatrix(image, pixel.KIND.width, pixel.KIND.height);
+            
+        } else {
+            
+            System.out.println("**** ERROR **** Sorry only PNG and GIF are supported, cannot handle " + path);
+            logMe.aLogger.severe("Sorry only PNG and GIF are supported, cannot handle " + path);
+        }
     }        
 }
