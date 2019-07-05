@@ -20,11 +20,8 @@ public class CliPixel
  private String[] args = null;
  private Options options = new Options();
  private int WebPortOption = 8080;
- //private String PortOption = "";
- //private int ledMatrixType = 3;
- //private int ledMatrixTypeDefault = 3;
- private int ledMatrixType = 11;
- private int ledMatrixTypeDefault = 11;
+ private int ledMatrixType = 15;
+ private int ledMatrixTypeDefault = 15;
  private int ledMatrixTypeMax = 25;
  private static boolean silentMode = false;
  
