@@ -84,7 +84,7 @@ public class WebEnabledPixel
     
     private String ledResolution_ = "";
 
-    private static int LED_MATRIX_ID = 11;
+    private static int LED_MATRIX_ID = 15;
 //TODO: We shoudl invert this and have teh user specicy the matrix label 
 //      (SEEEDSTUDIO_64x64, Matrix.SEEEDSTUDIO_32x32, etc...) instead of an
 //      integer ID.
@@ -740,6 +740,7 @@ public class WebEnabledPixel
             namesList.addAll(list);
         }
         
+        java.util.Collections.sort(namesList); //sorting the list alphabetical
         return namesList;
     }
     
