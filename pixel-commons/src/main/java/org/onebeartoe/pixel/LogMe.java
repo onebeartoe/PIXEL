@@ -32,7 +32,9 @@ public class LogMe {
         try{
             
             //FileHandler fh = new FileHandler(Pixel.getHomePath() + "pixelcade.log"); //this is returning null
-            FileHandler fh = new FileHandler("pixelweb.log");
+            int FILE_SIZE = 5000 * 1024;  //limit log file to 5 MB
+            FileHandler fh = new FileHandler("pixelweb.log", FILE_SIZE, 1, false); //overwrite log each time pixelweb is launched
+            //FileHandler fh = new FileHandler("pixelweb.log");
             //fh.setFormatter(new SimpleFormatter());
             fh.setFormatter(new PixelLogFormatter());
             aLogger.addHandler(fh);
