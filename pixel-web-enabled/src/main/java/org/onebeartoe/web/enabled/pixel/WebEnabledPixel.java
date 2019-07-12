@@ -117,7 +117,7 @@ public class WebEnabledPixel
     
     private int speed_ = 10;
     
-    public static String pixelwebVersion = "2.0.4";
+    public static String pixelwebVersion = "2.0.5";
     
     public WebEnabledPixel(String[] args)
     {
@@ -129,7 +129,10 @@ public class WebEnabledPixel
         //Using our common logger across multiple classes
         //LogMe logMe = LogMe.getInstance();
         logMe = LogMe.getInstance();
-        if (!silentMode_) logMe.aLogger.info( "Pixelcade Listender (pixelweb) Version " + pixelwebVersion);
+        if (!silentMode_) {
+            logMe.aLogger.info( "Pixelcade Listender (pixelweb) Version " + pixelwebVersion);
+            System.out.println( "Pixelcade Listender (pixelweb) Version " + pixelwebVersion);
+        }
 
         yTextOffset = cli.getyTextOffset();
         

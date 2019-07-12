@@ -28,6 +28,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.RandomAccessFile;
 import java.io.StringReader;
+import java.net.URL;
 import java.net.URLDecoder;
 import java.time.Duration;
 import java.util.Arrays;
@@ -51,7 +52,9 @@ import java.util.logging.SimpleFormatter;
 import org.apache.commons.io.FilenameUtils;
 import org.gifdecoder.GifDecoder;
 import org.onebeartoe.pixel.LogMe;
-
+import java.util.Queue; 
+import java.util.LinkedList;
+import javax.imageio.ImageIO;
 
 /**
  * @author Roberto Marquez
@@ -145,9 +148,9 @@ public class Pixel
     /**
      * This is length in milliseconds of the delay between each scrolling text redraw.
      */
-    private long scrollDelay = 500; 
+    private long scrollDelay = 10; 
     
-    private Color scrollingTextColor = Color.ORANGE;
+    private Color scrollingTextColor = Color.RED;
     
     private int yScrollingTextOffset = 0;
     
@@ -178,6 +181,14 @@ public class Pixel
     private final AtomicBoolean scrollingTextTimerRunningFlag = new AtomicBoolean();
     private final AtomicBoolean clockTimerRunningFlag = new AtomicBoolean();
     
+    public Queue<String> PixelQueue = new LinkedList<>(); 
+    
+    private Boolean isLooping = false;   //we'll use this for the queue feature
+    private int loopTimesGlobal = 0;
+    private int loopScrollingTextCounter = 0;
+    private int loopGIFCounter = 0;
+   
+    
     //private TimerTask animateTimer = new AnimateTimer();
     
     /**
@@ -191,6 +202,8 @@ public class Pixel
         logger = Logger.getLogger(name);
         
         logMe = LogMe.getInstance();
+        
+        //PixelQueue = new LinkedList<>(); 
         
         /* String name = getClass().getName();
         logger = Logger.getLogger(name);
@@ -383,6 +396,11 @@ public class Pixel
     public String getPixelHome()
     {
         return pixelHome;
+    }
+    
+    public boolean getLoopStatus()
+    {
+        return isLooping;
     }
     
     //public String getArcadeHome() {
@@ -849,6 +867,7 @@ private static String checksum(String filepath, MessageDigest md) throws IOExcep
     	else return false;
     }
     
+    /*
     private void runRepeatingTask(TimerTask drawTask, long repeatPeriod)  //**** NO LONGER USED ******
     {
         stopExistingTimer();
@@ -863,6 +882,7 @@ private static String checksum(String filepath, MessageDigest md) throws IOExcep
         timer.schedule(drawTask, firstTime, repeatPeriod);
         
     }
+    */
     
     public void sendPixelDecodedFrame(String decodedDir, String gifName, int x, int selectedFileTotalFrames, int selectedFileResolution, int frameWidth, int frameHeight) 
     {
@@ -1016,18 +1036,46 @@ private static String checksum(String filepath, MessageDigest md) throws IOExcep
         }
     }
    
-    public void scrollText()
+    public void scrollText(int loop)
     {
-        stopExistingTimer();
-
-        //timer = new Timer();
-        //TimerTask drawTask = new TextScroller();
-        //Date firstTime = new Date();
-        //timer.schedule(drawTask, firstTime, scrollDelay);
         
-        ScheduledExecutorService scrollTextService = Executors.newScheduledThreadPool(1);
-        futurescroll = scrollTextService.scheduleAtFixedRate(drawTask, 0, scrollDelay, TimeUnit.MILLISECONDS);
-        scrollingTextTimerRunningFlag.set(true);  //atomic boolean , better for threads
+        System.out.println("went here scroll text in pixel");
+        
+        //this goes away
+       /*
+        if (isLooping && loop != 0) {  //we were already looping and new command has a loop and is not a write command so let's write to the Q
+             System.out.println("went here looping and loop not 0");
+             System.out.println("color before: " + scrollingTextColor);
+             //if (scrollingTextColor == null) scrollingTextColor = Color.RED;
+             addtoQueue("text",scrollingText,Long.toString(scrollDelay),loop,false,scrollingTextColor);
+           
+            // addtoQueue(String mode, String consoleOrText, String FileNameOrSpeed, int loop, Boolean writeMode, Color color) 
+                     
+                  
+                     
+        } else 
+        
+        {
+        */
+        
+            if (loop!=0) {            //we were not already looping but new command has a loop and is not a write so let's continue and loop the gif
+                isLooping = true;
+                loopTimesGlobal = loop; 
+                System.out.println("went here looping for first time");
+            }
+
+            stopExistingTimer();
+            //stopExistingTimer("text",scrollingText,Long.toString(scrollDelay),"0",false,scrollingTextColor);
+
+
+            //timer = new Timer();
+            //TimerTask drawTask = new TextScroller();
+            //Date firstTime = new Date();
+            //timer.schedule(drawTask, firstTime, scrollDelay);
+
+            ScheduledExecutorService scrollTextService = Executors.newScheduledThreadPool(1);
+            futurescroll = scrollTextService.scheduleAtFixedRate(drawTask, 0, scrollDelay, TimeUnit.MILLISECONDS);
+            scrollingTextTimerRunningFlag.set(true);  //atomic boolean , better for threads
         
     }
     
@@ -1051,6 +1099,7 @@ private static String checksum(String filepath, MessageDigest md) throws IOExcep
         {
             // the mode has changed
             stopExistingTimer();
+            //stopExistingTimer("modechange",null,null,null,false,null);
         }
 
         this.mode = mode;
@@ -1863,36 +1912,70 @@ private static String checksum(String filepath, MessageDigest md) throws IOExcep
         scrollingTextColor = color;
     }
     
+    public void addtoQueue(String mode, String consoleOrText, String FileNameOrSpeed, int loop, Boolean writeMode, Color color) {
+        System.out.println("Adding item to Queue..."); 
+        
+        System.out.println("mode: " + mode); 
+        System.out.println("text: " + consoleOrText); 
+        System.out.println("speed: " + FileNameOrSpeed); 
+        System.out.println("loop: " + loop);
+        System.out.println("writemode: " + writeMode); 
+        System.out.println("color: " + color); 
+        
+        try { 
+            
+            PixelQueue.add(mode + "," + consoleOrText + "," + FileNameOrSpeed + "," + Integer.toString(loop) + "," + writeMode.toString() + "," + color.toString());
+        } 
+        catch (Exception e) { 
+            System.out.println("Queue Exception: " + e); 
+        } 
+        
+        System.out.println("Queue Contents : " + PixelQueue);
+        //System.out.println("Queue item added: " + mode + "," + consoleOrText + "," + FileNameOrSpeed + "," + Integer.toString(loop) + "," + writeMode.toString() + "," + color.toString());
+    }
+    
+    //public void stopExistingTimer(String mode, String consoleOrText, String FileNameOrSpeed, String loop, Boolean writeMode, Color color)
     public void stopExistingTimer()
     {
        
        // System.out.println("Checking for Timers in PIXEL activity in " + getClass().getSimpleName() + ".");
        
-        interactiveMode();     
+       //check if loopflag and if so, write to the queue
         
-        if (streamGIFTimerRunningFlag.get() == true) {
-            //streamgifTask.shutdown();    //looks like this is not needed
-            future.cancel(false); //dont' interrupt if busy
-            z = 0; 
-            //System.out.println("Shutdown streamgiftask timer");
-            streamGIFTimerRunningFlag.set(false);
-        }
-        
-        if (scrollingTextTimerRunningFlag.get() == true) {
-            //drawktask.shutdown();    //looks like this is not needed
-            futurescroll.cancel(false); //dont' interrupt if busy
-            //System.out.println("Shutdown drawtask timer");
-            scrollingTextTimerRunningFlag.set(false);
-        }
-        
-         if (clockTimerRunningFlag.get() == true) {
-            //clocktask.shutdown();    //looks like this is not needed
-            futureclock.cancel(false); //dont' interrupt if busy
-            //System.out.println("Shutdown clock timer");
-            clockTimerRunningFlag.set(false);
-        }
+      // if (isLooping) {  //we're looping so let's not stop the timer and instead write to the queue
+           
+        //   PixelQueue.add(mode + "," + consoleOrText + "," + FileNameOrSpeed + "," + loop + "," + writeMode.toString() + "," + color.toString());
+          // System.out.println("Queue item added: " + mode + "," + consoleOrText + "," + FileNameOrSpeed + "," + loop + "," + writeMode.toString() + "," + color.toString());
+          
+           
+      // } else {
+           
+            interactiveMode();     
 
-        /*
+            if (streamGIFTimerRunningFlag.get() == true) {
+                //streamgifTask.shutdown();    //looks like this is not needed
+                future.cancel(false); //dont' interrupt if busy but we're cancelling this timer
+                z = 0; 
+                //System.out.println("Shutdown streamgiftask timer");
+                streamGIFTimerRunningFlag.set(false);
+            }
+
+            if (scrollingTextTimerRunningFlag.get() == true) {
+                //drawktask.shutdown();    //looks like this is not needed
+                futurescroll.cancel(false); //dont' interrupt if busy
+                //System.out.println("Shutdown drawtask timer");
+                scrollingTextTimerRunningFlag.set(false);
+            }
+
+             if (clockTimerRunningFlag.get() == true) {
+                //clocktask.shutdown();    //looks like this is not needed
+                futureclock.cancel(false); //dont' interrupt if busy
+                //System.out.println("Shutdown clock timer");
+                clockTimerRunningFlag.set(false);
+            }
+      //  }
+
+        /*                          //old code with timer that was causing ioio disconnect on windows
          if(timer == null)
         {
             System.out.println("No timer stop needed at Pixel mode change.");
@@ -1910,132 +1993,152 @@ private static String checksum(String filepath, MessageDigest md) throws IOExcep
         
     }    
     
-    public void writeArcadeAnimation(String selectedPlatformName, String selectedFileName, boolean writeMode) throws NoSuchAlgorithmException
+    public void writeArcadeAnimation(String selectedPlatformName, String selectedFileName, boolean writeMode, int loop) throws NoSuchAlgorithmException
     {
         
+        System.out.println("isLooping " + isLooping);
+        System.out.println("loop " + loop);
+        System.out.println("writeMode " + writeMode);
         
-        if (isWindows()) {
-            decodedAnimationsPath =  pixelHome + selectedPlatformName + "\\decoded\\";  //don't have to do this technically, just for display purposes
-            gifFilePath = pixelHome + selectedPlatformName + "\\" + selectedFileName; //user home/pixelcade/mame/digdug.gif
-        }
         
-        else {
-            decodedAnimationsPath =  pixelHome + selectedPlatformName + "/decoded/";   //pixelcade/mame/decoded
-            gifFilePath = pixelHome + selectedPlatformName + "/" + selectedFileName; //user home/pixelcade/mame/digdug.gif
-        }
+        if (isLooping && loop != 0 && !writeMode) {  //we were already looping and new command has a loop and is not a write command so let's write to the Q
+             
+             addtoQueue("gif",selectedPlatformName,selectedFileName,loop,writeMode,Color.red);
+        } else 
         
-        stopExistingTimer();
-        //System.out.println("Sending request to stop existing timer...");
-       
-        //let's make sure the target gif exists before proceeding
-        File file = new File(gifFilePath);
-
-        if(file.exists() && !file.isDirectory()) { 
+        {
+        
+            if (loop!=0 && !writeMode) {            //we were not already looping but new command has a loop and is not a write so let's continue and loop the gif
+                isLooping = true;
+                loopTimesGlobal = loop; 
+            }
             
-               try 
-               {
-                   System.out.println("Found GIF: " + gifFilePath);
-                   logMe.aLogger.info("Found GIF: " + gifFilePath);
-                   animationFilename = selectedFileName;
-                   if(gifTxtExists(decodedAnimationsPath,selectedFileName) == true && GIFRGB565Exists(decodedAnimationsPath,selectedFileName) == true)
+
+            if (isWindows()) {
+                decodedAnimationsPath =  pixelHome + selectedPlatformName + "\\decoded\\";  //don't have to do this technically, just for display purposes
+                gifFilePath = pixelHome + selectedPlatformName + "\\" + selectedFileName; //user home/pixelcade/mame/digdug.gif
+            }
+
+            else {
+                decodedAnimationsPath =  pixelHome + selectedPlatformName + "/decoded/";   //pixelcade/mame/decoded
+                gifFilePath = pixelHome + selectedPlatformName + "/" + selectedFileName; //user home/pixelcade/mame/digdug.gif
+            }
+
+            //stopExistingTimer("gif",selectedPlatformName,selectedFileName,"0",writeMode, null);  //if we are looping , we won't stop becasue of the isLooping flag
+            stopExistingTimer();
+
+            //System.out.println("Sending request to stop existing timer...");
+
+            //let's make sure the target gif exists before proceeding
+            File file = new File(gifFilePath);
+
+            if(file.exists() && !file.isDirectory()) { 
+
+                   try 
                    {
-                       System.out.println("This GIF was already decoded");
-                       logMe.aLogger.info("This GIF was already decoded");
-                   }
-                   else
-                   {
-                       System.out.println("Decoding " + selectedFileName);
-                       System.out.println("Decoding " + gifFilePath);
-                       logMe.aLogger.info("Decoding " + gifFilePath);
-                       // the text file is not there so we cannot continue and we must decode, let's first copy the file to home dir
-                       decodeArcadeGIF(decodedAnimationsPath, gifFilePath,selectedFileName, currentResolution, KIND.width, KIND.height);
-                   }
-                   
-                   if (GIFArcadeNeedsDecoding(decodedAnimationsPath, selectedFileName, currentResolution,gifFilePath) == true)
-                   {
-                       System.out.println("Selected LED panel is different than the encoded GIF, need to re-encode...");
-                       logMe.aLogger.info("Selected LED panel is different than the encoded GIF, need to re-encode...");
-                       decodeArcadeGIF(decodedAnimationsPath, gifFilePath, selectedFileName, currentResolution, KIND.width, KIND.height);
-                   }
-                   
-                   //****** Now let's setup the animation ******
-                   
-                   // TODO: replace animation_name with selectedFileName
-                   String animation_name = selectedFileName;
-                   
-                   float GIFfps = getDecodedfps(decodedAnimationsPath, animation_name); //get the fps //to do fix this later becaause we are getting from internal path
-                   GIFnumFrames = getDecodednumFrames(decodedAnimationsPath, animation_name);
-                   int gifSelectedFileDelay = getDecodedframeDelay(decodedAnimationsPath, animation_name);
-                   
-                   currentResolution = getDecodedresolution(decodedAnimationsPath, animation_name);
-                   GIFresolution = currentResolution;
-                  
-                   System.out.println("GIF Width: " + KIND.width + ", GIF Height: " + KIND.height);
-                   logMe.aLogger.info("GIF Width: " + KIND.width + ", GIF Height: " + KIND.height);
-                   
-                   
-                   String pixelHardwareId = "not found";
-                   try
-                   {
-                       pixelHardwareId = ioiO.getImplVersion(v.HARDWARE_VER);
-                   }
-                   catch (ConnectionLostException ex)
+                       System.out.println("Found GIF: " + gifFilePath);
+                       logMe.aLogger.info("Found GIF: " + gifFilePath);
+                       animationFilename = selectedFileName;
+                       if(gifTxtExists(decodedAnimationsPath,selectedFileName) == true && GIFRGB565Exists(decodedAnimationsPath,selectedFileName) == true)
+                       {
+                           System.out.println("This GIF was already decoded");
+                           logMe.aLogger.info("This GIF was already decoded");
+                       }
+                       else
+                       {
+                           System.out.println("Decoding " + selectedFileName);
+                           System.out.println("Decoding " + gifFilePath);
+                           logMe.aLogger.info("Decoding " + gifFilePath);
+                           // the text file is not there so we cannot continue and we must decode, let's first copy the file to home dir
+                           decodeArcadeGIF(decodedAnimationsPath, gifFilePath,selectedFileName, currentResolution, KIND.width, KIND.height);
+                       }
+
+                       if (GIFArcadeNeedsDecoding(decodedAnimationsPath, selectedFileName, currentResolution,gifFilePath) == true)
+                       {
+                           System.out.println("Selected LED panel is different than the encoded GIF, need to re-encode...");
+                           logMe.aLogger.info("Selected LED panel is different than the encoded GIF, need to re-encode...");
+                           decodeArcadeGIF(decodedAnimationsPath, gifFilePath, selectedFileName, currentResolution, KIND.width, KIND.height);
+                       }
+
+                       //****** Now let's setup the animation ******
+
+                       // TODO: replace animation_name with selectedFileName
+                       String animation_name = selectedFileName;
+
+                       float GIFfps = getDecodedfps(decodedAnimationsPath, animation_name); //get the fps //to do fix this later becaause we are getting from internal path
+                       GIFnumFrames = getDecodednumFrames(decodedAnimationsPath, animation_name);
+                       int gifSelectedFileDelay = getDecodedframeDelay(decodedAnimationsPath, animation_name);
+
+                       currentResolution = getDecodedresolution(decodedAnimationsPath, animation_name);
+                       GIFresolution = currentResolution;
+
+                       System.out.println("GIF Width: " + KIND.width + ", GIF Height: " + KIND.height);
+                       logMe.aLogger.info("GIF Width: " + KIND.width + ", GIF Height: " + KIND.height);
+
+
+                       String pixelHardwareId = "not found";
+                       try
+                       {
+                           pixelHardwareId = ioiO.getImplVersion(v.HARDWARE_VER);
+                       }
+                       catch (ConnectionLostException ex)
+                       {
+                           Logger.getLogger(Pixel.class.getName()).log(Level.SEVERE, null, ex);
+                           logMe.aLogger.log(Level.SEVERE, Pixel.class.getName(), ex);
+                       }
+
+                       //stopExistingTimer();
+                       //System.out.println("The existing timer was stopped");
+
+                       if (pixelHardwareId.substring(0,4).equals("PIXL") && writeMode == true)
+                       {
+                           interactiveMode();         //have to put back into interactive mode, otherwise we were playing locally
+                           // need to tell PIXEL the frames per second to use, how fast to play the animations
+                           writeMode(GIFfps);
+                           System.out.println("Now writing to PIXEL's SD card, the screen will go blank until writing has been completed...");
+                           logMe.aLogger.info("Now writing to PIXEL's SD card, the screen will go blank until writing has been completed...");
+
+                           // we'll run this in the background and also update the UI with progress
+                           //System.out.println("The Pixel animation writer is being created");
+
+                           //Date now = new Date();
+                           //SendGifAnimationTask wp = new SendGifAnimationTask();   //starts a timer which loops through frames doing a write and playlocal when time done
+                           //timer = new Timer(); //note that this timer only runs through one loop and then stops
+                           //timer.schedule(wp, now);
+
+                            WriteGIFAnimationTask();
+
+                           //System.out.println("The Pixel animation writer was created");
+                       }
+                       else
+                       {
+
+                           interactiveMode();  //we are streaming here so need to put in interactive mode first , otherwise we're just playing locally
+
+                           //System.out.println("Future version of the timer is starting.");
+                           //scheduledExecutorService.scheduleAtFixedRate(streamgifTask, 0, gifSelectedFileDelay, TimeUnit.MILLISECONDS);
+
+                           //define and get reference
+                           ScheduledExecutorService streamGIFservice = Executors.newScheduledThreadPool(1);
+                           future = streamGIFservice.scheduleAtFixedRate(streamgifTask, 0, gifSelectedFileDelay, TimeUnit.MILLISECONDS);
+                           streamGIFTimerRunningFlag.set(true);  //atomic boolean , better for threads
+
+                           //timer = new Timer();
+                           //TimerTask animateTimer = new AnimateTimer(); 
+                           //Date firstTime = new Date();
+                           //timer.schedule(animateTimer, firstTime, gifSelectedFileDelay);  //
+
+                           //System.out.println("Streaming version of the timer has started.");
+                       }
+                   } 
+                   catch (IOException ex) 
                    {
                        Logger.getLogger(Pixel.class.getName()).log(Level.SEVERE, null, ex);
-                       logMe.aLogger.log(Level.SEVERE, Pixel.class.getName(), ex);
                    }
-                   
-                   //stopExistingTimer();
-                   //System.out.println("The existing timer was stopped");
-                   
-                   if (pixelHardwareId.substring(0,4).equals("PIXL") && writeMode == true)
-                   {
-                       interactiveMode();         //have to put back into interactive mode, otherwise we were playing locally
-                       // need to tell PIXEL the frames per second to use, how fast to play the animations
-                       writeMode(GIFfps);
-                       System.out.println("Now writing to PIXEL's SD card, the screen will go blank until writing has been completed...");
-                       logMe.aLogger.info("Now writing to PIXEL's SD card, the screen will go blank until writing has been completed...");
-                       
-                       // we'll run this in the background and also update the UI with progress
-                       //System.out.println("The Pixel animation writer is being created");
-                       
-                       //Date now = new Date();
-                       //SendGifAnimationTask wp = new SendGifAnimationTask();   //starts a timer which loops through frames doing a write and playlocal when time done
-                       //timer = new Timer(); //note that this timer only runs through one loop and then stops
-                       //timer.schedule(wp, now);
-                       
-                        WriteGIFAnimationTask();
-                       
-                       //System.out.println("The Pixel animation writer was created");
-                   }
-                   else
-                   {
-                       
-                       interactiveMode();  //we are streaming here so need to put in interactive mode first , otherwise we're just playing locally
-                       
-                       //System.out.println("Future version of the timer is starting.");
-                       //scheduledExecutorService.scheduleAtFixedRate(streamgifTask, 0, gifSelectedFileDelay, TimeUnit.MILLISECONDS);
-                       
-                       //define and get reference
-                       ScheduledExecutorService streamGIFservice = Executors.newScheduledThreadPool(1);
-                       future = streamGIFservice.scheduleAtFixedRate(streamgifTask, 0, gifSelectedFileDelay, TimeUnit.MILLISECONDS);
-                       streamGIFTimerRunningFlag.set(true);  //atomic boolean , better for threads
-                      
-                       //timer = new Timer();
-                       //TimerTask animateTimer = new AnimateTimer(); 
-                       //Date firstTime = new Date();
-                       //timer.schedule(animateTimer, firstTime, gifSelectedFileDelay);  //
-                       
-                       //System.out.println("Streaming version of the timer has started.");
-                   }
-               } 
-               catch (IOException ex) 
-               {
-                   Logger.getLogger(Pixel.class.getName()).log(Level.SEVERE, null, ex);
-               }
-        } else {
-             System.out.println("** ERROR ** GIF file not found: " + gifFilePath);
-             logMe.aLogger.severe("GIF file not found: " + gifFilePath);
+            } else {
+                 System.out.println("** ERROR ** GIF file not found: " + gifFilePath);
+                 logMe.aLogger.severe("GIF file not found: " + gifFilePath);
+            }
         }
     }
     
@@ -2079,6 +2182,7 @@ private static String checksum(String filepath, MessageDigest md) throws IOExcep
         if (gifFileExists) {
         
             stopExistingTimer();
+            //stopExistingTimer("gif",selectedPlatformName,selectedFileName,"0",writeMode, null); //we need to pass all this stuff because if we're looping, we'll need these parameters to add to the Q
 
             //let's make sure the target gif exists before proceeding
             File file = new File(gifFilePath);
@@ -2200,11 +2304,11 @@ private static String checksum(String filepath, MessageDigest md) throws IOExcep
      * @param selectedFileName
      * @param writeMode 
      */
-    public void writeAnimation(String selectedFileName, boolean writeMode)
+    public void writeAnimation(String selectedFileName, boolean writeMode)  //we don't need loop here since this is UI
     {
         
         stopExistingTimer();
-        
+        //stopExistingTimer("gif",null,selectedFileName,"0",writeMode, null);
         animationFilename = selectedFileName;
         
         if(gifTxtExists(decodedAnimationsPath,selectedFileName) == true && GIFRGB565Exists(decodedAnimationsPath,selectedFileName) == true) 
@@ -2288,6 +2392,60 @@ private static String checksum(String filepath, MessageDigest md) throws IOExcep
         } 
     }
     
+    public void writeArcadeImage(File PNGFileFullPath, Boolean writeMode, int loop, String consoleNameMapped, String PNGNameWithExtension) throws IOException {
+        
+        if (loop != 0 && !writeMode) {         //we'll be looping but note we can't loop if in write mode
+            isLooping = true;
+        }
+        
+        URL url = null; 
+        BufferedImage image;
+        url = PNGFileFullPath.toURI().toURL();
+        image = ImageIO.read(url);
+       
+        System.out.println("PNG image found: " + url.toString());
+        logMe.aLogger.info("PNG image found: " + url.toString());
+        
+        //stopExistingTimer("png",consoleNameMapped,PNGNameWithExtension,"0",writeMode, null);
+        stopExistingTimer();
+       
+        //if (saveAnimation && pixel.getPIXELHardwareID().substring(0,4).equals("PIXL")) {
+        if (writeMode) {
+            
+            interactiveMode();
+            writeMode(10);
+            
+             try {
+                   writeImagetoMatrix(image, KIND.width, KIND.height);
+            } catch (ConnectionLostException e1) {
+                    // TODO Auto-generated catch block
+                    e1.printStackTrace();
+            } 
+             
+            try {
+                Thread.sleep(100); //this may not be needed but was causing a problem on the writes for the gif animations so adding here to be safe
+                //TO DO will a smaller delay still work too?
+            } catch (InterruptedException ex) {
+                //Logger.getLogger(ArcadeHttpHandler.class.getName()).log(Level.SEVERE, null, ex);
+            }
+            
+             playLocalMode();
+            
+        } else {
+            
+            interactiveMode();
+            try {
+                writeImagetoMatrix(image, KIND.width, KIND.height); //to do add save parameter here
+            } catch (ConnectionLostException ex) {
+                Logger.getLogger(Pixel.class.getName()).log(Level.SEVERE, null, ex);
+            }
+            
+            //TO DP
+            //if loop !=0, then add a timer that waits for the number of seconds in the loop parameter
+            
+            
+        }
+    }
     
     /**
      * This method is used to write a single frame to the pixel.
@@ -2558,25 +2716,261 @@ private static String checksum(String filepath, MessageDigest md) throws IOExcep
 
         public void run() {
             
-              if (z >= GIFnumFrames) 
-            {
+            if (z >= GIFnumFrames) { //then we've completed one loop
+            
                 z = 0;
                 //System.out.println("reset z to: " + z);
+                loopGIFCounter++;
+                System.out.println("loop GIF counter: " + loopGIFCounter);
+                System.out.println("loop times global: " + loopTimesGlobal);
+                //if loop and we've finished looping, now check the queue
+            }
+            
+            if (isLooping == true && loopGIFCounter >= loopTimesGlobal) {  //first of all, we must be in loop mode and if so have we finished all of our loops
+                //ok we're done looping so now we need to stop this current animation or scrolling text and then check the queue
+                loopGIFCounter = 0;
+                loopTimesGlobal = 0;
+                isLooping = false;
+                System.out.println("Done looping GIF, now checking Queue");
+                doneLoopingCheckQueue();
+                
+                //reset loop flag before stopping timer
+                //isLooping = false;
+                //loopTimesGlobal = 0;
+                //stopExistingTimer(null,null,null,null,null,null);  //we don't need to pass anything here as this is a stop call and we aren't adding to the queue here
             }
             
             //String message = "frame:" + z; //should start at 0 in counter reset but is staritng at 1
             //System.out.println(message);
             //System.out.println(message);
+            //loopCounter++;
             sendPixelDecodedFrame(decodedAnimationsPath, animationFilename, z, GIFnumFrames, GIFresolution, KIND.width,KIND.height); //if z is not reset, then we could be sending a frame that doesn't exist and hence ioio disconnect
             
             z++;
             
         }
 
-        void shutdown() {
+        void shutdown() { //not using
            
         }
-} 
+    } 
+    
+    private void doneLoopingCheckQueue() {
+        
+        
+        /* Queue structure
+        gif or image
+        [gif or png], console, filename with ext, loop, writemode, null
+        
+        text
+        text, scrolling text, speed, loop, writeMode, color
+        */
+        
+        String mode_ = null;
+        String console_ = null;
+        String filenameWithExt_ = null;
+        int loop_ = 0;
+        boolean writeMode_ = false;
+        
+        String text_ = null;
+        Long speed_ = null;
+        Color color_ = null;
+
+        //must reset loop flag and loop times to 0 before stopping timer
+         isLooping = false;
+         loopTimesGlobal = 0;
+         //stopExistingTimer(null,null,null,null,null,null);  //we don't need to pass anything here as this is a stop call and we aren't adding to the queue here
+         stopExistingTimer(); 
+         
+         //ok we've stopped things, now let's check if anything is in the queue
+         //Object firstElement = PixelQueue.peek();
+         System.out.println("Items in the Q: " + PixelQueue);
+         
+         if (!PixelQueue.isEmpty()) {
+             
+              System.out.println("Processing items in the Queue");
+              //we've got some stuff in the queue so let's process
+              String QueueCommand = PixelQueue.element(); //get the item in the top of the queue
+              String [] QueueCommandArray = QueueCommand.split(","); 
+              
+              System.out.println("Q Length: " + QueueCommandArray.length);
+              
+               System.out.println("Q 1: " + QueueCommandArray[0]);
+               System.out.println("Q 2: " + QueueCommandArray[1]);
+               System.out.println("Q 3: " + QueueCommandArray[2]);
+               System.out.println("Q 4: " + QueueCommandArray[3]);
+               System.out.println("Q 5: " + QueueCommandArray[4]);
+               System.out.println("Q 6: " + QueueCommandArray[5]);
+               System.out.println("Q 7: " + QueueCommandArray[6]);
+               System.out.println("Q 8: " + QueueCommandArray[7]);
+                    
+              if (QueueCommandArray.length == 8) {
+                  
+                  mode_ = QueueCommandArray[0];
+                  
+                  if (mode_.equals("gif") || mode_.equals("png")) {
+                      console_ = QueueCommandArray[1];
+                      filenameWithExt_ = QueueCommandArray[2];
+                      loop_ = Integer.valueOf(QueueCommandArray[3]);
+                      if (QueueCommandArray[4].equals("true")) {
+                          writeMode_ = true;
+                      } else {
+                          writeMode_ = false;
+                      }
+                      
+                      if (mode_.equals("gif")) {
+                          PixelQueue.remove();
+                          System.out.println("Processing GIF Queue item and removing...");
+                          try {
+                              writeArcadeAnimation(console_,filenameWithExt_,writeMode_,loop_);
+                          } catch (NoSuchAlgorithmException ex) {
+                              Logger.getLogger(Pixel.class.getName()).log(Level.SEVERE, null, ex);
+                          }
+                          
+                      } else {  //it was a png
+                           //public void writeArcadeImage(File PNGFileFullPath, Boolean writeMode, int loop, String consoleNameMapped, String PNGNameWithExtension) 
+                           //first we need to construct the full PNG path
+                            System.out.println("Processing PNG Queue item and removing...");
+                            String arcadeFilePathPNG = getPixelHome() + console_ + "/" + filenameWithExt_;
+                            File arcadeFilePNG = new File(arcadeFilePathPNG);
+                            PixelQueue.remove();
+                            try {
+                                writeArcadeImage(arcadeFilePNG,writeMode_,loop_,console_,filenameWithExt_);
+                            } catch (IOException ex) {
+                                Logger.getLogger(Pixel.class.getName()).log(Level.SEVERE, null, ex);
+                            }
+                      }
+                  }
+                  else if (mode_.equals("text")) {
+                       //text, scrolling text, speed, loop, writeMode, color
+                       //  addtoQueue("text","","",loop,false,Color.red);
+                      System.out.println("went here text in doneq");
+                      text_ = QueueCommandArray[1];
+                      speed_ = Long.valueOf(QueueCommandArray[2]);
+                      loop_ = Integer.valueOf(QueueCommandArray[3]); 
+                      
+                       System.out.println("went here 1");
+                      if (QueueCommandArray[4].equals("true")) {
+                          writeMode_ = true;
+                      } else {
+                          writeMode_ = false;
+                      }
+                      
+                       System.out.println("went here 2");
+                      //color_ = getColor(QueueCommandArray[4]); //TO DO this is not working
+                      
+                      
+                       System.out.println("went here 3");
+                      if (text_ != null) setScrollingText(text_);
+                      if (speed_ != null) setScrollDelay(speed_);
+                     // if (color_ != null) setScrollTextColor(color_);
+                      
+                      setScrollTextColor(Color.RED);
+                      //we have everything so now let's scroll text
+                      
+                        try { 
+                                PixelQueue.remove(); 
+
+                            } 
+                        catch (Exception e) { 
+                                System.out.println("Exception: " + e);
+                        }
+                      
+                       System.out.println("went here before scroll loop");
+                      //PixelQueue.remove(); //remove the top item in the queue since we just processed it
+                      scrollText(loop_);
+                  }
+                  else {
+                      System.out.println("Error");
+                  }
+                  
+                  
+              }
+              else {
+                  System.out.println("Queue parameters are not correct");
+              }
+             
+         } else {
+             System.out.println("Queue is empty");
+         }
+        
+         
+    }
+    
+    private Color getColor (String colorText) {
+           
+        Boolean colorTextMatch = false;
+        Color color;
+        switch (colorText) {
+
+                        case "red":
+                            color = Color.RED;
+                            colorTextMatch = true;
+                            break;
+                        case "blue":
+                            color = Color.BLUE;
+                            colorTextMatch = true;
+                            break;
+                         case "cyan":
+                            color = Color.CYAN;
+                            colorTextMatch = true;
+                            break;
+                         case "gray":
+                            color = Color.GRAY;
+                            colorTextMatch = true;
+                            break;
+                         case "darkgray":
+                            color = Color.DARK_GRAY;
+                            colorTextMatch = true;
+                            break;
+                        case "green":
+                            color = Color.GREEN;
+                            colorTextMatch = true;
+                            break;
+                         case "lightgray":
+                            color = Color.LIGHT_GRAY;
+                            colorTextMatch = true;
+                            break;
+                        case "magenta":
+                            color = Color.MAGENTA;
+                            colorTextMatch = true;
+                            break;
+                        case "orange":
+                            color = Color.ORANGE;
+                            colorTextMatch = true;
+                            break;
+                         case "pink":
+                            color = Color.PINK;
+                            colorTextMatch = true;
+                            break;
+                        case "yellow":
+                            color = Color.YELLOW;
+                            colorTextMatch = true;
+                            break;
+                        case "white":
+                            color = Color.WHITE;
+                            colorTextMatch = true;
+                            break;
+                        default: 
+                            color = Color.RED;
+                            colorTextMatch = false;
+                    }
+
+                    if (!colorTextMatch) {           //this means we have a hex code vs. color string text
+                        color = hex2Rgb(colorText);
+                    }
+                    
+                    return color;
+                    
+    }
+    
+     public static Color hex2Rgb(String colorStr) 
+    {
+        return new Color(
+                Integer.valueOf( colorStr.substring( 0, 2 ), 16 ),
+                Integer.valueOf( colorStr.substring( 2, 4 ), 16 ),
+                Integer.valueOf( colorStr.substring( 4, 6 ), 16 ) );
+    }    
      
     //private class AnimateTimer extends TimerTask
     /* public class AnimateTimer extends TimerTask //***** NO LONGER USED ******
@@ -2621,7 +3015,7 @@ private static String checksum(String filepath, MessageDigest md) throws IOExcep
 	}
     
     //private class TextScroller extends TimerTask
-     public class TextScroller implements Runnable 
+     public class TextScroller implements Runnable //to do: should this be called drawTask?
     {
         @Override
         public void run()
@@ -2709,9 +3103,21 @@ private static String checksum(String filepath, MessageDigest md) throws IOExcep
             int messageWidth = fm.stringWidth(scrollingText);            
             int resetX = 0 - messageWidth;
             
-            if(x == resetX)
-            {
+            if(x == resetX) {  //this means we finished one loop of scrolling text
                 x = w;
+                loopScrollingTextCounter++;
+                
+                System.out.println("text: loopScrollingTextCounter: " + loopScrollingTextCounter);
+                System.out.println("text: loopTimesGlobal: " + loopTimesGlobal);
+                
+                 if (isLooping == true && loopScrollingTextCounter >= loopTimesGlobal) {  //first of all, we must be in loop mode and if so have we finished all of our loops
+                    //ok we're done looping so now we need to stop this current animation or scrolling text and then check the queue
+                    loopScrollingTextCounter = 0; //reset this one, we'll reset the rest in doneLoopCheckingQueue
+                    System.out.println("Done looping scrolling text, now checking Queue");
+                    doneLoopingCheckQueue();
+                    
+                }  
+                 
             }
             else
             {

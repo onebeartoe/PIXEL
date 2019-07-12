@@ -59,9 +59,9 @@ public class StillImageHttpHandler extends ImageResourceHttpHandler
         String ext = FilenameUtils.getExtension(imageClassPath); //get the extension, we want to know if PNG or GIF   
             
         //path = application.getPixel().getPixelHome() + imageClassPath; //home/pixelcade/images/1941.gif so full path
-        path = application.getPixel().getPixelHome() + "images/" + arcadeName;
-        File file = new File(path);
-        url = file.toURI().toURL();
+        path = application.getPixel().getPixelHome() + "images/" + arcadeName; //to do need to regression test this
+        File targetFilePath = new File(path);
+        url = targetFilePath.toURI().toURL();
         
         if( imageClassPath.contains("/save/"))  saveAnimation = true;
           
@@ -82,22 +82,29 @@ public class StillImageHttpHandler extends ImageResourceHttpHandler
 
                 Pixel pixel = application.getPixel();
                 
-                pixel.writeArcadeAnimation("images",arcadeName,saveAnimation); 
+                pixel.writeArcadeAnimation("images",arcadeName,saveAnimation,0); //since this class handles pngs and gifs that are served up, we won't have a loop here so pass 0
                     } catch (NoSuchAlgorithmException ex) {
                         Logger.getLogger(StillImageHttpHandler.class.getName()).log(Level.SEVERE, null, ex);
                  }
         } 
         else if (ext.equals("png")) {
             
-            image = ImageIO.read(url);
+            Pixel pixel = application.getPixel();
+            pixel.writeArcadeImage(targetFilePath, saveAnimation, 0,"",""); //since this class handles pngs and gifs that are served up, we won't have a loop and won't need the console and png names
+            
+            /*
+             
+             image = ImageIO.read(url);
         
             if (!CliPixel.getSilentMode()) {
                     System.out.println("buffered image created for: " + url.toString());
                     logMe.aLogger.info("buffered image created for: " + url.toString());
             }
             
-             Pixel pixel = application.getPixel();
-             pixel.stopExistingTimer();  //a timer could be running from a gif so we need to kill it here
+            //to do : we need to move this to pixel.java 
+            
+            //Pixel pixel = application.getPixel();
+            pixel.stopExistingTimer( null, null, null, null, null, null);  //a timer could be running from a gif so we need to kill it here
         
             //if (saveAnimation && pixel.getPIXELHardwareID().substring(0,4).equals("PIXL")) {
             if (saveAnimation) {
@@ -125,14 +132,9 @@ public class StillImageHttpHandler extends ImageResourceHttpHandler
 
                 pixel.interactiveMode();
                 pixel.writeImagetoMatrix(image, pixel.KIND.width, pixel.KIND.height); //to do add save parameter here
-            }
-            
-            
-            //Pixel pixel = application.getPixel();
-            //pixel.stopExistingTimer();
-            //pixel.writeImagetoMatrix(image, pixel.KIND.width, pixel.KIND.height);
-            
-        } else {
+            }   */ 
+        } 
+        else {
             
             System.out.println("**** ERROR **** Sorry only PNG and GIF are supported, cannot handle " + path);
             logMe.aLogger.severe("Sorry only PNG and GIF are supported, cannot handle " + path);

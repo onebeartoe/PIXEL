@@ -6,9 +6,13 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.charset.Charset;
 import java.security.NoSuchAlgorithmException;
 import java.time.Duration;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.imageio.ImageIO;
@@ -19,6 +23,8 @@ import org.onebeartoe.pixel.LogMe;
 import org.onebeartoe.pixel.PixelLogFormatter;
 import org.apache.commons.io.FilenameUtils;
 import org.onebeartoe.web.enabled.pixel.CliPixel;
+import org.apache.http.NameValuePair;
+import org.apache.http.client.utils.URLEncodedUtils;
 
 /**
  * @author Roberto Marquez
@@ -35,10 +41,16 @@ public class ArcadeHttpHandler extends ImageResourceHttpHandler
         modeName = "arcade";
     }
     
-    private void handlePNG(File file, Boolean saveAnimation) throws MalformedURLException, IOException, ConnectionLostException {
+    private void handlePNG(File arcadeFilePNGFullPath, Boolean saveAnimation, int Loop, String consoleNameMapped, String PNGNameWithExtension) throws MalformedURLException, IOException, ConnectionLostException {
         
         LogMe logMe = LogMe.getInstance();
         
+         //arcadeFilePathPNG = application.getPixel().getPixelHome() + consoleNameMapped + "/" + arcadeNameOnly +".png";
+         //File arcadeFilePNG = new File(arcadeFilePathPNG);
+        Pixel pixel = application.getPixel();
+        pixel.writeArcadeImage(arcadeFilePNGFullPath, saveAnimation, 0, consoleNameMapped, PNGNameWithExtension); //we have the full file path here
+        
+        /* 
         URL url = null; 
         BufferedImage image;
         url = file.toURI().toURL();
@@ -48,9 +60,10 @@ public class ArcadeHttpHandler extends ImageResourceHttpHandler
             logMe.aLogger.info("PNG image found: " + url.toString());
         }
          
-        Pixel pixel = application.getPixel();
-        pixel.stopExistingTimer();  //a timer could be running from a gif so we need to kill it here
-        
+        //Pixel pixel = application.getPixel();
+       // pixel.stopExistingTimer();  //a timer could be running from a gif so we need to kill it here
+       //to do : test this but we should not need a stop timer here 
+       
         //if (saveAnimation && pixel.getPIXELHardwareID().substring(0,4).equals("PIXL")) {
         if (saveAnimation) {
             
@@ -78,22 +91,21 @@ public class ArcadeHttpHandler extends ImageResourceHttpHandler
             pixel.interactiveMode();
             pixel.writeImagetoMatrix(image, pixel.KIND.width, pixel.KIND.height); //to do add save parameter here
         }
+        */
         
     }
     
-    private void handleGIF(String consoleName, String arcadeName, Boolean saveAnimation) {
-         
-       
+    private void handleGIF(String consoleName, String arcadeName, Boolean saveAnimation, int loop) {
          
         Pixel pixel = application.getPixel();
         
         try {
-            pixel.writeArcadeAnimation(consoleName, arcadeName , saveAnimation);
+            pixel.writeArcadeAnimation(consoleName, arcadeName , saveAnimation, loop);
         } catch (NoSuchAlgorithmException ex) {
             Logger.getLogger(ArcadeHttpHandler.class.getName()).log(Level.SEVERE, null, ex);
         }
        
-        //Sleeper.sleepo(15);  //roberto had this but we don't need anymore now that we switched to new timer
+        //Sleeper.sleepo(15);  //roberto had this but we don't need anymore now that we switched to the new timer
         //Sleeper.sleepo(100);
     }
     
@@ -127,16 +139,59 @@ public class ArcadeHttpHandler extends ImageResourceHttpHandler
                                                 "visualpinball", "wonderswan", "wonderswancolor", "zinc", "sss",
                                                 "zmachine", "zxspectrum"};
  	boolean saveAnimation = false;
-        //String extension=null;
-        
+        int loop_ = 0;
+        String text_ = "";
+       // String loopString = "0"; //to do kill this
+      
+       
         //to do the slashes will screw up this logic, we could remove the / first or switch to another convention
        
-        String [] arcadeURLarray = urlParams.split("/"); 
-        //String [] arcadeURLarray = urlParams.split("&"); 
+        //urlParams = urlParams.replaceAll("\r", "").replaceAll("\n", ""); //to do : add check for %00 null end of string
+        // to do: need to modify pixelcade.exe for the extra post params
         
-        //&m=stream or write , &c=console , &g=game
-    	
-    	  if (!CliPixel.getSilentMode()) System.out.println("arcade handler received " + urlParams);
+        //  /text/?t=hello%20world?c=red?s=10?l=2
+        
+        List<NameValuePair> params = null;
+        try {
+                params = URLEncodedUtils.parse(new URI(urlParams), "UTF-8");
+            } catch (URISyntaxException ex) {
+                Logger.getLogger(ArcadeHttpHandler.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        for (NameValuePair param : params) {
+           
+             switch (param.getName()) {
+
+                    case "t": //scrolling text value
+                        text_ = param.getValue();
+                        break;
+                    case "text": //scrolling speed
+                        text_ = param.getValue();
+                        break;
+                    case "l": //how many times to loop
+                        loop_ = Integer.valueOf(param.getValue());
+                        // Long speed = Long.valueOf(s); //to do for integer
+                        break;
+                    case "loop": //loop
+                       loop_ = Integer.valueOf(param.getValue());
+                        break;
+                    }
+        }
+  
+        // /arcade/stream/mame/pacman?t=x?5=x
+        //so now we just need to the left of the ?
+        URI tempURI = null;
+        try {
+             tempURI = new URI("http://localhost:8080" + urlParams);
+        } catch (URISyntaxException ex) {
+            Logger.getLogger(ArcadeHttpHandler.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        
+        String URLPath = tempURI.getPath();
+        System.out.println("path is: " + URLPath);
+        
+        //String [] arcadeURLarray = urlParams.split("/"); 
+        String [] arcadeURLarray = URLPath.split("/"); 
+        //String [] arcadeURLarray = urlParams.split("&"); 
         
         /* for (int i=0; i < arcadeURLarray.length; i++) { 
             System.out.println("Str["+i+"]:"+arcadeURLarray[i]); 
@@ -145,7 +200,10 @@ public class ArcadeHttpHandler extends ImageResourceHttpHandler
         */
         
         logMe = LogMe.getInstance();
-        if (!CliPixel.getSilentMode()) logMe.aLogger.info("arcade handler received " + urlParams);
+        if (!CliPixel.getSilentMode()) {
+            System.out.println("arcade handler received: " + urlParams);
+            logMe.aLogger.info("arcade handler received: " + urlParams);
+        }
         
         if (arcadeURLarray.length == 5) {
         	
@@ -153,6 +211,10 @@ public class ArcadeHttpHandler extends ImageResourceHttpHandler
         	    consoleName = arcadeURLarray[3];
         	    arcadeName = arcadeURLarray[4];
                     
+                    arcadeName = arcadeName.trim();
+                    arcadeName = arcadeName.replace("\n", "").replace("\r", "");
+            
+
             //to do add code to remove " " in case the user entered those
                     
             //arcadeName could be a full path or just a name, we need to handle both
@@ -163,6 +225,7 @@ public class ArcadeHttpHandler extends ImageResourceHttpHandler
             //let's make sure this file exists and skip if not
             //arcadeNameExtension = FilenameUtils.getExtension(arcadeName); 
             arcadeNameOnly = FilenameUtils.getBaseName(arcadeName); //stripping out the extension
+            
             
             //let's now refer to our mapping table for the console names, because console names are different for RetroPie vs. HyperSpin and other front ends
             //to do add a user defined .txt mapping if the console is not found in our mapping table
@@ -184,17 +247,32 @@ public class ArcadeHttpHandler extends ImageResourceHttpHandler
                  consoleNameMapped = consoleName;                               //we were already mapped so let's use it
             }
             
+                //more user friendly for the log since technically it's looping forever until stopped
+
              //System.out.println("Console after mapping: " + consoleNameMapped);
              if (!CliPixel.getSilentMode()) {
                 System.out.println(streamOrWrite.toUpperCase() + " MODE");
                 System.out.println("Console Before Mapping: " + consoleName);
                 System.out.println("Console Mapped: " + consoleNameMapped);
                 System.out.println("Game Name Only: " +  arcadeNameOnly);
+                if (loop_ == 0) {
+                    System.out.println("# of Times to Loop: infinite");
+                } else {
+                    System.out.println("# of Times to Loop: " + loop_);
+                }
+                
+                if (text_ != "") System.out.println("alt text if marquee file not found: " + text_);
 
                 logMe.aLogger.info(streamOrWrite.toUpperCase() + " MODE");
                 logMe.aLogger.info("Console Before Mapping: " + consoleName);
                 logMe.aLogger.info("Console Mapped: " + consoleNameMapped);
                 logMe.aLogger.info("Game Name Only: " +  arcadeNameOnly);
+                 if (loop_ == 0) {
+                    logMe.aLogger.info("# of Times to Loop: infinite");
+                } else {
+                    logMe.aLogger.info("# of Times to Loop: " + loop_);
+                }
+                 if (text_ != "") logMe.aLogger.info("alt text if marquee file not found: " + text_);
              }
            
             //now let's decide if we're going to find the png or gif 
@@ -214,12 +292,12 @@ public class ArcadeHttpHandler extends ImageResourceHttpHandler
                
                 if (arcadeFileGIF.exists() && !arcadeFileGIF.isDirectory()) {
                         //System.out.println("delete went here GIF");
-                        handleGIF(consoleNameMapped, arcadeNameOnly +".gif", saveAnimation);
+                        handleGIF(consoleNameMapped, arcadeNameOnly +".gif", saveAnimation, loop_);
                 }
                         
                 else if(arcadeFilePNG.exists() && !arcadeFilePNG.isDirectory()) { 
                         //System.out.println("delete went here PNG");
-                        handlePNG(arcadeFilePNG, saveAnimation);
+                        handlePNG(arcadeFilePNG, saveAnimation,loop_,consoleNameMapped,arcadeNameOnly +".png");
                 }
                 else { //nothing is there so let's use the console
                         
@@ -228,8 +306,6 @@ public class ArcadeHttpHandler extends ImageResourceHttpHandler
                     
                         consoleFilePathPNG = application.getPixel().getPixelHome() + "console/" + "default-" + consoleNameMapped + ".png"; 
                         File consoleFilePNG = new File(consoleFilePathPNG);
-                       
-                        //System.out.println("delete console gif: " + consoleFilePathGIF);
                         
                         if(consoleFileGIF.exists() && !consoleFileGIF.isDirectory()) { 
 
@@ -237,13 +313,12 @@ public class ArcadeHttpHandler extends ImageResourceHttpHandler
                                     System.out.println("PNG default console LED Marquee file not found, looking for GIF version: " + consoleFilePathPNG);
                                     logMe.aLogger.info("PNG default console LED Marquee file not found, looking for GIF version: " + consoleFilePathPNG);
                               }
-                              handleGIF("console", "default-" + consoleNameMapped + ".gif", saveAnimation);
-                        }
-                                
+                              handleGIF("console", "default-" + consoleNameMapped + ".gif", saveAnimation, loop_);
+                        }      
                        
                         else if (consoleFilePNG.exists() && !consoleFilePNG.isDirectory()) { 
                              
-                              handlePNG(consoleFilePNG, saveAnimation);
+                              handlePNG(consoleFilePNG, saveAnimation,loop_,consoleNameMapped,arcadeNameOnly +".png");
                         }
                         else {
                                if (!CliPixel.getSilentMode()) {
@@ -254,7 +329,7 @@ public class ArcadeHttpHandler extends ImageResourceHttpHandler
                                File defaultConsoleFilePNG = new File(defaultConsoleFilePathPNG);
                                
                                if(defaultConsoleFilePNG.exists() && !defaultConsoleFilePNG.isDirectory()) { 
-                                       handlePNG(defaultConsoleFilePNG, saveAnimation);
+                                       handlePNG(defaultConsoleFilePNG, saveAnimation,0,consoleNameMapped,arcadeNameOnly +".png");
                                }
                                else {
                                        if (!CliPixel.getSilentMode()) {
@@ -272,11 +347,11 @@ public class ArcadeHttpHandler extends ImageResourceHttpHandler
                 
                 if(arcadeFilePNG.exists() && !arcadeFilePNG.isDirectory()) { 
                         //System.out.println("delete went here PNG");
-                        handlePNG(arcadeFilePNG, saveAnimation);
+                        handlePNG(arcadeFilePNG, saveAnimation,0,consoleNameMapped,arcadeNameOnly +".png");
                 }
                 else if (arcadeFileGIF.exists() && !arcadeFileGIF.isDirectory()) {
                         //System.out.println("delete went here GIF");
-                        handleGIF(consoleNameMapped, arcadeNameOnly +".gif", saveAnimation);
+                        handleGIF(consoleNameMapped, arcadeNameOnly +".gif", saveAnimation, loop_);
                 }
                 else { //nothing is there so let's use the console
                     
@@ -290,14 +365,14 @@ public class ArcadeHttpHandler extends ImageResourceHttpHandler
                     
                         if(consoleFilePNG.exists() && !consoleFilePNG.isDirectory()) { 
 
-                              handlePNG(consoleFilePNG, saveAnimation);
+                              handlePNG(consoleFilePNG, saveAnimation,0,consoleNameMapped,arcadeNameOnly +".png");
                         }
                         else if(consoleFileGIF.exists() && !consoleFileGIF.isDirectory()) { 
                                 if (!CliPixel.getSilentMode()) {
                                     System.out.println("PNG default console LED Marquee file not found, looking for GIF version: " + consoleFilePathPNG);
                                     logMe.aLogger.info("PNG default console LED Marquee file not found, looking for GIF version: " + consoleFilePathPNG);
                                 }
-                                handleGIF("console", "default-" + consoleNameMapped + ".gif", saveAnimation);
+                                handleGIF("console", "default-" + consoleNameMapped + ".gif", saveAnimation, loop_);
                         }
                         else {
                                if (!CliPixel.getSilentMode()) {
@@ -308,7 +383,7 @@ public class ArcadeHttpHandler extends ImageResourceHttpHandler
                                File defaultConsoleFilePNG = new File(defaultConsoleFilePathPNG);
                                
                                if(defaultConsoleFilePNG.exists() && !defaultConsoleFilePNG.isDirectory()) { 
-                                       handlePNG(defaultConsoleFilePNG, saveAnimation);
+                                       handlePNG(defaultConsoleFilePNG, saveAnimation,loop_,consoleNameMapped,arcadeNameOnly +".png");
                                }
                                else {
                                          if (!CliPixel.getSilentMode()) {
@@ -321,10 +396,6 @@ public class ArcadeHttpHandler extends ImageResourceHttpHandler
                         }
                 }
             }
-            
-            
-            
-            
         }
         
         else {

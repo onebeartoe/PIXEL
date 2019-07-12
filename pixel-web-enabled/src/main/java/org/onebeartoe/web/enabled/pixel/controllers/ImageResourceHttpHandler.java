@@ -53,12 +53,14 @@ public abstract class ImageResourceHttpHandler extends TextHttpHandler
             }
             else if( path.contains("/arcade/") )
             {
-                imageClassPath = path; //let's get the whole path as we'll need write or stream, platform name, and arcade game gif
-               
+                imageClassPath = path; //this just returns /arcade/stream/mame/pacman
+                imageClassPath = requestURI.toString(); //this returns /arcade/stream/mame/pacman?t=1?c=2?r=5
             }
             else
             {
                 imageClassPath = basePath + name;
+                
+                //to do need to add text here too
             }
         }
         catch(Exception e)
@@ -95,7 +97,7 @@ public abstract class ImageResourceHttpHandler extends TextHttpHandler
         }
         finally
         {
-            return "request received for " + imageClassPath;
+            return "REST call received for " + imageClassPath;
         }
     }
     
