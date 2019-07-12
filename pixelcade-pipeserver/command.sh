@@ -1,0 +1,1 @@
+java -jar pixelcade.jar -m stream -c mame -g "f:\program files\roms\yo\##$#\pacman.zip"

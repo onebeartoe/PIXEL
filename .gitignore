@@ -25,3 +25,5 @@
 /pixel-web-enabled copy/target/
 /pixelcade-frontend/target/
 /pixelcade-installer/target/
+/pixelcade-frontend copy/target/
+/pixelcade-pipeserver/target/
