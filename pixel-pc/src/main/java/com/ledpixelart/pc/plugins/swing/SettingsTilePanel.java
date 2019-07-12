@@ -155,10 +155,10 @@ private static String serialPortInstructionsLinux = "LINUX, Raspberry Pi, and Be
     
     textPanel = new JPanel( new BorderLayout());
 	
-	String labels[] = { "Seeed 32x16", "Adafruit 32x16", "Seeed 32x32", "PIXEL V1", "64x32 (2x1 horz)",
-			"32x64 (1x2 vert)", "Mirrored (2 displays)","Mirrored (4 displays)","128x32 (4x1 horz)",
-			"32x128 (1x4 vert)","SUPER PIXEL 64x64 (2x2 square)", "PIXEL V2 (DEFAULT)", "Adafruit 32x32 Color Swap",
-                        "Adafruit 64x32", "Adafruit 64x64","Adafruit 128x32", "Adafruit 32x128", "Adafruit 64x16"};
+	String labels[] = { "Legacy 32x16", "32x16", "Legacy 32x32", "Legacy PIXEL V1", "Legacy 64x32 (2x1 horz)",
+			"Legacy 32x64 (1x2 vert)", "Legacy Mirrored (2 displays)","Legacy Mirrored (4 displays)","Legacy 128x32 (4x1 horz)",
+			"Legacy 32x128 (1x4 vert)","Legacy 64x64 (2x2 square)", "PIXEL V2 (DEFAULT)", "32x32 Color Swap",
+                        "64x32", "64x64","128x32", "32x128", "64x16", "64x32 Mirrored","256x16","32x32 Mirrored", "32x32 Mirrored 4X", "128x16", "AliExpress Random 32x32", "64x32 Color Swap", "64x64 Color Swap"};
         
       
 
