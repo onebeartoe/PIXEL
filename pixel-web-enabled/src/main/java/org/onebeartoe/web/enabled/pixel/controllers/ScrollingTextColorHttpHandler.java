@@ -103,7 +103,7 @@ public class ScrollingTextColorHttpHandler extends TextHttpHandler
         Pixel pixel = application.getPixel();
         //pixel.stopExistingTimer();  //should not need this here
         pixel.setScrollTextColor(color);
-        pixel.scrollText(0); //setting to 0 as we would not be looping from here
+        //pixel.scrollText(0); //setting to 0 as we would not be looping from here
         
         //return "scrolling text color update received:" + hex;
         if (!CliPixel.getSilentMode()) {

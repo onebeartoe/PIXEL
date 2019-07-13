@@ -2,6 +2,7 @@
 package org.onebeartoe.web.enabled.pixel.controllers;
 
 import ioio.lib.api.exception.ConnectionLostException;
+import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -41,14 +42,14 @@ public class ArcadeHttpHandler extends ImageResourceHttpHandler
         modeName = "arcade";
     }
     
-    private void handlePNG(File arcadeFilePNGFullPath, Boolean saveAnimation, int Loop, String consoleNameMapped, String PNGNameWithExtension) throws MalformedURLException, IOException, ConnectionLostException {
+    private void handlePNG(File arcadeFilePNGFullPath, Boolean saveAnimation, int loop, String consoleNameMapped, String PNGNameWithExtension) throws MalformedURLException, IOException, ConnectionLostException {
         
         LogMe logMe = LogMe.getInstance();
         
          //arcadeFilePathPNG = application.getPixel().getPixelHome() + consoleNameMapped + "/" + arcadeNameOnly +".png";
          //File arcadeFilePNG = new File(arcadeFilePathPNG);
         Pixel pixel = application.getPixel();
-        pixel.writeArcadeImage(arcadeFilePNGFullPath, saveAnimation, 0, consoleNameMapped, PNGNameWithExtension); //we have the full file path here
+        pixel.writeArcadeImage(arcadeFilePNGFullPath, saveAnimation, loop, consoleNameMapped, PNGNameWithExtension); //we have the full file path here
         
         /* 
         URL url = null; 
@@ -297,9 +298,56 @@ public class ArcadeHttpHandler extends ImageResourceHttpHandler
                         
                 else if(arcadeFilePNG.exists() && !arcadeFilePNG.isDirectory()) { 
                         //System.out.println("delete went here PNG");
-                        handlePNG(arcadeFilePNG, saveAnimation,loop_,consoleNameMapped,arcadeNameOnly +".png");
+                        handlePNG(arcadeFilePNG, saveAnimation,loop_,consoleNameMapped,FilenameUtils.getName(arcadeFilePathPNG));
                 }
-                else { //nothing is there so let's use the console
+                
+                else if (text_ != "") {  //the game image or png is not there and alt text was supplied so let's scroll that alt text
+                         
+                         Pixel pixel = application.getPixel();
+                         int LED_MATRIX_ID = WebEnabledPixel.getMatrixID();
+                         
+                         int yTextOffset = -4;
+                         int fontSize_ = 22;
+                         long speed = 10L;
+                         
+                         speed = WebEnabledPixel.getScrollingTextSpeed(LED_MATRIX_ID);  //this method also sets the yoffset
+                         pixel.scrollText(text_, 0, speed, Color.RED);
+                         
+                         /*
+                        
+                         
+                         switch (LED_MATRIX_ID) {
+            
+                            case 11: //32x32
+                                yTextOffset = -4;
+                                fontSize_ = 22;
+                                speed = 38L;
+                                break;
+                            case 13: //64x32
+                                yTextOffset = -12;
+                                fontSize_ = 32;
+                                speed = 18L;       //smaller the frame, faster the scrolling so slowing it down relative to 128x32
+                                break;
+                            case 15: //128x32
+                                yTextOffset = -12;
+                                fontSize_ = 32;
+                                speed = 10L;
+                                break;
+                            default: 
+                                yTextOffset = -4;  
+                                fontSize_ = 22;
+                                speed = 38L;
+                        }
+        
+                        //pixel.setyScrollingTextOffset(yTextOffset);
+                        //pixel.setFontSize(fontSize_);
+                        
+                         
+                        pixel.scrollText(text_, 0, speed, Color.RED); //no looping here
+                        */
+                }
+                
+                else { //nothing is there so let's use the generic console
                         
                         consoleFilePathGIF = application.getPixel().getPixelHome() + "console/" + "default-" + consoleNameMapped + ".gif"; 
                         File consoleFileGIF = new File(consoleFilePathGIF);
@@ -318,8 +366,9 @@ public class ArcadeHttpHandler extends ImageResourceHttpHandler
                        
                         else if (consoleFilePNG.exists() && !consoleFilePNG.isDirectory()) { 
                              
-                              handlePNG(consoleFilePNG, saveAnimation,loop_,consoleNameMapped,arcadeNameOnly +".png");
+                              handlePNG(consoleFilePNG, saveAnimation,loop_,"console",FilenameUtils.getName(consoleFilePathPNG)); //mame/default-marquee.png
                         }
+                       
                         else {
                                if (!CliPixel.getSilentMode()) {
                                     System.out.println("GIF default console LED Marquee file not found, looking for default marquee: " + consoleFilePathGIF);
@@ -329,7 +378,7 @@ public class ArcadeHttpHandler extends ImageResourceHttpHandler
                                File defaultConsoleFilePNG = new File(defaultConsoleFilePathPNG);
                                
                                if(defaultConsoleFilePNG.exists() && !defaultConsoleFilePNG.isDirectory()) { 
-                                       handlePNG(defaultConsoleFilePNG, saveAnimation,0,consoleNameMapped,arcadeNameOnly +".png");
+                                       handlePNG(defaultConsoleFilePNG, saveAnimation,loop_,"console",FilenameUtils.getName(defaultConsoleFilePathPNG));
                                }
                                else {
                                        if (!CliPixel.getSilentMode()) {
@@ -347,12 +396,56 @@ public class ArcadeHttpHandler extends ImageResourceHttpHandler
                 
                 if(arcadeFilePNG.exists() && !arcadeFilePNG.isDirectory()) { 
                         //System.out.println("delete went here PNG");
-                        handlePNG(arcadeFilePNG, saveAnimation,0,consoleNameMapped,arcadeNameOnly +".png");
+                        handlePNG(arcadeFilePNG, saveAnimation,loop_,consoleNameMapped,FilenameUtils.getName(arcadeFilePathPNG));
                 }
                 else if (arcadeFileGIF.exists() && !arcadeFileGIF.isDirectory()) {
                         //System.out.println("delete went here GIF");
                         handleGIF(consoleNameMapped, arcadeNameOnly +".gif", saveAnimation, loop_);
                 }
+                else if (text_ != "") {  //the game image or png is not there and alt text was supplied so let's scroll that alt text
+                        
+                         Pixel pixel = application.getPixel();
+                         int LED_MATRIX_ID = WebEnabledPixel.getMatrixID();
+                         
+                         int yTextOffset = -4;
+                         int fontSize_ = 22;
+                         long speed = 10L;
+                         
+                         speed = WebEnabledPixel.getScrollingTextSpeed(LED_MATRIX_ID);  //this method also sets the yoffset
+                         pixel.scrollText(text_, 0, speed, Color.RED); //no looping
+                         
+                         /*
+                         
+                         switch (LED_MATRIX_ID) {
+            
+                            case 11: //32x32
+                                yTextOffset = -4;
+                                fontSize_ = 22;
+                                speed = 38L;
+                                break;
+                            case 13: //64x32
+                                yTextOffset = -12;
+                                fontSize_ = 32;
+                                speed = 18L;       //smaller the frame, faster the scrolling so slowing it down relative to 128x32
+                                break;
+                            case 15: //128x32
+                                yTextOffset = -12;
+                                fontSize_ = 32;
+                                speed = 10L;
+                                break;
+                            default: 
+                                yTextOffset = -4;  
+                                fontSize_ = 22;
+                                speed = 38L;
+                        }
+        
+                        pixel.setyScrollingTextOffset(yTextOffset);
+                        pixel.setFontSize(fontSize_);
+                         
+                        pixel.scrollText(text_, 0, speed, Color.RED); //no looping here
+                        */
+                }
+                
                 else { //nothing is there so let's use the console
                     
                         consoleFilePathPNG = application.getPixel().getPixelHome() + "console/" + "default-" + consoleNameMapped + ".png"; 
@@ -365,7 +458,7 @@ public class ArcadeHttpHandler extends ImageResourceHttpHandler
                     
                         if(consoleFilePNG.exists() && !consoleFilePNG.isDirectory()) { 
 
-                              handlePNG(consoleFilePNG, saveAnimation,0,consoleNameMapped,arcadeNameOnly +".png");
+                              handlePNG(consoleFilePNG, saveAnimation,loop_,"console",FilenameUtils.getName(consoleFilePathPNG));
                         }
                         else if(consoleFileGIF.exists() && !consoleFileGIF.isDirectory()) { 
                                 if (!CliPixel.getSilentMode()) {
@@ -383,7 +476,7 @@ public class ArcadeHttpHandler extends ImageResourceHttpHandler
                                File defaultConsoleFilePNG = new File(defaultConsoleFilePathPNG);
                                
                                if(defaultConsoleFilePNG.exists() && !defaultConsoleFilePNG.isDirectory()) { 
-                                       handlePNG(defaultConsoleFilePNG, saveAnimation,loop_,consoleNameMapped,arcadeNameOnly +".png");
+                                       handlePNG(defaultConsoleFilePNG, saveAnimation,loop_,"console",FilenameUtils.getName(defaultConsoleFilePathPNG));
                                }
                                else {
                                          if (!CliPixel.getSilentMode()) {

@@ -47,7 +47,7 @@ public class ScrollingTextSpeedHttpHandler extends TextHttpHandler
         Pixel pixel = application.getPixel();
        // pixel.stopExistingTimer();
         pixel.setScrollDelay(speed);
-        pixel.scrollText(0);  //0 as we would not be starting a loop from here
+       // pixel.scrollText(0);  //0 as we would not be starting a loop from here
         
         if (!CliPixel.getSilentMode()) {
             System.out.println("scrolling text speed update received:" + speed);

@@ -111,11 +111,13 @@ public class WebEnabledPixel
     
     private static String alreadyRunningErrorMsg = "";
     
-    private int yTextOffset = 0;
+    private static int yTextOffset = 0;
     
-    private int fontSize_ = 32;
+    private static int fontSize_ = 32;
     
-    private int speed_ = 10;
+    private static int speed_ = 10;
+    
+    private static long speed = 10L;
     
     public static String pixelwebVersion = "2.0.5";
     
@@ -655,6 +657,42 @@ public class WebEnabledPixel
             }
         }
     }
+     
+     public static int getMatrixID() {
+         return  LED_MATRIX_ID;
+     }
+     
+     public static long getScrollingTextSpeed(int LED_MATRIX_ID) {
+                         
+            switch (LED_MATRIX_ID) {
+
+               case 11: //32x32
+                   yTextOffset = -4;
+                   fontSize_ = 22;
+                   speed = 38L;
+                   break;
+               case 13: //64x32
+                   yTextOffset = -12;
+                   fontSize_ = 32;
+                   speed = 18L;       //smaller the frame, faster the scrolling so slowing it down relative to 128x32
+                   break;
+               case 15: //128x32
+                   yTextOffset = -12;
+                   fontSize_ = 32;
+                   speed = 10L;
+                   break;
+               default: 
+                   yTextOffset = -4;  
+                   fontSize_ = 22;
+                   speed = 38L;
+           }
+
+           Pixel.setyScrollingTextOffset(yTextOffset);
+           Pixel.setFontSize(fontSize_);
+
+           return speed;
+                        
+     }
      
      public static boolean isWindows() {
 
