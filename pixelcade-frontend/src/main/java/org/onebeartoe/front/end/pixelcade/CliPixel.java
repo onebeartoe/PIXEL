@@ -26,16 +26,22 @@ public class CliPixel
  private String text = "";
  private String color = "";
  private String speed = "";
+ private String loop = "";
  private Boolean quit = false;
  private Boolean silent = false;
  private int yTextOffset = 0;
- private static String instructions = "usage: Pixelcade\n" +
+ private static String instructions = "usage: Pixelcade Version 2.0.6\n" +
 "                    -m,--mode <arg>  Sets stream or write mode, options are stream or write\n" +
 "                    -c,--console <arg>  Sets the console or platform name, ex. mame, atari2600, nes\n" +
 "                    -g,--game <arg>  Sets game / rom name, can be a full path, file name,\n" +
 "                        or just the basename without the extension\n" +
+"                    -t, --text <arg> Scrolling text\n" +
+"                    -l, --loop <arg> Looping and Queue Feature\n" +
+"                    -color, --color <arg> Sets scrolling text color\n" +    
+"                    -speed, --speed <arg> Sets the scrolling text speed, min 10 and max 150\n" +        
 "                    -q,--quit Shuts down the Pixelcade Listener (pixelweb.exe)\n" +
 "                    -h,--help  show help.\n" +
+"                     Full documentation and examples at ledpixelart.com/pixelcade-api\n" +         
 "                    \n" +
 "                    Examples\n" +
 "                    VERY IMPORTANT: Enclose any parameters with spaces in double quotes, for example\n" +
@@ -58,6 +64,7 @@ public class CliPixel
   options.addOption("t", "text", true, "Scrolling text");
   options.addOption("color", "color", true, "Scrolling text color");
   options.addOption("speed", "speed", true, "Scrolling text speed");
+  options.addOption("l", "loop", true, "Looping and Queue Feature");
   options.addOption("s", "silent", false, "Run in silent mode");
   options.addOption("q", "quit", false, "Shuts down the Pixelcade Listener (pixelweb.exe)");
   options.addOption("h", "help", false, "show help.");
@@ -108,6 +115,10 @@ public class CliPixel
           eventID = cmd.getOptionValue("e");
       }
       
+      if (cmd.hasOption("l")) {
+          loop = cmd.getOptionValue("l");
+      }
+      
       if (cmd.hasOption("q")) {
           //log.log(Level.INFO, "Using cli argument -q=" + cmd.getOptionValue("q"));
           quit = true;
@@ -156,6 +167,11 @@ public class CliPixel
   public String getSpeed()
  {
     return speed;
+ }
+  
+   public String getLoop()
+ {
+    return loop;
  }
  
   public String getGEventID()

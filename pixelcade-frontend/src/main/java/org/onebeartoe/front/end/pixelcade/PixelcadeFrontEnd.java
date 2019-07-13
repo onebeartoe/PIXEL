@@ -47,6 +47,8 @@ public class PixelcadeFrontEnd
     
     private static String eventID_ = "";
     
+    private static String loop_ = "";
+    
     private static Boolean quit_ = false;
     
     private static Boolean silent_ = false;
@@ -86,6 +88,7 @@ public class PixelcadeFrontEnd
             text_ = cli.getText();
             color_ = cli.getColor();
             speed_ = cli.getSpeed();
+            loop_ = cli.getLoop();
         }
     
     public static void main(String[] args) throws MalformedURLException, IOException
@@ -179,17 +182,36 @@ public class PixelcadeFrontEnd
             } 
         }
         
-        else if (!text_.equals("")) {  
-             URLString = "http://localhost:8080/text?t=" + text_;
-             makeRESTCall(URLString);
+        
+        else if (!text_.equals("") && gameName_.equals("")) {  //if there is text and no game, we're in text mode
+             
+            URLString = "http://localhost:8080/text?t=" + text_;
+             
+            if (!color_.equals("")) {
+                URLString = URLString + "&c=" + color_;
+            } 
+            if (!speed_.equals("")) {
+                URLString = URLString + "&s=" + speed_;
+            } 
+            if (!loop_.equals("")) {
+                URLString = URLString + "&l=" + loop_;
+            } 
+            
+            makeRESTCall(URLString);
         }
         
-        else if (!color_.equals("")) {  
+        
+        //else if (!text_.equals("")) {  
+        //     URLString = "http://localhost:8080/text?t=" + text_;
+        //     makeRESTCall(URLString);
+        //}
+        
+        else if (!color_.equals("") && text_.equals("")) {  //color was specified but no text so it's a color only command
              URLString = "http://localhost:8080/text/color/" + color_;
              makeRESTCall(URLString);
         }
         
-        else if (!speed_.equals("")) {  
+        else if (!speed_.equals("") && text_.equals("")) {  //speed was specified but no text so it's a speed only command
              URLString = "http://localhost:8080/text/speed/" + speed_;
              makeRESTCall(URLString);
         }
@@ -219,8 +241,24 @@ public class PixelcadeFrontEnd
 
                     URLString = "http://localhost:8080/arcade/" + mode_.toLowerCase() + "/" + consoleName_.toLowerCase() + "/" + BaseGameName_.toLowerCase();
                     //TO DO we could add localhost to settings.ini in case somoene wants to enable their system remote via an IP address or domain name instead
+                    //now let's append text and loop if those were specified
+                    
+                    if (!loop_.equals("")) {
+                        URLString = URLString + "?l=" + loop_;
+                    } else {
+                        URLString = URLString + "?l=0";  //had to do this because first parameter has to be ? and then next is &
+                    }
+                    
+                    if (!text_.equals("")) {
+                        URLString = URLString + "&t=" + text_;
+                    } 
+                    
+                    if (!color_.equals("")) {
+                        URLString = URLString + "&c=" + color_;
+                    } 
 
                     makeRESTCall(URLString);
+                    
                 }
                 else {
 
