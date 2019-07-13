@@ -133,7 +133,7 @@ public class ScrollingTextHttpHander extends TextHttpHandler  //TO DO have TextH
             if (color_ != null) {  //some color was entered, either red, green, blue, etc. or a hex value with the #
            
                 //let's first check if we have a hex string color
-                if (isHexadecimal(color_)) {
+                if (isHexadecimal(color_) && color_.length() == 6) {  //hex colors are 6 digits
                      color = hex2Rgb(color_);
                      System.out.println("Hex color value detected");
                 }        
@@ -179,6 +179,7 @@ public class ScrollingTextHttpHander extends TextHttpHandler  //TO DO have TextH
                             break;
                         default:
                             color = Color.RED;
+                            System.out.println("Invalid color, defaulting to red");
                     }
                 }
             }
