@@ -119,7 +119,7 @@ public class WebEnabledPixel
     
     private static long speed = 10L;
     
-    public static String pixelwebVersion = "2.0.5";
+    public static String pixelwebVersion = "2.0.6";
     
     public WebEnabledPixel(String[] args)
     {

@@ -33,15 +33,14 @@ public class ScrollingTextSpeedHttpHandler extends TextHttpHandler
         
         Long speed = Long.valueOf(s);
         
-        if(speed == 0) //Roberto originally had if less than 100 here but the scrolling is too slow
+        if(speed == 0) 
         {
-            //speed = 100L;
-            speed = 1L;
+            speed = 10L;
         }
         
-        if(600 < speed)
+        if(speed > 200)
         {
-            speed = 600L;
+            speed = 200L;
         }
         
         Pixel pixel = application.getPixel();

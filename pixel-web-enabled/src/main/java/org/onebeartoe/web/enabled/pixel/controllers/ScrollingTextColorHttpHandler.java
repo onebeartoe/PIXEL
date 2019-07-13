@@ -4,6 +4,9 @@ package org.onebeartoe.web.enabled.pixel.controllers;
 import com.sun.net.httpserver.HttpExchange;
 import java.awt.Color;
 import java.net.URI;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import static java.util.regex.Pattern.compile;
 import org.onebeartoe.network.TextHttpHandler;
 import org.onebeartoe.pixel.LogMe;
 import org.onebeartoe.pixel.hardware.Pixel;
@@ -31,71 +34,62 @@ public class ScrollingTextColorHttpHandler extends TextHttpHandler
         String path = requestURI.getPath();
         int i = path.lastIndexOf("/") + 1;
         //String hex = path.substring(i);
-        String color_ = path.substring(i);
-        Color color = Color.red;
-        Boolean colorTextMatch = false;
+        String colorString = path.substring(i);
+        Color color = Color.red; //default
         
-        switch (color_) {
-            
-            case "red":
-                color = Color.RED;
-                colorTextMatch = true;
-                break;
-            case "blue":
-                color = Color.BLUE;
-                colorTextMatch = true;
-                break;
-             case "cyan":
-                color = Color.CYAN;
-                colorTextMatch = true;
-                break;
-             case "gray":
-                color = Color.GRAY;
-                colorTextMatch = true;
-                break;
-             case "darkgray":
-                color = Color.DARK_GRAY;
-                colorTextMatch = true;
-                break;
-            case "green":
-                color = Color.GREEN;
-                colorTextMatch = true;
-                break;
-             case "lightgray":
-                color = Color.LIGHT_GRAY;
-                colorTextMatch = true;
-                break;
-            case "magenta":
-                color = Color.MAGENTA;
-                colorTextMatch = true;
-                break;
-            case "orange":
-                color = Color.ORANGE;
-                colorTextMatch = true;
-                break;
-             case "pink":
-                color = Color.PINK;
-                colorTextMatch = true;
-                break;
-            case "yellow":
-                color = Color.YELLOW;
-                colorTextMatch = true;
-                break;
-            case "white":
-                color = Color.WHITE;
-                colorTextMatch = true;
-                break;
-            default: 
-                color = Color.RED;
-                colorTextMatch = false;
-        }
         
-        if (!colorTextMatch) {           //this means we have a hex code vs. color string text
+        if (colorString != null) color = ArcadeHttpHandler.getColorFromHexOrName(colorString);
+        
+        /*
+        if (isHexadecimal(color_) && color_.length() == 6) {  //hex colors are 6 digits
             color = hex2Rgb(color_);
+            System.out.println("Hex color value detected");
+        } else {   //and if not then color text was entered so let's look for a match
+
+            switch (color_) {
+
+                case "red":
+                    color = Color.RED;
+                    break;
+                case "blue":
+                    color = Color.BLUE;
+                    break;
+                case "cyan":
+                    color = Color.CYAN;
+                    break;
+                case "gray":
+                    color = Color.GRAY;
+                    break;
+                case "darkgray":
+                    color = Color.DARK_GRAY;
+                    break;
+                case "green":
+                    color = Color.GREEN;
+                    break;
+                case "lightgray":
+                    color = Color.LIGHT_GRAY;
+                    break;
+                case "magenta":
+                    color = Color.MAGENTA;
+                    break;
+                case "orange":
+                    color = Color.ORANGE;
+                    break;
+                case "pink":
+                    color = Color.PINK;
+                    break;
+                case "yellow":
+                    color = Color.YELLOW;
+                    break;
+                case "white":
+                    color = Color.WHITE;
+                    break;
+                default:
+                    color = Color.RED;
+                    System.out.println("Invalid color, defaulting to red");
+            }
         }
-        
-        //Color color = hex2Rgb(hex); //roberto had a hex code, changed to color to make it simpler for the user
-     
+        */
         
 // I think in head less environment decode() did not work        
 //        Color color = Color.decode(hex);
@@ -107,10 +101,10 @@ public class ScrollingTextColorHttpHandler extends TextHttpHandler
         
         //return "scrolling text color update received:" + hex;
         if (!CliPixel.getSilentMode()) {
-             System.out.println("scrolling text color update received:" + color_);
-             logMe.aLogger.info("scrolling text color update received:" + color_);
+             System.out.println("scrolling text color update received:" + colorString);
+             logMe.aLogger.info("scrolling text color update received:" + colorString);
          }
-        return "scrolling text color update received:" + color_;
+        return "scrolling text color update received:" + colorString;
     }
     
     /**
@@ -118,11 +112,21 @@ public class ScrollingTextColorHttpHandler extends TextHttpHandler
      * @param colorStr e.g. "FFFFFF"
      * @return 
      */
+    
+    /*
     public static Color hex2Rgb(String colorStr) 
     {
         return new Color(
                 Integer.valueOf( colorStr.substring( 0, 2 ), 16 ),
                 Integer.valueOf( colorStr.substring( 2, 4 ), 16 ),
                 Integer.valueOf( colorStr.substring( 4, 6 ), 16 ) );
-    }    
+    } 
+    
+     private boolean isHexadecimal(String input) {
+        
+        final Pattern HEXADECIMAL_PATTERN = compile("\\p{XDigit}+");
+        final Matcher matcher = HEXADECIMAL_PATTERN.matcher(input);
+        return matcher.matches();
+        
+    }*/
 }

@@ -130,7 +130,13 @@ public class ScrollingTextHttpHander extends TextHttpHandler  //TO DO have TextH
             if (speed_ != null) logMe.aLogger.info("scrolling speed: " + speed_);
             logMe.aLogger.info("# times to loop: " + loop_);
         }
-            if (color_ != null) {  //some color was entered, either red, green, blue, etc. or a hex value with the #
+            
+        if (color_ != null) color = ArcadeHttpHandler.getColorFromHexOrName(color_);
+                             
+        /*                
+        
+        
+        if (color_ != null) {  //some color was entered, either red, green, blue, etc. or a hex value with the #
            
                 //let's first check if we have a hex string color
                 if (isHexadecimal(color_) && color_.length() == 6) {  //hex colors are 6 digits
@@ -183,26 +189,24 @@ public class ScrollingTextHttpHander extends TextHttpHandler  //TO DO have TextH
                     }
                 }
             }
-
-            /*
+            */
+            
             if (speed_ != null) {
 
                  speed = Long.valueOf(speed_);
 
                 if(speed == 0) //Roberto originally had if less than 100 here but the scrolling is too slow
                 {
-                    //speed = 100L;
-                    speed = 1L;
+                    speed = 10L;
                 }
 
-                if(600 < speed)
+                if(speed > 200)
                 {
-                    speed = 600L;
+                    speed = 200L;
                 }
-            }
-            */          
+            }      
         
-        //app.getPixel().interactiveMode(); //to do: we shouldn't need this but add back if so
+        //app.getPixel().interactiveMode(); //to do: we shouldn't need this but add can try adding back if scrolling text failing
         
         if (loop_ != null) loop = Integer.valueOf(loop_);
               
@@ -223,7 +227,7 @@ public class ScrollingTextHttpHander extends TextHttpHandler  //TO DO have TextH
         return "scrolling text request received: " + text_ ;
     }
     
-    
+    /*
     public static Color hex2Rgb(String colorStr) 
     {
         return new Color(
@@ -239,6 +243,7 @@ public class ScrollingTextHttpHander extends TextHttpHandler  //TO DO have TextH
         return matcher.matches();
         
     }
+*/
     
 }
 
