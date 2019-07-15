@@ -8,7 +8,9 @@ Summary of steps:
 
 2. Install Java 8 on your Pi
 
-3. Copy pixelweb.jar to your /home/pi/pixelcade folder
+3. Create a new folder /home/pi/pixelcade
+
+3. Copy pixelweb.jar to /home/pi/pixelcade folder
 
 4. cd /home/pi/pixelcade
 
@@ -17,6 +19,12 @@ Summary of steps:
 6. Copy retrogame.cfg to your Pi /boot/retrogame.cfg
 
 7. Copy runcommand-onstart.sh and runcommand-onend.sh to your Pi /opt/retropie/configs/all/
+
+8. Add java -jar pixelweb.jar to auto start
+
+sudo nano /etc/rc.local
+java -jar 
+
 
 
 
