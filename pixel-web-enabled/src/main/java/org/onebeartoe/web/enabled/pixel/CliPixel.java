@@ -24,6 +24,7 @@ public class CliPixel
  private int ledMatrixTypeDefault = 15;
  private int ledMatrixTypeMax = 25;
  private static boolean silentMode = false;
+ private static boolean backgroundMode = false;
  
  private int yTextOffset = 0;
 
@@ -51,6 +52,7 @@ public class CliPixel
   
   options.addOption("m", "matrix", true, "Sets the LED matrix type, same as l option");
   options.addOption("y", "y text offset", true, "This is the y offset for scrolling text.");
+  options.addOption("b", "background", false, "Run in the background as a service, ex. java -jar pixelweb.jar &");
   options.addOption("s", "silent", false, "No console messages or logging to pixelcade.log");
  }
 
@@ -77,6 +79,10 @@ public class CliPixel
   
    if (cmd.hasOption("s")) {
         silentMode = true;
+   }
+   
+   if (cmd.hasOption("b")) {
+        backgroundMode = true;
    }
    
    if( cmd.hasOption("y") )
@@ -142,6 +148,10 @@ public class CliPixel
 
    public static boolean getSilentMode() {
         return silentMode;
+    }
+   
+   public static boolean getBackgroundMode() {
+        return backgroundMode;
     }
  
 }

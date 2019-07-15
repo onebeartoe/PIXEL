@@ -99,9 +99,14 @@ public class PixelcadeFrontEnd
         PixelcadeFrontEnd app = new PixelcadeFrontEnd(args);
         
         if (isWindows()) {
-                errorMsg = "Pixelcade Listener (pixelweb) is not running: \n"
+                /*errorMsg = "Pixelcade Listener (pixelweb) is not running: \n"
                         + "We'll attempt to launch it now but it's better going forward\n"
                         + "that you add the listender to your Windnows startup\n" 
+                        + System.getProperty("user.dir") + "\\pixelweb.exe"; */
+                
+                 errorMsg = "Pixelcade Listener (pixelweb) is not running \n"
+                        + "Please launch the Pixelcade Listener first\n"
+                        + "You may also want to add the listener to your Windows startup\n" 
                         + System.getProperty("user.dir") + "\\pixelweb.exe";
 
                 exePath = System.getProperty("user.dir") + "\\pixelweb.exe";
@@ -328,22 +333,12 @@ public class PixelcadeFrontEnd
         
         if (!quit_) {
            
-            System.out.println(errorMsg);
-            //logMe.aLogger.info(errorMsg);
- 
-                try
-                {
-                    //System.out.println("Please run your command again");
-                    //runtime.exec(pixelwebLaunchPath, null ,exeWorkingPath);        //run pixelweb.exe in it's working directory
-                    
-                    //final ProcessBuilder pb = new ProcessBuilder(pixelwebLaunchPath);
-                    //pb.directory(new File(pixelwebWorkingPath));
-                    //final Process p = pb.start();
+            System.out.println(errorMsg);  //pixelweb is not running so let's prompt the user
                     
                    if (isWindows()) {
-                        //String[] cmd = { pixelwebLaunchPath };
-                        //Process run = Runtime.getRuntime().exec(cmd);
-                        
+                      
+                       //launching pixelweb.exe worked but launched it in a hidden mode so not user friendly, removing for now 
+                       /*
                         Process run = Runtime.getRuntime().exec(pixelwebLaunchPath,null,exeWorkingPath);
                        // logMe.aLogger.info("Launching " + pixelwebLaunchPath);
                         try {
@@ -351,8 +346,16 @@ public class PixelcadeFrontEnd
                         } catch (InterruptedException ex) {
                             //Logger.getLogger(PixelcadeFrontEnd.class.getName()).log(Level.SEVERE, null, ex);
                            // logMe.aLogger.log(Level.SEVERE, "could not run pixelweb", ex);
-                        }
-                    }  else {
+                        } */
+                        
+                         JFrame frame = new JFrame("JOptionPane showMessageDialog example");  //let's show a pop up too so the user doesn't miss it
+                            JOptionPane.showMessageDialog(frame,
+                                    errorMsg,
+                                    "Pixelcade Listener",
+                                    JOptionPane.ERROR_MESSAGE);
+                        
+                        
+                    }  else if (isMac()) {
                            
                             
                             JFrame frame = new JFrame("JOptionPane showMessageDialog example");  //let's show a pop up too so the user doesn't miss it
@@ -360,75 +363,11 @@ public class PixelcadeFrontEnd
                                     errorMsg,
                                     "Pixelcade Listener",
                                     JOptionPane.ERROR_MESSAGE);
-                            
-                            //System.exit(1);  
-                       
-            
-                        /*
-                        ProcessBuilder pb = new ProcessBuilder(pixelwebLaunchPath);
-                        //pb.directory(new File(pixelwebWorkingPath));
-                        
-                        try {
-
-                                Process process = pb.start();
-
-                                StringBuilder output = new StringBuilder();
-
-                                BufferedReader reader = new BufferedReader(
-                                                new InputStreamReader(process.getInputStream()));
-
-                                String line;
-                                while ((line = reader.readLine()) != null) {
-                                        output.append(line + "\n");
-                                }
-
-                                int exitVal = process.waitFor();
-                                if (exitVal == 0) {
-                                        System.out.println("Success!");
-                                        System.out.println(output);
-                                        System.exit(0);
-                                } else {
-                                        //abnormal...
-                                }
-
-                                } catch (IOException e) {
-                                        e.printStackTrace();
-                                } catch (InterruptedException e) {
-                                        e.printStackTrace();
-                                }
-                            */
-                       
-                   }
-                    
-                    /* try {
-                        //we launched pixelweb so let's sleep a bit to give time to load before making the rest call
-                        Thread.sleep(3000);
-                    } catch (InterruptedException ex) {
-                        Logger.getLogger(PixelcadeFrontEnd.class.getName()).log(Level.SEVERE, null, ex);
-                    }
-                    
-                    makeRESTCall(URLString);
-                   */
-                    
-                    
-                }
-                catch (IOException e)
-                {
-                    e.printStackTrace();
-                }
-            
-            
-            /*
-            JFrame frame = new JFrame("JOptionPane showMessageDialog example");  //let's show a pop up too so the user doesn't miss it
-            JOptionPane.showMessageDialog(frame,
-                    errorMsg,
-                    "Pixelcade Listener",
-                    JOptionPane.ERROR_MESSAGE);
-            */
-            }
+                    } 
         
         
-       
+        System.exit(1);                       //we can't continue because pixelweb is not running
+        
         //TO DO get the auto-launch going if pixelweb not running, code below didn't work on windows
         /* try {
             Process process = new ProcessBuilder(exePath).start();
@@ -436,8 +375,7 @@ public class PixelcadeFrontEnd
             Logger.getLogger(PixelcadeFrontEnd.class.getName()).log(Level.SEVERE, null, ex);
         } */
         
-        System.exit(1);                       //we can't continue because pixelweb is not running
-        
+        }
         //TO DO possibly could auto-launch the listener using shell cmd from Java, set a timer delay, and then re-run
      }
      

@@ -30,7 +30,7 @@ public class CliPixel
  private Boolean quit = false;
  private Boolean silent = false;
  private int yTextOffset = 0;
- private static String instructions = "usage: Pixelcade Version 2.0.6\n" +
+ private static String instructions = "usage: Pixelcade Version 2.0.7\n" +
 "                    -m,--mode <arg>  Sets stream or write mode, options are stream or write\n" +
 "                    -c,--console <arg>  Sets the console or platform name, ex. mame, atari2600, nes\n" +
 "                    -g,--game <arg>  Sets game / rom name, can be a full path, file name,\n" +

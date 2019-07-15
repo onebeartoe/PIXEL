@@ -132,64 +132,6 @@ public class ScrollingTextHttpHander extends TextHttpHandler  //TO DO have TextH
         }
             
         if (color_ != null) color = ArcadeHttpHandler.getColorFromHexOrName(color_);
-                             
-        /*                
-        
-        
-        if (color_ != null) {  //some color was entered, either red, green, blue, etc. or a hex value with the #
-           
-                //let's first check if we have a hex string color
-                if (isHexadecimal(color_) && color_.length() == 6) {  //hex colors are 6 digits
-                     color = hex2Rgb(color_);
-                     System.out.println("Hex color value detected");
-                }        
-                else {   //and if not then color text was entered so let's look for a match
-                
-                    switch (color_) {
-
-                        case "red":
-                            color = Color.RED;
-                            break;
-                        case "blue":
-                            color = Color.BLUE;
-                            break;
-                        case "cyan":
-                            color = Color.CYAN;
-                            break;
-                        case "gray":
-                            color = Color.GRAY;
-                            break;
-                        case "darkgray":
-                            color = Color.DARK_GRAY;
-                            break;
-                        case "green":
-                            color = Color.GREEN;
-                            break;
-                        case "lightgray":
-                            color = Color.LIGHT_GRAY;
-                            break;
-                        case "magenta":
-                            color = Color.MAGENTA;
-                            break;
-                        case "orange":
-                            color = Color.ORANGE;
-                            break;
-                        case "pink":
-                            color = Color.PINK;
-                            break;
-                        case "yellow":
-                            color = Color.YELLOW;
-                            break;
-                        case "white":
-                            color = Color.WHITE;
-                            break;
-                        default:
-                            color = Color.RED;
-                            System.out.println("Invalid color, defaulting to red");
-                    }
-                }
-            }
-            */
             
             if (speed_ != null) {
 
@@ -211,8 +153,6 @@ public class ScrollingTextHttpHander extends TextHttpHandler  //TO DO have TextH
         if (loop_ != null) loop = Integer.valueOf(loop_);
               
         if (color_ == null)  color = Color.RED;
-
-        //if (speed_ == null)  speed = 10L;
        
         if (speed_ == null) { //speed was not specified so let's get default per panel type
             
@@ -221,7 +161,7 @@ public class ScrollingTextHttpHander extends TextHttpHandler  //TO DO have TextH
             int fontSize_ = 22;
             speed = WebEnabledPixel.getScrollingTextSpeed(LED_MATRIX_ID);  //this method also sets the yoffset and font
         }
-        
+       
         app.getPixel().scrollText(text_, loop, speed, color);
         
         return "scrolling text request received: " + text_ ;
