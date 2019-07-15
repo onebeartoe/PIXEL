@@ -428,9 +428,6 @@ public class WebEnabledPixel
         inpath = contentClasspath + "shutdown_button.service";
         extractClasspathResource(inpath, pixelHomeDirectory);
         
-        inpath = contentClasspath + "testwrite.sh";
-        extractClasspathResource(inpath, pixelHomeDirectory);
-        
         inpath = contentClasspath + "settings.ini";
         extractClasspathResource(inpath, pixelHomeDirectory);
     }
