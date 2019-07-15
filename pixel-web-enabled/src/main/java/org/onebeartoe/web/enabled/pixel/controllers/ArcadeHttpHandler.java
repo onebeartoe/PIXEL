@@ -51,6 +51,7 @@ public class ArcadeHttpHandler extends ImageResourceHttpHandler
         
          //arcadeFilePathPNG = application.getPixel().getPixelHome() + consoleNameMapped + "/" + arcadeNameOnly +".png";
          //File arcadeFilePNG = new File(arcadeFilePathPNG);
+         
         Pixel pixel = application.getPixel();
         pixel.writeArcadeImage(arcadeFilePNGFullPath, saveAnimation, loop, consoleNameMapped, PNGNameWithExtension); //we have the full file path here
         
@@ -131,7 +132,7 @@ public class ArcadeHttpHandler extends ImageResourceHttpHandler
         String defaultConsoleFilePathPNG = null;
         String consoleNameMapped = null;
         LogMe logMe = null;
-        String[] consoleArray = new String[] {  "mame",  "atari2600", "daphne", "nes", "neogeo", "atarilynx",
+        String[] consoleArray = new String[] {  "mame", "atari2600", "daphne", "nes", "neogeo", "atarilynx",
                                                 "snes", "atari5200", "atari7800", "atarijaguar", "c64", 
                                                 "genesis", "capcom", "n64", "psp", "psx", "coleco", "dreamcast",
                                                 "fba", "gb", "gba", "ngp", "ngpc", "odyssey",
@@ -142,6 +143,9 @@ public class ArcadeHttpHandler extends ImageResourceHttpHandler
                                                 "segacd", "sg-1000", "ti99", "vectrex", "virtualboy",
                                                 "visualpinball", "wonderswan", "wonderswancolor", "zinc", "sss",
                                                 "zmachine", "zxspectrum"};
+        
+        
+                 
  	boolean saveAnimation = false;
         int loop_ = 0;
         String text_ = "";
@@ -265,7 +269,7 @@ public class ArcadeHttpHandler extends ImageResourceHttpHandler
                 System.out.println("Console Mapped: " + consoleNameMapped);
                 System.out.println("Game Name Only: " +  arcadeNameOnly);
                 if (loop_ == 0) {
-                    System.out.println("# of Times to Loop: infinite");
+                    System.out.println("# of Times to Loop: null");
                 } else {
                     System.out.println("# of Times to Loop: " + loop_);
                 }
@@ -277,7 +281,7 @@ public class ArcadeHttpHandler extends ImageResourceHttpHandler
                 logMe.aLogger.info("Console Mapped: " + consoleNameMapped);
                 logMe.aLogger.info("Game Name Only: " +  arcadeNameOnly);
                  if (loop_ == 0) {
-                    logMe.aLogger.info("# of Times to Loop: infinite");
+                    logMe.aLogger.info("# of Times to Loop: null");
                 } else {
                     logMe.aLogger.info("# of Times to Loop: " + loop_);
                 }
@@ -294,7 +298,13 @@ public class ArcadeHttpHandler extends ImageResourceHttpHandler
              
              //System.out.println("delete PNG path " + arcadeFilePathPNG);
              //System.out.println("delete GiF path " + arcadeFilePathGIF);
-            
+             
+            String requestedPath = application.getPixel().getPixelHome() + consoleNameMapped + "\\" + arcadeNameOnly;
+             if (!CliPixel.getSilentMode()) {
+                    System.out.println("Looking for: " + requestedPath  + ".png or .gif");
+                    logMe.aLogger.info("Looking for: " + requestedPath  + ".png or .gif");
+            }
+                    
             if (streamOrWrite.equals("write")) {  //we're in write mode so gif gets the priority if both gif and png exist, never should write mode be used for front end scrolling
                 saveAnimation = true;
                 
@@ -473,7 +483,16 @@ public class ArcadeHttpHandler extends ImageResourceHttpHandler
           
          switch (originalConsoleName) {
             
-            case "snk neo geo":
+            case "mame-libretro":
+                 consoleNameMapped = "mame";
+                 return consoleNameMapped;
+            case "mame-mame4all":
+                consoleNameMapped = "mame";
+                 return consoleNameMapped;
+            case "arcade":
+                consoleNameMapped = "mame";
+                 return consoleNameMapped;
+            case "mame-advmame":
                 consoleNameMapped = "neogeo";
                  return consoleNameMapped;
             case "atari 2600":
