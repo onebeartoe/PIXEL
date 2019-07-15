@@ -119,7 +119,11 @@ public class WebEnabledPixel
     
     private static long speed = 10L;
     
-    public static String pixelwebVersion = "2.0.6";
+    public static String pixelwebVersion = "2.0.7";
+    
+    private static boolean backgroundMode_ = false;
+    
+    private static boolean stayConnected = true;
     
     public WebEnabledPixel(String[] args)
     {
@@ -127,6 +131,7 @@ public class WebEnabledPixel
         cli.parse();
         httpPort = cli.getWebPort();
         silentMode_ = cli.getSilentMode();
+        backgroundMode_ = cli.getBackgroundMode();
         
         //Using our common logger across multiple classes
         //LogMe logMe = LogMe.getInstance();
@@ -320,17 +325,17 @@ public class WebEnabledPixel
             
              System.out.println(alreadyRunningErrorMsg);
              System.out.println("Exiting...");
-
-             JFrame frame = new JFrame("JOptionPane showMessageDialog example");  //let's show a pop up too so the user doesn't miss it
-             JOptionPane.showMessageDialog(frame,
-                alreadyRunningErrorMsg,
-                "Pixelcade Listener Already Running",
-                JOptionPane.ERROR_MESSAGE);
-        
-             System.exit(1);                       //we can't continue because the pixel listener is already running
+             
+             if (isWindows() || isMac()) {  //we won't have xwindows on the Pi so skip this for the Pi
             
-            //String message = "An error occurred while creating the controllers";
-            //logger.log(Level.SEVERE, message, ex);
+                JFrame frame = new JFrame("JOptionPane showMessageDialog example");  //let's show a pop up too so the user doesn't miss it
+                JOptionPane.showMessageDialog(frame,
+                   alreadyRunningErrorMsg,
+                   "Pixelcade Listener Already Running",
+                   JOptionPane.ERROR_MESSAGE);
+             }
+        
+             System.exit(1);    //we can't continue because the pixel listener is already running
         }
     }
     
@@ -872,7 +877,23 @@ public class WebEnabledPixel
         @Override
         protected void run(String[] args) throws IOException 
         {
-            //System.out.println("now it begins!");
+            
+            if (backgroundMode_) {      //if this block isn't here, java -jar pixelweb.jar & doesn't work in Linux
+                while(stayConnected)
+                        {
+                            long duration = 1000 * 60 * 1;
+                            try
+                            {
+                                Thread.sleep(duration);
+                            } 
+                            catch (InterruptedException ex)
+                            {
+                                String message = "Error sleeping for Pixel initialization: " + ex.getMessage();
+                              
+                            }
+                        }
+		}
+            else {
             
             InputStreamReader isr = new InputStreamReader(System.in);
             BufferedReader reader = new BufferedReader(isr);
@@ -893,6 +914,7 @@ public class WebEnabledPixel
                     System.out.println("Unknown input. q=quit.");
                 }
             }
+          }
         }
 
         @Override
