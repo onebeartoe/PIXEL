@@ -82,7 +82,7 @@ public class StillImageHttpHandler extends ImageResourceHttpHandler
 
                 Pixel pixel = application.getPixel();
                 
-                pixel.writeArcadeAnimation("images",arcadeName,saveAnimation,0); //since this class handles pngs and gifs that are served up, we won't have a loop here so pass 0
+                pixel.writeArcadeAnimation("images",arcadeName,saveAnimation,0, WebEnabledPixel.pixelConnected); //since this class handles pngs and gifs that are served up, we won't have a loop here so pass 0
                     } catch (NoSuchAlgorithmException ex) {
                         Logger.getLogger(StillImageHttpHandler.class.getName()).log(Level.SEVERE, null, ex);
                  }
@@ -90,7 +90,7 @@ public class StillImageHttpHandler extends ImageResourceHttpHandler
         else if (ext.equals("png")) {
             
             Pixel pixel = application.getPixel();
-            pixel.writeArcadeImage(targetFilePath, saveAnimation, 0,"",""); //since this class handles pngs and gifs that are served up, we won't have a loop and won't need the console and png names
+            pixel.writeArcadeImage(targetFilePath, saveAnimation, 0,"","",WebEnabledPixel.pixelConnected); //since this class handles pngs and gifs that are served up, we won't have a loop and won't need the console and png names
             
             /*
              

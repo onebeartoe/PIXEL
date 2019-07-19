@@ -33,15 +33,16 @@ import org.apache.http.client.utils.URLEncodedUtils;
 /**
  * @author Roberto Marquez
  */
-public class ArcadeHttpHandler extends ImageResourceHttpHandler
+public class ConsoleHttpHandler extends ImageResourceHttpHandler
 {
-    public ArcadeHttpHandler(WebEnabledPixel application)
+    public ConsoleHttpHandler(WebEnabledPixel application)
     {
         super(application);
         
         //basePath = "arcade/";
         basePath = "";
-        defaultImageClassPath = "pacman.png"; //to do change this
+        //defaultImageClassPath = "pacman.png"; //to do change this
+        defaultImageClassPath = "mame"; //to do change this
         modeName = "arcade";
     }
     
@@ -49,55 +50,9 @@ public class ArcadeHttpHandler extends ImageResourceHttpHandler
         
         LogMe logMe = LogMe.getInstance();
         
-         //arcadeFilePathPNG = application.getPixel().getPixelHome() + consoleNameMapped + "/" + arcadeNameOnly +".png";
-         //File arcadeFilePNG = new File(arcadeFilePathPNG);
-         
         Pixel pixel = application.getPixel();
         pixel.writeArcadeImage(arcadeFilePNGFullPath, saveAnimation, loop, consoleNameMapped, PNGNameWithExtension,WebEnabledPixel.pixelConnected); //we have the full file path here
-        
-        /* 
-        URL url = null; 
-        BufferedImage image;
-        url = file.toURI().toURL();
-        image = ImageIO.read(url);
-        if (!CliPixel.getSilentMode()) {
-            System.out.println("PNG image found: " + url.toString());
-            logMe.aLogger.info("PNG image found: " + url.toString());
-        }
-         
-        //Pixel pixel = application.getPixel();
-       // pixel.stopExistingTimer();  //a timer could be running from a gif so we need to kill it here
-       //to do : test this but we should not need a stop timer here 
        
-        //if (saveAnimation && pixel.getPIXELHardwareID().substring(0,4).equals("PIXL")) {
-        if (saveAnimation) {
-            
-            pixel.interactiveMode();
-            pixel.writeMode(10);
-            
-             try {
-                   pixel.writeImagetoMatrix(image, pixel.KIND.width, pixel.KIND.height);
-            } catch (ConnectionLostException e1) {
-                    // TODO Auto-generated catch block
-                    e1.printStackTrace();
-            } 
-             
-            try {
-                Thread.sleep(100); //this may not be needed but was causing a problem on the writes for the gif animations so adding here to be safe
-                //TO DO will a smaller delay still work too?
-            } catch (InterruptedException ex) {
-                Logger.getLogger(ArcadeHttpHandler.class.getName()).log(Level.SEVERE, null, ex);
-            }
-            
-             pixel.playLocalMode();
-            
-        } else {
-            
-            pixel.interactiveMode();
-            pixel.writeImagetoMatrix(image, pixel.KIND.width, pixel.KIND.height); //to do add save parameter here
-        }
-        */
-        
     }
     
     private void handleGIF(String consoleName, String arcadeName, Boolean saveAnimation, int loop) {
@@ -109,9 +64,6 @@ public class ArcadeHttpHandler extends ImageResourceHttpHandler
         } catch (NoSuchAlgorithmException ex) {
             Logger.getLogger(ArcadeHttpHandler.class.getName()).log(Level.SEVERE, null, ex);
         }
-       
-        //Sleeper.sleepo(15);  //roberto had this but we don't need anymore now that we switched to the new timer
-        //Sleeper.sleepo(100);
     }
     
     @Override
@@ -120,9 +72,9 @@ public class ArcadeHttpHandler extends ImageResourceHttpHandler
          
         String streamOrWrite = null ;
  	String consoleName = null ;
- 	String arcadeName = null ;
-        String arcadeNameExtension = null; 
-        String arcadeNameOnly = null;
+ 	//String arcadeName = null ;
+        //String arcadeNameExtension = null; 
+        //String arcadeNameOnly = null;
         //String arcadeFilePath = null;
         
         String arcadeFilePathPNG = null;
@@ -143,23 +95,13 @@ public class ArcadeHttpHandler extends ImageResourceHttpHandler
                                                 "segacd", "sg-1000", "ti99", "vectrex", "virtualboy",
                                                 "visualpinball", "wonderswan", "wonderswancolor", "zinc", "sss",
                                                 "zmachine", "zxspectrum"};
-        
-        
                  
  	boolean saveAnimation = false;
         int loop_ = 0;
         String text_ = "";
         String color_ = "";
         Color color = Color.RED; //default to red color if not added
-       // String loopString = "0"; //to do kill this
       
-       
-        //to do the slashes will screw up this logic, we could remove the / first or switch to another convention
-       
-        //urlParams = urlParams.replaceAll("\r", "").replaceAll("\n", ""); //to do : add check for %00 null end of string
-        // to do: need to modify pixelcade.exe for the extra post params
-        
-        //  /text/?t=hello%20world?c=red?s=10?l=2
         
         List<NameValuePair> params = null;
         try {
@@ -190,13 +132,13 @@ public class ArcadeHttpHandler extends ImageResourceHttpHandler
                     }
         }
   
-        // /arcade/stream/mame/pacman?t=x?5=x
+        // /console/stream/mame?t=x?l=x
         //so now we just need to the left of the ?
         URI tempURI = null;
         try {
              tempURI = new URI("http://localhost:8080" + urlParams);
         } catch (URISyntaxException ex) {
-            Logger.getLogger(ArcadeHttpHandler.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(ConsoleHttpHandler.class.getName()).log(Level.SEVERE, null, ex);
         }
         
         String URLPath = tempURI.getPath();
@@ -206,44 +148,22 @@ public class ArcadeHttpHandler extends ImageResourceHttpHandler
         String [] arcadeURLarray = URLPath.split("/"); 
         //String [] arcadeURLarray = urlParams.split("&"); 
         
-        /* for (int i=0; i < arcadeURLarray.length; i++) { 
-            System.out.println("Str["+i+"]:"+arcadeURLarray[i]); 
-        } 
-        System.out.println(arcadeURLarray.length); //should be 5
-        */
-        
         logMe = LogMe.getInstance();
         if (!CliPixel.getSilentMode()) {
-            System.out.println("arcade handler received: " + urlParams);
-            logMe.aLogger.info("arcade handler received: " + urlParams);
+            System.out.println("console handler received: " + urlParams);
+            logMe.aLogger.info("console handler received: " + urlParams);
         }
         
-        if (arcadeURLarray.length == 5) {
+        if (arcadeURLarray.length == 4) {  //  /console/stream/mame?t=x?l=x
         	
-        	    streamOrWrite = arcadeURLarray[2];
-        	    consoleName = arcadeURLarray[3];
-        	    arcadeName = arcadeURLarray[4];
-                    
-                    arcadeName = arcadeName.trim();
-                    arcadeName = arcadeName.replace("\n", "").replace("\r", "");
-            
+                streamOrWrite = arcadeURLarray[2];
+                consoleName = arcadeURLarray[3];
+                //arcadeName = arcadeURLarray[4];
 
-            //to do add code to remove " " in case the user entered those
-                    
-            //arcadeName could be a full path or just a name, we need to handle both
-            String name1 = FilenameUtils.getName(arcadeName);
-            String name2 = FilenameUtils.getBaseName(arcadeName);
-            //String name3 = FilenameUtils.getExtension(arcadeName);
-                    
-            //let's make sure this file exists and skip if not
-            //arcadeNameExtension = FilenameUtils.getExtension(arcadeName); 
-            arcadeNameOnly = FilenameUtils.getBaseName(arcadeName); //stripping out the extension
-            
-            
-            //let's now refer to our mapping table for the console names, because console names are different for RetroPie vs. HyperSpin and other front ends
-            //to do add a user defined .txt mapping if the console is not found in our mapping table
-            
-            consoleName = consoleName.toLowerCase();
+                consoleName = consoleName.trim();
+                consoleName = consoleName.replace("\n", "").replace("\r", "");
+
+                consoleName = consoleName.toLowerCase();
             //let's see if the console matches one of our known ones and if not, we'll go to the mapping table
             
             //or let's first check against the mapping table
@@ -254,11 +174,11 @@ public class ArcadeHttpHandler extends ImageResourceHttpHandler
              //if yes, we're good
              //if no, let's check & map a couple common hyperspin and skip the expesive mapping table
              
-            if (!consoleMatch(consoleArray,consoleName)) {  //if our console already matches, we are good but if not, we need to check it against mapping table
-                consoleNameMapped = getConsoleNamefromMapping(consoleName);     //will return original console if no matcn
-            } else {
-                 consoleNameMapped = consoleName;                               //we were already mapped so let's use it
-            }
+                if (!consoleMatch(consoleArray,consoleName)) {  //if our console already matches, we are good but if not, we need to check it against mapping table
+                    consoleNameMapped = getConsoleNamefromMapping(consoleName);     //will return original console if no matcn
+                } else {
+                     consoleNameMapped = consoleName;                               //we were already mapped so let's use it
+                }
             
                 //more user friendly for the log since technically it's looping forever until stopped
 
@@ -267,7 +187,6 @@ public class ArcadeHttpHandler extends ImageResourceHttpHandler
                 System.out.println(streamOrWrite.toUpperCase() + " MODE");
                 System.out.println("Console Before Mapping: " + consoleName);
                 System.out.println("Console Mapped: " + consoleNameMapped);
-                System.out.println("Game Name Only: " +  arcadeNameOnly);
                 if (loop_ == 0) {
                     System.out.println("# of Times to Loop: null");
                 } else {
@@ -279,7 +198,6 @@ public class ArcadeHttpHandler extends ImageResourceHttpHandler
                 logMe.aLogger.info(streamOrWrite.toUpperCase() + " MODE");
                 logMe.aLogger.info("Console Before Mapping: " + consoleName);
                 logMe.aLogger.info("Console Mapped: " + consoleNameMapped);
-                logMe.aLogger.info("Game Name Only: " +  arcadeNameOnly);
                  if (loop_ == 0) {
                     logMe.aLogger.info("# of Times to Loop: null");
                 } else {
@@ -287,19 +205,8 @@ public class ArcadeHttpHandler extends ImageResourceHttpHandler
                 }
                  if (text_ != "") logMe.aLogger.info("alt text if marquee file not found: " + text_);
              }
-           
-            //now let's decide if we're going to find the png or gif 
-            
-             arcadeFilePathPNG = application.getPixel().getPixelHome() + consoleNameMapped + "/" + arcadeNameOnly +".png";
-             File arcadeFilePNG = new File(arcadeFilePathPNG);
              
-             arcadeFilePathGIF = application.getPixel().getPixelHome() + consoleNameMapped + "/" + arcadeNameOnly +".gif";
-             File arcadeFileGIF = new File(arcadeFilePathGIF);
-             
-             //System.out.println("delete PNG path " + arcadeFilePathPNG);
-             //System.out.println("delete GiF path " + arcadeFilePathGIF);
-             
-            String requestedPath = application.getPixel().getPixelHome() + consoleNameMapped + "\\" + arcadeNameOnly;
+            String requestedPath = application.getPixel().getPixelHome() + "console" + "\\" + consoleNameMapped;
              if (!CliPixel.getSilentMode()) {
                     System.out.println("Looking for: " + requestedPath  + ".png or .gif");
                     logMe.aLogger.info("Looking for: " + requestedPath  + ".png or .gif");
@@ -308,37 +215,7 @@ public class ArcadeHttpHandler extends ImageResourceHttpHandler
             if (streamOrWrite.equals("write")) {  //we're in write mode so gif gets the priority if both gif and png exist, never should write mode be used for front end scrolling
                 saveAnimation = true;
                 
-               
-                if (arcadeFileGIF.exists() && !arcadeFileGIF.isDirectory()) {
-                        //System.out.println("delete went here GIF");
-                        handleGIF(consoleNameMapped, arcadeNameOnly +".gif", saveAnimation, loop_);
-                }
-                        
-                else if(arcadeFilePNG.exists() && !arcadeFilePNG.isDirectory()) { 
-                        //System.out.println("delete went here PNG");
-                        handlePNG(arcadeFilePNG, saveAnimation,loop_,consoleNameMapped,FilenameUtils.getName(arcadeFilePathPNG));
-                }
-                
-                else if (text_ != "") {  //the game image or png is not there and alt text was supplied so let's scroll that alt text
-                         
-                         Pixel pixel = application.getPixel();
-                         int LED_MATRIX_ID = WebEnabledPixel.getMatrixID();
-                         
-                         int yTextOffset = -4;
-                         int fontSize_ = 22;
-                         long speed = 10L;
-                         
-                         speed = WebEnabledPixel.getScrollingTextSpeed(LED_MATRIX_ID);  //this method also sets the yoffset
-                         
-                         if (color_ != "") {
-                             color = getColorFromHexOrName(color_);
-                         }
-                         
-                         pixel.scrollText(text_, loop_, speed, color,WebEnabledPixel.pixelConnected);
-                        
-                }
-                
-                else { //nothing is there so let's use the generic console
+                 //nothing is there so let's use the generic console
                         
                         consoleFilePathGIF = application.getPixel().getPixelHome() + "console/" + "default-" + consoleNameMapped + ".gif"; 
                         File consoleFileGIF = new File(consoleFilePathGIF);
@@ -361,107 +238,128 @@ public class ArcadeHttpHandler extends ImageResourceHttpHandler
                         }
                        
                         else {
-                               if (!CliPixel.getSilentMode()) {
-                                    System.out.println("GIF default console LED Marquee file not found, looking for default marquee: " + consoleFilePathGIF);
-                                    logMe.aLogger.info("GIF default console LED Marquee file not found, looking for default marquee: " + consoleFilePathGIF);
-                               }
-                               defaultConsoleFilePathPNG = application.getPixel().getPixelHome() + "console/" + "default-marquee.png"; 
-                               File defaultConsoleFilePNG = new File(defaultConsoleFilePathPNG);
-                               
-                               if(defaultConsoleFilePNG.exists() && !defaultConsoleFilePNG.isDirectory()) { 
-                                       handlePNG(defaultConsoleFilePNG, saveAnimation,loop_,"console",FilenameUtils.getName(defaultConsoleFilePathPNG));
-                               }
-                               else {
-                                       if (!CliPixel.getSilentMode()) {
-                                            System.out.println("Default console LED Marquee file not found: " + defaultConsoleFilePathPNG);
-                                            System.out.println("Skipping LED marquee " + streamOrWrite + ", please check the files");
-                                            logMe.aLogger.info("Default console LED Marquee file not found: " + defaultConsoleFilePathPNG);
-                                            logMe.aLogger.info("Skipping LED marquee " + streamOrWrite + ", please check the files");
-                                       }
-                               }
+                            
+                            //if there was alt text, let's use that and if not alt text, we'll use the default marquee
+                            
+                            if (text_ != "") {  //the game image or png is not there and alt text was supplied so let's scroll that alt text
+                         
+                                    Pixel pixel = application.getPixel();
+                                    int LED_MATRIX_ID = WebEnabledPixel.getMatrixID();
+
+                                    int yTextOffset = -4;
+                                    int fontSize_ = 22;
+                                    long speed = 10L;
+
+                                    speed = WebEnabledPixel.getScrollingTextSpeed(LED_MATRIX_ID);  //this method also sets the yoffset
+
+                                    if (color_ != "") {
+                                        color = getColorFromHexOrName(color_);
+                                    }
+
+                                    pixel.scrollText(text_, loop_, speed, color,WebEnabledPixel.pixelConnected);
+                            } 
+                            else {
+                            
+                                if (!CliPixel.getSilentMode()) {
+                                     System.out.println("GIF default console LED Marquee file not found, looking for default marquee: " + consoleFilePathGIF);
+                                     logMe.aLogger.info("GIF default console LED Marquee file not found, looking for default marquee: " + consoleFilePathGIF);
+                                }
+                                defaultConsoleFilePathPNG = application.getPixel().getPixelHome() + "console/" + "default-marquee.png"; 
+                                File defaultConsoleFilePNG = new File(defaultConsoleFilePathPNG);
+
+                                if(defaultConsoleFilePNG.exists() && !defaultConsoleFilePNG.isDirectory()) { 
+                                        handlePNG(defaultConsoleFilePNG, saveAnimation,loop_,"console",FilenameUtils.getName(defaultConsoleFilePathPNG));
+                                }
+                                else {
+                                        if (!CliPixel.getSilentMode()) {
+                                             System.out.println("Default console LED Marquee file not found: " + defaultConsoleFilePathPNG);
+                                             System.out.println("Skipping LED marquee " + streamOrWrite + ", please check the files");
+                                             logMe.aLogger.info("Default console LED Marquee file not found: " + defaultConsoleFilePathPNG);
+                                             logMe.aLogger.info("Skipping LED marquee " + streamOrWrite + ", please check the files");
+                                        }
+                                }
+                            }
                         }
-                }
+                
                 
             } else {                      //we're in stream mode so png gets the priority if both png and gif exist
                 saveAnimation = false;
                 
-                if(arcadeFilePNG.exists() && !arcadeFilePNG.isDirectory()) { 
-                        //System.out.println("delete went here PNG");
-                        handlePNG(arcadeFilePNG, saveAnimation,loop_,consoleNameMapped,FilenameUtils.getName(arcadeFilePathPNG));
-                }
-                else if (arcadeFileGIF.exists() && !arcadeFileGIF.isDirectory()) {
-                        //System.out.println("delete went here GIF");
-                        handleGIF(consoleNameMapped, arcadeNameOnly +".gif", saveAnimation, loop_);
-                }
-                else if (text_ != "") {  //the game image or png is not there and alt text was supplied so let's scroll that alt text
+               
+                   //nothing is there so let's use the generic console
                         
-                         Pixel pixel = application.getPixel();
-                         int LED_MATRIX_ID = WebEnabledPixel.getMatrixID();
-                         
-                         int yTextOffset = -4;
-                         int fontSize_ = 22;
-                         long speed = 10L;
-                         
-                         speed = WebEnabledPixel.getScrollingTextSpeed(LED_MATRIX_ID);  //this method also sets the yoffset
-                         
-                         if (color_ != "") {
-                            
-                             color = getColorFromHexOrName(color_);
-                         }
-                         
-                         pixel.scrollText(text_, loop_, speed, color,WebEnabledPixel.pixelConnected); 
-                }
-                
-                else { //nothing is there so let's use the console
+                        consoleFilePathGIF = application.getPixel().getPixelHome() + "console/" + "default-" + consoleNameMapped + ".gif"; 
+                        File consoleFileGIF = new File(consoleFilePathGIF);
                     
                         consoleFilePathPNG = application.getPixel().getPixelHome() + "console/" + "default-" + consoleNameMapped + ".png"; 
                         File consoleFilePNG = new File(consoleFilePathPNG);
                         
-                        consoleFilePathGIF = application.getPixel().getPixelHome() + "console/" + "default-" + consoleNameMapped + ".gif"; 
-                        File consoleFileGIF = new File(consoleFilePathGIF);
-                       
-                        //System.out.println("delete console gif: " + consoleFilePathGIF);
-                    
-                        if(consoleFilePNG.exists() && !consoleFilePNG.isDirectory()) { 
+                        if(consoleFileGIF.exists() && !consoleFileGIF.isDirectory()) { 
 
-                              handlePNG(consoleFilePNG, saveAnimation,loop_,"console",FilenameUtils.getName(consoleFilePathPNG));
-                        }
-                        else if(consoleFileGIF.exists() && !consoleFileGIF.isDirectory()) { 
-                                if (!CliPixel.getSilentMode()) {
+                              if (!CliPixel.getSilentMode()) {
                                     System.out.println("PNG default console LED Marquee file not found, looking for GIF version: " + consoleFilePathPNG);
                                     logMe.aLogger.info("PNG default console LED Marquee file not found, looking for GIF version: " + consoleFilePathPNG);
-                                }
-                                handleGIF("console", "default-" + consoleNameMapped + ".gif", saveAnimation, loop_);
+                              }
+                              handleGIF("console", "default-" + consoleNameMapped + ".gif", saveAnimation, loop_);
+                        }      
+                       
+                        else if (consoleFilePNG.exists() && !consoleFilePNG.isDirectory()) { 
+                             
+                              handlePNG(consoleFilePNG, saveAnimation,loop_,"console",FilenameUtils.getName(consoleFilePathPNG)); //mame/default-marquee.png
                         }
+                       
                         else {
-                               if (!CliPixel.getSilentMode()) {
-                                    System.out.println("GIF default console LED Marquee file not found, looking for default marquee: " + consoleFilePathGIF);
-                                    logMe.aLogger.info("GIF default console LED Marquee file not found, looking for default marquee: " + consoleFilePathGIF);
-                               }
-                               defaultConsoleFilePathPNG = application.getPixel().getPixelHome() + "console/" + "default-marquee.png"; 
-                               File defaultConsoleFilePNG = new File(defaultConsoleFilePathPNG);
-                               
-                               if(defaultConsoleFilePNG.exists() && !defaultConsoleFilePNG.isDirectory()) { 
-                                       handlePNG(defaultConsoleFilePNG, saveAnimation,loop_,"console",FilenameUtils.getName(defaultConsoleFilePathPNG));
-                               }
-                               else {
-                                         if (!CliPixel.getSilentMode()) {
-                                                System.out.println("Default console LED Marquee file not found: " + defaultConsoleFilePathPNG);
-                                                System.out.println("Skipping LED marquee " + streamOrWrite + ", please check the files");
-                                                logMe.aLogger.info("Default console LED Marquee file not found: " + defaultConsoleFilePathPNG);
-                                                logMe.aLogger.info("Skipping LED marquee " + streamOrWrite + ", please check the files");
-                                         }
-                               }
+                            
+                            //if there was alt text, let's use that and if not alt text, we'll use the default marquee
+                            
+                            if (text_ != "") {  //the game image or png is not there and alt text was supplied so let's scroll that alt text
+                         
+                                    Pixel pixel = application.getPixel();
+                                    int LED_MATRIX_ID = WebEnabledPixel.getMatrixID();
+
+                                    int yTextOffset = -4;
+                                    int fontSize_ = 22;
+                                    long speed = 10L;
+
+                                    speed = WebEnabledPixel.getScrollingTextSpeed(LED_MATRIX_ID);  //this method also sets the yoffset
+
+                                    if (color_ != "") {
+                                        color = getColorFromHexOrName(color_);
+                                    }
+
+                                    pixel.scrollText(text_, loop_, speed, color,WebEnabledPixel.pixelConnected);
+                            } 
+                            else {
+                            
+                                if (!CliPixel.getSilentMode()) {
+                                     System.out.println("GIF default console LED Marquee file not found, looking for default marquee: " + consoleFilePathGIF);
+                                     logMe.aLogger.info("GIF default console LED Marquee file not found, looking for default marquee: " + consoleFilePathGIF);
+                                }
+                                defaultConsoleFilePathPNG = application.getPixel().getPixelHome() + "console/" + "default-marquee.png"; 
+                                File defaultConsoleFilePNG = new File(defaultConsoleFilePathPNG);
+
+                                if(defaultConsoleFilePNG.exists() && !defaultConsoleFilePNG.isDirectory()) { 
+                                        handlePNG(defaultConsoleFilePNG, saveAnimation,loop_,"console",FilenameUtils.getName(defaultConsoleFilePathPNG));
+                                }
+                                else {
+                                        if (!CliPixel.getSilentMode()) {
+                                             System.out.println("Default console LED Marquee file not found: " + defaultConsoleFilePathPNG);
+                                             System.out.println("Skipping LED marquee " + streamOrWrite + ", please check the files");
+                                             logMe.aLogger.info("Default console LED Marquee file not found: " + defaultConsoleFilePathPNG);
+                                             logMe.aLogger.info("Skipping LED marquee " + streamOrWrite + ", please check the files");
+                                        }
+                                }
+                            }
                         }
-                }
+                
             }
         }
         
         else {
-             System.out.println("** ERROR ** URL format incorect, use http://localhost:8080/arcade/<stream or write>/<platform name>/<game name .gif or .png>");
-             System.out.println("Example: http://localhost:8080/arcade/write/mame/pacman.png or http://localhost:8080/arcade/stream/atari2600/digdug.gif");
-             logMe.aLogger.severe("** ERROR ** URL format incorect, use http://localhost:8080/arcade/<stream or write>/<platform name>/<game name .gif or .png>");
-             logMe.aLogger.severe("Example: http://localhost:8080/arcade/write/mame/pacman.png or http://localhost:8080/arcade/stream/atari2600/digdug.gif");
+             System.out.println("** ERROR ** URL format incorect, use http://localhost:8080/console/<stream or write>/<platform name>");
+             System.out.println("Example: http://localhost:8080/conosle/write/mame");
+             logMe.aLogger.severe("** ERROR ** URL format incorect, use http://localhost:8080/console/<stream or write>/<platform name>");
+             logMe.aLogger.severe("Example: http://localhost:8080/conosle/write/mame");
         }
     }
 

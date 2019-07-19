@@ -19,6 +19,7 @@ import org.apache.http.client.utils.URLEncodedUtils;
 import org.onebeartoe.network.TextHttpHandler;
 import org.onebeartoe.web.enabled.pixel.WebEnabledPixel;
 import org.onebeartoe.pixel.LogMe;
+import org.onebeartoe.pixel.hardware.Pixel;
 import org.onebeartoe.web.enabled.pixel.CliPixel;
 
 /**
@@ -162,7 +163,13 @@ public class ScrollingTextHttpHander extends TextHttpHandler  //TO DO have TextH
             speed = WebEnabledPixel.getScrollingTextSpeed(LED_MATRIX_ID);  //this method also sets the yoffset and font
         }
        
-        app.getPixel().scrollText(text_, loop, speed, color);
+        
+        //Pixel pixel = application.getPixel();
+        
+        //pixel.scrollText(text_, loop, speed, color,WebEnabledPixel.pixelConnected);
+        
+        // app.getPixel().scrollText(text_, loop, speed, color);
+        app.getPixel().scrollText(text_, loop, speed, color,WebEnabledPixel.pixelConnected);
         
         return "scrolling text request received: " + text_ ;
     }

@@ -60,6 +60,7 @@ import org.onebeartoe.web.enabled.pixel.controllers.StillImageListHttpHandler;
 import org.onebeartoe.web.enabled.pixel.controllers.UploadHttpHandler;
 import org.onebeartoe.web.enabled.pixel.controllers.UploadOriginHttpHandler;
 import org.onebeartoe.web.enabled.pixel.controllers.ArcadeHttpHandler;
+import org.onebeartoe.web.enabled.pixel.controllers.ConsoleHttpHandler;
 import org.onebeartoe.web.enabled.pixel.controllers.QuitHttpHandler;
 
 import org.onebeartoe.pixel.LogMe;
@@ -119,11 +120,13 @@ public class WebEnabledPixel
     
     private static long speed = 10L;
     
-    public static String pixelwebVersion = "2.0.7";
+    public static String pixelwebVersion = "2.0.8";
     
     private static boolean backgroundMode_ = false;
     
     private static boolean stayConnected = true;
+    
+    public static boolean pixelConnected = false;
     
     public WebEnabledPixel(String[] args)
     {
@@ -272,6 +275,8 @@ public class WebEnabledPixel
             HttpHandler animationsListHttpHandler = new AnimationsListHttpHandler(this);
             
             HttpHandler arcadeListHttpHandler = new ArcadeListHttpHandler(this);
+            
+            HttpHandler consoleListHttpHandler = new ConsoleHttpHandler(this);
 
             HttpHandler uploadHttpHandler = new UploadHttpHandler(this);
             
@@ -284,23 +289,19 @@ public class WebEnabledPixel
              HttpHandler quitHttpHandler = new QuitHttpHandler(this);
             
             
-            
-            
-            
 // ARE WE GONNA DO ANYTHING WITH THE HttpContext OBJECTS?   
             
             HttpContext createContext =     server.createContext("/", indexHttpHandler);
             
-            HttpContext animationsContext = server.createContext("/animation", animationsHttpHandler);
-                                            server.createContext("/animation/list", animationsListHttpHandler);
+            HttpContext animationsContext = server.createContext("/animations", animationsHttpHandler);
+                                            server.createContext("/animations/list", animationsListHttpHandler);
                                             server.createContext("/animations/save", animationsListHttpHandler);
                                             
             HttpContext arcadeContext =     server.createContext("/arcade", arcadeHttpHandler);
                                             server.createContext("/quit", quitHttpHandler);
                                             server.createContext("/shutdown", quitHttpHandler);
                                             server.createContext("/arcade/list", arcadeListHttpHandler);
-                                            
-                                            
+                                            server.createContext("/console", consoleListHttpHandler);
 
             HttpContext staticContent =     server.createContext("/files", staticFileHttpHandler);
             
@@ -314,7 +315,6 @@ public class WebEnabledPixel
                                             
             HttpContext uploadContext =     server.createContext("/upload", uploadHttpHandler);
                                             server.createContext("/upload/origin", uploadOriginHttpHandler);
-            
             
             HttpContext clockContext =      server.createContext("/clock", clockHttpHandler);
                                             
@@ -963,6 +963,23 @@ public class WebEnabledPixel
                     searchTimer.cancel(); //need to stop the timer so we don't still display the pixel searching message
                     
                     message.append("PIXEL Status: Connected");
+                    pixelConnected = true;
+                    
+                    //we just connected so let's let's check the Q and see if anything was written to it while we were searching for the board
+                    if (!pixel.PixelQueue.isEmpty()) {
+                        pixel.doneLoopingCheckQueue();
+                         if (!silentMode_)  {
+                            System.out.println("Processing Startup Queue Items...");
+                            logMe.aLogger.info("Processing Startup Queue Items...");
+                        }
+                    } else {
+                        if (!silentMode_)  {
+                            System.out.println("No Items in the Queue at Startup...");
+                            logMe.aLogger.info("No Items in the Queue at Startup...");
+                        }
+                    }
+                    
+                    //we need to check if there was anything written to the Q before we connected
                    
                      if (!silentMode_)  {
                          System.out.println(message);

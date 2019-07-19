@@ -47,13 +47,21 @@ public abstract class ImageResourceHttpHandler extends TextHttpHandler
                 // this is just a request change to still image mode
                 imageClassPath = defaultImageClassPath;
             }
-            else if( path.contains("/save/") )
+             else if( path.contains("/animations/"))
+            {
+                imageClassPath = requestURI.toString(); //this returns /arcade/stream/mame/pacman?t=1?c=2?r=5
+            }
+            else if( path.contains("/save/"))
             {
                 imageClassPath = path;
             }
-            else if( path.contains("/arcade/") )
+            else if( path.contains("/console/"))
+            { 
+                imageClassPath = requestURI.toString(); //this returns /arcade/stream/mame/pacman?t=1?c=2?r=5
+            }
+            else if( path.contains("/arcade/"))
             {
-                imageClassPath = path; //this just returns /arcade/stream/mame/pacman
+                //imageClassPath = path; //this just returns /arcade/stream/mame/pacman
                 imageClassPath = requestURI.toString(); //this returns /arcade/stream/mame/pacman?t=1?c=2?r=5
             }
             else
