@@ -120,7 +120,7 @@ public class WebEnabledPixel
     
     private static long speed = 10L;
     
-    public static String pixelwebVersion = "2.0.8";
+    public static String pixelwebVersion = "2.1.1";
     
     private static boolean backgroundMode_ = false;
     

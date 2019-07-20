@@ -193,6 +193,7 @@ public class Pixel
     private int loopPNGCounter = 0;
     
     private int p = 0;
+    private int scrollingTextMultiplier = 1;
    
     
     //private TimerTask animateTimer = new AnimateTimer();
@@ -265,6 +266,7 @@ public class Pixel
                 animationsPath = pixelHome + "animations\\";            
                 decodedAnimationsPath = animationsPath + "decoded\\";
                 imagesPath = pixelHome + "images\\";
+                scrollingTextMultiplier = 3; //have to slow down scrolling text on windows only
             } 
             else {
                 //pixelHome = userHome + "/";                 
@@ -1050,7 +1052,9 @@ private static String checksum(String filepath, MessageDigest md) throws IOExcep
            if (loop == 0) {
              loop = 1;
            }
-         addtoQueue("text", text, Long.toString(speed), loop, false, color);
+           //text = text.replace(';',',');
+           text = text.replaceAll(";"," "); 
+           addtoQueue("text", text, Long.toString(speed), loop, false, color);
             
         } else { 
         
@@ -1061,6 +1065,7 @@ private static String checksum(String filepath, MessageDigest md) throws IOExcep
              //if (scrollingTextColor == null) scrollingTextColor = Color.RED;
              loopScrollingTextCounter = 0;
              loopTimesGlobal = loop; 
+             text = text.replaceAll(";"," "); 
              addtoQueue("text",text,Long.toString(speed),loop,false,color);
                     
         } else 
@@ -1070,8 +1075,10 @@ private static String checksum(String filepath, MessageDigest md) throws IOExcep
             
             scrollDelay = speed;
     
-            setScrollingText(text);
-    
+            //setScrollingText(text);
+            
+             scrollingText = text;
+          
             setScrollTextColor(color);
         
             if (loop!=0) {                                      //we were not already looping but new command has a loop and is not a write so let's continue and loop the gif
@@ -1079,7 +1086,7 @@ private static String checksum(String filepath, MessageDigest md) throws IOExcep
                 isLooping = true;
                 loopScrollingTextCounter = 0;
                 loopTimesGlobal = loop; 
-                //System.out.println("looping for first time");
+                //System.out.println("looping for first time:" + loop);
             } else {                                            //we are not looping or we have a write command so let's reset everything and clear the Q
                 x = KIND.width;
                 isLooping = false;
@@ -1936,18 +1943,17 @@ private static String checksum(String filepath, MessageDigest md) throws IOExcep
     public void addtoQueue(String mode, String consoleOrText, String FileNameOrSpeed, int loop, Boolean writeMode, Color color) {
         System.out.println("Adding item to Queue..."); 
         
-        /*System.out.println("mode: " + mode); 
+        System.out.println("mode: " + mode); 
         System.out.println("text: " + consoleOrText); 
         System.out.println("speed: " + FileNameOrSpeed); 
         System.out.println("loop: " + loop);
         System.out.println("writemode: " + writeMode); 
         System.out.println("color: " + color); 
         System.out.println("color hex: " + toHexString(color)); 
-        */
         
         try { 
             
-            PixelQueue.add(mode + "," + consoleOrText + "," + FileNameOrSpeed + "," + Integer.toString(loop) + "," + writeMode.toString() + "," + toHexString(color));
+            PixelQueue.add(mode + ";" + consoleOrText + ";" + FileNameOrSpeed + ";" + Integer.toString(loop) + ";" + writeMode.toString() + ";" + toHexString(color));
         } 
         catch (Exception e) { 
             System.out.println("Queue Exception: " + e); 
@@ -2842,8 +2848,8 @@ private static String checksum(String filepath, MessageDigest md) throws IOExcep
         public void run() {
               
             loopPNGCounter++;
-            System.out.println("loop PNG counter: " + loopPNGCounter);
-            System.out.println("loop limit: " + loopTimesGlobal);
+            //System.out.println("loop PNG counter: " + loopPNGCounter);
+            //System.out.println("loop limit: " + loopTimesGlobal);
             
             if (isLooping == true && loopPNGCounter > loopTimesGlobal) {  //first of all, we must be in loop mode and if so have we finished all of our loops
                 //ok we're done looping so now we need to stop this current animation or scrolling text and then check the queue
@@ -2897,9 +2903,9 @@ private static String checksum(String filepath, MessageDigest md) throws IOExcep
               System.out.println("Processing items in the Queue");
               //we've got some stuff in the queue so let's process
               String QueueCommand = PixelQueue.element(); //get the item in the top of the queue
-              String [] QueueCommandArray = QueueCommand.split(","); 
+              String [] QueueCommandArray = QueueCommand.split(";"); 
               
-               /*
+              /*
                System.out.println("Q Length: " + QueueCommandArray.length);
                System.out.println("Q 1: " + QueueCommandArray[0]);
                System.out.println("Q 2: " + QueueCommandArray[1]);
@@ -2908,6 +2914,7 @@ private static String checksum(String filepath, MessageDigest md) throws IOExcep
                System.out.println("Q 5: " + QueueCommandArray[4]);
                System.out.println("Q 6: " + QueueCommandArray[5]);
               */
+             
                     
               if (QueueCommandArray.length == 6) {
                   
@@ -3240,11 +3247,14 @@ private static String checksum(String filepath, MessageDigest md) throws IOExcep
                 
             }
                         
-            int messageWidth = fm.stringWidth(scrollingText);            
+            int messageWidth = fm.stringWidth(scrollingText);    
+            // System.out.println("message width: " + messageWidth);
             int resetX = 0 - messageWidth;
-            
-            if(x == resetX) {  //this means we finished one loop of scrolling text
+            //System.out.println("resetx: " + resetX);
+          
+            if(x <= resetX) {  //this means we finished one loop of scrolling text
                 x = w;
+                //System.out.println("x reset: " + x);
                 loopScrollingTextCounter++;
                 
                 //System.out.println("text: loopScrollingTextCounter: " + loopScrollingTextCounter);
@@ -3259,7 +3269,9 @@ private static String checksum(String filepath, MessageDigest md) throws IOExcep
             }
             else
             {
-                x--;
+                //x--;
+                //System.out.println("x: " + x);
+                x = x-scrollingTextMultiplier; //TO DO tweak this for windows scrolling
             }
           }
         }
