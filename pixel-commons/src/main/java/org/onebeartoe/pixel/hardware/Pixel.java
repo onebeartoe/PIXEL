@@ -2514,7 +2514,8 @@ private static String checksum(String filepath, MessageDigest md) throws IOExcep
                     if (isLooping && !writeMode) {
 
                         ScheduledExecutorService loopPNGservice = Executors.newScheduledThreadPool(1);
-                        futureimage = loopPNGservice.scheduleAtFixedRate(pngLoopTask, 0, loop, TimeUnit.SECONDS);
+                        //futureimage = loopPNGservice.scheduleAtFixedRate(pngLoopTask, 0, loop, TimeUnit.SECONDS);
+                        futureimage = loopPNGservice.scheduleAtFixedRate(pngLoopTask, 0, 1, TimeUnit.SECONDS); //start now and run every second
                         PNGTimerRunningFlag.set(true);  //atomic boolean , better for threads
 
                     }
@@ -2841,10 +2842,10 @@ private static String checksum(String filepath, MessageDigest md) throws IOExcep
         public void run() {
               
             loopPNGCounter++;
-            //System.out.println("loop PNG counter: " + loopPNGCounter);
-            //System.out.println("loop limit: " + loopTimesGlobal);
+            System.out.println("loop PNG counter: " + loopPNGCounter);
+            System.out.println("loop limit: " + loopTimesGlobal);
             
-            if (isLooping == true && loopPNGCounter >= loopTimesGlobal) {  //first of all, we must be in loop mode and if so have we finished all of our loops
+            if (isLooping == true && loopPNGCounter > loopTimesGlobal) {  //first of all, we must be in loop mode and if so have we finished all of our loops
                 //ok we're done looping so now we need to stop this current animation or scrolling text and then check the queue
                 loopPNGCounter = 0;
                 loopTimesGlobal = 0;
