@@ -167,7 +167,8 @@ public class ArcadeHttpHandler extends ImageResourceHttpHandler
             } catch (URISyntaxException ex) {
                 Logger.getLogger(ArcadeHttpHandler.class.getName()).log(Level.SEVERE, null, ex);
         }
-        for (NameValuePair param : params) {
+        //moved this down as we added gt and gametitle
+        /*for (NameValuePair param : params) {
            
              switch (param.getName()) {
 
@@ -184,11 +185,17 @@ public class ArcadeHttpHandler extends ImageResourceHttpHandler
                     case "loop": //loop
                        loop_ = Integer.valueOf(param.getValue());
                         break;
+                    case "gt": //game title
+                        text_ = 
+                        break; 
+                    case "gametitle": //game title
+
+                    break; 
                     case "c": //color
                        color_ = param.getValue();
                        break;
                     }
-        }
+        } */
   
         // /arcade/stream/mame/pacman?t=x?5=x
         //so now we just need to the left of the ?
@@ -239,6 +246,36 @@ public class ArcadeHttpHandler extends ImageResourceHttpHandler
             //arcadeNameExtension = FilenameUtils.getExtension(arcadeName); 
             arcadeNameOnly = FilenameUtils.getBaseName(arcadeName); //stripping out the extension
             
+            for (NameValuePair param : params) {
+           
+             switch (param.getName()) {
+
+                    case "t": //scrolling text value
+                        text_ = param.getValue();
+                        break;
+                    case "text": //scrolling speed
+                        text_ = param.getValue();
+                        break;
+                    case "l": //how many times to loop
+                        loop_ = Integer.valueOf(param.getValue());
+                        // Long speed = Long.valueOf(s); //to do for integer
+                        break;
+                    case "loop": //loop
+                       loop_ = Integer.valueOf(param.getValue());
+                        break;
+                    case "gt": //game title
+                        text_ = WebEnabledPixel.getGameName(arcadeNameOnly);
+                        break; 
+                    case "gametitle": //game title
+                        text_ = WebEnabledPixel.getGameName(arcadeNameOnly);
+                    break; 
+                    case "c": //color
+                       color_ = param.getValue();
+                       break;
+                    }
+            }
+            
+            
             
             //let's now refer to our mapping table for the console names, because console names are different for RetroPie vs. HyperSpin and other front ends
             //to do add a user defined .txt mapping if the console is not found in our mapping table
@@ -274,7 +311,7 @@ public class ArcadeHttpHandler extends ImageResourceHttpHandler
                     System.out.println("# of Times to Loop: " + loop_);
                 }
                 
-                if (text_ != "") System.out.println("alt text if game file not found: " + text_);
+                if (text_ != "") System.out.println("alt text if game file not found: " + text_); //game title would have been written here
 
                 logMe.aLogger.info(streamOrWrite.toUpperCase() + " MODE");
                 logMe.aLogger.info("Console Before Mapping: " + consoleName);

@@ -16,7 +16,9 @@ import java.awt.Color;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
@@ -27,6 +29,7 @@ import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.TimerTask;
 import java.util.logging.Level;
@@ -62,6 +65,11 @@ import org.onebeartoe.web.enabled.pixel.controllers.UploadOriginHttpHandler;
 import org.onebeartoe.web.enabled.pixel.controllers.ArcadeHttpHandler;
 import org.onebeartoe.web.enabled.pixel.controllers.ConsoleHttpHandler;
 import org.onebeartoe.web.enabled.pixel.controllers.QuitHttpHandler;
+import org.onebeartoe.web.enabled.pixel.controllers.mameRom2Name;
+
+import org.json.simple.JSONArray; 
+import org.json.simple.JSONObject; 
+import org.json.simple.parser.*;
 
 import org.onebeartoe.pixel.LogMe;
 /**
@@ -70,6 +78,8 @@ import org.onebeartoe.pixel.LogMe;
 public class WebEnabledPixel
 {
     //public static final Logger logger = null;
+    
+    public static String pixelwebVersion = "2.1.2";
     
     public static LogMe logMe = null;
 
@@ -120,15 +130,17 @@ public class WebEnabledPixel
     
     private static long speed = 10L;
     
-    public static String pixelwebVersion = "2.1.1";
-    
     private static boolean backgroundMode_ = false;
     
     private static boolean stayConnected = true;
     
     public static boolean pixelConnected = false;
     
-    public WebEnabledPixel(String[] args)
+    public static boolean rom2GameMappingExists = false;
+    
+    public static HashMap<String, String> rom2NameMap = new HashMap<String, String>();
+    
+    public WebEnabledPixel(String[] args) throws FileNotFoundException, IOException
     {
         cli = new CliPixel(args);
         cli.parse();
@@ -238,16 +250,42 @@ public class WebEnabledPixel
         
         if (!silentMode_) logMe.aLogger.info( "Pixelcade HOME DIRECTORY: " +    pixel.getPixelHome());
         
-            extractDefaultContent();  //to do :  keep this file smaller, moved this to pixelcade-installer?
+        extractDefaultContent();  //to do :  keep this file smaller, moved this to pixelcade-installer?
 
-            loadImageLists();
+        loadImageLists();
 
-            loadAnimationList();
+        loadAnimationList();
 
-            loadArcadeList();
+        loadArcadeList();
 
-            createControllers();
+        createControllers();
+        
+        //let's load a rom name to game title mapping into memory into a hashmap
+        File mamefile = new File("mame2.csv"); //csv file
+        if (mamefile.exists() && !mamefile.isDirectory()) { 
+            rom2GameMappingExists = true;
+            String filePath = "mame2.csv";
+            String line;
+            BufferedReader reader = new BufferedReader(new FileReader(filePath));
+            while ((line = reader.readLine()) != null)
+            {
+                String[] parts = line.split(",", 2);
+                if (parts.length >= 2)
+                {
+                    String key = parts[0];
+                    String value = parts[1];
+                    rom2NameMap.put(key, value);
+                } else {
+                    System.out.println("ignoring line: " + line);
+                }
+            }
+            
+            reader.close();
+            } else {
+             
+            System.out.println("mame2.csv does not exist");
         }
+    } 
         
     private void createControllers()
     {
@@ -660,9 +698,24 @@ public class WebEnabledPixel
         }
     }
      
+     
+     public static String getGameName(String romName) {  //returns the game name string based on the rom name
+        
+        String GameName = "";
+        
+        if (rom2GameMappingExists) {
+             GameName = rom2NameMap.get(romName); 
+        } else {
+            GameName = "mame2.csv does not exist"; 
+        }
+        return GameName;
+    }
+     
      public static int getMatrixID() {
          return  LED_MATRIX_ID;
      }
+     
+     
      
      public static long getScrollingTextSpeed(int LED_MATRIX_ID) {
                          
@@ -802,7 +855,7 @@ public class WebEnabledPixel
         return stillImageNames;
     }
     
-    public static void main(String[] args)
+    public static void main(String[] args) throws IOException
     {
         
         WebEnabledPixel app = new WebEnabledPixel(args);

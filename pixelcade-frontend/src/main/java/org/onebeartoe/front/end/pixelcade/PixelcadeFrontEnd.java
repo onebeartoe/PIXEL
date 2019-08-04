@@ -53,6 +53,8 @@ public class PixelcadeFrontEnd
     
     private static Boolean silent_ = false;
     
+    private static Boolean gameTitle_ = false;
+    
     private static String BaseGameName_ = "";
     
     private static HttpURLConnection con;
@@ -89,6 +91,7 @@ public class PixelcadeFrontEnd
             color_ = cli.getColor();
             speed_ = cli.getSpeed();
             loop_ = cli.getLoop();
+            gameTitle_ = cli.getGameTitleMode();
         }
     
     public static void main(String[] args) throws MalformedURLException, IOException
@@ -211,12 +214,12 @@ public class PixelcadeFrontEnd
         //     makeRESTCall(URLString);
         //}
         
-        else if (!color_.equals("") && text_.equals("")) {  //color was specified but no text so it's a color only command
+        else if (!color_.equals("") && text_.equals("") && !gameTitle_) {  //color was specified but no text so it's a color only command
              URLString = "http://localhost:8080/text/color/" + color_;
              makeRESTCall(URLString);
         }
         
-        else if (!speed_.equals("") && text_.equals("")) {  //speed was specified but no text so it's a speed only command
+        else if (!speed_.equals("") && text_.equals("") && !gameTitle_) {  //speed was specified but no text so it's a speed only command
              URLString = "http://localhost:8080/text/speed/" + speed_;
              makeRESTCall(URLString);
         }
@@ -253,10 +256,15 @@ public class PixelcadeFrontEnd
                     } else {
                         URLString = URLString + "?l=0";  //had to do this because first parameter has to be ? and then next is &
                     }
-                    
-                    if (!text_.equals("")) {
-                        URLString = URLString + "&t=" + text_;
-                    } 
+                            
+                    if (!gameTitle_.equals("")) {  //if game title is specified, we'll take that first before just plan text
+                        URLString = URLString + "&gt";
+                    } else {
+
+                        if (!text_.equals("")) {
+                            URLString = URLString + "&t=" + text_;
+                        }
+                    }
                     
                     if (!color_.equals("")) {
                         URLString = URLString + "&c=" + color_;

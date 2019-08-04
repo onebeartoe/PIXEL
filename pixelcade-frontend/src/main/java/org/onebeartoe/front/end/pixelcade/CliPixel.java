@@ -29,18 +29,20 @@ public class CliPixel
  private String loop = "";
  private Boolean quit = false;
  private Boolean silent = false;
+ private Boolean gameTitle = false;
  private int yTextOffset = 0;
- private static String instructions = "usage: Pixelcade Version 2.0.7\n" +
-"                    -m,--mode <arg>  Sets stream or write mode, options are stream or write\n" +
-"                    -c,--console <arg>  Sets the console or platform name, ex. mame, atari2600, nes\n" +
-"                    -g,--game <arg>  Sets game / rom name, can be a full path, file name,\n" +
+ private static String instructions = "usage: Pixelcade Version 2.1.2\n" +
+"                    -m,-mode <arg>  Sets stream or write mode, options are stream or write\n" +
+"                    -c,-console <arg>  Sets the console or platform name, ex. mame, atari2600, nes\n" +
+"                    -g,-game <arg>  Sets game / rom name, can be a full path, file name,\n" +
 "                        or just the basename without the extension\n" +
-"                    -t, --text <arg> Scrolling text\n" +
-"                    -l, --loop <arg> Looping and Queue Feature\n" +
-"                    -color, --color <arg> Sets scrolling text color\n" +    
-"                    -speed, --speed <arg> Sets the scrolling text speed, min 10 and max 150\n" +        
-"                    -q,--quit Shuts down the Pixelcade Listener (pixelweb.exe)\n" +
-"                    -h,--help  show help.\n" +
+"                    -t, -text <arg> Scrolling text\n" +
+"                    -gt, -gametitle Scrolls MAME game title if no matching image\n" +
+"                    -l, -loop <arg> Looping and Queue Feature\n" +
+"                    -color, -color <arg> Sets scrolling text color\n" +    
+"                    -speed, -speed <arg> Sets the scrolling text speed, min 10 and max 150\n" +        
+"                    -q,-quit Shuts down the Pixelcade Listener (pixelweb.exe)\n" +
+"                    -h,-help  show help.\n" +
 "                     Full documentation and examples at ledpixelart.com/pixelcade-api\n" +         
 "                    \n" +
 "                    Examples\n" +
@@ -48,6 +50,7 @@ public class CliPixel
 "                           Atari 2600 must be enclosed in double quotes\n" +
 "                    pixelcade.exe -m stream -p \"Atari 2600\" -g Rampage.bin\n" +
 "                    pixelcade.exe -m write -p mame -g d:\\roms\\pacman.zip\n" +
+"                    pixelcade.exe -m write -p mame -g ad5crscg -gametitle\n" +
 "                    pixelcade.exe -q\n" +
 "                    java -jar pixelcade.jar -m stream -p c64 -g \"Video Vermin (World).zip\" \n" +
 "                    java -jar pixelcade.jar -m write -p \"Nintendo Entertain System\" -g \"Zelda II - The Adventure of Link (U).zip\"";
@@ -65,6 +68,7 @@ public class CliPixel
   options.addOption("color", "color", true, "Scrolling text color");
   options.addOption("speed", "speed", true, "Scrolling text speed");
   options.addOption("l", "loop", true, "Looping and Queue Feature");
+  options.addOption("gt", "gametitle", false, "Scrolls MAME game title if no matching image");
   options.addOption("s", "silent", false, "Run in silent mode");
   options.addOption("q", "quit", false, "Shuts down the Pixelcade Listener (pixelweb.exe)");
   options.addOption("h", "help", false, "show help.");
@@ -128,6 +132,10 @@ public class CliPixel
           //log.log(Level.INFO, "Using cli argument -q=" + cmd.getOptionValue("q"));
           silent = true;
       }
+       
+       if (cmd.hasOption("gt")) {
+          gameTitle = true;
+      }
       
 
   } catch (ParseException e) {
@@ -187,6 +195,11 @@ public class CliPixel
  public boolean getSilentMode()
 {
     return silent;
+}
+ 
+  public boolean getGameTitleMode()
+{
+    return gameTitle;
 }
  
  public static String getInstructions() {
