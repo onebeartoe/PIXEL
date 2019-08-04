@@ -150,6 +150,8 @@ public class Pixel
      */
     private long scrollDelay = 10; 
     
+    private int scrollSmooth = 1; 
+    
     private Color scrollingTextColor = Color.RED;
     
     private static int yScrollingTextOffset = 0;
@@ -266,7 +268,7 @@ public class Pixel
                 animationsPath = pixelHome + "animations\\";            
                 decodedAnimationsPath = animationsPath + "decoded\\";
                 imagesPath = pixelHome + "images\\";
-                scrollingTextMultiplier = 3; //have to slow down scrolling text on windows only
+                scrollingTextMultiplier = 3; //to do this may no longer be needed
             } 
             else {
                 //pixelHome = userHome + "/";                 
@@ -1044,7 +1046,7 @@ private static String checksum(String filepath, MessageDigest md) throws IOExcep
         }
     }
    
-    public void scrollText(String text, int loop, long speed, Color color, boolean pixelConnected)
+    public void scrollText(String text, int loop, long speed, Color color, boolean pixelConnected,int scrollsmooth)
     {
         
      if (!pixelConnected) {  //if pixel is still starting up and we get a command, let's add to Q
@@ -1054,7 +1056,7 @@ private static String checksum(String filepath, MessageDigest md) throws IOExcep
            }
            //text = text.replace(';',',');
            text = text.replaceAll(";"," "); 
-           addtoQueue("text", text, Long.toString(speed), loop, false, color);
+           addtoQueue("text", text, Long.toString(speed), loop, false, color,scrollsmooth);
             
         } else { 
         
@@ -1066,18 +1068,17 @@ private static String checksum(String filepath, MessageDigest md) throws IOExcep
              loopScrollingTextCounter = 0;
              loopTimesGlobal = loop; 
              text = text.replaceAll(";"," "); 
-             addtoQueue("text",text,Long.toString(speed),loop,false,color);
+             addtoQueue("text",text,Long.toString(speed),loop,false,color,scrollsmooth);
                     
         } else 
         
         {
-            //setScrollDelay(speed);
             
             scrollDelay = speed;
-    
-            //setScrollingText(text);
             
-             scrollingText = text;
+            scrollingTextMultiplier = scrollsmooth;
+            
+            scrollingText = text;
           
             setScrollTextColor(color);
         
@@ -1930,6 +1931,11 @@ private static String checksum(String filepath, MessageDigest md) throws IOExcep
         scrollDelay = delay;
     }
     
+     public void setScrollSmooth(int scrollsmooth)
+    {
+        scrollingTextMultiplier = scrollsmooth;
+    }
+    
     public void setScrollingText(String text)
     {
         scrollingText = text;
@@ -1940,7 +1946,7 @@ private static String checksum(String filepath, MessageDigest md) throws IOExcep
         scrollingTextColor = color;
     }
     
-    public void addtoQueue(String mode, String consoleOrText, String FileNameOrSpeed, int loop, Boolean writeMode, Color color) {
+    public void addtoQueue(String mode, String consoleOrText, String FileNameOrSpeed, int loop, Boolean writeMode, Color color, int scrollSmooth) {
         System.out.println("Adding item to Queue..."); 
         
         System.out.println("mode: " + mode); 
@@ -1950,10 +1956,11 @@ private static String checksum(String filepath, MessageDigest md) throws IOExcep
         System.out.println("writemode: " + writeMode); 
         System.out.println("color: " + color); 
         System.out.println("color hex: " + toHexString(color)); 
+        System.out.println("scroll smooth: " + scrollSmooth);
         
         try { 
             
-            PixelQueue.add(mode + ";" + consoleOrText + ";" + FileNameOrSpeed + ";" + Integer.toString(loop) + ";" + writeMode.toString() + ";" + toHexString(color));
+            PixelQueue.add(mode + ";" + consoleOrText + ";" + FileNameOrSpeed + ";" + Integer.toString(loop) + ";" + writeMode.toString() + ";" + toHexString(color) + ";" + Integer.toString(scrollSmooth));
         } 
         catch (Exception e) { 
             System.out.println("Queue Exception: " + e); 
@@ -2015,14 +2022,14 @@ private static String checksum(String filepath, MessageDigest md) throws IOExcep
         if (!pixelConnected) {
              
             if (loop == 0) loop = 1;
-            addtoQueue("gif",selectedPlatformName,selectedFileName,loop,writeMode,Color.red);
+            addtoQueue("gif",selectedPlatformName,selectedFileName,loop,writeMode,Color.red,1);
             
         } else {
         
         
             if (isLooping && loop != 0 && !writeMode) {  //we were already looping and new command has a loop and is not a write command so let's write to the Q
 
-                 addtoQueue("gif",selectedPlatformName,selectedFileName,loop,writeMode,Color.red);
+                 addtoQueue("gif",selectedPlatformName,selectedFileName,loop,writeMode,Color.red,1);
 
             } else 
 
@@ -2151,13 +2158,13 @@ private static String checksum(String filepath, MessageDigest md) throws IOExcep
         if (!pixelConnected) {
              
             if (loop == 0) loop = 1;
-            addtoQueue("animations",selectedPlatformName,selectedFileName,loop,writeMode,Color.red);
+            addtoQueue("animations",selectedPlatformName,selectedFileName,loop,writeMode,Color.red,1);
             
         } else {
 
             if (isLooping && loop != 0 && !writeMode) {  //we were already looping and new command has a loop and is not a write command so let's write to the Q
 
-                    addtoQueue("animations",selectedPlatformName,selectedFileName,loop,writeMode,Color.red);
+                    addtoQueue("animations",selectedPlatformName,selectedFileName,loop,writeMode,Color.red,1);
 
                } else 
 
@@ -2437,13 +2444,13 @@ private static String checksum(String filepath, MessageDigest md) throws IOExcep
         if (!pixelConnected) {
              
             if (loop == 0) loop = 3;
-            addtoQueue("png",consoleNameMapped,PNGNameWithExtension,loop,writeMode,Color.red);
+            addtoQueue("png",consoleNameMapped,PNGNameWithExtension,loop,writeMode,Color.red,1);
             
         } else {
         
         
             if (isLooping && loop != 0 && !writeMode) {  //we were already looping and new command has a loop and is not a write command so let's write to the Q
-                 addtoQueue("png",consoleNameMapped,PNGNameWithExtension,loop,writeMode,Color.red);
+                 addtoQueue("png",consoleNameMapped,PNGNameWithExtension,loop,writeMode,Color.red,1);
             } else 
 
            {
@@ -2887,6 +2894,7 @@ private static String checksum(String filepath, MessageDigest md) throws IOExcep
         
         String text_ = null;
         Long speed_ = null;
+        int scrollsmooth_ = 1;
         Color color_ = null;
 
         //must reset loop flag and loop times to 0 before stopping timer
@@ -2916,7 +2924,7 @@ private static String checksum(String filepath, MessageDigest md) throws IOExcep
               */
              
                     
-              if (QueueCommandArray.length == 6) {
+              if (QueueCommandArray.length == 7) {
                   
                   mode_ = QueueCommandArray[0];
                   
@@ -2929,6 +2937,7 @@ private static String checksum(String filepath, MessageDigest md) throws IOExcep
                       } else {
                           writeMode_ = false;
                       }
+                      
                       
                       if (mode_.equals("gif")) {
                           PixelQueue.remove();
@@ -2976,24 +2985,25 @@ private static String checksum(String filepath, MessageDigest md) throws IOExcep
                       text_ = QueueCommandArray[1];
                       speed_ = Long.valueOf(QueueCommandArray[2]);
                       loop_ = Integer.valueOf(QueueCommandArray[3]); 
-                      
+                     
                      
                       if (QueueCommandArray[4].equals("true")) {
                           writeMode_ = true;
                       } else {
                           writeMode_ = false;
                       }
-                      
                                // to do need error handling here in case bad value for the color
                       String colorHexString = QueueCommandArray[5]; //color in the array is stored as a hex string like this ff00ff
                       color_ = hex2Rgb(colorHexString);             // now let's convert that hex string to rgb color
                     
+                      scrollsmooth_ = Integer.valueOf(QueueCommandArray[6]); //the default is 1
+                      
                       if (text_ == null) text_ = "No Text Specified";  //we don't need to set text, speed, color here as that will happen in the scrolltext method
                       if (speed_ == null) speed_ = 10L;
                       if (color_ == null) color_ = Color.RED;  //let's default to red if color not specified
-                      
-                      //
-                      //we have everything so now let's scroll text
+                      if (scrollsmooth_ == 0) scrollsmooth_ = 1; //not really needed but just to be safe
+//
+                      //ok, we have everything we need now so let's scroll text
                       
                         try { 
                                 PixelQueue.remove(); 
@@ -3002,7 +3012,7 @@ private static String checksum(String filepath, MessageDigest md) throws IOExcep
                                 System.out.println("Exception: " + e);
                         }
                      
-                      scrollText(text_, loop_, speed_, color_, true);
+                      scrollText(text_, loop_, speed_, color_, true,scrollsmooth_);
                       
                   }
                   else {
