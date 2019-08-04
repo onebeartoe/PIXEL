@@ -12,11 +12,11 @@ import org.onebeartoe.web.enabled.pixel.WebEnabledPixel;
 /**
  * @author Roberto Marquez
  */
-public class ScrollingTextSpeedHttpHandler extends TextHttpHandler
+public class ScrollingTextScrollSmoothHttpHandler extends TextHttpHandler
 {
     protected WebEnabledPixel application;
     
-    public ScrollingTextSpeedHttpHandler(WebEnabledPixel application)
+    public ScrollingTextScrollSmoothHttpHandler(WebEnabledPixel application)
     {
         this.application = application;
     }
@@ -31,22 +31,17 @@ public class ScrollingTextSpeedHttpHandler extends TextHttpHandler
         int i = path.lastIndexOf("/") + 1;
         String s = path.substring(i);
         
-        Long speed = Long.valueOf(s);
-        
-        if(speed == 0) 
-        {
-            speed = 10L;
-        }
+        int scrollsmooth = Integer.valueOf(s);
         
         Pixel pixel = application.getPixel();
-        pixel.setScrollDelay(speed);
+        pixel.setScrollSmooth(scrollsmooth);
         
         if (!CliPixel.getSilentMode()) {
-            System.out.println("scrolling text speed update received:" + speed);
-            logMe.aLogger.info("scrolling text speed update received:" + speed);
+            System.out.println("scrolling smooth factor received:" + scrollsmooth);
+            logMe.aLogger.info("scrolling smooth factor received:" + scrollsmooth);
          }
         
-        return "scrolling text speed update received:" + speed;
+        return "scrolling smooth factor received:" + scrollsmooth;
     }
 
 }

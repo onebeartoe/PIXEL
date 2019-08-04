@@ -41,13 +41,13 @@ public class CliPixel
                     "0=32x16 Old 1=32x16, 2=32x32 Old\n" +
                     "3=PIXEL V2 32x32 Old, 4=64x32 Old, 5=32x64 Old, 6=Old 2 Mirrored\n" +
                     "7=Old 4 Mirrored (does not work), 8=128x32 Old, 9=32x128 Old\n" +
-                    "10=SUPER PIXEL 64x64, 11=32x32, 12=32x32 Color Swap\n" +
+                    "10=Old SUPER PIXEL 64x64, 11=32x32, 12=32x32 Color Swap\n" +
                     "13=64x32, 14=64x64, 15=128x32\n" +
                     "16=32x128, 17=64x16, \n" +
                     "18=64x32 Mirrored, 19=256x16, \n" +
                     "20=32x32 Mirrored, 21=32x32 4x Mirrored, \n" +
                     "22=128x16, 23=ALIEXPRESS RANDOM1 32x32, \n" +
-                    "24=64x32 COLOR SWAP, 25=64x32 COLOR SWAP\n");
+                    "24=64x32 COLOR SWAP, 25=64x64 COLOR SWAP\n");
   
   
   options.addOption("m", "matrix", true, "Sets the LED matrix type, same as l option");

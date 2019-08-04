@@ -40,57 +40,6 @@ public class ScrollingTextColorHttpHandler extends TextHttpHandler
         
         if (colorString != null) color = ArcadeHttpHandler.getColorFromHexOrName(colorString);
         
-        /*
-        if (isHexadecimal(color_) && color_.length() == 6) {  //hex colors are 6 digits
-            color = hex2Rgb(color_);
-            System.out.println("Hex color value detected");
-        } else {   //and if not then color text was entered so let's look for a match
-
-            switch (color_) {
-
-                case "red":
-                    color = Color.RED;
-                    break;
-                case "blue":
-                    color = Color.BLUE;
-                    break;
-                case "cyan":
-                    color = Color.CYAN;
-                    break;
-                case "gray":
-                    color = Color.GRAY;
-                    break;
-                case "darkgray":
-                    color = Color.DARK_GRAY;
-                    break;
-                case "green":
-                    color = Color.GREEN;
-                    break;
-                case "lightgray":
-                    color = Color.LIGHT_GRAY;
-                    break;
-                case "magenta":
-                    color = Color.MAGENTA;
-                    break;
-                case "orange":
-                    color = Color.ORANGE;
-                    break;
-                case "pink":
-                    color = Color.PINK;
-                    break;
-                case "yellow":
-                    color = Color.YELLOW;
-                    break;
-                case "white":
-                    color = Color.WHITE;
-                    break;
-                default:
-                    color = Color.RED;
-                    System.out.println("Invalid color, defaulting to red");
-            }
-        }
-        */
-        
 // I think in head less environment decode() did not work        
 //        Color color = Color.decode(hex);
         

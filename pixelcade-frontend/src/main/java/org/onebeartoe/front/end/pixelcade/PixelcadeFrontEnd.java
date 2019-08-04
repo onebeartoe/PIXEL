@@ -45,6 +45,8 @@ public class PixelcadeFrontEnd
     
     private static String speed_ = "";
     
+    private static String scrollsmooth_ = "";
+    
     private static String eventID_ = "";
     
     private static String loop_ = "";
@@ -90,6 +92,7 @@ public class PixelcadeFrontEnd
             text_ = cli.getText();
             color_ = cli.getColor();
             speed_ = cli.getSpeed();
+            scrollsmooth_ = cli.getScrollSmooth();
             loop_ = cli.getLoop();
             gameTitle_ = cli.getGameTitleMode();
         }
@@ -199,7 +202,10 @@ public class PixelcadeFrontEnd
                 URLString = URLString + "&c=" + color_;
             } 
             if (!speed_.equals("")) {
-                URLString = URLString + "&s=" + speed_;
+                URLString = URLString + "&speed=" + speed_;
+            }
+            if (!scrollsmooth_.equals("")) {
+                URLString = URLString + "&ss=" + scrollsmooth_;
             } 
             if (!loop_.equals("")) {
                 URLString = URLString + "&l=" + loop_;
@@ -221,6 +227,11 @@ public class PixelcadeFrontEnd
         
         else if (!speed_.equals("") && text_.equals("") && !gameTitle_) {  //speed was specified but no text so it's a speed only command
              URLString = "http://localhost:8080/text/speed/" + speed_;
+             makeRESTCall(URLString);
+        }
+        
+        else if (!scrollsmooth_.equals("") && text_.equals("") && !gameTitle_) {  //scroll smooth was specified but no text so it's a scrollsmooth only command
+             URLString = "http://localhost:8080/text/scrollspeed/" + scrollsmooth_;
              makeRESTCall(URLString);
         }
             
@@ -257,7 +268,7 @@ public class PixelcadeFrontEnd
                         URLString = URLString + "?l=0";  //had to do this because first parameter has to be ? and then next is &
                     }
                             
-                    if (!gameTitle_.equals("")) {  //if game title is specified, we'll take that first before just plan text
+                    if (gameTitle_) {  //if game title is specified, we'll take that first before just plan text
                         URLString = URLString + "&gt";
                     } else {
 
@@ -268,6 +279,14 @@ public class PixelcadeFrontEnd
                     
                     if (!color_.equals("")) {
                         URLString = URLString + "&c=" + color_;
+                    } 
+                    
+                    if (!speed_.equals("")) {
+                        URLString = URLString + "&speed=" + speed_;
+                    } 
+                    
+                    if (!scrollsmooth_.equals("")) {
+                        URLString = URLString + "&ss=" + scrollsmooth_;
                     } 
 
                     makeRESTCall(URLString);

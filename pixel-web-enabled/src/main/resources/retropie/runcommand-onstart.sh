@@ -37,11 +37,12 @@ if $pixelexists | grep -q '/dev/ttyACM0'; then  #let's only go here if we detect
    if [[ $PLATFORM == "mame-libretro" ]] || [[ $PLATFORM == "mame-mame4all" ]] || [[ $PLATFORM == "arcade" ]] || [[ $PLATFORM == "mame-advmame" ]] ;then
 
        if [[ -f "$MAMECSV" ]]; then
-         while IFS=, read -r romname title year manufacturer rpi2	rpi3	bios	notes
+         #while IFS=, read -r romname title year manufacturer rpi2	rpi3	bios	notes
+        while IFS=, read -r romname title
          do
              if [[ $romname = $GAMEFILENAME ]];then
                USERMESSAGE="Writing LED Marquee for $title..."
-               MAMEGAMETITLE=$title
+               #MAMEGAMETITLE=$title
                #echo "Writing LED Marquee for $title..."
              fi
          done < $MAMECSV
@@ -64,7 +65,8 @@ if $pixelexists | grep -q '/dev/ttyACM0'; then  #let's only go here if we detect
        #java -jar "${PIXELPATH}pixelcade.jar" -m stream -c "$PLATFORM" -g "${ROMPATH}" -t "${MAMEGAMETITLE}"
        #silent mode
         if [[ $PLATFORM == "mame-libretro" ]] || [[ $PLATFORM == "mame-mame4all" ]] || [[ $PLATFORM == "arcade" ]] || [[ $PLATFORM == "mame-advmame" ]] ;then
-          java -jar "${PIXELPATH}pixelcade.jar" -m stream -c "$PLATFORM" -g "${ROMPATH}" -s -t "${MAMEGAMETITLE}" 
+          #java -jar "${PIXELPATH}pixelcade.jar" -m stream -c "$PLATFORM" -g "${ROMPATH}" -s -t "${MAMEGAMETITLE}"
+          java -jar "${PIXELPATH}pixelcade.jar" -m stream -c "$PLATFORM" -g "${ROMPATH}" -s -gt
        else
           java -jar "${PIXELPATH}pixelcade.jar" -m stream -c "$PLATFORM" -g "${ROMPATH}" -s
        fi

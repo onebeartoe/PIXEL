@@ -51,6 +51,8 @@ public class ScrollingTextHttpHander extends TextHttpHandler  //TO DO have TextH
         Long speed = null;
         String loop_ = null;
         int loop = 0;
+        int scrollsmooth_ = 1;
+        Long speeddelay_ = 10L;
         
         
         LogMe logMe = LogMe.getInstance();
@@ -79,7 +81,6 @@ public class ScrollingTextHttpHander extends TextHttpHandler  //TO DO have TextH
             try {
                     params = URLEncodedUtils.parse(new URI(requestURI.toString()), "UTF-8");
             } catch (URISyntaxException ex) {
-                    //Logger.getLogger(ArcadeHttpHandler.class.getName()).log(Level.SEVERE, null, ex);
             }
 
             for (NameValuePair param : params) {
@@ -91,9 +92,6 @@ public class ScrollingTextHttpHander extends TextHttpHandler  //TO DO have TextH
                         break;
                     case "c": //text color
                         color_ = param.getValue();
-                        break;
-                    case "s": //scrolling speed
-                        speed_ = param.getValue();
                         break;
                     case "l": //loop
                         loop_ = param.getValue();
@@ -110,8 +108,16 @@ public class ScrollingTextHttpHander extends TextHttpHandler  //TO DO have TextH
                     case "loop": //loop
                         loop_ = param.getValue();
                         break;
-                    }
+                    case "ss": //scroll smooth
+                        scrollsmooth_ = Integer.valueOf(param.getValue());
+                        break;
+                    case "scrollsmooth": //scroll smooth
+                        scrollsmooth_ = Integer.valueOf(param.getValue());
+                        break;
+                }
             }
+            
+            
 
             /* TO DO catch this wrong URL format as I made this mistake of ? instead of & after the first one!!!!
             Scrolling text handler received a request: /text/?t=hello%20world?c=red?s=10?l=2
@@ -125,10 +131,12 @@ public class ScrollingTextHttpHander extends TextHttpHandler  //TO DO have TextH
             System.out.println("scrolling text: " + text_);
             if (color_ != null) System.out.println("text color: " + color_);
             if (speed_ != null) System.out.println("scrolling speed: " + speed_);
+            //if (scrollsmooth_ != 1) System.out.println("scrolling smooth factor: " + scrollsmooth_);
             System.out.println("# times to loop: " + loop_);
             logMe.aLogger.info("scrolling text: " + text_);
             if (color_ != null) logMe.aLogger.info("text color: " + color_);
             if (speed_ != null) logMe.aLogger.info("scrolling speed: " + speed_);
+            //if (scrollsmooth_ != 1) logMe.aLogger.info("scrolling smooth factor: " + scrollsmooth_);
             logMe.aLogger.info("# times to loop: " + loop_);
         }
             
@@ -136,16 +144,11 @@ public class ScrollingTextHttpHander extends TextHttpHandler  //TO DO have TextH
             
             if (speed_ != null) {
 
-                 speed = Long.valueOf(speed_);
+                speed = Long.valueOf(speed_);
 
                 if(speed == 0) //Roberto originally had if less than 100 here but the scrolling is too slow
                 {
                     speed = 10L;
-                }
-
-                if(speed > 200)
-                {
-                    speed = 200L;
                 }
             }      
         
@@ -155,43 +158,23 @@ public class ScrollingTextHttpHander extends TextHttpHandler  //TO DO have TextH
               
         if (color_ == null)  color = Color.RED;
        
-        if (speed_ == null) { //speed was not specified so let's get default per panel type
-            
+        //if (speed_ == null) { //speed was not specified so let's get default per panel type
+        //  let's set the defaults 
             int LED_MATRIX_ID = WebEnabledPixel.getMatrixID();
             int yTextOffset = -4;
             int fontSize_ = 22;
             speed = WebEnabledPixel.getScrollingTextSpeed(LED_MATRIX_ID);  //this method also sets the yoffset and font
-        }
-       
+        //}
         
-        //Pixel pixel = application.getPixel();
+        // and if speed was entered in a param, let's override with that
+         if (speed_ != null) { //speed is not null so it was specified so let's override with that
+             speed = Long.valueOf(speed_);
+         } //TO DO this is bad code, clean up later
         
-        //pixel.scrollText(text_, loop, speed, color,WebEnabledPixel.pixelConnected);
-        
-        // app.getPixel().scrollText(text_, loop, speed, color);
-        app.getPixel().scrollText(text_, loop, speed, color,WebEnabledPixel.pixelConnected);
+        app.getPixel().scrollText(text_, loop, speed, color,WebEnabledPixel.pixelConnected,scrollsmooth_);
         
         return "scrolling text request received: " + text_ ;
     }
-    
-    /*
-    public static Color hex2Rgb(String colorStr) 
-    {
-        return new Color(
-                Integer.valueOf( colorStr.substring( 0, 2 ), 16 ),
-                Integer.valueOf( colorStr.substring( 2, 4 ), 16 ),
-                Integer.valueOf( colorStr.substring( 4, 6 ), 16 ) );
-    }   
-    
-    private boolean isHexadecimal(String input) {
-        
-        final Pattern HEXADECIMAL_PATTERN = compile("\\p{XDigit}+");
-        final Matcher matcher = HEXADECIMAL_PATTERN.matcher(input);
-        return matcher.matches();
-        
-    }
-*/
-    
 }
 
 

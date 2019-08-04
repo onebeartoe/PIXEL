@@ -57,6 +57,7 @@ import org.onebeartoe.web.enabled.pixel.controllers.IndexHttpHandler;
 import org.onebeartoe.web.enabled.pixel.controllers.ScrollingTextColorHttpHandler;
 import org.onebeartoe.web.enabled.pixel.controllers.ScrollingTextHttpHander;
 import org.onebeartoe.web.enabled.pixel.controllers.ScrollingTextSpeedHttpHandler;
+import org.onebeartoe.web.enabled.pixel.controllers.ScrollingTextScrollSmoothHttpHandler;
 import org.onebeartoe.web.enabled.pixel.controllers.StaticFileHttpHandler;
 import org.onebeartoe.web.enabled.pixel.controllers.StillImageHttpHandler;
 import org.onebeartoe.web.enabled.pixel.controllers.StillImageListHttpHandler;
@@ -211,6 +212,30 @@ public class WebEnabledPixel
                      }
                     LED_MATRIX_ID = 11;
                 } 
+                 
+                  if (ledResolution_.equals("64x64")) {
+                     if (!silentMode_) {
+                        System.out.println("PIXEL resolution found in settings.ini: resolution=" + ledResolution_);
+                        logMe.aLogger.info("PIXEL resolution found in settings.ini: resolution=" + ledResolution_);
+                     }
+                    LED_MATRIX_ID = 14;
+                } 
+                  
+                if (ledResolution_.equals("64x32C")) {
+                     if (!silentMode_) {
+                        System.out.println("PIXEL resolution found in settings.ini: resolution=" + ledResolution_);
+                        logMe.aLogger.info("PIXEL resolution found in settings.ini: resolution=" + ledResolution_);
+                     }
+                    LED_MATRIX_ID = 24;
+                } 
+                  
+                if (ledResolution_.equals("64x64C")) {
+                     if (!silentMode_) {
+                        System.out.println("PIXEL resolution found in settings.ini: resolution=" + ledResolution_);
+                        logMe.aLogger.info("PIXEL resolution found in settings.ini: resolution=" + ledResolution_);
+                     }
+                    LED_MATRIX_ID = 25;
+                } 
          }
         
         pixelEnvironment = new PixelEnvironment(LED_MATRIX_ID);
@@ -232,11 +257,26 @@ public class WebEnabledPixel
                 fontSize_ = 32;
                 speed_ = 18;       //smaller the frame, faster the scrolling so slowing it down relative to 128x32
                 break;
+            case 14: //64x64
+                 yTextOffset = -6;
+                 fontSize_ = 46;
+                 speed = 10L;       //smaller the frame, faster the scrolling so slowing it down relative to 128x32
+                 break;
             case 15: //128x32
                 yTextOffset = -12;
                 fontSize_ = 32;
                 speed_ = 10;
                 break;
+            case 24: //64x32 Color Swap
+                yTextOffset = -12;
+                fontSize_ = 32;
+                speed_ = 18;       //smaller the frame, faster the scrolling so slowing it down relative to 128x32
+                break;
+            case 25: //64x64 Color Swap
+                 yTextOffset = -6;
+                 fontSize_ = 46;
+                 speed = 10L;       //smaller the frame, faster the scrolling so slowing it down relative to 128x32
+                 break;
             default: 
                 yTextOffset = -4;  
                 fontSize_ = 22;
@@ -261,10 +301,10 @@ public class WebEnabledPixel
         createControllers();
         
         //let's load a rom name to game title mapping into memory into a hashmap
-        File mamefile = new File("mame2.csv"); //csv file
+        File mamefile = new File("mame.csv"); //csv file
         if (mamefile.exists() && !mamefile.isDirectory()) { 
             rom2GameMappingExists = true;
-            String filePath = "mame2.csv";
+            String filePath = "mame.csv";
             String line;
             BufferedReader reader = new BufferedReader(new FileReader(filePath));
             while ((line = reader.readLine()) != null)
@@ -276,14 +316,14 @@ public class WebEnabledPixel
                     String value = parts[1];
                     rom2NameMap.put(key, value);
                 } else {
-                    System.out.println("ignoring line: " + line);
+                    System.out.println("ignoring line in mame.csv: " + line);
                 }
             }
             
             reader.close();
             } else {
              
-            System.out.println("mame2.csv does not exist");
+            System.out.println("mame.csv not found");
         }
     } 
         
@@ -299,6 +339,8 @@ public class WebEnabledPixel
             HttpHandler scrollingTextHttpHander = new ScrollingTextHttpHander(this);
             
             HttpHandler scrollingTextSpeedHttpHander = new ScrollingTextSpeedHttpHandler(this);
+            
+            HttpHandler scrollingTextScrollSmoothHttpHandler = new ScrollingTextScrollSmoothHttpHandler(this);
             
             HttpHandler scrollingTextColorHttpHandler = new ScrollingTextColorHttpHandler(this);
             
@@ -349,6 +391,7 @@ public class WebEnabledPixel
                                             
             HttpContext   textContext =     server.createContext("/text", scrollingTextHttpHander);
                                             server.createContext("/text/speed", scrollingTextSpeedHttpHander);
+                                            server.createContext("/text/scrollsmooth", scrollingTextScrollSmoothHttpHandler);
                                             server.createContext("/text/color", scrollingTextColorHttpHandler);
                                             
             HttpContext uploadContext =     server.createContext("/upload", uploadHttpHandler);
@@ -703,10 +746,18 @@ public class WebEnabledPixel
         
         String GameName = "";
         
-        if (rom2GameMappingExists) {
-             GameName = rom2NameMap.get(romName); 
+        if (rom2GameMappingExists) { //mame.csv file was found and opened
+             
+            if (rom2NameMap.containsKey(romName))  
+            { 
+                 GameName = rom2NameMap.get(romName); 
+            } 
+            else {
+                 GameName = "nomatch"; 
+            }
+            
         } else {
-            GameName = "mame2.csv does not exist"; 
+            GameName = "nomatch"; 
         }
         return GameName;
     }
@@ -719,7 +770,8 @@ public class WebEnabledPixel
      
      public static long getScrollingTextSpeed(int LED_MATRIX_ID) {
                          
-            switch (LED_MATRIX_ID) {
+         // to do add 64x64   
+         switch (LED_MATRIX_ID) {
 
                case 11: //32x32
                    yTextOffset = -4;
@@ -731,10 +783,25 @@ public class WebEnabledPixel
                    fontSize_ = 32;
                    speed = 18L;       //smaller the frame, faster the scrolling so slowing it down relative to 128x32
                    break;
+               case 14: //64x64
+                   yTextOffset = -6;
+                   fontSize_ = 46;
+                   speed = 10L;       //smaller the frame, faster the scrolling so slowing it down relative to 128x32
+                   break;
                case 15: //128x32
                    yTextOffset = -12;
                    fontSize_ = 32;
                    speed = 10L;
+                   break;
+                case 24: //64x32 Color Swap
+                    yTextOffset = -12;
+                    fontSize_ = 32;
+                    speed_ = 18;       //smaller the frame, faster the scrolling so slowing it down relative to 128x32
+                    break;
+               case 25: //64x64
+                   yTextOffset = -6;
+                   fontSize_ = 46;
+                   speed = 10L;       //smaller the frame, faster the scrolling so slowing it down relative to 128x32
                    break;
                default: 
                    yTextOffset = -4;  

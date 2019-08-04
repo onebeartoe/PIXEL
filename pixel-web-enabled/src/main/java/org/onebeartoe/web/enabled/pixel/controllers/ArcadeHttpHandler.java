@@ -143,16 +143,21 @@ public class ArcadeHttpHandler extends ImageResourceHttpHandler
                                                 "segacd", "sg-1000", "ti99", "vectrex", "virtualboy",
                                                 "visualpinball", "wonderswan", "wonderswancolor", "zinc", "sss",
                                                 "zmachine", "zxspectrum"};
-        
-        
                  
  	boolean saveAnimation = false;
         int loop_ = 0;
         String text_ = "";
+        int scrollsmooth_ = 1;
+        Long speeddelay_ = 10L;
         String color_ = "";
         Color color = Color.RED; //default to red color if not added
        // String loopString = "0"; //to do kill this
       
+       
+       if (WebEnabledPixel.isWindows()) {  //unfortunate hack we have to do as scrolling on windows is slower
+           scrollsmooth_ = 3;
+       } 
+       
        
         //to do the slashes will screw up this logic, we could remove the / first or switch to another convention
        
@@ -247,8 +252,8 @@ public class ArcadeHttpHandler extends ImageResourceHttpHandler
             arcadeNameOnly = FilenameUtils.getBaseName(arcadeName); //stripping out the extension
             
             for (NameValuePair param : params) {
-           
-             switch (param.getName()) {
+
+                switch (param.getName()) {
 
                     case "t": //scrolling text value
                         text_ = param.getValue();
@@ -258,24 +263,30 @@ public class ArcadeHttpHandler extends ImageResourceHttpHandler
                         break;
                     case "l": //how many times to loop
                         loop_ = Integer.valueOf(param.getValue());
-                        // Long speed = Long.valueOf(s); //to do for integer
                         break;
                     case "loop": //loop
-                       loop_ = Integer.valueOf(param.getValue());
+                        loop_ = Integer.valueOf(param.getValue());
                         break;
                     case "gt": //game title
                         text_ = WebEnabledPixel.getGameName(arcadeNameOnly);
-                        break; 
+                        break;
                     case "gametitle": //game title
                         text_ = WebEnabledPixel.getGameName(arcadeNameOnly);
-                    break; 
+                        break;
+                    case "ss": //scroll smooth
+                        scrollsmooth_ = Integer.valueOf(param.getValue());
+                        break;
+                    case "scrollsmooth": //scroll smooth
+                        scrollsmooth_ = Integer.valueOf(param.getValue());
+                        break;
+                    case "speed": //scroll smooth
+                        speeddelay_ = Long.valueOf(param.getValue());
+                        break; 
                     case "c": //color
-                       color_ = param.getValue();
-                       break;
-                    }
+                        color_ = param.getValue();
+                        break;
+                }
             }
-            
-            
             
             //let's now refer to our mapping table for the console names, because console names are different for RetroPie vs. HyperSpin and other front ends
             //to do add a user defined .txt mapping if the console is not found in our mapping table
@@ -356,22 +367,25 @@ public class ArcadeHttpHandler extends ImageResourceHttpHandler
                         handlePNG(arcadeFilePNG, saveAnimation,loop_,consoleNameMapped,FilenameUtils.getName(arcadeFilePathPNG));
                 }
                 
-                else if (text_ != "") {  //the game image or png is not there and alt text was supplied so let's scroll that alt text
+                else if (text_ != "" && !text_.equals("nomatch")) {  //the game image or png is not there and alt text was supplied so let's scroll that alt text, if equal to mame.csv not found or rom name no match then we went to the maping table but didn't find anything so if that is the case, then let's skip this and just write the generic image
                          
                          Pixel pixel = application.getPixel();
                          int LED_MATRIX_ID = WebEnabledPixel.getMatrixID();
                          
                          int yTextOffset = -4;
                          int fontSize_ = 22;
-                         long speed = 10L;
                          
+                         long speed = 10L;
                          speed = WebEnabledPixel.getScrollingTextSpeed(LED_MATRIX_ID);  //this method also sets the yoffset
+                         if (speeddelay_ != 10L) {  //this means another value was set from a parameter for speed so let's use that
+                             speed = speeddelay_;
+                         }
                          
                          if (color_ != "") {
                              color = getColorFromHexOrName(color_);
                          }
                          
-                         pixel.scrollText(text_, loop_, speed, color,WebEnabledPixel.pixelConnected);
+                         pixel.scrollText(text_, loop_, speed, color,WebEnabledPixel.pixelConnected,scrollsmooth_);
                         
                 }
                 
@@ -430,9 +444,28 @@ public class ArcadeHttpHandler extends ImageResourceHttpHandler
                         //System.out.println("delete went here GIF");
                         handleGIF(consoleNameMapped, arcadeNameOnly +".gif", saveAnimation, loop_);
                 }
-                else if (text_ != "") {  //the game image or png is not there and alt text was supplied so let's scroll that alt text
+                
+                else if (text_ != "" && !text_.equals("nomatch")) {  //the game image or png is not there and alt text was supplied so let's scroll that alt text
                         
                          Pixel pixel = application.getPixel();
+                         int LED_MATRIX_ID = WebEnabledPixel.getMatrixID();
+                         
+                         int yTextOffset = -4;
+                         int fontSize_ = 22;
+                         
+                         long speed = 10L;
+                         speed = WebEnabledPixel.getScrollingTextSpeed(LED_MATRIX_ID);  //this method also sets the yoffset
+                         if (speeddelay_ != 10L) {  //this means another value was set from a parameter for speed so let's use that
+                             speed = speeddelay_;
+                         }
+                         
+                         if (color_ != "") {
+                             color = getColorFromHexOrName(color_);
+                         }
+                         
+                         pixel.scrollText(text_, loop_, speed, color,WebEnabledPixel.pixelConnected,scrollsmooth_); 
+                    
+                        /*Pixel pixel = application.getPixel();
                          int LED_MATRIX_ID = WebEnabledPixel.getMatrixID();
                          
                          int yTextOffset = -4;
@@ -447,6 +480,7 @@ public class ArcadeHttpHandler extends ImageResourceHttpHandler
                          }
                          
                          pixel.scrollText(text_, loop_, speed, color,WebEnabledPixel.pixelConnected); 
+                         */
                 }
                 
                 else { //nothing is there so let's use the console

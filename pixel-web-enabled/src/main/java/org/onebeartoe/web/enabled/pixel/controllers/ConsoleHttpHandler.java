@@ -101,7 +101,8 @@ public class ConsoleHttpHandler extends ImageResourceHttpHandler
         String text_ = "";
         String color_ = "";
         Color color = Color.RED; //default to red color if not added
-      
+        int scrollsmooth_ = 1;
+        Long speeddelay_ = 10L;
         
         List<NameValuePair> params = null;
         try {
@@ -109,7 +110,7 @@ public class ConsoleHttpHandler extends ImageResourceHttpHandler
             } catch (URISyntaxException ex) {
                 Logger.getLogger(ArcadeHttpHandler.class.getName()).log(Level.SEVERE, null, ex);
         }
-        for (NameValuePair param : params) {
+        /*for (NameValuePair param : params) {
            
              switch (param.getName()) {
 
@@ -130,7 +131,38 @@ public class ConsoleHttpHandler extends ImageResourceHttpHandler
                        color_ = param.getValue();
                        break;
                     }
-        }
+        }*/
+        
+        for (NameValuePair param : params) {
+
+                switch (param.getName()) {
+
+                    case "t": //scrolling text value
+                        text_ = param.getValue();
+                        break;
+                    case "text": //scrolling speed
+                        text_ = param.getValue();
+                        break;
+                    case "l": //how many times to loop
+                        loop_ = Integer.valueOf(param.getValue());
+                        break;
+                    case "loop": //loop
+                        loop_ = Integer.valueOf(param.getValue());
+                        break;
+                    case "ss": //scroll smooth
+                        scrollsmooth_ = Integer.valueOf(param.getValue());
+                        break;
+                    case "scrollsmooth": //scroll smooth
+                        scrollsmooth_ = Integer.valueOf(param.getValue());
+                        break;
+                    case "speed": //scroll smooth
+                        speeddelay_ = Long.valueOf(param.getValue());
+                        break; 
+                    case "c": //color
+                        color_ = param.getValue();
+                        break;
+                }
+            }
   
         // /console/stream/mame?t=x?l=x
         //so now we just need to the left of the ?
@@ -248,15 +280,18 @@ public class ConsoleHttpHandler extends ImageResourceHttpHandler
 
                                     int yTextOffset = -4;
                                     int fontSize_ = 22;
+                                    
                                     long speed = 10L;
-
                                     speed = WebEnabledPixel.getScrollingTextSpeed(LED_MATRIX_ID);  //this method also sets the yoffset
+                                    if (speeddelay_ != 10L) {  //this means another value was set from a parameter for speed so let's use that
+                                        speed = speeddelay_;
+                                    }
 
                                     if (color_ != "") {
                                         color = getColorFromHexOrName(color_);
                                     }
 
-                                    pixel.scrollText(text_, loop_, speed, color,WebEnabledPixel.pixelConnected);
+                                    pixel.scrollText(text_, loop_, speed, color,WebEnabledPixel.pixelConnected,scrollsmooth_);
                             } 
                             else {
                             
@@ -313,7 +348,26 @@ public class ConsoleHttpHandler extends ImageResourceHttpHandler
                             //if there was alt text, let's use that and if not alt text, we'll use the default marquee
                             
                             if (text_ != "") {  //the game image or png is not there and alt text was supplied so let's scroll that alt text
-                         
+                                
+                                    Pixel pixel = application.getPixel();
+                                    int LED_MATRIX_ID = WebEnabledPixel.getMatrixID();
+
+                                    int yTextOffset = -4;
+                                    int fontSize_ = 22;
+                                    
+                                    long speed = 10L;
+                                    speed = WebEnabledPixel.getScrollingTextSpeed(LED_MATRIX_ID);  //this method also sets the yoffset
+                                    if (speeddelay_ != 10L) {  //this means another value was set from a parameter for speed so let's use that
+                                        speed = speeddelay_;
+                                    }
+
+                                    if (color_ != "") {
+                                        color = getColorFromHexOrName(color_);
+                                    }
+
+                                    pixel.scrollText(text_, loop_, speed, color,WebEnabledPixel.pixelConnected,scrollsmooth_);
+                                
+                                    /*
                                     Pixel pixel = application.getPixel();
                                     int LED_MATRIX_ID = WebEnabledPixel.getMatrixID();
 
@@ -328,6 +382,7 @@ public class ConsoleHttpHandler extends ImageResourceHttpHandler
                                     }
 
                                     pixel.scrollText(text_, loop_, speed, color,WebEnabledPixel.pixelConnected);
+                                    */
                             } 
                             else {
                             
