@@ -64,12 +64,9 @@ if $pixelexists | grep -q '/dev/ttyACM0'; then  #let's only go here if we detect
        # use verbose mode initially and then switch to silent mode once everything is working
        #java -jar "${PIXELPATH}pixelcade.jar" -m stream -c "$PLATFORM" -g "${ROMPATH}" -t "${MAMEGAMETITLE}"
        #silent mode
-        if [[ $PLATFORM == "mame-libretro" ]] || [[ $PLATFORM == "mame-mame4all" ]] || [[ $PLATFORM == "arcade" ]] || [[ $PLATFORM == "mame-advmame" ]] ;then
-          #java -jar "${PIXELPATH}pixelcade.jar" -m stream -c "$PLATFORM" -g "${ROMPATH}" -s -t "${MAMEGAMETITLE}"
-          java -jar "${PIXELPATH}pixelcade.jar" -m stream -c "$PLATFORM" -g "${ROMPATH}" -s -gt
-       else
-          java -jar "${PIXELPATH}pixelcade.jar" -m stream -c "$PLATFORM" -g "${ROMPATH}" -s
-       fi
+    
+       java -jar "${PIXELPATH}pixelcade.jar" -m stream -c "$PLATFORM" -g "${ROMPATH}" -s -gt #this will work for non MAME too if the mapping is in mame.csv
+
 
        # if you don't want the scrolling text for games that don't have an image
        #java -jar "${PIXELPATH}pixelcade.jar" -m stream -c "$PLATFORM" -g "${ROMPATH}"
