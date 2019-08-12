@@ -48,55 +48,9 @@ public class ArcadeHttpHandler extends ImageResourceHttpHandler
     private void handlePNG(File arcadeFilePNGFullPath, Boolean saveAnimation, int loop, String consoleNameMapped, String PNGNameWithExtension) throws MalformedURLException, IOException, ConnectionLostException {
         
         LogMe logMe = LogMe.getInstance();
-        
-         //arcadeFilePathPNG = application.getPixel().getPixelHome() + consoleNameMapped + "/" + arcadeNameOnly +".png";
-         //File arcadeFilePNG = new File(arcadeFilePathPNG);
          
         Pixel pixel = application.getPixel();
         pixel.writeArcadeImage(arcadeFilePNGFullPath, saveAnimation, loop, consoleNameMapped, PNGNameWithExtension,WebEnabledPixel.pixelConnected); //we have the full file path here
-        
-        /* 
-        URL url = null; 
-        BufferedImage image;
-        url = file.toURI().toURL();
-        image = ImageIO.read(url);
-        if (!CliPixel.getSilentMode()) {
-            System.out.println("PNG image found: " + url.toString());
-            logMe.aLogger.info("PNG image found: " + url.toString());
-        }
-         
-        //Pixel pixel = application.getPixel();
-       // pixel.stopExistingTimer();  //a timer could be running from a gif so we need to kill it here
-       //to do : test this but we should not need a stop timer here 
-       
-        //if (saveAnimation && pixel.getPIXELHardwareID().substring(0,4).equals("PIXL")) {
-        if (saveAnimation) {
-            
-            pixel.interactiveMode();
-            pixel.writeMode(10);
-            
-             try {
-                   pixel.writeImagetoMatrix(image, pixel.KIND.width, pixel.KIND.height);
-            } catch (ConnectionLostException e1) {
-                    // TODO Auto-generated catch block
-                    e1.printStackTrace();
-            } 
-             
-            try {
-                Thread.sleep(100); //this may not be needed but was causing a problem on the writes for the gif animations so adding here to be safe
-                //TO DO will a smaller delay still work too?
-            } catch (InterruptedException ex) {
-                Logger.getLogger(ArcadeHttpHandler.class.getName()).log(Level.SEVERE, null, ex);
-            }
-            
-             pixel.playLocalMode();
-            
-        } else {
-            
-            pixel.interactiveMode();
-            pixel.writeImagetoMatrix(image, pixel.KIND.width, pixel.KIND.height); //to do add save parameter here
-        }
-        */
         
     }
     
@@ -118,6 +72,8 @@ public class ArcadeHttpHandler extends ImageResourceHttpHandler
     protected void writeImageResource(String urlParams) throws IOException, ConnectionLostException
     {
          
+        Pixel pixel = application.getPixel();
+        
         String streamOrWrite = null ;
  	String consoleName = null ;
  	String arcadeName = null ;
@@ -302,12 +258,21 @@ public class ArcadeHttpHandler extends ImageResourceHttpHandler
              //if yes, we're good
              //if no, let's check & map a couple common hyperspin and skip the expesive mapping table
              
-            if (!consoleMatch(consoleArray,consoleName)) {  //if our console already matches, we are good but if not, we need to check it against mapping table
-                consoleNameMapped = getConsoleNamefromMapping(consoleName);     //will return original console if no matcn
+            /*if (!consoleMatch(consoleArray,consoleName)) {  //if our console already matches, we are good but if not, we need to check it against mapping table
+                //consoleNameMapped = getConsoleNamefromMapping(consoleName);     //will return original console if no matcn
+               // consoleNameMapped = pixel.getConsoleNamefromMapping(consoleName); 
+                consoleNameMapped = WebEnabledPixel.getGameName(arcadeNameOnly);
             } else {
                  consoleNameMapped = consoleName;                               //we were already mapped so let's use it
-            }
+            }*/
             
+            if (!consoleMatch(consoleArray, consoleName)) {  //if our console already matches, we are good but if not, we need to check it against mapping table
+                //will return original console if no matcn
+                consoleNameMapped = WebEnabledPixel.getConsoleMapping(consoleName);
+            } else {
+                consoleNameMapped = consoleName;                               //we were already mapped so let's just use it
+            }
+
                 //more user friendly for the log since technically it's looping forever until stopped
 
              //System.out.println("Console after mapping: " + consoleNameMapped);
@@ -369,7 +334,7 @@ public class ArcadeHttpHandler extends ImageResourceHttpHandler
                 
                 else if (text_ != "" && !text_.equals("nomatch")) {  //the game image or png is not there and alt text was supplied so let's scroll that alt text, if equal to mame.csv not found or rom name no match then we went to the maping table but didn't find anything so if that is the case, then let's skip this and just write the generic image
                          
-                         Pixel pixel = application.getPixel();
+                         //Pixel pixel = application.getPixel();
                          int LED_MATRIX_ID = WebEnabledPixel.getMatrixID();
                          
                          int yTextOffset = -4;
@@ -447,7 +412,7 @@ public class ArcadeHttpHandler extends ImageResourceHttpHandler
                 
                 else if (text_ != "" && !text_.equals("nomatch")) {  //the game image or png is not there and alt text was supplied so let's scroll that alt text
                         
-                         Pixel pixel = application.getPixel();
+                         //Pixel pixel = application.getPixel();
                          int LED_MATRIX_ID = WebEnabledPixel.getMatrixID();
                          
                          int yTextOffset = -4;
@@ -545,7 +510,7 @@ public class ArcadeHttpHandler extends ImageResourceHttpHandler
     } 
     
     
-      public String getConsoleNamefromMapping(String originalConsoleName)
+      /* public static String getConsoleNamefromMapping(String originalConsoleName)
     {
          String consoleNameMapped = null; //to do set this if null?
          
@@ -855,7 +820,7 @@ public class ArcadeHttpHandler extends ImageResourceHttpHandler
                  consoleNameMapped = originalConsoleName;    //we didn't find a match so just return the name you got
                  return consoleNameMapped;
         }
-    }
+    } */
          //now check for override file but only go there if it exists
          //give an example file but give it a different name
         

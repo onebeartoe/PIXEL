@@ -29,6 +29,7 @@ import org.apache.commons.io.FilenameUtils;
 import org.onebeartoe.web.enabled.pixel.CliPixel;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.utils.URLEncodedUtils;
+import org.onebeartoe.web.enabled.pixel.controllers.ArcadeHttpHandler;
 
 /**
  * @author Roberto Marquez
@@ -70,6 +71,8 @@ public class ConsoleHttpHandler extends ImageResourceHttpHandler
     protected void writeImageResource(String urlParams) throws IOException, ConnectionLostException
     {
          
+        Pixel pixel = application.getPixel();
+        
         String streamOrWrite = null ;
  	String consoleName = null ;
  	//String arcadeName = null ;
@@ -206,11 +209,12 @@ public class ConsoleHttpHandler extends ImageResourceHttpHandler
              //if yes, we're good
              //if no, let's check & map a couple common hyperspin and skip the expesive mapping table
              
-                if (!consoleMatch(consoleArray,consoleName)) {  //if our console already matches, we are good but if not, we need to check it against mapping table
-                    consoleNameMapped = getConsoleNamefromMapping(consoleName);     //will return original console if no matcn
-                } else {
-                     consoleNameMapped = consoleName;                               //we were already mapped so let's use it
-                }
+            if (!consoleMatch(consoleArray, consoleName)) {  //if our console already matches, we are good but if not, we need to check it against mapping table
+                //will return original console if no matcn
+                consoleNameMapped = WebEnabledPixel.getConsoleMapping(consoleName);
+            } else {
+                consoleNameMapped = consoleName;                               //we were already mapped so let's just use it
+            }
             
                 //more user friendly for the log since technically it's looping forever until stopped
 
@@ -275,7 +279,7 @@ public class ConsoleHttpHandler extends ImageResourceHttpHandler
                             
                             if (text_ != "") {  //the game image or png is not there and alt text was supplied so let's scroll that alt text
                          
-                                    Pixel pixel = application.getPixel();
+                                    //Pixel pixel = application.getPixel();
                                     int LED_MATRIX_ID = WebEnabledPixel.getMatrixID();
 
                                     int yTextOffset = -4;
@@ -349,7 +353,7 @@ public class ConsoleHttpHandler extends ImageResourceHttpHandler
                             
                             if (text_ != "") {  //the game image or png is not there and alt text was supplied so let's scroll that alt text
                                 
-                                    Pixel pixel = application.getPixel();
+                                    //Pixel pixel = application.getPixel();
                                     int LED_MATRIX_ID = WebEnabledPixel.getMatrixID();
 
                                     int yTextOffset = -4;
@@ -426,7 +430,7 @@ public class ConsoleHttpHandler extends ImageResourceHttpHandler
 	return false;
     } 
     
-    
+    /*
       public String getConsoleNamefromMapping(String originalConsoleName)
     {
          String consoleNameMapped = null; //to do set this if null?
@@ -738,6 +742,7 @@ public class ConsoleHttpHandler extends ImageResourceHttpHandler
                  return consoleNameMapped;
         }
     }
+*/
          //now check for override file but only go there if it exists
          //give an example file but give it a different name
         

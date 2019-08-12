@@ -66,7 +66,7 @@ import org.onebeartoe.web.enabled.pixel.controllers.UploadOriginHttpHandler;
 import org.onebeartoe.web.enabled.pixel.controllers.ArcadeHttpHandler;
 import org.onebeartoe.web.enabled.pixel.controllers.ConsoleHttpHandler;
 import org.onebeartoe.web.enabled.pixel.controllers.QuitHttpHandler;
-import org.onebeartoe.web.enabled.pixel.controllers.mameRom2Name;
+//import org.onebeartoe.web.enabled.pixel.controllers.mameRom2Name;
 
 import org.json.simple.JSONArray; 
 import org.json.simple.JSONObject; 
@@ -80,7 +80,7 @@ public class WebEnabledPixel
 {
     //public static final Logger logger = null;
     
-    public static String pixelwebVersion = "2.1.2";
+    public static String pixelwebVersion = "2.1.4";
     
     public static LogMe logMe = null;
 
@@ -139,7 +139,11 @@ public class WebEnabledPixel
     
     public static boolean rom2GameMappingExists = false;
     
+    public static boolean consoleMappingExists = false;
+    
     public static HashMap<String, String> rom2NameMap = new HashMap<String, String>();
+    
+    public static HashMap<String, String> consoleMap = new HashMap<String, String>();
     
     public WebEnabledPixel(String[] args) throws FileNotFoundException, IOException
     {
@@ -302,16 +306,14 @@ public class WebEnabledPixel
         
         //let's load a rom name to game title mapping into memory into a hashmap
         File mamefile = new File("mame.csv"); //csv file
-        if (mamefile.exists() && !mamefile.isDirectory()) { 
+        if (mamefile.exists() && !mamefile.isDirectory()) {
             rom2GameMappingExists = true;
             String filePath = "mame.csv";
             String line;
             BufferedReader reader = new BufferedReader(new FileReader(filePath));
-            while ((line = reader.readLine()) != null)
-            {
+            while ((line = reader.readLine()) != null) {
                 String[] parts = line.split(",", 2);
-                if (parts.length >= 2)
-                {
+                if (parts.length >= 2) {
                     String key = parts[0];
                     String value = parts[1];
                     rom2NameMap.put(key, value);
@@ -319,12 +321,38 @@ public class WebEnabledPixel
                     System.out.println("ignoring line in mame.csv: " + line);
                 }
             }
-            
+
             reader.close();
-            } else {
-             
+        } else {
             System.out.println("mame.csv not found");
         }
+        
+         //let's load a console mapping into memory into a hashmap
+        File consolefile = new File("console.csv"); //csv file
+        if (consolefile.exists() && !consolefile.isDirectory()) {
+            consoleMappingExists = true;
+            String filePath = "console.csv";
+            String line;
+            BufferedReader reader = new BufferedReader(new FileReader(filePath));
+            while ((line = reader.readLine()) != null) {
+                String[] parts = line.split(",", 2);
+                if (parts.length >= 2) {
+                    String key = parts[0];
+                    String value = parts[1];
+                    consoleMap.put(key, value);
+                } else {
+                    System.out.println("ignoring line in console.csv: " + line);
+                }
+            }
+
+            reader.close();
+        } else {
+            System.out.println("console.csv not found");
+        }
+        
+        
+        
+        
     } 
         
     private void createControllers()
@@ -478,11 +506,13 @@ public class WebEnabledPixel
        public void extractRetroPie() throws IOException
     {
         String contentClasspath = "/retropie/";
-        String inpath = contentClasspath + "mame.csv";
-
         String pixelHomePath = pixel.getPixelHome();
         File pixelHomeDirectory = new File(pixelHomePath);
-            
+        
+        String inpath = contentClasspath + "mame.csv";
+        extractClasspathResource(inpath, pixelHomeDirectory);
+        
+        inpath = contentClasspath + "console.csv";
         extractClasspathResource(inpath, pixelHomeDirectory);
         
         inpath = contentClasspath + "pixel-logo.txt";
@@ -741,7 +771,6 @@ public class WebEnabledPixel
         }
     }
      
-     
      public static String getGameName(String romName) {  //returns the game name string based on the rom name
         
         String GameName = "";
@@ -761,6 +790,31 @@ public class WebEnabledPixel
         }
         return GameName;
     }
+     
+     public static String getConsoleMapping(String originalConsole) {  //returns the game name string based on the rom name
+        
+        String ConsoleMapped = "";
+        
+        if (consoleMappingExists) {                                 //console.csv file was found and opened
+             
+            if (consoleMap.containsKey(originalConsole))            //let's check if the key exists
+            { 
+                 ConsoleMapped = consoleMap.get(originalConsole);   // if it does, get the pair value
+            } 
+            else {
+                 ConsoleMapped = originalConsole;                  //if no match
+            }
+            
+        } else {
+           
+           ConsoleMapped = getConsoleNamefromMapping(originalConsole);  //if file is not there, then let's go to the hard coded mapping
+            
+           //ConsoleMapped = originalConsole; 
+        }
+        return ConsoleMapped;
+    } 
+     
+     
      
      public static int getMatrixID() {
          return  LED_MATRIX_ID;
@@ -954,6 +1008,351 @@ public class WebEnabledPixel
 //TODO: ONCE USING THE PIXelINTEGRATRION FROM PIXEL-COMMONS
 //      CALL ITS addXxxxxListeners() methods
 //      AND then its initialize() method
+    }
+    
+     public static String getConsoleNamefromMapping(String originalConsoleName)
+    {
+         String consoleNameMapped = null; //to do set this if null?
+         
+         originalConsoleName = originalConsoleName.toLowerCase();
+         //add the popular ones first to save time
+          
+         switch (originalConsoleName) {
+            
+            case "atari-2600":
+                 consoleNameMapped = "atari2600";
+                 return consoleNameMapped;
+            case "atari_2600":
+                consoleNameMapped = "atari2600";
+                return consoleNameMapped;
+             case "mame-libretro":
+                 consoleNameMapped = "mame";
+                 return consoleNameMapped;
+            case "mame-mame4all":
+                consoleNameMapped = "mame";
+                 return consoleNameMapped;
+            case "arcade":
+                consoleNameMapped = "mame";
+                 return consoleNameMapped;
+            case "mame-advmame":
+                consoleNameMapped = "neogeo";
+                 return consoleNameMapped;
+            case "atari 2600":
+                consoleNameMapped = "atari2600";
+                return consoleNameMapped;
+            case "nintendo entertainment system":
+                consoleNameMapped = "nes";
+                return consoleNameMapped;
+            case "nintendo_entertainment_system":
+                consoleNameMapped = "nes";
+                return consoleNameMapped;    
+            case "nintendo 64":
+                consoleNameMapped = "n64";
+                return consoleNameMapped;
+            case "nintendo_64":
+                consoleNameMapped = "n64";
+                return consoleNameMapped;    
+            case "sony playstation":
+                 consoleNameMapped = "psx";
+                 return consoleNameMapped;
+            case "sony_playstation":
+                 consoleNameMapped = "psx";
+                 return consoleNameMapped;     
+            case "sony playstation 2":
+                consoleNameMapped = "ps2";
+                 return consoleNameMapped;
+            case "sony_playstation_2":
+                consoleNameMapped = "ps2";
+                 return consoleNameMapped;     
+            case "sony pocketstation":
+                consoleNameMapped = "psp";
+                 return consoleNameMapped;
+            case "sony psp":
+                consoleNameMapped = "psp";
+                 return consoleNameMapped;
+             case "sony_psp":
+                consoleNameMapped = "psp";
+                 return consoleNameMapped;     
+            case "amstrad cpc":
+                consoleNameMapped = "amstradcpc";
+                 return consoleNameMapped;
+            case "amstrad gx4000":
+                consoleNameMapped = "amstradcpc";
+                 return consoleNameMapped;
+            case "apple II":
+                consoleNameMapped = "apple2";
+                 return consoleNameMapped;
+            case "atari 5200":
+                consoleNameMapped = "atari5200";
+                 return consoleNameMapped;
+             case "atari_5200":
+                consoleNameMapped = "atari5200";
+                 return consoleNameMapped;     
+            case "atari 7800":
+                consoleNameMapped = "atari7800";
+                 return consoleNameMapped;
+             case "atari_7800":
+                consoleNameMapped = "atari7800";
+                 return consoleNameMapped;     
+            case "atari jaguar":
+                consoleNameMapped = "atarijaguar";
+                 return consoleNameMapped;
+            case "atari_jaguar":
+                consoleNameMapped = "atarijaguar";
+                 return consoleNameMapped;     
+            case "atari jaguar cd":
+                consoleNameMapped = "atarijaguar";
+                 return consoleNameMapped;
+            case "atari lynx":
+                consoleNameMapped = "atarilynx";
+                 return consoleNameMapped;
+            case "atari_lynx":
+                consoleNameMapped = "atarilynx";
+                 return consoleNameMapped;     
+            case "bandai super vision 8000":
+                consoleNameMapped = "wonderswan";
+                 return consoleNameMapped;
+            case "bandai wonderswan":
+                consoleNameMapped = "wonderswan";
+                 return consoleNameMapped;
+            case "bandai wonderswan color":
+                consoleNameMapped = "wonderswancolor";
+                 return consoleNameMapped;
+            case "capcom classics":
+                consoleNameMapped = "capcom";
+                 return consoleNameMapped;
+            case "capcom play pystem":
+                consoleNameMapped = "capcom";
+                 return consoleNameMapped;
+            case "capcom play system II":
+                consoleNameMapped = "capcom";
+                 return consoleNameMapped;
+            case "capcom play system III":
+                consoleNameMapped = "capcom";
+                 return consoleNameMapped;
+            case "colecovision":
+                consoleNameMapped = "coleco";
+                 return consoleNameMapped;
+            case "commodore 128":
+                consoleNameMapped = "c64";
+                 return consoleNameMapped;
+            case "commodore 16 & plus4":
+                consoleNameMapped = "c64";
+                 return consoleNameMapped;
+            case "commodore 64":
+                consoleNameMapped = "c64";
+                 return consoleNameMapped;
+            case "commodore amiga":
+                consoleNameMapped = "amiga";
+                 return consoleNameMapped;
+            case "commodore amiga cd32":
+                consoleNameMapped = "amiga";
+                 return consoleNameMapped;
+            case "commodore vic-20":
+                consoleNameMapped = "c64";
+                 return consoleNameMapped;
+            case "final burn alpha":
+                consoleNameMapped = "fba";
+                 return consoleNameMapped;
+            case "future pinball":
+                consoleNameMapped = "futurepinball";
+                 return consoleNameMapped;
+            case "gce vectrex":
+                consoleNameMapped = "vectrex";
+                 return consoleNameMapped;
+            case "magnavox odyssey":
+                consoleNameMapped = "odyssey";
+                 return consoleNameMapped;
+            case "magnavox odyssey 2":
+                consoleNameMapped = "odyssey";
+                 return consoleNameMapped;
+            case "mattel intellivision":
+                consoleNameMapped = "intellivision";
+                 return consoleNameMapped;
+            case "microsoft msx":
+                consoleNameMapped = "msx";
+                 return consoleNameMapped;
+            case "microsoft msx2":
+                consoleNameMapped = "msx";
+                 return consoleNameMapped;
+            case "microsoft msx2+":
+                consoleNameMapped = "msx";
+                 return consoleNameMapped;
+            case "microsoft windows 3.x":
+                consoleNameMapped = "pc";
+                 return consoleNameMapped;
+            case "misfit mame":
+                consoleNameMapped = "mame";
+                 return consoleNameMapped;
+            case "nec pc engine":
+                consoleNameMapped = "pcengine";
+                 return consoleNameMapped;
+            case "nec pc engine-cd":
+                consoleNameMapped = "pcengine";
+                 return consoleNameMapped;
+            case "nec pc-8801":
+                consoleNameMapped = "pcengine";
+                 return consoleNameMapped;
+            case "nec pc-9801":
+                consoleNameMapped = "pcengine";
+                 return consoleNameMapped;
+            case "nec pc-fx":
+                consoleNameMapped = "pcengine";
+                 return consoleNameMapped;
+            case "nec supergrafx":
+                consoleNameMapped = "pcengine";
+                 return consoleNameMapped;
+            case "nec turbografx-16":
+                consoleNameMapped = "pcengine";
+                 return consoleNameMapped;
+            case "nec turbografx-cd":
+                consoleNameMapped = "pcengine";
+                 return consoleNameMapped;
+            case "nintendo 64dd":
+                consoleNameMapped = "n64";
+                 return consoleNameMapped;
+            case "nintendo famicom":
+                consoleNameMapped = "nes";
+                 return consoleNameMapped;
+            case "nintendo famicom disk system":
+                consoleNameMapped = "nes";
+                 return consoleNameMapped;
+            case "nintendo game boy":
+                consoleNameMapped = "gb";
+                 return consoleNameMapped;
+            case "nintendo game boy advance":
+                consoleNameMapped = "gba";
+                 return consoleNameMapped;
+            case "nintendo game boy color":
+                consoleNameMapped = "gbc";
+                 return consoleNameMapped;
+            case "nintendo gamecube":
+                consoleNameMapped = "nes";
+                 return consoleNameMapped;
+            case "nintendo pokemon mini":
+                consoleNameMapped = "nes";
+                 return consoleNameMapped;
+            case "nintendo satellaview":
+                consoleNameMapped = "nes";
+                 return consoleNameMapped;
+            case "nintendo super famicom":
+                consoleNameMapped = "nes";
+                 return consoleNameMapped;
+            case "nintendo super game boy":
+                consoleNameMapped = "gba";
+                 return consoleNameMapped;
+            case "nintendo virtual boy":
+                consoleNameMapped = "nes";
+                 return consoleNameMapped;
+            case "nintendo wii":
+                consoleNameMapped = "nes";
+                 return consoleNameMapped;
+            case "nintendo wii u":
+                consoleNameMapped = "nes";
+                 return consoleNameMapped;
+            case "nintendo wiiware":
+                consoleNameMapped = "nes";
+                 return consoleNameMapped;
+            case "panasonic 3do":
+                consoleNameMapped = "3do";
+                 return consoleNameMapped;
+            case "pc games":
+                consoleNameMapped = "pc";
+                 return consoleNameMapped;
+            case "pinball fx2":
+                consoleNameMapped = "futurepinball";
+                 return consoleNameMapped;
+            case "sega 32x":
+                consoleNameMapped = "sega32x";
+                 return consoleNameMapped;
+            case "sega cd":
+                consoleNameMapped = "segacd";
+                 return consoleNameMapped;
+            case "sega classics":
+                consoleNameMapped = "sega32x";
+                 return consoleNameMapped;
+            case "sega dreamcast":
+                consoleNameMapped = "dreamcast";
+                 return consoleNameMapped;
+            case "sega game gear":
+                consoleNameMapped = "gamegear";
+                 return consoleNameMapped;
+            case "sega genesis":
+                consoleNameMapped = "genesis";
+                 return consoleNameMapped;
+            case "sega hikaru":
+                consoleNameMapped = "sega32x";
+                 return consoleNameMapped;
+            case "sega master system":
+                consoleNameMapped = "mastersystem";
+                 return consoleNameMapped;
+            case "sega model 2":
+                consoleNameMapped = "sega32x";
+                 return consoleNameMapped;
+            case "sega model 3":
+                consoleNameMapped = "sega32x";
+                 return consoleNameMapped;
+            case "sega naomi":
+                consoleNameMapped = "sega32x";
+                 return consoleNameMapped;
+            case "sega pico":
+                consoleNameMapped = "sega32x";
+                 return consoleNameMapped;
+            case "sega saturn":
+                consoleNameMapped = "saturn";
+                 return consoleNameMapped;
+            case "sega sc-3000":
+                consoleNameMapped = "sega32x";
+                 return consoleNameMapped;
+            case "sega sg-1000":
+                consoleNameMapped = "sega32x";
+                 return consoleNameMapped;
+            case "sega st-v":
+                consoleNameMapped = "sega32x";
+                 return consoleNameMapped;
+            case "sega triforce":
+                consoleNameMapped = "sega32x";
+                 return consoleNameMapped;
+            case "sega vmu":
+                consoleNameMapped = "sega32x";
+                 return consoleNameMapped;
+            case "sinclair zx spectrum":
+                consoleNameMapped = "zxspectrum";
+                 return consoleNameMapped;
+            case "sinclair zx81":
+                consoleNameMapped = "zxspectrum";
+                 return consoleNameMapped;
+            case "snk classics":
+                consoleNameMapped = "neogeo";
+                 return consoleNameMapped;
+            case "snk neo geo aes":
+                consoleNameMapped = "neogeo";
+                 return consoleNameMapped;
+            case "snk neo geo cd":
+                consoleNameMapped = "neogeo";
+                 return consoleNameMapped;
+            case "snk neo geo mvs":
+                consoleNameMapped = "neogeo";
+                 return consoleNameMapped;
+            case "snk neo geo pocket":
+                consoleNameMapped = "ngp";
+                 return consoleNameMapped;
+            case "snk neo geo pocket color":
+                consoleNameMapped = "ngpc";
+                 return consoleNameMapped;
+            case "sony psp minis":
+                consoleNameMapped = "psp";
+                 return consoleNameMapped;
+            case "super nintendo entertainment system":
+                consoleNameMapped = "snes";
+                 return consoleNameMapped;
+            case "visual pinball":
+                consoleNameMapped = "visualpinball";
+                 return consoleNameMapped;
+            default: 
+                 consoleNameMapped = originalConsoleName;    //we didn't find a match so just return the name you got
+                 return consoleNameMapped;
+        }
     }
     
      

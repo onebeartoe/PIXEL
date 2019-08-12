@@ -1,6 +1,6 @@
 #!/bin/sh
 
-#v2.0.7
+#v2.1.4
 # *************** Defaults you can change in this section if needed *********************
 # Change this only if you have the pixelcade directory in a different location
 PIXELPATH="/home/pi/pixelcade/"
