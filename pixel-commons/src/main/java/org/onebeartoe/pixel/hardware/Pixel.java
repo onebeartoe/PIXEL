@@ -196,7 +196,10 @@ public class Pixel
     
     private int p = 0;
     private int scrollingTextMultiplier = 1;
-   
+    //private Boolean loop99999Flag = false;
+    private Boolean loop99999FlagPNG = false;
+    private Boolean loop99999FlagGIF = false;
+    private Boolean loop99999FlagText = false;
     
     //private TimerTask animateTimer = new AnimateTimer();
     
@@ -1049,30 +1052,38 @@ private static String checksum(String filepath, MessageDigest md) throws IOExcep
     public void scrollText(String text, int loop, long speed, Color color, boolean pixelConnected,int scrollsmooth)
     {
         
-     if (!pixelConnected) {  //if pixel is still starting up and we get a command, let's add to Q
+        //System.out.println("Scrolling Text Loop Flag " + isLooping);
+        
+        if (!pixelConnected) {  //if pixel is still starting up and we get a command, let's add to Q
              
            if (loop == 0) {
              loop = 1;
            }
-           //text = text.replace(';',',');
+           
            text = text.replaceAll(";"," "); 
            addtoQueue("text", text, Long.toString(speed), loop, false, color,scrollsmooth);
             
-        } else { 
+     } 
+     
+     else { 
         
+             if (isLooping && loop == 99999) {  //we were already looping and new command has a loop and is not a write command so let's write to the Q
+            
+                 text = text.replaceAll(";"," "); 
+                 addtoQueue("text",text,Long.toString(speed),loop,false,color,scrollsmooth);
+                 loop99999FlagText = true;
+             }
+         
+             else if (isLooping && loop != 0) {  //we were already looping and new command has a loop so let's write to the Q
+                
+                 loopScrollingTextCounter = 0;
+                 loopTimesGlobal = loop; 
+                 text = text.replaceAll(";"," "); 
+                 addtoQueue("text",text,Long.toString(speed),loop,false,color,scrollsmooth);
+
+            } 
         
-        if (isLooping && loop != 0) {  //we were already looping and new command has a loop and is not a write command so let's write to the Q
-             //System.out.println("was already looping and a new loop came in");
-             
-             //if (scrollingTextColor == null) scrollingTextColor = Color.RED;
-             loopScrollingTextCounter = 0;
-             loopTimesGlobal = loop; 
-             text = text.replaceAll(";"," "); 
-             addtoQueue("text",text,Long.toString(speed),loop,false,color,scrollsmooth);
-                    
-        } else 
-        
-        {
+            else  {
             
             scrollDelay = speed;
             
@@ -1082,7 +1093,7 @@ private static String checksum(String filepath, MessageDigest md) throws IOExcep
           
             setScrollTextColor(color);
         
-            if (loop!=0) {                                      //we were not already looping but new command has a loop and is not a write so let's continue and loop the gif
+            if (loop !=0 && loop != 99999) {   //if it's 99999, then we're actually no longer looping   //we were not already looping but new command has a loop and is not a write so let's continue and loop the gif
                 x = KIND.width;
                 isLooping = true;
                 loopScrollingTextCounter = 0;
@@ -1949,7 +1960,7 @@ private static String checksum(String filepath, MessageDigest md) throws IOExcep
     public void addtoQueue(String mode, String consoleOrText, String FileNameOrSpeed, int loop, Boolean writeMode, Color color, int scrollSmooth) {
         System.out.println("Adding item to Queue..."); 
         
-        System.out.println("mode: " + mode); 
+        /* System.out.println("mode: " + mode); 
         System.out.println("text: " + consoleOrText); 
         System.out.println("speed: " + FileNameOrSpeed); 
         System.out.println("loop: " + loop);
@@ -1957,6 +1968,7 @@ private static String checksum(String filepath, MessageDigest md) throws IOExcep
         System.out.println("color: " + color); 
         System.out.println("color hex: " + toHexString(color)); 
         System.out.println("scroll smooth: " + scrollSmooth);
+        */
         
         try { 
             
@@ -2017,6 +2029,8 @@ private static String checksum(String filepath, MessageDigest md) throws IOExcep
     public void writeArcadeAnimation(String selectedPlatformName, String selectedFileName, boolean writeMode, int loop, boolean pixelConnected) throws NoSuchAlgorithmException
     {
        
+         //System.out.println("Looping Flag: " + isLooping);
+
         //we first need to check that pixel is connected and if not, let's write it to the queue
         //ledblinky needed this because ledblanky calls pixelweb.exe and then immediately sends some commands
         if (!pixelConnected) {
@@ -2027,20 +2041,28 @@ private static String checksum(String filepath, MessageDigest md) throws IOExcep
         } else {
         
         
-            if (isLooping && loop != 0 && !writeMode) {  //we were already looping and new command has a loop and is not a write command so let's write to the Q
+             if (isLooping && loop == 99999 && !writeMode) {  //we were already looping and new command has a loop and is not a write command so let's write to the Q
 
-                 addtoQueue("gif",selectedPlatformName,selectedFileName,loop,writeMode,Color.red,1);
+                 addtoQueue("gif",selectedPlatformName,selectedFileName,99999,writeMode,Color.red,1);
+                 loop99999FlagGIF = true;
+            } 
+            
+             else if (isLooping && loop != 0 && !writeMode) {  //we were already looping and new command has a loop and is not a write command so let's write to the Q
 
-            } else 
+                 addtoQueue("gif",selectedPlatformName,selectedFileName,loop,writeMode,Color.red,1); //but don't add to the Q if it's empty?
+
+            } 
+            
+            else 
 
             {
 
-                if (loop!=0 && !writeMode) {            //we were not already looping but new command has a loop and is not a write so let's continue and loop the gif
+                if (loop!=0 && !writeMode && loop != 99999) {            //we just got a looping command but were not looping before so just start a new one 
                     isLooping = true;
                     loopGIFCounter = 0;
                     loopTimesGlobal = loop; 
                 }
-                else {   //we are not looping or we have a write command so let's reset everything and clear the Q
+                else {   //loop = 0 so we are not looping or we have a write command so let's reset everything and clear the Q
                     isLooping = false;
                     loopGIFCounter = 0;
                     loopTimesGlobal = 0;
@@ -2439,7 +2461,8 @@ private static String checksum(String filepath, MessageDigest md) throws IOExcep
     }
     
     public void writeArcadeImage(File PNGFileFullPath, Boolean writeMode, int loop, String consoleNameMapped, String PNGNameWithExtension, boolean pixelConnected) throws IOException {
-       
+        
+        //System.out.println("PNG loop status: " + isLooping);
         
         if (!pixelConnected) {
              
@@ -2449,15 +2472,23 @@ private static String checksum(String filepath, MessageDigest md) throws IOExcep
         } else {
         
         
-            if (isLooping && loop != 0 && !writeMode) {  //we were already looping and new command has a loop and is not a write command so let's write to the Q
+            if (isLooping && loop == 99999 && !writeMode) {  //we were already looping and new command has a loop and is not a write command so let's write to the Q
+
                  addtoQueue("png",consoleNameMapped,PNGNameWithExtension,loop,writeMode,Color.red,1);
-            } else 
+                 loop99999FlagPNG = true;
+            } 
+            
+            else if (isLooping && loop != 0 && !writeMode) {  //we were already looping and new command has a loop and is not a write command so let's write to the Q
+                 addtoQueue("png",consoleNameMapped,PNGNameWithExtension,loop,writeMode,Color.red,1);
+            } 
+            
+            else 
 
            {
 
                stopExistingTimer(); 
 
-               if (loop != 0 && !writeMode) {         //we'll be looping but note we can't loop if in write mode
+               if (loop != 0 && !writeMode && loop != 99999) {         //we'll be looping but note we can't loop if in write mode
 
                     isLooping = true;
                     loopPNGCounter = 0;
@@ -2826,11 +2857,22 @@ private static String checksum(String filepath, MessageDigest md) throws IOExcep
                 //if loop and we've finished looping, now check the queue
             }
             
-            if (isLooping == true && loopGIFCounter >= loopTimesGlobal) {  //first of all, we must be in loop mode and if so have we finished all of our loops
+            if (isLooping == true && loop99999FlagGIF == true && loopGIFCounter == 0) { // and gif was not already looping  //first of all, we must be in loop mode and if so have we finished all of our loops
+                //let's let it continue indefinitely and not stop and check Q
+                loopGIFCounter = 0;
+                loopTimesGlobal = 0;
+                isLooping = false;
+                loop99999FlagGIF = false; //reset the flag
+                System.out.println("Clearing Queue and Playing Indefintately");
+                PixelQueue.clear(); //let's clear the Q
+            }
+            
+            else if (isLooping == true && loopGIFCounter >= loopTimesGlobal) {  //first of all, we must be in loop mode and if so have we finished all of our loops
                 //ok we're done looping so now we need to stop this current animation or scrolling text and then check the queue
                 loopGIFCounter = 0;
                 loopTimesGlobal = 0;
                 isLooping = false;
+                loop99999FlagGIF = false; //reset the flag
                 System.out.println("Done looping GIF, now checking Queue");
                 doneLoopingCheckQueue();
                 
@@ -2840,6 +2882,7 @@ private static String checksum(String filepath, MessageDigest md) throws IOExcep
                 //sendPixelDecodedFrame(decodedAnimationsPath, animationFilename, z, GIFnumFrames, GIFresolution, KIND.width,KIND.height); //if z is not reset, then we could be sending a frame that doesn't exist and hence ioio disconnect
                 z++;
             }
+            
          } 
         }
 
@@ -2857,6 +2900,17 @@ private static String checksum(String filepath, MessageDigest md) throws IOExcep
             loopPNGCounter++;
             //System.out.println("loop PNG counter: " + loopPNGCounter);
             //System.out.println("loop limit: " + loopTimesGlobal);
+            
+             if (isLooping == true && loop99999FlagPNG == true && loopPNGCounter == 0) {  //first of all, we must be in loop mode and if so have we finished all of our loops
+                //let's let it continue indefinitely and not stop and check Q
+                loopPNGCounter = 0;
+                loopTimesGlobal = 0;
+                isLooping = false;
+                loop99999FlagPNG = false; //reset the flag
+                System.out.println("Clearing Queue and Playing Indefintately");
+                PixelQueue.clear(); //let's clear the Q
+            }
+            
             
             if (isLooping == true && loopPNGCounter > loopTimesGlobal) {  //first of all, we must be in loop mode and if so have we finished all of our loops
                 //ok we're done looping so now we need to stop this current animation or scrolling text and then check the queue
@@ -3582,16 +3636,24 @@ private static String checksum(String filepath, MessageDigest md) throws IOExcep
                 x = w;
                 //System.out.println("x reset: " + x);
                 loopScrollingTextCounter++;
+                 
+                 if (isLooping == true && loop99999FlagText == true && loopScrollingTextCounter == 0) {  //first of all, we must be in loop mode and if so have we finished all of our loops
+                    //let's let it continue indefinitely and not stop and check Q
+                    loopScrollingTextCounter = 0;
+                    loopTimesGlobal = 0;
+                    isLooping = false;
+                    loop99999FlagText = false; //reset the flag
+                    System.out.println("Clearing Queue and Playing Indefintately");
+                    PixelQueue.clear(); //let's clear the Q
+                }
                 
-                //System.out.println("text: loopScrollingTextCounter: " + loopScrollingTextCounter);
-                //System.out.println("text: loopTimesGlobal: " + loopTimesGlobal);
-                
-                 if (isLooping == true && loopScrollingTextCounter >= loopTimesGlobal) {  //first of all, we must be in loop mode and if so have we finished all of our loops
+                if (isLooping == true && loopScrollingTextCounter >= loopTimesGlobal) {  //first of all, we must be in loop mode and if so have we finished all of our loops
                     //ok we're done looping so now we need to stop this current animation or scrolling text and then check the queue
                     loopScrollingTextCounter = 0; //reset this one, we'll reset the rest in doneLoopCheckingQueue
                     System.out.println("Done looping scrolling text, now checking Queue");
                     doneLoopingCheckQueue();
                 } 
+                 
             }
             else
             {

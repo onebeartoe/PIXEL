@@ -80,7 +80,7 @@ public class WebEnabledPixel
 {
     //public static final Logger logger = null;
     
-    public static String pixelwebVersion = "2.1.4";
+    public static String pixelwebVersion = "2.1.5";
     
     public static LogMe logMe = null;
 
