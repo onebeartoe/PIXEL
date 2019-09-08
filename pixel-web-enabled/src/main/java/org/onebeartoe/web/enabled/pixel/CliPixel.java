@@ -47,7 +47,8 @@ public class CliPixel
                     "18=64x32 Mirrored, 19=256x16, \n" +
                     "20=32x32 Mirrored, 21=32x32 4x Mirrored, \n" +
                     "22=128x16, 23=ALIEXPRESS RANDOM1 32x32, \n" +
-                    "24=64x32 COLOR SWAP, 25=64x64 COLOR SWAP\n");
+                    "24=64x32 COLOR SWAP, 25=64x64 COLOR SWAP\n" +
+                    "26=64x32 P2.5 COLOR SWAP V2, 27=128x32 P2.5 COLOR SWAP V2\n");
   
   
   options.addOption("m", "matrix", true, "Sets the LED matrix type, same as l option");

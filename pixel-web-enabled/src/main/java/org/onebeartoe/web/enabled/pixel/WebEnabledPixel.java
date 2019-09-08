@@ -80,7 +80,7 @@ public class WebEnabledPixel
 {
     //public static final Logger logger = null;
     
-    public static String pixelwebVersion = "2.1.5";
+    public static String pixelwebVersion = "2.5.0";
     
     public static LogMe logMe = null;
 
@@ -240,6 +240,22 @@ public class WebEnabledPixel
                      }
                     LED_MATRIX_ID = 25;
                 } 
+                
+                if (ledResolution_.equals("64x32C2")) {
+                     if (!silentMode_) {
+                        System.out.println("PIXEL resolution found in settings.ini: resolution=" + ledResolution_);
+                        logMe.aLogger.info("PIXEL resolution found in settings.ini: resolution=" + ledResolution_);
+                     }
+                    LED_MATRIX_ID = 26;
+                } 
+                
+                 if (ledResolution_.equals("128x32C2")) {
+                     if (!silentMode_) {
+                        System.out.println("PIXEL resolution found in settings.ini: resolution=" + ledResolution_);
+                        logMe.aLogger.info("PIXEL resolution found in settings.ini: resolution=" + ledResolution_);
+                     }
+                    LED_MATRIX_ID = 27;
+                } 
          }
         
         pixelEnvironment = new PixelEnvironment(LED_MATRIX_ID);
@@ -281,6 +297,16 @@ public class WebEnabledPixel
                  fontSize_ = 46;
                  speed = 10L;       //smaller the frame, faster the scrolling so slowing it down relative to 128x32
                  break;
+            case 26: //64x32 Color Swap 2 for P2.5 Panels from SYRLED
+                 yTextOffset = -12;
+                 fontSize_ = 32;
+                 speed_ = 18;       //smaller the frame, faster the scrolling so slowing it down relative to 128x32
+                 break;
+            case 27: //128x32 Color Swap 2 for P2.5 Panels from SYRLED
+                yTextOffset = -12;
+                fontSize_ = 32;
+                speed_ = 10;
+                break;
             default: 
                 yTextOffset = -4;  
                 fontSize_ = 22;
@@ -292,7 +318,7 @@ public class WebEnabledPixel
         pixel.setScrollDelay(speed_);
         pixel.setScrollTextColor(Color.red);
         
-        if (!silentMode_) logMe.aLogger.info( "Pixelcade HOME DIRECTORY: " +    pixel.getPixelHome());
+        if (!silentMode_) logMe.aLogger.info( "Pixelcade HOME DIRECTORY: " +  pixel.getPixelHome());
         
         extractDefaultContent();  //to do :  keep this file smaller, moved this to pixelcade-installer?
 
@@ -847,7 +873,7 @@ public class WebEnabledPixel
                    fontSize_ = 32;
                    speed = 10L;
                    break;
-                case 24: //64x32 Color Swap
+               case 24: //64x32 Color Swap
                     yTextOffset = -12;
                     fontSize_ = 32;
                     speed_ = 18;       //smaller the frame, faster the scrolling so slowing it down relative to 128x32
@@ -856,6 +882,16 @@ public class WebEnabledPixel
                    yTextOffset = -6;
                    fontSize_ = 46;
                    speed = 10L;       //smaller the frame, faster the scrolling so slowing it down relative to 128x32
+                   break;
+               case 26: //64x32 P2.5 Color Swap V2
+                   yTextOffset = -12;
+                   fontSize_ = 32;
+                   speed = 18L;       
+                   break;
+               case 27: //128x32 P2.5 Color Swap V2
+                   yTextOffset = -12;
+                   fontSize_ = 32;
+                   speed = 10L;
                    break;
                default: 
                    yTextOffset = -4;  

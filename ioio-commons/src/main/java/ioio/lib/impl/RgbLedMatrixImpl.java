@@ -282,6 +282,14 @@ class RgbLedMatrixImpl extends AbstractResource implements RgbLedMatrix {
 		case ADAFRUIT_32x32_4X_MIRRORED:
 			convertAdafruit32x324XMirrored(rgb565, frame_);
 			break;	
+                        
+                case P25_64x32_ColorSwap:
+                        convertP25_64x32_ColorSwap(rgb565, frame_);
+                        break;
+                        
+                case P25_128x32_ColorSwap:
+                        convertP25_128x32_ColorSwap(rgb565, frame_);
+                        break;  
 
 		default:
 			throw new IllegalStateException("This format is not supported");
@@ -401,6 +409,18 @@ class RgbLedMatrixImpl extends AbstractResource implements RgbLedMatrix {
 	private static void convertAliexpress32x32_Random1(short[] rgb565, byte[] dest) {
 		convertAliexpress_Random1(rgb565, 32, dest); 
 	}
+        
+        private static void convertP25_64x32_ColorSwap(short[] rgb565, byte[] dest) {
+		convertAdafruit_ColorSwap2(rgb565, 64, 16, dest);
+	}
+        
+        private static void convertP25_128x32_ColorSwap(short[] rgb565, byte[] dest) {
+		convertAdafruit_ColorSwap2(rgb565, 128, 16, dest);
+	}
+        
+        
+        
+        
 	
 	/*private static void convertAdafruit32x16(short[] rgb565, byte[] dest) {
 	// TODO: Consider replacing this with convertAdafruit(rgb565, 32, 8, dest) or somethin'
@@ -584,52 +604,103 @@ class RgbLedMatrixImpl extends AbstractResource implements RgbLedMatrix {
 	}
 }
 
-	private static void convertAdafruit_ColorSwap(short[] rgb565, int width, int numLogicalRows, byte[] dest) {
-	final int pairOffset = 16;
-	final int height = rgb565.length / width;
-	final int subframeSize = rgb565.length / 2;
-	
-	for (int x = 0; x < width; ++x) {
-		for (int y = 0; y < height; ++y) {
-			if (y % (pairOffset * 2) >= pairOffset) continue;
-			
-			// This are the two indices of the pixel comprising a dot-pair in the input.
-			int inputIndex0 = y * width + x;
-			int inputIndex1 = (y + pairOffset) * width + x;
-			
-			short color0 = rgb565[inputIndex0];
-			// Take the top 3 bits of each {r,g,b}
-			int b0 = (color0 >> 13) & 0x7;
-			int r0 = (color0 >> 8) & 0x7;
-			int g0 = (color0 >> 2) & 0x7;
-									
-			short color1 = rgb565[inputIndex1];
-			// Take the top 3 bits of each {r,g,b}
-			int b1 = (color1 >> 13) & 0x7;
-			int r1 = (color1 >> 8) & 0x7;
-			int g1 = (color1 >> 2) & 0x7;
-			
-			for (int subframe = 0; subframe < 3; ++subframe) {
-				int dotPair =
-						(r0 & 1) << 5
-						| (g0 & 1) << 4
-						| (b0 & 1) << 3
-						| (r1 & 1) << 2
-						| (g1 & 1) << 1
-						| (b1 & 1) << 0;
-				int indexWithinSubframe = mapAdafruitIndex(x, y, width, height, numLogicalRows);
-				int indexWithinOutput = subframe * subframeSize + indexWithinSubframe;
-				dest[indexWithinOutput] = (byte) dotPair;
-				r0 >>= 1;
-				g0 >>= 1;
-				b0 >>= 1;
-				r1 >>= 1;
-				g1 >>= 1;
-				b1 >>= 1;
-			}
-		}
-	}
-}
+    private static void convertAdafruit_ColorSwap(short[] rgb565, int width, int numLogicalRows, byte[] dest) {
+        final int pairOffset = 16;
+        final int height = rgb565.length / width;
+        final int subframeSize = rgb565.length / 2;
+
+        for (int x = 0; x < width; ++x) {
+            for (int y = 0; y < height; ++y) {
+                if (y % (pairOffset * 2) >= pairOffset) {
+                    continue;
+                }
+
+                // This are the two indices of the pixel comprising a dot-pair in the input.
+                int inputIndex0 = y * width + x;
+                int inputIndex1 = (y + pairOffset) * width + x;
+
+                short color0 = rgb565[inputIndex0];
+                // Take the top 3 bits of each {r,g,b}
+                int b0 = (color0 >> 13) & 0x7;
+                int r0 = (color0 >> 8) & 0x7;
+                int g0 = (color0 >> 2) & 0x7;
+
+                short color1 = rgb565[inputIndex1];
+                // Take the top 3 bits of each {r,g,b}
+                int b1 = (color1 >> 13) & 0x7;
+                int r1 = (color1 >> 8) & 0x7;
+                int g1 = (color1 >> 2) & 0x7;
+
+                for (int subframe = 0; subframe < 3; ++subframe) {
+                    int dotPair
+                            = (r0 & 1) << 5
+                            | (g0 & 1) << 4
+                            | (b0 & 1) << 3
+                            | (r1 & 1) << 2
+                            | (g1 & 1) << 1
+                            | (b1 & 1) << 0;
+                    int indexWithinSubframe = mapAdafruitIndex(x, y, width, height, numLogicalRows);
+                    int indexWithinOutput = subframe * subframeSize + indexWithinSubframe;
+                    dest[indexWithinOutput] = (byte) dotPair;
+                    r0 >>= 1;
+                    g0 >>= 1;
+                    b0 >>= 1;
+                    r1 >>= 1;
+                    g1 >>= 1;
+                    b1 >>= 1;
+                }
+            }
+        }
+    }
+        
+    private static void convertAdafruit_ColorSwap2(short[] rgb565, int width, int numLogicalRows, byte[] dest) {
+        final int pairOffset = 16;
+        final int height = rgb565.length / width;
+        final int subframeSize = rgb565.length / 2;
+
+        for (int x = 0; x < width; ++x) {
+            for (int y = 0; y < height; ++y) {
+                if (y % (pairOffset * 2) >= pairOffset) {
+                    continue;
+                }
+
+                // This are the two indices of the pixel comprising a dot-pair in the input.
+                int inputIndex0 = y * width + x;
+                int inputIndex1 = (y + pairOffset) * width + x;
+
+                short color0 = rgb565[inputIndex0];
+                // Take the top 3 bits of each {r,g,b}
+                int r0 = (color0 >> 13) & 0x7;
+                int b0 = (color0 >> 8) & 0x7;
+                int g0 = (color0 >> 2) & 0x7;
+
+                short color1 = rgb565[inputIndex1];
+                // Take the top 3 bits of each {r,g,b}
+                int r1 = (color1 >> 13) & 0x7;
+                int b1 = (color1 >> 8) & 0x7;
+                int g1 = (color1 >> 2) & 0x7;
+
+                for (int subframe = 0; subframe < 3; ++subframe) {
+                    int dotPair
+                            = (r0 & 1) << 5
+                            | (g0 & 1) << 4
+                            | (b0 & 1) << 3
+                            | (r1 & 1) << 2
+                            | (g1 & 1) << 1
+                            | (b1 & 1) << 0;
+                    int indexWithinSubframe = mapAdafruitIndex(x, y, width, height, numLogicalRows);
+                    int indexWithinOutput = subframe * subframeSize + indexWithinSubframe;
+                    dest[indexWithinOutput] = (byte) dotPair;
+                    r0 >>= 1;
+                    g0 >>= 1;
+                    b0 >>= 1;
+                    r1 >>= 1;
+                    g1 >>= 1;
+                    b1 >>= 1;
+                }
+            }
+        }
+    }
 	
 	private static void convertAliexpress_Random1(short[] rgb565, int width, byte[] dest) {
 		final int height = rgb565.length / width;
@@ -878,9 +949,7 @@ class RgbLedMatrixImpl extends AbstractResource implements RgbLedMatrix {
 		case ADAFRUIT_32x32:
 		case ADAFRUIT_32x32_ColorSwap:
 		
-		
 			return 1;
-
 
 		case ADAFRUIT_64x16:
 		case SEEEDSTUDIO_32x16:
@@ -891,6 +960,7 @@ class RgbLedMatrixImpl extends AbstractResource implements RgbLedMatrix {
 		case ADAFRUIT_64x32_ColorSwap:
 		case ALIEXPRESS_RANDOM1_32x32:
 		case ADAFRUIT_32x32_MIRRORED:
+                case P25_64x32_ColorSwap:
 		
 			return 2;
 			
@@ -904,6 +974,7 @@ class RgbLedMatrixImpl extends AbstractResource implements RgbLedMatrix {
 		case ADAFRUIT_128x32:
 		case ADAFRUIT_32x128:
 		case ADAFRUIT_128x16:
+                case P25_128x32_ColorSwap:
 		
 			return 4; 
 
@@ -912,9 +983,6 @@ class RgbLedMatrixImpl extends AbstractResource implements RgbLedMatrix {
 		case SEEEDSTUDIO_128x32:
 		case SEEEDSTUDIO_32x128:
 		case ADAFRUIT_256x16:
-		
-	
-		
 		
 			return 8; 	
 		
@@ -943,8 +1011,6 @@ class RgbLedMatrixImpl extends AbstractResource implements RgbLedMatrix {
 		case ADAFRUIT_256x16:
 		case ALIEXPRESS_RANDOM1_32x32:
 		
-		
-		
 			return 8; 	
 			
 		case ADAFRUIT_32x32:           // these panels are 1/16 scan or 16 rows
@@ -958,7 +1024,8 @@ class RgbLedMatrixImpl extends AbstractResource implements RgbLedMatrix {
 		case ADAFRUIT_32x128:
 		case ADAFRUIT_32x32_4X_MIRRORED:
 		case ADAFRUIT_32x32_MIRRORED:
-		
+                case P25_64x32_ColorSwap:
+                case P25_128x32_ColorSwap:
 		
 			return 16;
 

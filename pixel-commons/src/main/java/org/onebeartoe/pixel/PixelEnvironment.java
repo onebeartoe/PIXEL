@@ -152,6 +152,17 @@ public class PixelEnvironment
                 frame_length = 8192;
                 currentResolution = 128; 
                 break;
+            case 26:
+                LED_MATRIX = ioio.lib.api.RgbLedMatrix.Matrix.P25_64x32_ColorSwap;
+                frame_length = 4096;
+                currentResolution = 64; 
+                break;
+            case 27:
+                LED_MATRIX = ioio.lib.api.RgbLedMatrix.Matrix.P25_128x32_ColorSwap;
+                frame_length = 8192;
+                currentResolution = 128; 
+                break;
+                
             default:
                 LED_MATRIX = ioio.lib.api.RgbLedMatrix.Matrix.ADAFRUIT_32x32; //v2 as the default
                 frame_length = 2048;

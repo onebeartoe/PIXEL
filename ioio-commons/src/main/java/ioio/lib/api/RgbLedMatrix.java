@@ -86,7 +86,9 @@ public interface RgbLedMatrix extends Closeable {
 		ALIEXPRESS_RANDOM1_32x32(32,32),  //panel Wilton Wong got from Ali Express and figured out the pixel mapping, have are laid out as two 8x64 panels chained together
 		ADAFRUIT_64x32_MIRRORED(64,64),  //note 128,32 changes to a vertically mirred 32x64
 		ADAFRUIT_32x32_MIRRORED(32,64),
-		ADAFRUIT_32x32_4X_MIRRORED(32,128);
+		ADAFRUIT_32x32_4X_MIRRORED(32,128),
+                P25_64x32_ColorSwap(64,32),
+                P25_128x32_ColorSwap(128,32);
 		
 		public final int width;
 		public final int height;
