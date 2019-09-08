@@ -108,9 +108,9 @@ public class AnimationsHttpHandler extends ImageResourceHttpHandler
             logMe.aLogger.info("animation handler received: " + urlParams);
         }
         
-        System.out.println("length: " + animationURLarray.length);  //a
+        //System.out.println("length: " + animationURLarray.length);  //a
         
-        if (animationURLarray.length == 4) {
+       if (animationURLarray.length == 4) {
         	
                 streamOrWrite = animationURLarray[2];
                 arcadeName = animationURLarray[3];
@@ -125,17 +125,17 @@ public class AnimationsHttpHandler extends ImageResourceHttpHandler
                 if (streamOrWrite.equals("write"))  saveAnimation = true;
 
 
+            
             /*
-
             // the writeAnimation() method just takes the name of the file
             int i = urlParams.lastIndexOf("/") + 1;
             String animationName = urlParams.substring(i);
-            String arcadeNameOnly = "";
+            //String arcadeNameOnly = "";
 
             //System.out.println("string: " + imageClassPath);  //animation/0pacgosts.png or //animation/save/0pacghosts
             //System.out.println("animationName: " + animationName);  //0pacghosts.png
 
-            boolean saveAnimation = false;
+            //boolean saveAnimation = false;
 
             if( urlParams.contains("/save/") )
             {
@@ -148,7 +148,9 @@ public class AnimationsHttpHandler extends ImageResourceHttpHandler
             {
                 arcadeNameOnly = defaultImageClassPath;
             } 
-    */
+           */
+            
+            
 
              if (!CliPixel.getSilentMode()) {
                 System.out.println(streamOrWrite.toUpperCase() + " MODE");

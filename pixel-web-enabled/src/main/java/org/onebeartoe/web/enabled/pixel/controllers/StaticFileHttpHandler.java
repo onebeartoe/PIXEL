@@ -68,7 +68,7 @@ public class StaticFileHttpHandler implements HttpHandler//extends PixelHttpHand
         } 
         else if (!file.isFile())
         {
-            logger.log(Level.INFO, "file not found    request: " + t.getRequestURI());
+            logger.log(Level.INFO, "file not found request: " + t.getRequestURI());
             logger.log(Level.INFO, "file not found translated: " + file.getAbsolutePath() );
             
             // Object does not exist or is not a file: reject with 404 error.
