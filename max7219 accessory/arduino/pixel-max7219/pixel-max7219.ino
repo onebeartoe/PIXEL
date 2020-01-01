@@ -20,27 +20,83 @@
 #define HANDSHAKE_RETURN 45           //once pixelcadeh is received, arduino will send back 45 45. Once the PC receives that, we know we are communicating correctly
 #define FW_VERSION "MAX70001"         //PMAX is the platform or short for PMAX7219 in this case and 0001 is the version
 
+/* Pin connections are as follows:
+LED Matrix 1
+DIN--> 11
+CS-->  10
+CLK--> 13
+If connecting a second or third matrix, just daisy chain them
+
+7 Segment
+DIN--> 9
+CS-->  8
+CLK--> 7
+
+OLED 1
+SCL--> SCL 
+SDA--> SDA  
+
+OLED 2
+SCL--> SCL 
+SDA--> SDA  
+Note there are no SDA and SCL pins on Arduino Nano so use instead SDA\-->A4 and SCL-->A5
+ */
+
 // ***************** 7 Segment ****************
 LedControl lc=LedControl(9,7,8,2); //pins for the 7 segment modules and 2 is the number of modules
-
+/*
+ pin 9 is connected to DataIn 
+ pin 7 is connected to CLK 
+ pin 8 is connected to CS 
+ */
 // ****************** LED MATRIX ***************
 #define HARDWARE_TYPE MD_MAX72XX::FC16_HW
-#define MAX_DEVICES 4                 //for 4 MAX7219 LED modules, change this number if you have more, up to 8 are supported
+#define MAX_DEVICES 8                 //in this case we have 8 modules total and are defining 2 zones meaning we treat one zone of 4 and the second zone of 4 and can control them independently
+#define NUM_ZONES 2
 #define CLK_PIN   13
 #define DATA_PIN  11
 #define CS_PIN    10
-MD_Parola P = MD_Parola(HARDWARE_TYPE, CS_PIN, MAX_DEVICES);\
+
+MD_Parola P = MD_Parola(HARDWARE_TYPE, CS_PIN, MAX_DEVICES);
 // LED MATRIX Scrolling parameters
 uint8_t scrollSpeed = 25;    // default frame delay value
-textEffect_t scrollEffect = PA_SCROLL_LEFT;
-textPosition_t scrollAlign = PA_LEFT;
+textEffect_t scrollEffectIn = PA_SCROLL_RIGHT;
+textEffect_t scrollEffectOut = PA_GROW_DOWN;  
+textPosition_t scrollAlign = PA_RIGHT;
 uint16_t scrollPause = 2000; // in milliseconds
 unsigned long delaytime=250;
 
+/* Other possible scroll effects you can experiment with
+  PA_PRINT,
+  PA_SCAN_HORIZ,
+  PA_SCROLL_LEFT,
+  PA_WIPE,
+  PA_SCROLL_UP_LEFT,
+  PA_SCROLL_UP,
+  PA_OPENING_CURSOR,
+  PA_GROW_UP,
+  PA_MESH,
+  PA_SCROLL_UP_RIGHT,
+  PA_BLINDS,
+  PA_CLOSING,
+  PA_RANDOM,
+  PA_GROW_DOWN,
+  PA_SCAN_VERT,
+  PA_SCROLL_DOWN_LEFT,
+  PA_WIPE_CURSOR,
+  PA_DISSOLVE,
+  PA_OPENING,
+  PA_CLOSING_CURSOR,
+  PA_SCROLL_DOWN_RIGHT,
+  PA_SCROLL_RIGHT,
+  PA_SLICE,
+  PA_SCROLL_DOWN,
+*/
+
 // Global message buffers shared by Serial and Scrolling functions
-#define  BUF_SIZE  250     //had to increase the buffer size from the default of 75 becasue our string length was exceeding
+#define  BUF_SIZE  250     //had to increase the buffer size from the default of 75 becasue our string length was exceeding and note on the pixelcade side we also truncate to ensure the incoming serial message is not too long
 char curMessage[BUF_SIZE] = { "" };
-char newMessage[BUF_SIZE] = { "Pixelcade" };
+char newMessage[BUF_SIZE] = { "Pixelcade Waiting to Connect..." };
 bool newMessageAvailable = true;
 // **********************************************
 
@@ -59,19 +115,19 @@ SSD1306AsciiWire oled;
 //char* oledScrollBottom[] = {"        Pixelcade Sub Display Accessory: Waiting to Connect..."};
 //**********************************
 
-bool handShakeResponse = false;
-int gameYearArray[4] = {0x67, 0x10, 8, 8};
-String gameTitle="";
-String gameYear="";
-String gameManufacturer="";
-String gameGenre="";
-String gameRating="";
+bool    handShakeResponse = false;
+int     gameYearArray[4] = {0x67, 0x10, 8, 8};
+String  gameTitle="";
+String  gameYear="";
+String  gameManufacturer="";
+String  gameGenre="";
+String  gameRating="";
 
-int firstSeparator=0;
-int secondSeparator=0;
-int thirdSeparator=0;
-int fourthSeparator=0;
-int fifthSeparator=0;
+int     firstSeparator=0;
+int     secondSeparator=0;
+int     thirdSeparator=0;
+int     fourthSeparator=0;
+int     fifthSeparator=0;
 
 void readSerial(void)
 {
@@ -167,14 +223,30 @@ void MovingDigits7Segment()
 void writeOled () {
   oled.setFont(Adafruit5x7);
   oled.clear();
-  oled.println(gameTitle);
+  
+  if (gameTitle.equals("")) {                   //this means we haven't connected yet
+    oled.println("Display Accessory");
+  }
+  else {
+    oled.println(gameTitle);
+  }
+  
   oled.println(gameManufacturer);
   oled.println();
+  
   oled.set2X();
-  oled.println(gameYear);
+  if (gameTitle.equals("")) {                  
+    oled.println("Pixelcade");
+  }
+  else {
+     oled.println(gameYear);
+  }
+ 
   oled.set1X();
   oled.println(gameGenre);
   oled.println(gameRating);
+
+
 
    // Use Adafruit5x7 font, field at row 2, set1X, columns 16 through 100.
   //oled.tickerInit(&state, Adafruit5x7, 7, false, 16, 100); //this worked but couldn't figure out how to change dynamically
@@ -194,24 +266,79 @@ void setup()
 
    // Use Adafruit5x7 font, field at row 2, set1X, columns 16 through 100.
   //oled.tickerInit(&state, Adafruit5x7, 7, false, 16, 100);
-  
   /////*****************************************
   
   Serial.begin(57600);
   Serial.setTimeout(50);
   Serial.print(FW_VERSION);
+ 
+  P.begin(NUM_ZONES);   //we have a total of 8 modules with two zones, the first zone is modules 0-3 and second zone is modules 4-7
+  P.setZone(0, 0, 3);
+  P.setZone(1, 4, 7);
+
+  // change these to false if your displays are upside down
+  P.setZoneEffect(0, true, PA_FLIP_UD);
+  P.setZoneEffect(0, true, PA_FLIP_LR);
+  P.setZoneEffect(1, true, PA_FLIP_UD);
+  P.setZoneEffect(1, true, PA_FLIP_LR);
+
+  for (uint8_t i=0; i<NUM_ZONES; i++) {
+    P.displayZoneText(i, curMessage, scrollAlign, scrollSpeed, scrollPause, scrollEffectIn, scrollEffectOut);
+  }
   
+  
+  /* old code for one zone
   P.begin();
+ 
   P.displayText(curMessage, scrollAlign, scrollSpeed, scrollPause, scrollEffect, scrollEffect);
+  // *****change these to false if your display is upside down
+   P.setZoneEffect(0, true, PA_FLIP_UD);
+   P.setZoneEffect(0, true, PA_FLIP_LR);
+  // *****************
+  */
 
   // the zero refers to the MAX7219 number, it is zero for 1 chip
-  lc.shutdown(0,false);// turn off power saving, enables display
-  lc.setIntensity(0,8);// sets brightness (0~15 possible values)
-  lc.clearDisplay(0);// clear screen
+  lc.shutdown(0,false); // turn off power saving, enables display
+  lc.setIntensity(0,8); // sets brightness (0~15 possible values)
+  lc.clearDisplay(0); // clear screen
 }
 
 void loop()
 {
+  
+/*
+  if (P.displayAnimate())
+{
+ boolean bAllDone = true;
+
+ for (uint8_t i=0; i<MAX_ZONES && bAllDone; i++)
+   bAllDone = bAllDone && P.getZoneStatus(i);
+
+ if (bAllDone) 
+ {
+        
+    if (handShakeResponse) {
+       Serial.write(HANDSHAKE_RETURN);
+       Serial.write(HANDSHAKE_RETURN);
+       handShakeResponse = false;
+    }
+    
+    if (newMessageAvailable)
+    {
+      strcpy(curMessage, newMessage);
+      MovingDigits7Segment(); 
+      display7Segment();                //write game year to the 7 segment display
+      writeOled ();                     //write to the OLED
+      newMessageAvailable = false;
+    }
+    P.displayReset();
+  }
+  readSerial();
+ }
+
+*/
+  
+  
   if (P.displayAnimate())
   {
 
@@ -234,6 +361,7 @@ void loop()
   }
   readSerial();
   
+  
  /*
  //******* For OLED display ***********
   if (tickTime <= millis()) {
@@ -253,3 +381,11 @@ void loop()
 
   
 }
+
+/*
+Notes on SPI
+MISO (Master In Slave Out) - The Slave line for sending data to the master,                                   12 or ICSP 1
+MOSI (Master Out Slave In) - The Master line for sending data to the peripherals,                             11 or ICSP 4
+SCK (Serial Clock) - The clock pulses which synchronize data transmission generated by the master             13 or ICSP 3
+SS (Slave Select) - the pin on each device that the master can use to enable and disable specific devices.    10 but can be any pin 
+*/
