@@ -95,8 +95,8 @@ public class IOIOImpl implements IOIO, DisconnectListener {
 			throw new ConnectionLostException();
 		}
 		addDisconnectListener(this);
-		Log.d(TAG, "Waiting for IOIO connection");
-                //logMe.aLogger.info("Waiting for IOIO connection");
+		Log.d(TAG, "Waiting for connection to PIXEL hardware");
+                //logMe.aLogger.info("Waiting for PIXEL connection");
 		try {
 			try {
 				Log.v(TAG, "Waiting for underlying connection");
@@ -553,6 +553,12 @@ public class IOIOImpl implements IOIO, DisconnectListener {
 				rate = Math.round(1000000.0f / baud) - 1;
 			}
 			protocol_.uartConfigure(uartNum, rate, speed4x, stopbits, parity);
+                       
+                          
+                        
+                        
+                        
+                        
 		} catch (IOException e) {
 			uart.close();
 			throw new ConnectionLostException(e);
