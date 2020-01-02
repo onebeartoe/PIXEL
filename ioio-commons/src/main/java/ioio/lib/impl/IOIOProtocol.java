@@ -151,6 +151,7 @@ class IOIOProtocol {
 			flush();
 		}
 		//Log.v(TAG, "sending: 0x" + Integer.toHexString(b));
+                //System.out.println(TAG +  " writeByte // sending: 0x" + Integer.toHexString(b)); //logging was here for the pinDMD work
 		outbuf_[pos_++] = (byte) b;
 	}
 	
@@ -376,7 +377,14 @@ class IOIOProtocol {
 				| (stopbits == Uart.StopBits.TWO ? 0x04 : 0x00) | parbits);
 		writeTwoBytes(rate);
 		endBatch();
+                
+               
+                
+                
+                
 	}
+        
+        
 
 	synchronized public void uartClose(int uartNum) throws IOException {
 		beginBatch();
@@ -632,6 +640,7 @@ class IOIOProtocol {
 					throw new IOException("Unexpected stream closure");
 				}
 				//Log.v(TAG, "received " + validBytes_ + " bytes");
+                                //System.out.println(TAG + " fillBuf // received " + validBytes_ + " bytes"); //had this here for pinDMD integration
 				readOffset_ = 0;
 			} catch (IOException e) {
 				Log.i(TAG, "IOIO disconnected");
@@ -646,6 +655,8 @@ class IOIOProtocol {
 			int b = inbuf_[readOffset_++];
 			b &= 0xFF;  // make unsigned
 			//Log.v(TAG, "received: 0x" + Integer.toHexString(b));
+                        //System.out.println(TAG + " readByte() // received: 0x" + Integer.toHexString(b)); //had this for pinDMD integration
+                        
 			return b;
 		}
 

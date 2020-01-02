@@ -70,6 +70,8 @@ class SerialPortIOIOConnection implements IOIOConnection {
 						inputStream_ = new GracefullyClosingInputStream(
 								serialPort_.getInputStream());
 						outputStream_ = serialPort_.getOutputStream();
+                                               
+                                                
 						return;
 					}
 				}
