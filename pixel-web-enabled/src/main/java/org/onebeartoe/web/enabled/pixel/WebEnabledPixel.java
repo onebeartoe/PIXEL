@@ -16,6 +16,7 @@ import java.awt.Color;
 
 import java.io.BufferedReader;
 import java.io.File;
+import static java.io.FileDescriptor.out;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
@@ -41,7 +42,10 @@ import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 
 import org.apache.commons.io.IOUtils;
+import org.ini4j.Config;
 import org.ini4j.Ini;
+import org.ini4j.Wini;
+import org.ini4j.spi.IniFormatter;
 
 import org.onebeartoe.io.TextFileReader;
 import org.onebeartoe.io.buffered.BufferedTextFileReader;
@@ -66,6 +70,7 @@ import org.onebeartoe.web.enabled.pixel.controllers.UploadOriginHttpHandler;
 import org.onebeartoe.web.enabled.pixel.controllers.ArcadeHttpHandler;
 import org.onebeartoe.web.enabled.pixel.controllers.ConsoleHttpHandler;
 import org.onebeartoe.web.enabled.pixel.controllers.QuitHttpHandler;
+import org.onebeartoe.web.enabled.pixel.controllers.PinDMDHttpHandler;
 //import org.onebeartoe.web.enabled.pixel.controllers.mameRom2Name;
 
 import org.json.simple.JSONArray; 
@@ -73,6 +78,14 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.*;
 
 import org.onebeartoe.pixel.LogMe;
+import com.fazecast.jSerialComm.SerialPort;
+import com.fazecast.jSerialComm.SerialPortDataListener;
+import com.fazecast.jSerialComm.SerialPortEvent;
+import com.fazecast.jSerialComm.SerialPortMessageListener;
+import java.io.PrintWriter;
+
+
+
 /**
  * @author Roberto Marquez
  */
@@ -80,7 +93,7 @@ public class WebEnabledPixel
 {
     //public static final Logger logger = null;
     
-    public static String pixelwebVersion = "2.5.0";
+    public static String pixelwebVersion = "2.5.4";
     
     public static LogMe logMe = null;
 
@@ -95,6 +108,8 @@ public class WebEnabledPixel
     private Pixel pixel;
     
     private String ledResolution_ = "";
+    
+    private String playLastSavedMarqueeOnStartup_ = "yes";
 
     private static int LED_MATRIX_ID = 15;
 //TODO: We shoudl invert this and have teh user specicy the matrix label 
@@ -141,9 +156,27 @@ public class WebEnabledPixel
     
     public static boolean consoleMappingExists = false;
     
+    public static boolean allMetaDataMappingExists = false;
+    
     public static HashMap<String, String> rom2NameMap = new HashMap<String, String>();
     
     public static HashMap<String, String> consoleMap = new HashMap<String, String>();
+    
+    public static HashMap<String, String> allMetaDataMap = new HashMap<String, String>();
+    
+    private String SubDisplayAccessory_ = "no";
+    
+    private String SubDisplayAccessoryPort_ = "COM99";
+    
+    public static boolean arduino1MatrixConnected = false;
+    
+    public static SerialPort arduino1MatrixPort;
+    
+    public static SerialPort arduino2OLED1Port;
+    
+    public static SerialPort arduino3OLED2Port;
+    
+    public static PrintWriter Arduino1MatrixOutput;
     
     public WebEnabledPixel(String[] args) throws FileNotFoundException, IOException
     {
@@ -182,16 +215,78 @@ public class WebEnabledPixel
          File file = new File("settings.ini");
              if (file.exists() && !file.isDirectory()) { 
                  
-                Ini ini = null;
+                Ini ini = null;   //see this https://stackoverflow.com/questions/49785474/how-to-get-rid-of-spaces-when-using-the-ini-store-method-to-write-into-ini-fil
+                //Wini ini = null;
+                 
                 try {
-                   ini = new Ini(new File("settings.ini"));  //uses the ini4j lib
+                   ini = new Ini(new File("settings.ini"));  //this code was adding extra characters on savings
+                   //ini = new Wini(new File("settings.ini")); 
+                    Config config = ini.getConfig(); // instead of Config config = new Config()  
+                    config.setStrictOperator(true);
+                    ini.setConfig(config); 
+                   
                 } catch (IOException ex) {
                    logMe.aLogger.log(Level.SEVERE, "could not load settings.ini", ex);
                     if (!silentMode_) logMe.aLogger.severe("Could not open settings.ini" + ex);
                 }
+                
                 //only go here if settings.ini exists
                 
-                ledResolution_=ini.get("PIXELCADE SETTINGS", "ledResolution"); 
+                Ini.Section sec = ini.get("PIXELCADE SETTINGS"); //if we had more sections, we could use this to better organize
+                //ledResolution_=ini.get("PIXELCADE SETTINGS", "ledResolution");
+                ledResolution_=sec.get("ledResolution");
+                
+                if(sec.containsKey("playLastSavedMarqueeOnStartup"))  {
+                     playLastSavedMarqueeOnStartup_ = sec.get("playLastSavedMarqueeOnStartup"); 
+                }
+                else { //let's create that key
+                     System.out.println("Creating key in settings.ini : playLastSavedMarqueeOnStartup");
+                     sec.add("playLastSavedMarqueeOnStartup","yes"); //if we had more sections, we could use this to better organize
+                     sec.add("playLastSavedMarqueeOnStartup_OPTION","yes");
+                     sec.add("playLastSavedMarqueeOnStartup_OPTION","no");
+                     sec.add("ledResolution_OPTION","128x32C2");  //pixel P2.5 panels that have the green and blue color lines crossed
+                     sec.put("userMessageGenericPlatform","Writing Generic LED Marquee for Emulator");
+                     sec.put("hostAddress","localhost");
+                }
+                
+                 if(sec.containsKey("SubDisplayAccessory"))  {
+                     SubDisplayAccessory_ = sec.get("SubDisplayAccessory"); 
+                     SubDisplayAccessoryPort_ = sec.get("SubDisplayAccessoryPort"); 
+                             
+                } else {
+                     sec.add("SubDisplayAccessory","no"); 
+                     sec.add("SubDisplayAccessory_OPTION","yes");
+                     sec.add("SubDisplayAccessory_OPTION","no");
+                     
+                     sec.add("SubDisplayAccessoryPort","COM99");
+                     sec.add("SubDisplayAccessoryPort_OPTION","COM1");
+                     sec.add("SubDisplayAccessoryPort_OPTION","COM2");
+                     sec.add("SubDisplayAccessoryPort_OPTION","COM3");
+                     sec.add("SubDisplayAccessoryPort_OPTION","COM4");
+                     sec.add("SubDisplayAccessoryPort_OPTION","COM5");
+                     sec.add("SubDisplayAccessoryPort_OPTION","COM6");
+                     sec.add("SubDisplayAccessoryPort_OPTION","COM7");
+                     sec.add("SubDisplayAccessoryPort_OPTION","COM8");
+                     sec.add("SubDisplayAccessoryPort_OPTION","COM9");
+                     sec.add("SubDisplayAccessoryPort_OPTION","COM10");
+                     sec.add("SubDisplayAccessoryPort_OPTION","COM12");
+                     sec.add("SubDisplayAccessoryPort_OPTION","COM13");
+                     sec.add("SubDisplayAccessoryPort_OPTION","COM14");
+                     sec.add("SubDisplayAccessoryPort_OPTION","COM15");
+                     sec.add("SubDisplayAccessoryPort_OPTION","COM16");
+                     sec.add("SubDisplayAccessoryPort_OPTION","COM17");
+                     sec.add("SubDisplayAccessoryPort_OPTION","COM18");
+                     sec.add("SubDisplayAccessoryPort_OPTION","COM19");
+                     sec.add("SubDisplayAccessoryPort_OPTION","COM20");
+                     sec.add("SubDisplayAccessoryPort_OPTION","COM21");
+                     sec.add("SubDisplayAccessoryPort_OPTION","COM22");
+                     sec.add("SubDisplayAccessoryPort_OPTION","COM23");
+                     sec.add("SubDisplayAccessoryPort_OPTION","COM24");
+                     sec.add("SubDisplayAccessoryPort_OPTION","COM25");
+                     
+                     //note sec.put was not working as it was over-writing, not creating a new key
+                     ini.store();
+                 }
                 
                 if (ledResolution_.equals("128x32")) {
                     if (!silentMode_) {
@@ -376,7 +471,68 @@ public class WebEnabledPixel
             System.out.println("console.csv not found");
         }
         
+         //let's load a rom name to game year mapping into memory into a hashmap for the 8 digital 7 segment display
+        File yearfile = new File("allmetadata.csv"); //csv file
+        if (yearfile.exists() && !yearfile.isDirectory()) {
+            allMetaDataMappingExists = true; 
+            String filePath = "allmetadata.csv";
+            String line;
+            BufferedReader reader = new BufferedReader(new FileReader(filePath));
+            while ((line = reader.readLine()) != null) {
+                String[] parts = line.split(",", 2);
+                if (parts.length >= 2) {
+                    String key = parts[0];
+                    String value = parts[1];
+                    allMetaDataMap.put(key, value);
+                } else {
+                    System.out.println("ignoring line in allmetadata.csv: " + line);
+                }
+            }
+            reader.close();
+        } else {
+            System.out.println("allmetadata.csv not found");
+        }
         
+        
+        if (SubDisplayAccessory_.equals("yes")) {
+                
+                //arduino1MatrixPort = SerialPort.getCommPort("/dev/tty.usbmodem14101");
+                System.out.println("Attempting to connect to Pixelcade Sub Display Accessory...");
+                
+                arduino1MatrixPort = SerialPort.getCommPort(SubDisplayAccessoryPort_);
+                arduino1MatrixPort.setComPortTimeouts(SerialPort.TIMEOUT_SCANNER, 0, 0);
+                arduino1MatrixPort.setBaudRate(57600); 
+
+                if(!arduino1MatrixPort.openPort()) {  //the arduino will reset when the serial port has been opened, we need to give it time to be ready before sending our handshake byte
+                        try {
+                                throw new Exception("Serial port \"" + SubDisplayAccessoryPort_ + "\" could not be opened.");
+                        } catch (Exception e) {
+                                // TODO Auto-generated catch block
+                                e.printStackTrace();
+                        }
+                        } else {
+
+                        try {
+                                Thread.sleep(1000);
+                        } catch (InterruptedException e1) {
+                                e1.printStackTrace();
+                        } 
+
+
+                        MessageListener listener = new MessageListener();
+                        arduino1MatrixPort.addDataListener(listener);
+                           try { Thread.sleep(1000); } catch (Exception e) { e.printStackTrace(); }
+                          // chosenPort.removeDataListener();
+
+                        //opening the port resets the arduino and we need to give time for it to startup and be ready to accept the commands
+                        
+                        Arduino1MatrixOutput = new PrintWriter(arduino1MatrixPort.getOutputStream());
+                        Arduino1MatrixOutput.print("pixelcadeh\n");  //the arduino is listening for this string for our handshake. When that is received, it will send back 45 45 which our listener will pick up as an event
+                        Arduino1MatrixOutput.flush();
+                        
+                        
+                }
+        }
         
         
     } 
@@ -420,7 +576,9 @@ public class WebEnabledPixel
             
             HttpHandler arcadeHttpHandler = new ArcadeHttpHandler(this);
             
-             HttpHandler quitHttpHandler = new QuitHttpHandler(this);
+            HttpHandler pindmdHttpHandler = new PinDMDHttpHandler(this);
+            
+            HttpHandler quitHttpHandler = new QuitHttpHandler(this);
             
             
 // ARE WE GONNA DO ANYTHING WITH THE HttpContext OBJECTS?   
@@ -436,6 +594,9 @@ public class WebEnabledPixel
                                             server.createContext("/shutdown", quitHttpHandler);
                                             server.createContext("/arcade/list", arcadeListHttpHandler);
                                             server.createContext("/console", consoleListHttpHandler);
+                                            
+            
+            HttpContext pindmdContext =     server.createContext("/pindmd", pindmdHttpHandler);
 
             HttpContext staticContent =     server.createContext("/files", staticFileHttpHandler);
             
@@ -566,6 +727,9 @@ public class WebEnabledPixel
         extractClasspathResource(inpath, pixelHomeDirectory);
         
         inpath = contentClasspath + "settings.ini";
+        extractClasspathResource(inpath, pixelHomeDirectory);
+        
+        inpath = contentClasspath + "allmetadata.csv";
         extractClasspathResource(inpath, pixelHomeDirectory);
     }
       
@@ -797,7 +961,7 @@ public class WebEnabledPixel
         }
     }
      
-     public static String getGameName(String romName) {  //returns the game name string based on the rom name
+    public static String getGameName(String romName) {  //returns the game name string based on the rom name
         
         String GameName = "";
         
@@ -816,8 +980,36 @@ public class WebEnabledPixel
         }
         return GameName;
     }
+    
+     public static String getGameMetaData(String romName) {  //returns the game name string based on the rom name
+        
+        String GameMetaData = "";
+        
+        if (allMetaDataMappingExists) { //allmetadata.csv file was found and opened
+             
+            if (allMetaDataMap.containsKey(romName))  
+            { 
+                 GameMetaData = allMetaDataMap.get(romName); 
+            } 
+            else {
+                 GameMetaData = "nomatch"; 
+            }
+            
+        } else {
+            GameMetaData = "nomatch"; 
+        }
+        //IMPORTANT: 91 chars is the max that the accessory displays can handle given memory / buffer size constraints so let's truncate if over
+        
+        if (GameMetaData.length() > 90) {;
+            GameMetaData = GameMetaData.substring(0, Math.min(GameMetaData.length(), 90));
+        }
+        
+        return GameMetaData;
+    }
+    
+    
      
-     public static String getConsoleMapping(String originalConsole) {  //returns the game name string based on the rom name
+     public static String getConsoleMapping(String originalConsole) {  //returns the console name string based on the rom name
         
         String ConsoleMapped = "";
         
@@ -839,6 +1031,8 @@ public class WebEnabledPixel
         }
         return ConsoleMapped;
     } 
+     
+    //TO DO need to add the year and manufacturer
      
      
      
@@ -1046,7 +1240,13 @@ public class WebEnabledPixel
 //      AND then its initialize() method
     }
     
-     public static String getConsoleNamefromMapping(String originalConsoleName)
+    public static void writeArduino1Matrix(String Arduino1MatrixText) {
+       
+       Arduino1MatrixOutput.print(Arduino1MatrixText +"\n");
+       Arduino1MatrixOutput.flush();
+    } 
+    
+    public static String getConsoleNamefromMapping(String originalConsoleName)
     {
          String consoleNameMapped = null; //to do set this if null?
          
@@ -1520,6 +1720,11 @@ public class WebEnabledPixel
                     message.append("PIXEL Status: Connected");
                     pixelConnected = true;
                     
+                     if (!playLastSavedMarqueeOnStartup_.equals("no")) {
+                         
+                        pixel.playLocalMode();
+                    }
+                    
                     //we just connected so let's let's check the Q and see if anything was written to it while we were searching for the board
                     if (!pixel.PixelQueue.isEmpty()) {
                         pixel.doneLoopingCheckQueue();
@@ -1607,5 +1812,55 @@ public class WebEnabledPixel
                 }
 	    }
 	}        
-    }    
+    }  
+    
+    private static class MessageListener implements SerialPortMessageListener
+    {
+       @Override
+       public int getListeningEvents() { return SerialPort.LISTENING_EVENT_DATA_RECEIVED; }
+
+       @Override
+       public byte[] getMessageDelimiter() { return new byte[] { (byte)0x2D, (byte)0x2D}; }  //45 45
+       //public byte[] getMessageDelimiter() { return new byte[] { (byte)0x2D };}  //45 45
+
+       @Override
+       public boolean delimiterIndicatesEndOfMessage() { return true; 
+     }
+       
+        @Override
+	   public void serialEvent(SerialPortEvent event)
+	   {
+	      byte[] delimitedMessage = event.getReceivedData();
+	      String firmwareString = new String(delimitedMessage);
+	      firmwareString = firmwareString.trim();
+	      firmwareString = right(firmwareString, 21); //had to do this as sometimes some garbled characters where in the front
+	      //System.out.println("Firmware Handshake: " + firmwareString);
+	      String FW_Hardware = "";
+	      String HW_Version = "";
+	      
+	      if (firmwareString.length() > 8) 
+	      {
+	    	  FW_Hardware = firmwareString.substring(0, 4);
+	    	  HW_Version = firmwareString.substring(4, 8);
+	      } 
+	      else
+	      {
+	    	  System.out.println("Invalid firmware: " + firmwareString);
+	      }
+	      
+	      System.out.println("Sub Display Accessory Found with Plaform Firmware: " + FW_Hardware);
+	      System.out.println("Sub Display Accessory Found with Version: " + HW_Version);
+              arduino1MatrixConnected = true; 
+	      
+	   }
+	}
+    
+     public static String right(String value, int length) {
+	        // To get right characters from a string, change the begin index.
+	        return value.substring(value.length() - length);
+	  }
+    
+    
+    
+    
 }

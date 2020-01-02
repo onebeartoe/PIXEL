@@ -6,6 +6,7 @@ import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -29,6 +30,7 @@ import org.apache.commons.io.FilenameUtils;
 import org.onebeartoe.web.enabled.pixel.CliPixel;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.utils.URLEncodedUtils;
+import com.fazecast.jSerialComm.SerialPort;
 
 /**
  * @author Roberto Marquez
@@ -100,7 +102,7 @@ public class ArcadeHttpHandler extends ImageResourceHttpHandler
                                                 "visualpinball", "wonderswan", "wonderswancolor", "zinc", "sss",
                                                 "zmachine", "zxspectrum"};
                  
- 	boolean saveAnimation = false;
+        boolean saveAnimation = false;
         int loop_ = 0;
         String text_ = "";
         int scrollsmooth_ = 1;
@@ -108,6 +110,7 @@ public class ArcadeHttpHandler extends ImageResourceHttpHandler
         String color_ = "";
         Color color = Color.RED; //default to red color if not added
        // String loopString = "0"; //to do kill this
+      //  SerialPort arduino1Port;
       
        
        if (WebEnabledPixel.isWindows()) {  //unfortunate hack we have to do as scrolling on windows is slower
@@ -321,6 +324,12 @@ public class ArcadeHttpHandler extends ImageResourceHttpHandler
             if (streamOrWrite.equals("write")) {  //we're in write mode so gif gets the priority if both gif and png exist, never should write mode be used for front end scrolling
                 saveAnimation = true;
                 
+                //if our accessory is connected, let's write to that
+                if (WebEnabledPixel.arduino1MatrixConnected) { //if it's connected, let's write the game text to the MAX7219 led matrix, 7 segment, and OLED which is connected to an Arduino
+                            WebEnabledPixel.writeArduino1Matrix(WebEnabledPixel.getGameMetaData(arcadeNameOnly));
+                            logMe.aLogger.info("Accessory Call: " + WebEnabledPixel.getGameMetaData(arcadeNameOnly));
+                }
+                
                
                 if (arcadeFileGIF.exists() && !arcadeFileGIF.isDirectory()) {
                         //System.out.println("delete went here GIF");
@@ -401,13 +410,24 @@ public class ArcadeHttpHandler extends ImageResourceHttpHandler
             } else {                      //we're in stream mode so png gets the priority if both png and gif exist
                 saveAnimation = false;
                 
+                //if our accessory is connected, let's write to that
+                if (WebEnabledPixel.arduino1MatrixConnected) { //if it's connected, let's write the game text to the MAX7219 led matrix, 7 segment, and OLED which is connected to an Arduino
+                            WebEnabledPixel.writeArduino1Matrix(WebEnabledPixel.getGameMetaData(arcadeNameOnly));
+                            logMe.aLogger.info("Accessory Call: " + WebEnabledPixel.getGameMetaData(arcadeNameOnly));
+                }
+                
                 if(arcadeFilePNG.exists() && !arcadeFilePNG.isDirectory()) { 
                         //System.out.println("delete went here PNG");
                         handlePNG(arcadeFilePNG, saveAnimation,loop_,consoleNameMapped,FilenameUtils.getName(arcadeFilePathPNG));
+                        
+                        
+                        
                 }
                 else if (arcadeFileGIF.exists() && !arcadeFileGIF.isDirectory()) {
                         //System.out.println("delete went here GIF");
                         handleGIF(consoleNameMapped, arcadeNameOnly +".gif", saveAnimation, loop_);
+                        
+                         
                 }
                 
                 else if (text_ != "" && !text_.equals("nomatch")) {  //the game image or png is not there and alt text was supplied so let's scroll that alt text
@@ -429,7 +449,7 @@ public class ArcadeHttpHandler extends ImageResourceHttpHandler
                          }
                          
                          pixel.scrollText(text_, loop_, speed, color,WebEnabledPixel.pixelConnected,scrollsmooth_); 
-                    
+                        
                         /*Pixel pixel = application.getPixel();
                          int LED_MATRIX_ID = WebEnabledPixel.getMatrixID();
                          
