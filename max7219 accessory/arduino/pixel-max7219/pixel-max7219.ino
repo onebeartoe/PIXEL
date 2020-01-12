@@ -43,7 +43,10 @@ Note there are no SDA and SCL pins on Arduino Nano so use instead SDA\-->A4 and 
  */
 
 // ***************** 7 Segment ****************
+
+
 LedControl lc=LedControl(9,7,8,2); //pins for the 7 segment modules and 2 is the number of modules
+//LedControl lc=LedControl(9,8,12,2); //pins for the 7 segment modules and 2 is the number of modules
 /*
  pin 9 is connected to DataIn 
  pin 7 is connected to CLK 
@@ -103,10 +106,12 @@ bool newMessageAvailable = true;
 //*************** OLED display
 #define RTN_CHECK 1
 // 0X3C+SA0 - 0x3C or 0x3D
-#define I2C_ADDRESS 0x3C
+#define I2C_ADDRESS_1 0x3C
+#define I2C_ADDRESS_2 0x3D
 // Define proper RST_PIN if required.
 #define RST_PIN -1
-SSD1306AsciiWire oled;
+SSD1306AsciiWire oled1;
+SSD1306AsciiWire oled2;
 // Ticker state. Maintains text pointer queue and current ticker state.
 //TickerState state;
 //uint32_t tickTime = 0;
@@ -192,6 +197,15 @@ void display7Segment()
     lc.setDigit(0,4,gameYearArray[1],false);
     lc.setDigit(0,3,gameYearArray[2],false);
     lc.setDigit(0,2,gameYearArray[3],false);
+
+    lc.setDigit(1,5,gameYearArray[0],false);
+    lc.setDigit(1,4,gameYearArray[1],false);
+    lc.setDigit(1,3,gameYearArray[2],false);
+    lc.setDigit(1,2,gameYearArray[3],false);
+
+  
+
+    
 }
 
 void display7SegmentInit() {
@@ -203,6 +217,16 @@ void display7SegmentInit() {
      lc.setChar(0,2,'a',false);
      lc.setChar(0,1,'d',false);
      lc.setChar(0,0,'e',false);
+
+     lc.setChar(1,7,'p',false);
+     lc.setDigit(1,6,1,false); //note i and x are not avaailble chars on 7 digit displays , available chars here https://en.wikipedia.org/wiki/Seven-segment_display
+     lc.setChar(1,5,'e',false);
+     lc.setChar(1,4,'L',false);
+     lc.setChar(1,3,'c',false);
+     lc.setChar(1,2,'a',false);
+     lc.setChar(1,1,'d',false);
+     lc.setChar(1,0,'e',false);
+     
      delay(5000);
 }
 
@@ -217,36 +241,57 @@ void MovingDigits7Segment()
   }
   delay(100);
   lc.clearDisplay(0);
+  
+   lc.clearDisplay(1);
+  for (int a=0; a<8; a++)
+  {
+    lc.setDigit(1,a,8,false);
+    delay(100);
+  }
+  delay(100);
+  lc.clearDisplay(1);
 }
 
 
 void writeOled () {
-  oled.setFont(Adafruit5x7);
-  oled.clear();
+  oled1.setFont(Adafruit5x7);
+  oled1.clear();
+
+  oled2.setFont(Adafruit5x7);
+  oled2.clear();
   
   if (gameTitle.equals("")) {                   //this means we haven't connected yet
-    oled.println("Display Accessory");
+    oled1.println("Display Accessory");
+    oled2.println("Display Accessory");
   }
   else {
-    oled.println(gameTitle);
+    oled1.println(gameTitle);
+    oled2.println(gameTitle);
   }
   
-  oled.println(gameManufacturer);
-  oled.println();
+  oled1.println(gameManufacturer);
+  oled1.println();
+  oled2.println(gameManufacturer);
+  oled2.println();
   
-  oled.set2X();
+  oled1.set2X();
+  oled2.set2X();
   if (gameTitle.equals("")) {                  
-    oled.println("Pixelcade");
+    oled1.println("Pixelcade");
+    oled2.println("Pixelcade");
   }
   else {
-     oled.println(gameYear);
+     oled1.println(gameYear);
+     oled2.println(gameYear);
   }
  
-  oled.set1X();
-  oled.println(gameGenre);
-  oled.println(gameRating);
+  oled1.set1X();
+  oled1.println(gameGenre);
+  oled1.println(gameRating);
 
-
+  oled2.set1X();
+  oled2.println(gameGenre);
+  oled2.println(gameRating);
 
    // Use Adafruit5x7 font, field at row 2, set1X, columns 16 through 100.
   //oled.tickerInit(&state, Adafruit5x7, 7, false, 16, 100); //this worked but couldn't figure out how to change dynamically
@@ -259,13 +304,15 @@ void setup()
    Wire.begin();
    Wire.setClock(400000L);
     #if RST_PIN >= 0
-    oled.begin(&Adafruit128x64, I2C_ADDRESS, RST_PIN);
+    oled1.begin(&Adafruit128x64, I2C_ADDRESS_1, RST_PIN);
+    oled2.begin(&Adafruit128x64, I2C_ADDRESS_2, RST_PIN);
     #else // RST_PIN >= 0
-    oled.begin(&Adafruit128x64, I2C_ADDRESS);
+    oled1.begin(&Adafruit128x64, I2C_ADDRESS_1);
+    oled2.begin(&Adafruit128x64, I2C_ADDRESS_2);
     #endif // RST_PIN >= 0
 
    // Use Adafruit5x7 font, field at row 2, set1X, columns 16 through 100.
-  //oled.tickerInit(&state, Adafruit5x7, 7, false, 16, 100);
+  //oled1.tickerInit(&state, Adafruit5x7, 7, false, 16, 100);
   /////*****************************************
   
   Serial.begin(57600);
@@ -301,6 +348,10 @@ void setup()
   lc.shutdown(0,false); // turn off power saving, enables display
   lc.setIntensity(0,8); // sets brightness (0~15 possible values)
   lc.clearDisplay(0); // clear screen
+
+  lc.shutdown(1,false); // turn off power saving, enables display
+  lc.setIntensity(1,8); // sets brightness (0~15 possible values)
+  lc.clearDisplay(1); // clear screen
 }
 
 void loop()
