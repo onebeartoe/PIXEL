@@ -261,6 +261,12 @@ public class ConsoleHttpHandler extends ImageResourceHttpHandler
                         
                         if(consoleFileGIF.exists() && !consoleFileGIF.isDirectory()) { 
 
+                              if (WebEnabledPixel.arduino1MatrixConnected) { //if it's connected, let's write the game text to the MAX7219 led matrix, 7 segment, and OLED which is connected to an Arduino
+                                    WebEnabledPixel.writeArduino1Matrix(WebEnabledPixel.getConsoleMetaData(consoleName));
+                                    logMe.aLogger.info("Accessory Call Console: " + WebEnabledPixel.getConsoleMetaData(consoleName));
+                              }
+                            
+                            
                               if (!CliPixel.getSilentMode()) {
                                     System.out.println("PNG default console LED Marquee file not found, looking for GIF version: " + consoleFilePathPNG);
                                     logMe.aLogger.info("PNG default console LED Marquee file not found, looking for GIF version: " + consoleFilePathPNG);
@@ -270,6 +276,11 @@ public class ConsoleHttpHandler extends ImageResourceHttpHandler
                        
                         else if (consoleFilePNG.exists() && !consoleFilePNG.isDirectory()) { 
                              
+                              if (WebEnabledPixel.arduino1MatrixConnected) { //if it's connected, let's write the game text to the MAX7219 led matrix, 7 segment, and OLED which is connected to an Arduino
+                                    WebEnabledPixel.writeArduino1Matrix(WebEnabledPixel.getConsoleMetaData(consoleName));
+                                    logMe.aLogger.info("Accessory Call Console: " + WebEnabledPixel.getConsoleMetaData(consoleName));
+                              }
+                            
                               handlePNG(consoleFilePNG, saveAnimation,loop_,"console",FilenameUtils.getName(consoleFilePathPNG)); //mame/default-marquee.png
                         }
                        
@@ -334,7 +345,12 @@ public class ConsoleHttpHandler extends ImageResourceHttpHandler
                         File consoleFilePNG = new File(consoleFilePathPNG);
                         
                         if(consoleFileGIF.exists() && !consoleFileGIF.isDirectory()) { 
-
+                            
+                              if (WebEnabledPixel.arduino1MatrixConnected) { //if it's connected, let's write the game text to the MAX7219 led matrix, 7 segment, and OLED which is connected to an Arduino
+                                    WebEnabledPixel.writeArduino1Matrix(WebEnabledPixel.getConsoleMetaData(consoleName));
+                                    logMe.aLogger.info("Accessory Call Console: " + WebEnabledPixel.getConsoleMetaData(consoleName));
+                              }
+                            
                               if (!CliPixel.getSilentMode()) {
                                     System.out.println("PNG default console LED Marquee file not found, looking for GIF version: " + consoleFilePathPNG);
                                     logMe.aLogger.info("PNG default console LED Marquee file not found, looking for GIF version: " + consoleFilePathPNG);
@@ -344,7 +360,14 @@ public class ConsoleHttpHandler extends ImageResourceHttpHandler
                        
                         else if (consoleFilePNG.exists() && !consoleFilePNG.isDirectory()) { 
                              
-                              handlePNG(consoleFilePNG, saveAnimation,loop_,"console",FilenameUtils.getName(consoleFilePathPNG)); //mame/default-marquee.png
+                              
+                            if (WebEnabledPixel.arduino1MatrixConnected) { //if it's connected, let's write the game text to the MAX7219 led matrix, 7 segment, and OLED which is connected to an Arduino
+                                    WebEnabledPixel.writeArduino1Matrix(WebEnabledPixel.getConsoleMetaData(consoleName));
+                                    logMe.aLogger.info("Accessory Call Console: " + WebEnabledPixel.getConsoleMetaData(consoleName));
+                            }
+                            
+                            
+                            handlePNG(consoleFilePNG, saveAnimation,loop_,"console",FilenameUtils.getName(consoleFilePathPNG)); //mame/default-marquee.png
                         }
                        
                         else {
