@@ -71,6 +71,7 @@ import org.onebeartoe.web.enabled.pixel.controllers.ArcadeHttpHandler;
 import org.onebeartoe.web.enabled.pixel.controllers.ConsoleHttpHandler;
 import org.onebeartoe.web.enabled.pixel.controllers.QuitHttpHandler;
 import org.onebeartoe.web.enabled.pixel.controllers.PinDMDHttpHandler;
+import org.onebeartoe.web.enabled.pixel.controllers.LocalModeHttpHandler;
 //import org.onebeartoe.web.enabled.pixel.controllers.mameRom2Name;
 
 import org.json.simple.JSONArray; 
@@ -93,10 +94,10 @@ public class WebEnabledPixel
 {
     //public static final Logger logger = null;
     
-    public static String pixelwebVersion = "2.5.4";
+    public static String pixelwebVersion = "2.6.0";
     
     public static LogMe logMe = null;
-
+ 
     private HttpServer server;
 
     private int httpPort;
@@ -105,7 +106,9 @@ public class WebEnabledPixel
     
     private Timer searchTimer;
     
-    private Pixel pixel;
+    //private Pixel pixel; //changed to public for the localplayback api call
+    
+    private static Pixel pixel; //TO DO changed to static, need to make sure this didn't break anything
     
     private String ledResolution_ = "";
     
@@ -156,13 +159,17 @@ public class WebEnabledPixel
     
     public static boolean consoleMappingExists = false;
     
-    public static boolean allMetaDataMappingExists = false;
+    public static boolean gameMetaDataMappingExists = false;
+    
+    public static boolean consoleMetaDataMappingExists = false;
     
     public static HashMap<String, String> rom2NameMap = new HashMap<String, String>();
     
     public static HashMap<String, String> consoleMap = new HashMap<String, String>();
     
-    public static HashMap<String, String> allMetaDataMap = new HashMap<String, String>();
+    public static HashMap<String, String> gameMetaDataMap = new HashMap<String, String>();
+    
+    public static HashMap<String, String> consoleMetaDataMap = new HashMap<String, String>();
     
     private String SubDisplayAccessory_ = "no";
     
@@ -471,11 +478,11 @@ public class WebEnabledPixel
             System.out.println("console.csv not found");
         }
         
-         //let's load a rom name to game year mapping into memory into a hashmap for the 8 digital 7 segment display
-        File yearfile = new File("allmetadata.csv"); //csv file
-        if (yearfile.exists() && !yearfile.isDirectory()) {
-            allMetaDataMappingExists = true; 
-            String filePath = "allmetadata.csv";
+         //let's load a rom name to game year mapping into memory into a hashmap for the pixelcade display accessories
+        File gameMetaData_ = new File("gamemetadata.csv"); //csv file
+        if (gameMetaData_.exists() && !gameMetaData_.isDirectory()) {
+            gameMetaDataMappingExists = true; 
+            String filePath = "gamemetadata.csv";
             String line;
             BufferedReader reader = new BufferedReader(new FileReader(filePath));
             while ((line = reader.readLine()) != null) {
@@ -483,16 +490,37 @@ public class WebEnabledPixel
                 if (parts.length >= 2) {
                     String key = parts[0];
                     String value = parts[1];
-                    allMetaDataMap.put(key, value);
+                    gameMetaDataMap.put(key, value);
                 } else {
-                    System.out.println("ignoring line in allmetadata.csv: " + line);
+                    System.out.println("ignoring line in gamemetadata.csv: " + line);
                 }
             }
             reader.close();
         } else {
-            System.out.println("allmetadata.csv not found");
+            System.out.println("gamemetadata.csv not found");
         }
         
+        //let's load a console name to meta data into a hashmap for the pixelcade display accessories
+        File consoleMetaData_ = new File("consolemetadata.csv"); //csv file
+        if (consoleMetaData_.exists() && !consoleMetaData_.isDirectory()) {
+            consoleMetaDataMappingExists = true; 
+            String filePath = "consolemetadata.csv";
+            String line;
+            BufferedReader reader = new BufferedReader(new FileReader(filePath));
+            while ((line = reader.readLine()) != null) {
+                String[] parts = line.split(",", 2);
+                if (parts.length >= 2) {
+                    String key = parts[0];
+                    String value = parts[1];
+                    consoleMetaDataMap.put(key, value);
+                } else {
+                    System.out.println("ignoring line in consolemetadata.csv: " + line);
+                }
+            }
+            reader.close();
+        } else {
+            System.out.println("consolemetadata.csv not found");
+        }
         
         if (SubDisplayAccessory_.equals("yes")) {
                 
@@ -580,6 +608,10 @@ public class WebEnabledPixel
             
             HttpHandler quitHttpHandler = new QuitHttpHandler(this);
             
+            HttpHandler localModeHttpHandler = new LocalModeHttpHandler(this);
+            
+            
+            
             
 // ARE WE GONNA DO ANYTHING WITH THE HttpContext OBJECTS?   
             
@@ -594,6 +626,7 @@ public class WebEnabledPixel
                                             server.createContext("/shutdown", quitHttpHandler);
                                             server.createContext("/arcade/list", arcadeListHttpHandler);
                                             server.createContext("/console", consoleListHttpHandler);
+                                            server.createContext("/localplayback",localModeHttpHandler);
                                             
             
             HttpContext pindmdContext =     server.createContext("/pindmd", pindmdHttpHandler);
@@ -729,7 +762,10 @@ public class WebEnabledPixel
         inpath = contentClasspath + "settings.ini";
         extractClasspathResource(inpath, pixelHomeDirectory);
         
-        inpath = contentClasspath + "allmetadata.csv";
+        inpath = contentClasspath + "gamemetadata.csv";
+        extractClasspathResource(inpath, pixelHomeDirectory);
+        
+        inpath = contentClasspath + "consolemetadata.csv";
         extractClasspathResource(inpath, pixelHomeDirectory);
     }
       
@@ -964,6 +1000,8 @@ public class WebEnabledPixel
     public static String getGameName(String romName) {  //returns the game name string based on the rom name
         
         String GameName = "";
+        romName = romName.trim();
+        romName = romName.toLowerCase();
         
         if (rom2GameMappingExists) { //mame.csv file was found and opened
              
@@ -984,30 +1022,73 @@ public class WebEnabledPixel
      public static String getGameMetaData(String romName) {  //returns the game name string based on the rom name
         
         String GameMetaData = "";
+        romName = romName.trim();
+        romName = romName.toLowerCase();
         
-        if (allMetaDataMappingExists) { //allmetadata.csv file was found and opened
+       System.out.println("ROM Name: " + romName);
+       logMe.aLogger.info("ROM Name: " + romName);
+        
+        if (gameMetaDataMappingExists) {                     //gamemetadata.csv file was found and opened
              
-            if (allMetaDataMap.containsKey(romName))  
+            if (gameMetaDataMap.containsKey(romName))  
             { 
-                 GameMetaData = allMetaDataMap.get(romName); 
+                 GameMetaData = gameMetaDataMap.get(romName); 
             } 
             else {
-                 GameMetaData = "nomatch"; 
+                 //GameMetaData = "nomatch"; 
+                 GameMetaData = romName + "%0000" + "%Manufacturer Unknown" + "%Genre Unknown" + "%Rating Unknown"; 
+                                                                                                                                //4 En Raya %1990%IDSA%Puzzle%Suitable For All Ages   //sample data which is title, year, manufacturer, game type, game rating
             }
             
-        } else {
-            GameMetaData = "nomatch"; 
+        } else {                                                //there is no  mapping file
+            GameMetaData = romName + "%0000" + "%Manufacturer Unknown" + "%Genre Unknown" + "%Rating Unknown"; 
         }
-        //IMPORTANT: 91 chars is the max that the accessory displays can handle given memory / buffer size constraints so let's truncate if over
+        //IMPORTANT: 91 chars is the max that the accessory displays can handle given memory / buffer size constraints on the Arduino side so let's truncate if over
         
         if (GameMetaData.length() > 90) {;
             GameMetaData = GameMetaData.substring(0, Math.min(GameMetaData.length(), 90));
         }
         
+       System.out.println("Game Metadata: " + GameMetaData);
+       logMe.aLogger.info("Game Metadata: " + GameMetaData);
+        
         return GameMetaData;
     }
-    
-    
+     
+     
+    public static String getConsoleMetaData(String console) {  //returns the game name string based on the rom name
+        
+        String ConsoleMetaData = "";
+        console = console.trim();
+        console = console.toLowerCase();
+        
+       System.out.println("Console: " + console);
+       logMe.aLogger.info("Console: " + console);
+        
+        if (consoleMetaDataMappingExists) {                     //consolemetadata.csv file was found and opened
+             
+            if (consoleMetaDataMap.containsKey(console))  
+            { 
+                 ConsoleMetaData = consoleMetaDataMap.get(console); 
+            } 
+            else {
+                 ConsoleMetaData = console + "%0000" + "%Manufacturer Unknown" + "%Units Sold Unknown" + "%CPU Unknown";      
+            }
+            
+        } else {                                                //there is no  mapping file
+                 ConsoleMetaData = console + "%0000" + "%Manufacturer Unknown" + "%Units Sold Unknown" + "%CPU Unknown";  
+        }
+        //IMPORTANT: 91 chars is the max that the accessory displays can handle given memory / buffer size constraints on the Arduino side so let's truncate if over
+        
+        if (ConsoleMetaData.length() > 90) {;
+            ConsoleMetaData = ConsoleMetaData.substring(0, Math.min(ConsoleMetaData.length(), 90));
+        }
+        
+       System.out.println("Game Metadata: " + ConsoleMetaData);
+       logMe.aLogger.info("Game Metadata: " + ConsoleMetaData);
+        
+        return ConsoleMetaData;
+    }
      
      public static String getConsoleMapping(String originalConsole) {  //returns the console name string based on the rom name
         
@@ -1039,8 +1120,7 @@ public class WebEnabledPixel
      public static int getMatrixID() {
          return  LED_MATRIX_ID;
      }
-     
-     
+    
      
      public static long getScrollingTextSpeed(int LED_MATRIX_ID) {
                          
@@ -1118,6 +1198,10 @@ public class WebEnabledPixel
 		
 	}
 
+    public static void setLocalMode() {  //the API via localmode handler uses this to put pixel into local playback mode
+       pixel.playLocalMode();
+    }
+    
     public Pixel getPixel()
     {
         return pixel;
@@ -1752,7 +1836,7 @@ public class WebEnabledPixel
             return looper;
         }        
     }
-        
+    
     private class SearchTimerTask extends TimerTask
     {
 	final long searchPeriodLength = 45 * 1000;
