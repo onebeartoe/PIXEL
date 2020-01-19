@@ -7,8 +7,6 @@
 #include <MD_Parola.h>
 #include <MD_MAX72xx.h>
 #include <SPI.h>
-//#include "SSD1306Ascii.h"
-//#include "SSD1306AsciiAvrI2c.h"
 #include <Wire.h>
 #include "SSD1306Ascii.h"
 #include "SSD1306AsciiWire.h"
@@ -96,7 +94,7 @@ unsigned long delaytime=250;
 */
 
 // Global message buffers shared by Serial and Scrolling functions
-#define  BUF_SIZE  250     //had to increase the buffer size from the default of 75 becasue our string length was exceeding and note on the pixelcade side we also truncate to ensure the incoming serial message is not too long
+#define  BUF_SIZE  200     //had to increase the buffer size from the default of 75 becasue our string length was exceeding and note on the pixelcade side we also truncate to ensure the incoming serial message is not too long
 char curMessage[BUF_SIZE] = { "" };
 char newMessage[BUF_SIZE] = { "Pixelcade" };
 bool newMessageAvailable = true;
@@ -120,7 +118,8 @@ SSD1306AsciiWire oled2;
 //**********************************
 
 bool    handShakeResponse = false;
-int     gameYearArray[4] = {0x67, 0x10, 8, 8};  //used for the 7segment LED display
+//int     gameYearArray[4] = {0x67, 0x10, 8, 8};  //used for the 7segment LED display
+int     gameYearArray[4] = {8, 8, 8, 8};  //used for the 7segment LED display
 String  gameTitle="";
 String  gameYear="";
 String  gameManufacturer="";
@@ -166,19 +165,24 @@ void readSerial(void)
                switch(i)
               {
                   case 0:
-                      gameTitle = trim(p);
+                      //gameTitle = trim(p);
+                      gameTitle = p;
                       break;
                   case 1:
-                      gameYear = trim(p);
+                      //gameYear = trim(p);
+                      gameYear = p;
                       break;
                   case 2:
-                      gameManufacturer = trim(p);
+                       //gameManufacturer = trim(p);
+                      gameManufacturer = p;
                       break;
                   case 3:
-                      gameGenre = trim(p);
+                      //gameGenre = trim(p);
+                      gameGenre = p;
                       break;
                   case 4:
-                      gameRating = trim(p);
+                      //gameRating = trim(p);
+                      gameRating = p;
                       break; 
                   default:
                       printf("string is longer, ignoring rest of string");
@@ -200,17 +204,22 @@ void readSerial(void)
 
             //newMessage is what actuallly gets sent to the LED matrix so we'll manipulate our desired string here based on the meta-data we have available, you can customize here as you like!
             Serial.println(gameYear);  //not sure why, but if this is removed, the handshake with pixelcade breaks so leave this here
-            //MatrixMessage = gameTitle + " from " + gameYear + " by " + gameManufacturer;
-            
-             if (gameYear.equals("0000")) {  //then we only have the rom name and no additional meta data so let's just scroll the rom name, pixelcade sends this is no metadata match romName + "%0000" + "%Manufacturer Unknown" + "%Genre Unknown" + "%Rating Unknown"; 
-                  MatrixMessage = gameTitle;
-             } else {
-                  MatrixMessage = gameTitle + " from " + gameYear + " by " + gameManufacturer;
-             }
+             MatrixMessage = gameTitle;
+
+             
+            //to do this part isn't workign and many will blank out the display so just scrolling game title for now
+//             if (gameYear.equals("0000")) {  //then we only have the rom name and no additional meta data so let's just scroll the rom name, pixelcade sends this is no metadata match romName + "%0000" + "%Manufacturer Unknown" + "%Genre Unknown" + "%Rating Unknown"; 
+//                  MatrixMessage = gameTitle;
+//             } else {
+//                  MatrixMessage = gameTitle + " from " + gameYear + " by " + gameManufacturer;
+//             }
            
-            MatrixMessage.toCharArray(newMessage, BUF_SIZE);
-            newMessageAvailable = true;
-            handShakeResponse = false; 
+            
+            if (!gameTitle.equals("dummy")) {
+                MatrixMessage.toCharArray(newMessage, BUF_SIZE);
+                newMessageAvailable = true;
+                handShakeResponse = false; 
+            }
        
       }
     }
@@ -255,16 +264,16 @@ void display7Segment()
 //     delay(5000);
 //}
 
-char *trim(char *s) {
-    char *ptr;
-    if (!s)
-        return NULL;   // handle NULL string
-    if (!*s)
-        return s;      // handle empty string
-    for (ptr = s + strlen(s) - 1; (ptr >= s) && isspace(*ptr); --ptr);
-    ptr[1] = '\0';
-    return s;
-}
+//char *trim(char *s) {
+//    char *ptr;
+//    if (!s)
+//        return NULL;   // handle NULL string
+//    if (!*s)
+//        return s;      // handle empty string
+//    for (ptr = s + strlen(s) - 1; (ptr >= s) && isspace(*ptr); --ptr);
+//    ptr[1] = '\0';
+//    return s;
+//}
 
 void MovingDigits7Segment() 
 {
