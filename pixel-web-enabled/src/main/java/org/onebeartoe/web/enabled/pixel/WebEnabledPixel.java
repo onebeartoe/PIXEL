@@ -94,7 +94,7 @@ public class WebEnabledPixel
 {
     //public static final Logger logger = null;
     
-    public static String pixelwebVersion = "2.6.0";
+    public static String pixelwebVersion = "2.6.1";
     
     public static LogMe logMe = null;
  

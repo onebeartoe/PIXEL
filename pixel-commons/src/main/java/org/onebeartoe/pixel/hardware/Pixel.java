@@ -344,9 +344,60 @@ public class Pixel
     /**
      * tells PIXEL to play the local files
      */
+    
+    public void playLocalModeCheck(int loop, Boolean pixelConnected, Boolean writeMode) {
+         
+        //pixel.playLocalModeCheck(loop_, localModeloop, WebEnabledPixel.pixelConnected);
+        
+        if (!pixelConnected) { //pixel not connected yet, should not be the case here actually
+             
+            if (loop == 0) loop = 1;
+            //addtoQueue("localplayback",selectedPlatformName,selectedFileName,loop,writeMode,Color.red,1);
+            addtoQueue("localplayback","","",loop, writeMode,Color.red,1);
+            
+        } else { //pixel is connected
+        
+        
+             if (isLooping && loop == 99999 && !writeMode) {  //we were already looping and new command has a loop so let's write to the Q
+
+                 //addtoQueue("gif",selectedPlatformName,selectedFileName,99999,writeMode,Color.red,1);
+                 addtoQueue("localplayback","","",loop,writeMode,Color.red,1);
+                 loop99999FlagGIF = true;
+            } 
+            
+             
+            else if (isLooping && loop != 0 && !writeMode) {  //we were already looping and new command has a loop and is not a write command so let's write to the Q
+
+                 //addtoQueue("gif",selectedPlatformName,selectedFileName,loop,writeMode,Color.red,1); //but don't add to the Q if it's empty?
+                  addtoQueue("localplayback","","",loop,writeMode,Color.red,1);
+            } 
+            
+            else 
+
+            {
+                if (loop!=0 && !writeMode && loop != 99999) { //we just got a looping command but were not looping before so just start a new one 
+                    isLooping = true;
+                    loopGIFCounter = 0;
+                    loopTimesGlobal = loop; 
+                    //?
+                    playLocalMode(); //and then let's play local mode
+                }
+                else {   //loop = 0 so we are not looping or we have a write command so let's reset everything and clear the Q
+                    isLooping = false;
+                    loopGIFCounter = 0;
+                    loopTimesGlobal = 0;
+                    PixelQueue.clear();
+                    playLocalMode(); //and then let's play local mode
+                }
+            }
+        }
+    }
+    
+    
     public void playLocalMode() 
     {
-    	try 
+      
+        try 
         {
     		matrix.playFile();
         } 
@@ -3069,6 +3120,23 @@ private static String checksum(String filepath, MessageDigest md) throws IOExcep
                       scrollText(text_, loop_, speed_, color_, true,scrollsmooth_);
                       
                   }
+                  
+                   else if (mode_.equals("localplayback")) {
+                                                                         // here is the command that was sent here addtoQueue("localplayback","","",loop, writeMode,Color.red,1);
+                     
+                        try { 
+                                PixelQueue.remove(); 
+                            } 
+                        catch (Exception e) { 
+                                System.out.println("Exception: " + e);
+                        }
+                     
+                      playLocalMode();
+                      System.out.println("Executing Queue command for localplayback and clearing the Queue...");
+                      PixelQueue.clear();
+                     
+                  }
+                  
                   else {
                       System.out.println("ERROR: Invalid Queue Command Format");
                   }
@@ -3081,7 +3149,8 @@ private static String checksum(String filepath, MessageDigest md) throws IOExcep
              
          } else {
              System.out.println("Queue is empty, blanking display");
-             interactiveMode(); //TO DO send a blank frame better way
+                //does not look like we need to add a check here to not call this if the Q command is localplayback
+                interactiveMode(); //TO DO send a blank frame better way
          }
         
          
