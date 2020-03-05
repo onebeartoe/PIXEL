@@ -47,10 +47,12 @@ Y: 32x32 adafruit d pin kiosk no writing
 Z: 32x32 adafruit d pin iOS Build only supports 32x32 adafruit*/
 
 enum Board {
-	SPRK0015(Hardware.IOIO0002), SPRK0016(Hardware.IOIO0003), MINT0010(Hardware.IOIO0003), SPRK0020(
-			Hardware.IOIO0004), PIXL0020(Hardware.IOIO0004), PIXL0025(Hardware.PIXL0025), PIXLI025(
-			Hardware.PIXL0025), PIXLQ025(Hardware.PIXL0025), PIXLR025(Hardware.PIXL0025), PIXLT025
-			(Hardware.PIXL0025), PIXLX025(Hardware.PIXL0025), PIXLZ025(Hardware.PIXL0025), PIXLY025(Hardware.PIXL0025),PIXLC025(Hardware.PIXL0025);
+	SPRK0015(Hardware.IOIO0002), SPRK0016(Hardware.IOIO0003), MINT0010(Hardware.IOIO0003), SPRK0020
+			(Hardware.IOIO0004), PIXL0020(Hardware.IOIO0004), PIXL0025(Hardware.PIXL0025), PIXLI025
+			(Hardware.PIXL0025), PIXLQ025(Hardware.PIXL0025), PIXLR025(Hardware.PIXL0025), PIXLT025
+			(Hardware.PIXL0025), PIXLX025(Hardware.PIXL0025), PIXLZ025(Hardware.PIXL0025), PIXLY025
+                        (Hardware.PIXL0025),PIXLC025(Hardware.PIXL0025),PIXLA025(Hardware.PIXL0025),PIXLP025
+                        (Hardware.PIXL0025);
 
 	public final Hardware hardware;
 
@@ -175,6 +177,8 @@ enum Board {
 		static final Hardware PIXLQ025 = IOIO0004;
 		static final Hardware PIXLZ025 = IOIO0004;
 		static final Hardware PIXLR025 = IOIO0004;
+                static final Hardware PIXLA025 = IOIO0004;
+                static final Hardware PIXLP025 = IOIO0004;
 		static final Hardware PIXLT025 = IOIO0004;
 		static final Hardware PIXLX025 = IOIO0004;
 		static final Hardware PIXLY025 = IOIO0004;
