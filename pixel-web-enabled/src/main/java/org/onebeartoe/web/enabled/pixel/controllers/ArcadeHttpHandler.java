@@ -65,9 +65,6 @@ public class ArcadeHttpHandler extends ImageResourceHttpHandler
         } catch (NoSuchAlgorithmException ex) {
             Logger.getLogger(ArcadeHttpHandler.class.getName()).log(Level.SEVERE, null, ex);
         }
-       
-        //Sleeper.sleepo(15);  //roberto had this but we don't need anymore now that we switched to the new timer
-        //Sleeper.sleepo(100);
     }
     
     @Override
@@ -109,9 +106,6 @@ public class ArcadeHttpHandler extends ImageResourceHttpHandler
         Long speeddelay_ = 10L;
         String color_ = "";
         Color color = Color.RED; //default to red color if not added
-       // String loopString = "0"; //to do kill this
-      //  SerialPort arduino1Port;
-      
        
        if (WebEnabledPixel.isWindows()) {  //unfortunate hack we have to do as scrolling on windows is slower
            scrollsmooth_ = 3;
@@ -131,38 +125,8 @@ public class ArcadeHttpHandler extends ImageResourceHttpHandler
             } catch (URISyntaxException ex) {
                 Logger.getLogger(ArcadeHttpHandler.class.getName()).log(Level.SEVERE, null, ex);
         }
-        //moved this down as we added gt and gametitle
-        /*for (NameValuePair param : params) {
-           
-             switch (param.getName()) {
-
-                    case "t": //scrolling text value
-                        text_ = param.getValue();
-                        break;
-                    case "text": //scrolling speed
-                        text_ = param.getValue();
-                        break;
-                    case "l": //how many times to loop
-                        loop_ = Integer.valueOf(param.getValue());
-                        // Long speed = Long.valueOf(s); //to do for integer
-                        break;
-                    case "loop": //loop
-                       loop_ = Integer.valueOf(param.getValue());
-                        break;
-                    case "gt": //game title
-                        text_ = 
-                        break; 
-                    case "gametitle": //game title
-
-                    break; 
-                    case "c": //color
-                       color_ = param.getValue();
-                       break;
-                    }
-        } */
-  
-        // /arcade/stream/mame/pacman?t=x?5=x
-        //so now we just need to the left of the ?
+        
+        
         URI tempURI = null;
         try {
              tempURI = new URI("http://localhost:8080" + urlParams);
@@ -171,17 +135,8 @@ public class ArcadeHttpHandler extends ImageResourceHttpHandler
         }
         
         String URLPath = tempURI.getPath();
-        //System.out.println("path is: " + URLPath);
-        
-        //String [] arcadeURLarray = urlParams.split("/"); 
         String [] arcadeURLarray = URLPath.split("/"); 
-        //String [] arcadeURLarray = urlParams.split("&"); 
-        
-        /* for (int i=0; i < arcadeURLarray.length; i++) { 
-            System.out.println("Str["+i+"]:"+arcadeURLarray[i]); 
-        } 
-        System.out.println(arcadeURLarray.length); //should be 5
-        */
+       
         
         logMe = LogMe.getInstance();
         if (!CliPixel.getSilentMode()) {
@@ -202,13 +157,17 @@ public class ArcadeHttpHandler extends ImageResourceHttpHandler
             //to do add code to remove " " in case the user entered those
                     
             //arcadeName could be a full path or just a name, we need to handle both
-            String name1 = FilenameUtils.getName(arcadeName);
-            String name2 = FilenameUtils.getBaseName(arcadeName);
+            //String name1 = FilenameUtils.getName(arcadeName);
+            //String name2 = FilenameUtils.getBaseName(arcadeName);
             //String name3 = FilenameUtils.getExtension(arcadeName);
                     
             //let's make sure this file exists and skip if not
             //arcadeNameExtension = FilenameUtils.getExtension(arcadeName); 
-            arcadeNameOnly = FilenameUtils.getBaseName(arcadeName); //stripping out the extension
+            //arcadeNameOnly = FilenameUtils.getBaseName(arcadeName); //stripping out the extension like .zip for example
+            
+            arcadeNameOnly = FilenameUtils.removeExtension(arcadeName);
+            //String fileNameWithOutExt = FilenameUtils.removeExtension(fileNameWithExt);
+            
             
             for (NameValuePair param : params) {
 
@@ -275,7 +234,10 @@ public class ArcadeHttpHandler extends ImageResourceHttpHandler
             } else {
                 consoleNameMapped = consoleName;                               //we were already mapped so let's just use it
             }
-
+            
+            if (consoleNameMapped.equals("mame-libretro")) { //yes this is a hack, some users this was still not getting mapped right
+                consoleNameMapped = "mame";
+            }
                 //more user friendly for the log since technically it's looping forever until stopped
 
              //System.out.println("Console after mapping: " + consoleNameMapped);
@@ -312,6 +274,56 @@ public class ArcadeHttpHandler extends ImageResourceHttpHandler
              arcadeFilePathGIF = application.getPixel().getPixelHome() + consoleNameMapped + "/" + arcadeNameOnly +".gif";
              File arcadeFileGIF = new File(arcadeFilePathGIF);
              
+            
+            //because retropie wil convert the filename to lower case during the call and Windows will add an _ for the space, we must check for alternative files, specifically all lowercase and spaces substituted with underscore
+             if (arcadeFilePNG.exists() && !arcadeFilePNG.isDirectory()) {
+                 //arcadeNameOnly = FilenameUtils.getBaseName(arcadeName);
+                 arcadeNameOnly = FilenameUtils.removeExtension(arcadeName);
+             } else {
+             
+                 //file is not there so let's check underscore version
+                 String arcadeNameOnlyUnderscore = arcadeNameOnly.replaceAll("_", " ");  //replace underscore with space
+                 String arcadeFilePathPNGUnderscore = application.getPixel().getPixelHome() + consoleNameMapped + "/" + arcadeNameOnlyUnderscore +".png";
+                 arcadeFilePNG = new File(arcadeFilePathPNGUnderscore);
+                 
+                 if (arcadeFilePNG.exists() && !arcadeFilePNG.isDirectory()) {
+                     arcadeNameOnly = arcadeNameOnlyUnderscore;
+                 }
+                 else {
+                    String arcadeNamelowerCase = arcadeNameOnly.toLowerCase();
+                    String arcadeFilePathPNGlowerCase = application.getPixel().getPixelHome() + consoleNameMapped + "/" + arcadeNamelowerCase +".png";
+                    arcadeFilePNG = new File(arcadeFilePathPNGlowerCase);
+                    
+                    if (arcadeFilePNG.exists() && !arcadeFilePNG.isDirectory()) {
+                     arcadeNameOnly = arcadeNamelowerCase;
+                    }
+                 }
+             }
+             
+             if (arcadeFileGIF.exists() && !arcadeFileGIF.isDirectory()) {
+                 //arcadeNameOnly = FilenameUtils.getBaseName(arcadeName);
+                 arcadeNameOnly = FilenameUtils.removeExtension(arcadeName);
+             } else {
+             
+                 //file is not there so let's check underscore version
+                 String arcadeNameOnlyUnderscore = arcadeNameOnly.replaceAll("_", " ");  //replace underscore with space, windows front ends do this
+                 String arcadeFilePathGIFUnderscore = application.getPixel().getPixelHome() + consoleNameMapped + "/" + arcadeNameOnlyUnderscore +".gif";
+                 arcadeFileGIF = new File(arcadeFilePathGIFUnderscore);
+                 
+                 if (arcadeFileGIF.exists() && !arcadeFileGIF.isDirectory()) {
+                     arcadeNameOnly = arcadeNameOnlyUnderscore;
+                 }
+                 else {
+                    String arcadeNamelowerCase = arcadeNameOnly.toLowerCase();
+                    String arcadeFilePathGIFlowerCase = application.getPixel().getPixelHome() + consoleNameMapped + "/" + arcadeNamelowerCase +".gif";
+                    arcadeFileGIF = new File(arcadeFilePathGIFlowerCase);
+                    
+                    if (arcadeFileGIF.exists() && !arcadeFileGIF.isDirectory()) {
+                     arcadeNameOnly = arcadeNamelowerCase;
+                    }
+                 }
+             }
+             
              //System.out.println("delete PNG path " + arcadeFilePathPNG);
              //System.out.println("delete GiF path " + arcadeFilePathGIF);
              
@@ -335,6 +347,8 @@ public class ArcadeHttpHandler extends ImageResourceHttpHandler
                         //System.out.println("delete went here GIF");
                         handleGIF(consoleNameMapped, arcadeNameOnly +".gif", saveAnimation, loop_);
                 }
+                
+                //to do we may need to add some additional checks for _ instead of space and lowercase file names
                         
                 else if(arcadeFilePNG.exists() && !arcadeFilePNG.isDirectory()) { 
                         //System.out.println("delete went here PNG");
@@ -416,21 +430,27 @@ public class ArcadeHttpHandler extends ImageResourceHttpHandler
                             logMe.aLogger.info("Accessory Call: " + WebEnabledPixel.getGameMetaData(arcadeNameOnly));
                 }
                 
-                if(arcadeFilePNG.exists() && !arcadeFilePNG.isDirectory()) { 
-                        //System.out.println("delete went here PNG");
-                        handlePNG(arcadeFilePNG, saveAnimation,loop_,consoleNameMapped,FilenameUtils.getName(arcadeFilePathPNG));
-                        
-                        
-                        
-                }
-                else if (arcadeFileGIF.exists() && !arcadeFileGIF.isDirectory()) {
-                        //System.out.println("delete went here GIF");
-                        handleGIF(consoleNameMapped, arcadeNameOnly +".gif", saveAnimation, loop_);
-                        
-                         
-                }
                 
-                else if (text_ != "" && !text_.equals("nomatch")) {  //the game image or png is not there and alt text was supplied so let's scroll that alt text
+                 if(arcadeFilePNG.exists() && !arcadeFilePNG.isDirectory() && arcadeFileGIF.exists() && !arcadeFileGIF.isDirectory()) { 
+                    
+                      handleGIF(consoleNameMapped, arcadeNameOnly + ".gif", saveAnimation, 1);
+                      handlePNG(arcadeFilePNG, saveAnimation,99999,consoleNameMapped,FilenameUtils.getName(arcadeFilePathPNG));
+                 }
+                 
+                 else {
+                
+                    if(arcadeFilePNG.exists() && !arcadeFilePNG.isDirectory()) { 
+                            //System.out.println("delete went here PNG");
+                            handlePNG(arcadeFilePNG, saveAnimation,loop_,consoleNameMapped,FilenameUtils.getName(arcadeFilePathPNG));
+                    }
+                    else if (arcadeFileGIF.exists() && !arcadeFileGIF.isDirectory()) {
+                            //System.out.println("delete went here GIF");
+                            handleGIF(consoleNameMapped, arcadeNameOnly +".gif", saveAnimation, loop_);
+                    }
+                    
+                  
+                
+                    else if (text_ != "" && !text_.equals("nomatch")) {  //the game image or png is not there and alt text was supplied so let's scroll that alt text
                         
                          //Pixel pixel = application.getPixel();
                          int LED_MATRIX_ID = WebEnabledPixel.getMatrixID();
@@ -468,7 +488,7 @@ public class ArcadeHttpHandler extends ImageResourceHttpHandler
                          */
                 }
                 
-                else { //nothing is there so let's use the console
+                    else { //nothing is there so let's use the console
                     
                         consoleFilePathPNG = application.getPixel().getPixelHome() + "console/" + "default-" + consoleNameMapped + ".png"; 
                         File consoleFilePNG = new File(consoleFilePathPNG);
@@ -510,6 +530,7 @@ public class ArcadeHttpHandler extends ImageResourceHttpHandler
                                }
                         }
                 }
+              }          
             }
         }
         
