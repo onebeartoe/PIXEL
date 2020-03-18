@@ -94,7 +94,7 @@ public class WebEnabledPixel
 {
     //public static final Logger logger = null;
     
-    public static String pixelwebVersion = "2.6.1";
+    public static String pixelwebVersion = "2.6.8";
     
     public static LogMe logMe = null;
  
@@ -197,8 +197,8 @@ public class WebEnabledPixel
         //LogMe logMe = LogMe.getInstance();
         logMe = LogMe.getInstance();
         if (!silentMode_) {
-            logMe.aLogger.info( "Pixelcade Listender (pixelweb) Version " + pixelwebVersion);
-            System.out.println( "Pixelcade Listender (pixelweb) Version " + pixelwebVersion);
+            logMe.aLogger.info( "Pixelcade Listener (pixelweb) Version " + pixelwebVersion);
+            System.out.println( "Pixelcade Listener (pixelweb) Version " + pixelwebVersion);
         }
 
         yTextOffset = cli.getyTextOffset();
@@ -422,13 +422,13 @@ public class WebEnabledPixel
         
         if (!silentMode_) logMe.aLogger.info( "Pixelcade HOME DIRECTORY: " +  pixel.getPixelHome());
         
-        extractDefaultContent();  //to do :  keep this file smaller, moved this to pixelcade-installer?
+        extractDefaultContent();  //to do :  keep this file smaller, move this to pixelcade-installer?
 
-        loadImageLists();
+        //loadImageLists();
 
-        loadAnimationList();
+        //loadAnimationList();
 
-        loadArcadeList();
+        //loadArcadeList();
 
         createControllers();
         
@@ -790,11 +790,11 @@ public class WebEnabledPixel
  
             extractHtmlAndJavascript();  //web server basic files
                         
-            extractStillImages();      //for the web server functions
+            //extractStillImages();      //for the web server functions
             
-            extractAnimationImages();  //for the web server functions
+            //extractAnimationImages();  //for the web server functions
             
-            extractGifSourceAnimationImages(); //the gifsource directory for animations
+            //extractGifSourceAnimationImages(); //the gifsource directory for animations
             
             if (isMac() || isUnix())  {       //extract RetroPie files if mac or Pi, we don't do this for windows as the installer takes care of these files already
                 
@@ -803,11 +803,11 @@ public class WebEnabledPixel
                     extractRetroPie();
                 } 
                 
-                extractArcadeConsoleGIFs();
+                //extractArcadeConsoleGIFs();
             
-                extractArcadeMAMEGIFs();          //we skip this is the arcade/mame folder is already there
+                //extractArcadeMAMEGIFs();          //we skip this is the arcade/mame folder is already there
                 
-                createArcadeDirs();
+                //createArcadeDirs();
             }
         } 
         catch (IOException ex)
@@ -1094,8 +1094,8 @@ public class WebEnabledPixel
         
         String ConsoleMapped = "";
         
-        if (consoleMappingExists) {                                 //console.csv file was found and opened
-             
+        if (consoleMappingExists) {  
+            
             if (consoleMap.containsKey(originalConsole))            //let's check if the key exists
             { 
                  ConsoleMapped = consoleMap.get(originalConsole);   // if it does, get the pair value
@@ -1107,8 +1107,8 @@ public class WebEnabledPixel
         } else {
            
            ConsoleMapped = getConsoleNamefromMapping(originalConsole);  //if file is not there, then let's go to the hard coded mapping
-            
-           //ConsoleMapped = originalConsole; 
+           System.out.println("console.csv file NOT FOUND");
+           logMe.aLogger.info("console.csv file NOT FOUND");  
         }
         return ConsoleMapped;
     } 
