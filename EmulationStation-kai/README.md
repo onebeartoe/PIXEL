@@ -11,19 +11,6 @@ EmulationStation uses some C++11 code, which means you'll need to use at least g
 
 EmulationStation has a few dependencies. For building, you'll need CMake, SDL2, FreeImage, FreeType, cURL and RapidJSON.  You also should probably install the `fonts-droid` package which contains fallback fonts for Chinese/Japanese/Korean characters, but ES will still work fine without it (this package is only used at run-time).
 
-Here are the files modified for Pixelcade
-
-es-app/src/views/ViewController.cpp
-es-app/src/SystemScreenSaver.cpp
-es-app/src/views/SystemView.cpp (edited)
-es-app/src/views/gamelist/ISimpleGameListView.cpp
-
-building instructions
-
-cmake ..
-make -j4
-make package (make the .deb)
-
 **On Debian/Ubuntu:**
 All of this be easily installed with `apt-get`:
 ```bash
@@ -36,7 +23,7 @@ All of this be easily installed with `dnf` (with rpmfusion activated) :
 ```bash
 sudo dnf install SDL2-devel freeimage-devel freetype-devel curl-devel \
   alsa-lib-devel mesa-libGL-devel cmake \
-  vlc-devel rapidjson-devel
+  vlc-devel rapidjson-devel 
 ```
 
 Note this Repository uses a git submodule - to checkout the source and all submodules, use
@@ -45,7 +32,7 @@ Note this Repository uses a git submodule - to checkout the source and all submo
 git clone --recursive https://github.com/RetroPie/EmulationStation.git
 ```
 
-or
+or 
 
 ```bash
 git clone https://github.com/RetroPie/EmulationStation.git

@@ -55,7 +55,7 @@ void ViewController::goToStart()
 			if ((*it)->getName() == requestedSystem)
 			{       
 			  goToGameList(*it);
-			  HttpReq req("http://127.0.0.1:8080/console/stream/" + requestedSystem + "?t=" + HttpReq::urlEncode(requestedSystem));
+			  HttpReq req("http://127.0.0.1:8080/console/stream/" + HttpReq::urlEncode(requestedSystem) + "?t=" + HttpReq::urlEncode(requestedSystem));
 			 if(req.status() != 200){}
 			  return;
 			}
@@ -129,9 +129,9 @@ void ViewController::goToGameList(SystemData* system)
 		sysList->setPosition(sysId * (float)Renderer::getScreenWidth(), sysList->getPosition().y());
 		offX = sysList->getPosition().x() - offX;
 		mCamera.translation().x() -= offX;
-                HttpReq req("http://127..0.1:8080/arcade/stream/" + system->getName());
+                HttpReq req("http://127..0.1:8080/arcade/stream/" + HttpReq::urlEncode(system->getName()));
 		if(req.status() != 200){
-			 std::cout <<  "http://127.0.0.1:8080/arcade/stream/" << system->getName() << "failed.";
+			 std::cout <<  "http://127.0.0.1:8080/arcade/stream/" << HttpReq::urlEncode(system->getName()) << "failed.";
 		}		
 /*httplib::Client cli("localhost", 8080);
                           std::string url = "/arcade/stream/" + system->getName();

@@ -177,11 +177,11 @@ mVideoScreensaver->topWindow(true);
 
 		PowerSaver::runningScreenSaver(true);
 		mTimer = 0;
-                HttpReq req("http://127.0.0.1:8080/arcade/stream/" + mCurrentGame->getSystem()->getName() + "/" + mCurrentGame->getFileName());
+                HttpReq req("http://127.0.0.1:8080/arcade/stream/" + HttpReq::urlEncode(mCurrentGame->getSystem()->getName()) + "/" + HttpReq::urlEncode(mCurrentGame->getFileName()));
 		return;
 	}
 	// No videos. Just use a standard screensaver
-	HttpReq req("http://127.0.0.1:8080/arcade/stream/" + mCurrentGame->getSystem()->getName() + "/" + mCurrentGame->getFileName());
+	HttpReq req("http://127.0.0.1:8080/arcade/stream/" + HttpReq::urlEncode(mCurrentGame->getSystem()->getName()) + "/" + HttpReq::urlEncode(mCurrentGame->getFileName()));
 	mState = STATE_SCREENSAVER_ACTIVE;
 	mCurrentGame = NULL;
 }

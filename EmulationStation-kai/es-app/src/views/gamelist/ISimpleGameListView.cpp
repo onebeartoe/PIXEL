@@ -167,9 +167,9 @@ bool ISimpleGameListView::input(InputConfig* config, Input input)
 	FileData* cursor = getCursor();
         SystemData* system = this->mRoot->getSystem();
        
-        HttpReq req("http://127.0.0.1:8080/arcade/stream/" + system->getName() + "/" + cursor->getFileName() + "?t=" + HttpReq::urlEncode( cursor->getName()));
+        HttpReq req("http://127.0.0.1:8080/arcade/stream/" + HttpReq::urlEncode(system->getName()) + "/" + HttpReq::urlEncode(cursor->getFileName()) + "?t=" + HttpReq::urlEncode( cursor->getName()));
 	if(req.status() != 200){
-	 std::cout << "http://127.0.0.1:8080/arcade/stream/" << system->getName() << "/" << cursor->getFileName() << "failed.";
+	 std::cout << "http://127.0.0.1:8080/arcade/stream/" << system->getName() << "/" << cursor->getFileName() << "callfailed.";
 
 	}
 	/*httplib::Client cli("localhost", 8080);
