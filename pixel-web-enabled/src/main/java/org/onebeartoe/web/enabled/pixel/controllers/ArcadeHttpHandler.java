@@ -31,6 +31,7 @@ import org.onebeartoe.web.enabled.pixel.CliPixel;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.utils.URLEncodedUtils;
 import com.fazecast.jSerialComm.SerialPort;
+import java.util.Random;
 
 /**
  * @author Roberto Marquez
@@ -106,6 +107,9 @@ public class ArcadeHttpHandler extends ImageResourceHttpHandler
         Long speeddelay_ = 10L;
         String color_ = "";
         Color color = Color.RED; //default to red color if not added
+        int i = 0;
+        boolean textSelected = false;
+        long speed = 10L; 
        
        if (WebEnabledPixel.isWindows()) {  //unfortunate hack we have to do as scrolling on windows is slower
            scrollsmooth_ = 3;
@@ -125,7 +129,6 @@ public class ArcadeHttpHandler extends ImageResourceHttpHandler
             } catch (URISyntaxException ex) {
                 Logger.getLogger(ArcadeHttpHandler.class.getName()).log(Level.SEVERE, null, ex);
         }
-        
         
         URI tempURI = null;
         try {
@@ -149,11 +152,10 @@ public class ArcadeHttpHandler extends ImageResourceHttpHandler
         	    streamOrWrite = arcadeURLarray[2];
         	    consoleName = arcadeURLarray[3];
         	    arcadeName = arcadeURLarray[4];
-                    
                     arcadeName = arcadeName.trim();
                     arcadeName = arcadeName.replace("\n", "").replace("\r", "");
             
-
+            //System.out.println("Arcade Name: " + arcadeName);
             //to do add code to remove " " in case the user entered those
                     
             //arcadeName could be a full path or just a name, we need to handle both
@@ -163,21 +165,43 @@ public class ArcadeHttpHandler extends ImageResourceHttpHandler
                     
             //let's make sure this file exists and skip if not
             //arcadeNameExtension = FilenameUtils.getExtension(arcadeName); 
+            
+
+            //String fileNameWithOutExt = FilenameUtils.removeExtension(fileNameWithExt);
             //arcadeNameOnly = FilenameUtils.getBaseName(arcadeName); //stripping out the extension like .zip for example
             
-            arcadeNameOnly = FilenameUtils.removeExtension(arcadeName);
-            //String fileNameWithOutExt = FilenameUtils.removeExtension(fileNameWithExt);
+            //if the extension is more than 3 chars, then let's treat it as a name that just happens to have a . in it
             
+            arcadeNameExtension = FilenameUtils.getExtension(arcadeName);
             
+            //System.out.println("arcade name only: " + arcadeName);
+            //System.out.println("arcade name extension: " + arcadeNameExtension);
+            //System.out.println("arcade name extension length: " + arcadeNameExtension.length());
+            
+           
+            if (arcadeNameExtension.length() > 3) {   //this means there just happened to be a period in the file  name 
+                arcadeNameOnly = arcadeName;
+            }    
+            else  { //there was no extension or it's a valid extension so proceed as normal and remove the extension if it's there
+                arcadeNameOnly = FilenameUtils.removeExtension(arcadeName);
+            } 
+            
+            //arcadeNameOnly = FilenameUtils.removeExtension(arcadeName);  //this wasn't working for dr.mario.zip for example and was just returning dr
+            //arcadeNameOnly = arcadeName; //turns out the extension was not getting passed
+            //arcadeNameOnly = arcadeName.replaceFirst("[.][^.]+$", "");
+            
+            i = 0;
             for (NameValuePair param : params) {
-
+                i++;
                 switch (param.getName()) {
 
                     case "t": //scrolling text value
                         text_ = param.getValue();
+                        textSelected = true;
                         break;
-                    case "text": //scrolling speed
+                    case "text": //scrolling text value
                         text_ = param.getValue();
+                        textSelected = true;
                         break;
                     case "l": //how many times to loop
                         loop_ = Integer.valueOf(param.getValue());
@@ -205,6 +229,8 @@ public class ArcadeHttpHandler extends ImageResourceHttpHandler
                         break;
                 }
             }
+            
+           
             
             //let's now refer to our mapping table for the console names, because console names are different for RetroPie vs. HyperSpin and other front ends
             //to do add a user defined .txt mapping if the console is not found in our mapping table
@@ -363,7 +389,7 @@ public class ArcadeHttpHandler extends ImageResourceHttpHandler
                          int yTextOffset = -4;
                          int fontSize_ = 22;
                          
-                         long speed = 10L;
+                         speed = 10L;
                          speed = WebEnabledPixel.getScrollingTextSpeed(LED_MATRIX_ID);  //this method also sets the yoffset
                          if (speeddelay_ != 10L) {  //this means another value was set from a parameter for speed so let's use that
                              speed = speeddelay_;
@@ -433,8 +459,12 @@ public class ArcadeHttpHandler extends ImageResourceHttpHandler
                 
                  if(arcadeFilePNG.exists() && !arcadeFilePNG.isDirectory() && arcadeFileGIF.exists() && !arcadeFileGIF.isDirectory()) { 
                     
+                      //in this case both the gif and png exist so we first need to kill the Q, then loop the GIF one time, and then stay on the PNG
+                      //http://localhost:8080/arcade/stream/black/dummy
+                      handlePNG(arcadeFilePNG, false,0,"black","dummy"); //kill Q and send black frame
+                      //handlePNG(File arcadeFilePNGFullPath, Boolean saveAnimation, int loop, String consoleNameMapped, String PNGNameWithExtension)
                       handleGIF(consoleNameMapped, arcadeNameOnly + ".gif", saveAnimation, 1);
-                      handlePNG(arcadeFilePNG, saveAnimation,99999,consoleNameMapped,FilenameUtils.getName(arcadeFilePathPNG));
+                      handlePNG(arcadeFilePNG, saveAnimation,99999,consoleNameMapped,FilenameUtils.getName(arcadeFilePathPNG)); //99999 means wait until the gif has looped
                  }
                  
                  else {
@@ -458,34 +488,96 @@ public class ArcadeHttpHandler extends ImageResourceHttpHandler
                          int yTextOffset = -4;
                          int fontSize_ = 22;
                          
-                         long speed = 10L;
+                         speed = 10L;  //10 is default for 128x32
                          speed = WebEnabledPixel.getScrollingTextSpeed(LED_MATRIX_ID);  //this method also sets the yoffset
-                         if (speeddelay_ != 10L) {  //this means another value was set from a parameter for speed so let's use that
-                             speed = speeddelay_;
-                         }
                          
-                         if (color_ != "") {
-                             color = getColorFromHexOrName(color_);
+                         if (i == 1 && textSelected == true) {  //then only &t was selected and we will override color and speed from settings.ini
+                             
+                             if (WebEnabledPixel.getTextColor().equals("random")) { //random color is selected in settings.ini so now we need to randomy pick the color
+                                 
+                                Random randomGenerator = new Random();
+                                int randomInt = randomGenerator.nextInt(11) + 1;  //0 to 11 + 1 = random number between 1 and 12
+                                //System.out.println("Random number generated is : " + randomInt);
+                                
+                                  switch (randomInt) {
+
+                                        case 1:
+                                            color = Color.RED;
+                                            break;
+                                        case 2:
+                                            color = Color.BLUE;
+                                            break;
+                                        case 3:
+                                            color = Color.CYAN;
+                                            break;
+                                        case 4:
+                                            color = Color.GRAY;
+                                            break;
+                                        case 5:
+                                            color = Color.DARK_GRAY;
+                                            break;
+                                        case 6:
+                                            color = Color.GREEN;
+                                            break;
+                                        case 7:
+                                            color = Color.LIGHT_GRAY;
+                                            break;
+                                        case 8:
+                                            color = Color.MAGENTA;
+                                            break;
+                                        case 9:
+                                            color = Color.ORANGE;
+                                            break;
+                                        case 10:
+                                            color = Color.PINK;
+                                            break;
+                                        case 11:
+                                            color = Color.YELLOW;
+                                            break;
+                                        case 12:
+                                            color = Color.WHITE;
+                                            break;
+                                        default:
+                                            color = Color.MAGENTA;
+                                    }
+                                 
+                             } else {
+                                  color = getColorFromHexOrName(WebEnabledPixel.getTextColor()); //getting this from settings.ini
+                             }
+                             
+                             String speedfromSettings = WebEnabledPixel.getTextSpeed(); //getting this from settings.ini
+                             
+                             switch (speedfromSettings) {
+                                    case "slow":
+                                         scrollsmooth_ = 1;
+                                        break;
+                                    case "normal":
+                                         scrollsmooth_ = 2;
+                                        break;
+                                    case "fast":
+                                         scrollsmooth_ = 5;
+                                        break;
+                                    default:
+                                         scrollsmooth_ = 2;
+                                }   
+                             
+                         } 
+                         
+                         else {
+                         
+                                speed = 10L;  //10 is default for 128x32
+                                speed = WebEnabledPixel.getScrollingTextSpeed(LED_MATRIX_ID);  //this method also sets the yoffset
+                                if (speeddelay_ != 10L) {  //this means another value was set from a parameter for speed so let's use that
+                                    speed = speeddelay_;
+                                }
+
+                                if (color_ != "") {
+                                    color = getColorFromHexOrName(color_);
+                                }
                          }
                          
                          pixel.scrollText(text_, loop_, speed, color,WebEnabledPixel.pixelConnected,scrollsmooth_); 
                         
-                        /*Pixel pixel = application.getPixel();
-                         int LED_MATRIX_ID = WebEnabledPixel.getMatrixID();
-                         
-                         int yTextOffset = -4;
-                         int fontSize_ = 22;
-                         long speed = 10L;
-                         
-                         speed = WebEnabledPixel.getScrollingTextSpeed(LED_MATRIX_ID);  //this method also sets the yoffset
-                         
-                         if (color_ != "") {
-                            
-                             color = getColorFromHexOrName(color_);
-                         }
-                         
-                         pixel.scrollText(text_, loop_, speed, color,WebEnabledPixel.pixelConnected); 
-                         */
                 }
                 
                     else { //nothing is there so let's use the console
