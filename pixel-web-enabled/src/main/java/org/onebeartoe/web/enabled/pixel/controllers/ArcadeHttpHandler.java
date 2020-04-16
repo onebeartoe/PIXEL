@@ -55,6 +55,7 @@ public class ArcadeHttpHandler extends ImageResourceHttpHandler
         Pixel pixel = application.getPixel();
         pixel.writeArcadeImage(arcadeFilePNGFullPath, saveAnimation, loop, consoleNameMapped, PNGNameWithExtension,WebEnabledPixel.pixelConnected); //we have the full file path here
         
+        
     }
     
     private void handleGIF(String consoleName, String arcadeName, Boolean saveAnimation, int loop) {
@@ -447,7 +448,7 @@ public class ArcadeHttpHandler extends ImageResourceHttpHandler
                         }
                 }
                 
-            } else {                      //we're in stream mode so png gets the priority if both png and gif exist
+            } else {                      //we're in stream mode so png gets the priority if both png and gif exist unless both are there
                 saveAnimation = false;
                 
                 //if our accessory is connected, let's write to that
@@ -464,22 +465,22 @@ public class ArcadeHttpHandler extends ImageResourceHttpHandler
                       handlePNG(arcadeFilePNG, false,0,"black","dummy"); //kill Q and send black frame
                       //handlePNG(File arcadeFilePNGFullPath, Boolean saveAnimation, int loop, String consoleNameMapped, String PNGNameWithExtension)
                       handleGIF(consoleNameMapped, arcadeNameOnly + ".gif", saveAnimation, 1);
-                      handlePNG(arcadeFilePNG, saveAnimation,99999,consoleNameMapped,FilenameUtils.getName(arcadeFilePathPNG)); //99999 means wait until the gif has looped
+                      //handlePNG(arcadeFilePNG, saveAnimation,99999,consoleNameMapped,FilenameUtils.getName(arcadeFilePathPNG)); //99999 means wait until the gif has looped
+                      handlePNG(arcadeFilePNG, saveAnimation,99999,consoleNameMapped,arcadeNameOnly + ".png"); //99999 means wait until the gif has looped
                  }
                  
                  else {
                 
                     if(arcadeFilePNG.exists() && !arcadeFilePNG.isDirectory()) { 
                             //System.out.println("delete went here PNG");
-                            handlePNG(arcadeFilePNG, saveAnimation,loop_,consoleNameMapped,FilenameUtils.getName(arcadeFilePathPNG));
+                            //handlePNG(arcadeFilePNG, saveAnimation,loop_,consoleNameMapped,FilenameUtils.getName(arcadeFilePathPNG));
+                            handlePNG(arcadeFilePNG, saveAnimation,loop_,consoleNameMapped,arcadeNameOnly + ".png");
                     }
                     else if (arcadeFileGIF.exists() && !arcadeFileGIF.isDirectory()) {
                             //System.out.println("delete went here GIF");
                             handleGIF(consoleNameMapped, arcadeNameOnly +".gif", saveAnimation, loop_);
                     }
                     
-                  
-                
                     else if (text_ != "" && !text_.equals("nomatch")) {  //the game image or png is not there and alt text was supplied so let's scroll that alt text
                         
                          //Pixel pixel = application.getPixel();
