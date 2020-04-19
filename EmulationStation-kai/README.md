@@ -40,12 +40,16 @@ cd EmulationStation
 git submodule update --init
 ```
 
-Then, generate and build the Makefile with CMake:
-```bash
-cd YourEmulationStationDirectory
-cmake .
-make
-```
+cd EmulationStation
+mkdir build
+cd build
+
+# On the RPi 2, you may need to add '-DFREETYPE_INCLUDE_DIRS=/usr/include/freetype2/'.
+# See issue #384 on GitHub for details.
+cmake ..
+
+# you can add -j2 here to use 2 threads for compiling in parallel (depending on how many cores/how much memory your RPi has)
+make -j2
 
 NOTE: to generate a `Debug` build on Unix/Linux, run the Makefile generation step as:
 ```bash
