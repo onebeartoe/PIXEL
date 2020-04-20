@@ -6,7 +6,7 @@ EmulationStation is a cross-platform graphical front-end for emulators with cont
 
 * es-app/src/views/ViewController.cpp
 * es-app/src/SystemScreenSaver.cpp
-* es-app/src/views/SystemView.cpp (edited) 
+* es-app/src/views/SystemView.cpp
 * es-app/src/views/gamelist/ISimpleGameListView.cpp
 
 Building
