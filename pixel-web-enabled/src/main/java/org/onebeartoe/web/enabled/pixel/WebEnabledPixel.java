@@ -66,6 +66,7 @@ import org.onebeartoe.web.enabled.pixel.controllers.StaticFileHttpHandler;
 import org.onebeartoe.web.enabled.pixel.controllers.StillImageHttpHandler;
 import org.onebeartoe.web.enabled.pixel.controllers.StillImageListHttpHandler;
 import org.onebeartoe.web.enabled.pixel.controllers.UploadHttpHandler;
+import org.onebeartoe.web.enabled.pixel.controllers.UploadPlatformHttpHandler;
 import org.onebeartoe.web.enabled.pixel.controllers.UploadOriginHttpHandler;
 import org.onebeartoe.web.enabled.pixel.controllers.ArcadeHttpHandler;
 import org.onebeartoe.web.enabled.pixel.controllers.ConsoleHttpHandler;
@@ -94,7 +95,7 @@ public class WebEnabledPixel
 {
     //public static final Logger logger = null;
     
-    public static String pixelwebVersion = "2.6.8";
+    public static String pixelwebVersion = "2.7.3";
     
     public static LogMe logMe = null;
  
@@ -174,6 +175,10 @@ public class WebEnabledPixel
     private String SubDisplayAccessory_ = "no";
     
     private String SubDisplayAccessoryPort_ = "COM99";
+    
+    private static String textColor_ = "random";
+    
+    private static String textSpeed_ = "normal";
     
     public static boolean arduino1MatrixConnected = false;
     
@@ -256,7 +261,7 @@ public class WebEnabledPixel
                      sec.put("hostAddress","localhost");
                 }
                 
-                 if(sec.containsKey("SubDisplayAccessory"))  {
+                if(sec.containsKey("SubDisplayAccessory"))  {
                      SubDisplayAccessory_ = sec.get("SubDisplayAccessory"); 
                      SubDisplayAccessoryPort_ = sec.get("SubDisplayAccessoryPort"); 
                              
@@ -292,6 +297,34 @@ public class WebEnabledPixel
                      sec.add("SubDisplayAccessoryPort_OPTION","COM25");
                      
                      //note sec.put was not working as it was over-writing, not creating a new key
+                     ini.store();
+                 }
+                
+                 if(sec.containsKey("textColor"))  {
+                     textColor_ = sec.get("textColor"); 
+                     textSpeed_ = sec.get("textSpeed"); 
+                             
+                } else {
+                     sec.add("textColor","random"); 
+                     sec.add("textColor_OPTION","random");
+                     sec.add("textColor_OPTION","red");
+                     sec.add("textColory_OPTION","blue");
+                     sec.add("textColor_OPTION","cyan");
+                     sec.add("textColory_OPTION","gray");
+                     sec.add("textColor_OPTION","darkgray");
+                     sec.add("textColory_OPTION","green");
+                     sec.add("textColor_OPTION","lightgray");
+                     sec.add("textColory_OPTION","magenta");
+                     sec.add("textColor_OPTION","orange");
+                     sec.add("textColory_OPTION","pink");
+                     sec.add("textColor_OPTION","yellow");
+                     sec.add("textColory_OPTION","white");
+                     
+                     sec.add("textSpeed","normal"); 
+                     sec.add("textSpeed_OPTION","slow");
+                     sec.add("textSpeed_OPTION","normal");
+                     sec.add("textSpeed_OPTION","fast");
+                     
                      ini.store();
                  }
                 
@@ -598,6 +631,8 @@ public class WebEnabledPixel
 
             HttpHandler uploadHttpHandler = new UploadHttpHandler(this);
             
+            HttpHandler uploadPlatformHttpHandler = new UploadPlatformHttpHandler(this);
+            
             HttpHandler uploadOriginHttpHandler = new UploadOriginHttpHandler( (UploadHttpHandler) uploadHttpHandler);
             
             HttpHandler clockHttpHandler = new ClockHttpHandler(this);
@@ -610,10 +645,7 @@ public class WebEnabledPixel
             
             HttpHandler localModeHttpHandler = new LocalModeHttpHandler(this);
             
-            
-            
-            
-// ARE WE GONNA DO ANYTHING WITH THE HttpContext OBJECTS?   
+            // ARE WE GONNA DO ANYTHING WITH THE HttpContext OBJECTS?   
             
             HttpContext createContext =     server.createContext("/", indexHttpHandler);
             
@@ -629,7 +661,7 @@ public class WebEnabledPixel
                                             server.createContext("/localplayback",localModeHttpHandler);
                                             
             
-            HttpContext pindmdContext =     server.createContext("/pindmd", pindmdHttpHandler);
+            HttpContext pindmdContext =     server.createContext("/dmd", pindmdHttpHandler);
 
             HttpContext staticContent =     server.createContext("/files", staticFileHttpHandler);
             
@@ -643,6 +675,7 @@ public class WebEnabledPixel
                                             server.createContext("/text/color", scrollingTextColorHttpHandler);
                                             
             HttpContext uploadContext =     server.createContext("/upload", uploadHttpHandler);
+                                            server.createContext("/uploadplatform", uploadPlatformHttpHandler);
                                             server.createContext("/upload/origin", uploadOriginHttpHandler);
             
             HttpContext clockContext =      server.createContext("/clock", clockHttpHandler);
@@ -655,14 +688,15 @@ public class WebEnabledPixel
              System.out.println(alreadyRunningErrorMsg);
              System.out.println("Exiting...");
              
-             if (isWindows() || isMac()) {  //we won't have xwindows on the Pi so skip this for the Pi
+             // took this out as the pop up is no good when pinball dmdext also running as this interrupts
+             /* if (isWindows() || isMac()) {  //we won't have xwindows on the Pi so skip this for the Pi
             
                 JFrame frame = new JFrame("JOptionPane showMessageDialog example");  //let's show a pop up too so the user doesn't miss it
                 JOptionPane.showMessageDialog(frame,
                    alreadyRunningErrorMsg,
                    "Pixelcade Listener Already Running",
                    JOptionPane.ERROR_MESSAGE);
-             }
+             } */
         
              System.exit(1);    //we can't continue because the pixel listener is already running
         }
@@ -1115,12 +1149,17 @@ public class WebEnabledPixel
      
     //TO DO need to add the year and manufacturer
      
-     
-     
      public static int getMatrixID() {
          return  LED_MATRIX_ID;
      }
-    
+     
+     public static String getTextColor() {
+         return  textColor_; 
+     }
+     
+     public static String getTextSpeed() {
+         return  textSpeed_; 
+     }
      
      public static long getScrollingTextSpeed(int LED_MATRIX_ID) {
                          
