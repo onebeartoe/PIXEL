@@ -36,7 +36,7 @@ public class StaticFileHttpHandler implements HttpHandler//extends PixelHttpHand
     @Override    
     public void handle(HttpExchange t) throws IOException
     {
-        logger.log(Level.INFO, "static file handler request: " + t.getRequestURI());
+        //logger.log(Level.INFO, "static file handler request: " + t.getRequestURI());  //commented to reduce clutter by Al April 2020 
         
         Pixel pixel = application.getPixel();
         String root = pixel.getPixelHome();
@@ -80,7 +80,7 @@ public class StaticFileHttpHandler implements HttpHandler//extends PixelHttpHand
         } 
         else
         {
-            logger.log(Level.INFO, "sending static file for request: " + t.getRequestURI());
+            //logger.log(Level.INFO, "sending static file for request: " + t.getRequestURI()); //commented to reduce clutter by Al April 2020 al 
             
             // Object exists and is a file: accept with response code 200.
             t.sendResponseHeaders(200, 0);
