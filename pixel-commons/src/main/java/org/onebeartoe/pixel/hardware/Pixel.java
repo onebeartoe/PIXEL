@@ -201,6 +201,8 @@ public class Pixel
     private Boolean loop99999FlagGIF = false;
     private Boolean loop99999FlagText = false;
     
+   
+    
     //private TimerTask animateTimer = new AnimateTimer();
     
     /**
@@ -1836,6 +1838,304 @@ private static String checksum(String filepath, MessageDigest md) throws IOExcep
 		}
     }
     
+    public void decodeArcadeGIFConstantFrameRate(final String decodedDir, String gifFilePath, String gifName, int currentResolution, final int pixelMatrix_width, final int pixelMatrix_height) throws NoSuchAlgorithmException, IOException 
+    {  
+		//we should add another flag here if we're decoding from the jar or user supplied gif
+		
+		//we're going to decode a native GIF into our RGB565 format
+                //we'll need to know the resolution of the currently selected matrix type: 16x32, 32x32, 32x64, or 64x64
+		//and then we will receive the gif accordingly as we decode
+		//we also need to get the original width and vuHeight of the gif which is easily done from the gif decoder class
+		//String gifName = FilenameUtils.removeExtension(gifName); //with no extension
+		
+        
+                int arcadeFrameDelayTarget = 100;
+                int arcadeCurrentFrameDelay = 100;
+                int numFramesCopy = 1;
+                int totalFramesCounter = 0; //used to count the total frames since we're duplicating
+       
+                String selectedFileName = FilenameUtils.getName(gifFilePath); 
+                fileType = FilenameUtils.getExtension(gifFilePath);
+                gifNameNoExt = FilenameUtils.removeExtension(selectedFileName); //with no extension
+		
+		System.out.println("Arcade file name: " + selectedFileName);
+		System.out.println("Arcade file name path: " + gifFilePath);
+                logMe.aLogger.info("Arcade file name: " + selectedFileName);
+                logMe.aLogger.info("Arcade file name path: " + gifFilePath);
+               
+		File file = new File(gifFilePath);
+		if (file.exists()) {
+                    
+                    MessageDigest md = MessageDigest.getInstance("MD5");
+                    String md5 = checksum(gifFilePath, md);
+                      //since we are decoding, we need to first make sure the .rgb565 and .txt decoded file is not there and delete if so.
+                    String gifName565Path =  decodedDir + gifNameNoExt + ".rgb565";  //   ex. c:\animation\decoded\tree.rgb565
+                    String gifNameTXTPath = decodedDir + gifNameNoExt + ".txt";  //   ex. c:\animation\decoded\tree.txt
+
+
+                    //since we are decoding, we need to first make sure the .rgb565 and .txt decoded file is not there and delete if so.
+
+                    File file565 = new File(gifName565Path);
+                    File fileTXT = new File(gifNameTXTPath);
+
+                    if (file565.exists()) file565.delete();
+                    if (fileTXT.exists()) file565.delete();
+                    //*******************************************************************************************
+
+                    GifDecoder d = new GifDecoder(); //our gif decoder
+                    d.read(gifFilePath);             //open the gif
+	        
+                    int numFrames = d.getFrameCount();      //how many frames in the original gif
+                    //arcadeFrameDelayTarget = d.getDelay(1); //even though gifs have a frame delay for each frmae, pixel doesn't support this so we'll take the frame rate of the second frame and use this for the whole animation. We take the second frame because often times the frame delay of the first frame in a gif is much longer than the rest of the frames
+                    
+                    // let's find out the smallest frame delay and then we can use that to make copies
+                    int currentFrameDelay = 0;
+                    int smallestFrameDelay = 100;
+                    for (int i = 0; i < numFrames; i++) { 
+                        currentFrameDelay = d.getDelay(i);
+                        //System.out.println("Frame delay: " + currentFrameDelay);
+                        if (currentFrameDelay < smallestFrameDelay)
+                            smallestFrameDelay = currentFrameDelay;
+                    }
+                    
+                    //let's loop through and get the smallest frame delay and use that!
+                    if (smallestFrameDelay == 0)
+                        arcadeFrameDelayTarget = 10; //tried 1 here but it makes the file too big
+                    else 
+                        arcadeFrameDelayTarget = smallestFrameDelay;
+                    
+
+                    Dimension frameSize = d.getFrameSize();
+                    int frameWidth = frameSize.width;
+                    int frameHeight = frameSize.height;
+                    
+	            //System.out.println("smallest frame delay: " + arcadeFrameDelayTarget);
+                    System.out.println("frame count: " + numFrames);
+                    System.out.println("frame delay: " + arcadeFrameDelayTarget);
+                    System.out.println("frame height: " + frameHeight);
+                    System.out.println("frame width: " + frameWidth);
+                    logMe.aLogger.info("frame count: " + numFrames);
+                    logMe.aLogger.info("frame delay: " + arcadeFrameDelayTarget);
+                    logMe.aLogger.info("frame height: " + frameHeight);
+                    logMe.aLogger.info("frame width: " + frameWidth);
+	          	          
+                    if (numFrames == 1) {  //ok this is a hack, for some reason only on raspberry pi, single frame gifs are not writing so the work around is to write 2 frames for a single frame GIF
+                             for (int i = 0; i < 2; i++) { 
+                             BufferedImage rotatedFrame = d.getFrame(0);  
+                                 if (frameWidth != pixelMatrix_width || frameHeight != pixelMatrix_height) {
+                                         System.out.println("Resizing and encoding " + selectedFileName + " frame " + i);
+                                         logMe.aLogger.info("Resizing and encoding " + selectedFileName + " frame " + i);
+
+                                         try {
+                                                        rotatedFrame = getScaledImage(rotatedFrame, pixelMatrix_width,pixelMatrix_height);
+
+                                                } catch (IOException e) {
+                                                        // TODO Auto-generated catch block
+                                                        e.printStackTrace();
+                                                }
+                                 }
+                                 else {
+                                         System.out.println("Encoding " + selectedFileName + " frame " + i);
+                                         logMe.aLogger.info("Encoding " + selectedFileName + " frame " + i);
+                                 }
+
+                             //this code here to convert a java image to rgb565 taken from stack overflow http://stackoverflow.com/questions/8319770/java-image-conversion-to-rgb565/
+                              BufferedImage sendImg  = new BufferedImage(pixelMatrix_width, pixelMatrix_height, BufferedImage.TYPE_USHORT_565_RGB);
+                              sendImg.getGraphics().drawImage(rotatedFrame, 0, 0, pixelMatrix_width, pixelMatrix_height, null);    
+
+                              int numByte=0;
+                              BitmapBytes = new byte[pixelMatrix_width*pixelMatrix_height*2];
+
+                                int x=0;
+                                int y=0;
+                                int len = BitmapBytes.length;
+
+                                for (x=0 ; x < pixelMatrix_height; x++) { //TO DO double check to make this is right
+                                    for (y=0; y < pixelMatrix_width; y++) {
+
+                                        Color c = new Color(sendImg.getRGB(y, x));  // x and y were switched in the original code which was causing the image to rotate by 90 degrees and was flipped horizontally, switching x and y fixes this bug
+                                        int red = c.getRed();
+                                        int green = c.getGreen();
+                                        int blue = c.getBlue();
+
+                                        //RGB565
+                                        red = red >> 3;
+                                        green = green >> 2;
+                                        blue = blue >> 3;  
+
+                                        short pixel_to_send = 0;
+                                        int pixel_to_send_int = 0;
+                                        pixel_to_send_int = (red << 11) | (green << 5) | (blue);
+                                        pixel_to_send = (short) pixel_to_send_int;
+                                        //dividing into bytes
+                                        byte byteH=(byte)((pixel_to_send >> 8) & 0x0FF);
+                                        byte byteL=(byte)(pixel_to_send & 0x0FF);
+
+                                        //Writing it to array - High-byte is the first, big endian byte order
+                                        BitmapBytes[numByte]=byteL;
+                                        BitmapBytes[numByte+1]=byteH;
+
+                                        numByte+=2;
+                                    }
+                                }
+
+                                        File decodeddir = new File(decodedDir); //this could be gif, gif64, or usergif
+                                           if(decodeddir.exists() == false) {
+                                                    decodeddir.mkdirs();
+                                            }
+
+                                            try {
+
+                                                    appendWrite(BitmapBytes, decodedDir + gifNameNoExt + ".rgb565"); //this writes one big file instead of individual ones
+
+
+                                            } catch (IOException e1) {
+                                                    // TODO Auto-generated catch block
+                                                    //Log.e("PixelAnimate", "Had a problem writing the original unified animation rgb565 file");
+                                                    e1.printStackTrace();
+                                            }
+                        }
+                  }        
+                   
+                   else {  // we don't have a single frame gif
+                  
+                        for (int i = 0; i < numFrames; i++) { //loop through all the frames
+                            
+                           arcadeCurrentFrameDelay = d.getDelay(i);
+                           //System.out.println("Current Frame Delay " + i + ": " + arcadeCurrentFrameDelay);
+                           
+                           //now let's check how many frame copies to make
+                           if (arcadeCurrentFrameDelay > arcadeFrameDelayTarget) 
+                               numFramesCopy = Math.round(arcadeCurrentFrameDelay / arcadeFrameDelayTarget);
+                           else 
+                               numFramesCopy = 1;
+                           
+                            //System.out.println(numFramesCopy + "for frame " + i);
+                            //let's nest another for loop to duplicate the frames if that specific frame is longer than the target frame rate
+                           for (int fc = 0; fc < numFramesCopy; fc++ ) {  //we have to go here at least once , fc means frame copy
+                               
+                                totalFramesCounter++;                     //since we are making copies, we want to track the total number of frames including the copies
+                                BufferedImage rotatedFrame = d.getFrame(i);  
+
+                                if (frameWidth != pixelMatrix_width || frameHeight != pixelMatrix_height) {
+                                        System.out.println("Resizing and encoding " + selectedFileName + " frame " + i);
+                                        logMe.aLogger.info("Resizing and encoding " + selectedFileName + " frame " + i);
+
+                                        try {
+                                                       rotatedFrame = getScaledImage(rotatedFrame, pixelMatrix_width,pixelMatrix_height);
+                                               } catch (IOException e) {
+                                                       // TODO Auto-generated catch block
+                                                       e.printStackTrace();
+                                               }
+                                }
+                                else {
+                                        System.out.println("Encoding " + selectedFileName + " frame " + i);
+                                        logMe.aLogger.info("Encoding " + selectedFileName + " frame " + i);
+                                }
+
+                                //this code here to convert a java image to rgb565 taken from stack overflow http://stackoverflow.com/questions/8319770/java-image-conversion-to-rgb565/
+                                BufferedImage sendImg  = new BufferedImage(pixelMatrix_width, pixelMatrix_height, BufferedImage.TYPE_USHORT_565_RGB);
+                                sendImg.getGraphics().drawImage(rotatedFrame, 0, 0, pixelMatrix_width, pixelMatrix_height, null);    
+
+                                int numByte=0;
+                                BitmapBytes = new byte[pixelMatrix_width*pixelMatrix_height*2];
+
+                                int x=0;
+                                int y=0;
+                                int len = BitmapBytes.length;
+
+                                for (x=0 ; x < pixelMatrix_height; x++) { //TO DO double check to make this is right
+                                    for (y=0; y < pixelMatrix_width; y++) {
+
+                                        Color c = new Color(sendImg.getRGB(y, x));  // x and y were switched in the original code which was causing the image to rotate by 90 degrees and was flipped horizontally, switching x and y fixes this bug
+                                        int red = c.getRed();
+                                        int green = c.getGreen();
+                                        int blue = c.getBlue();
+
+                                        //RGB565
+                                        red = red >> 3;
+                                        green = green >> 2;
+                                        blue = blue >> 3;    
+
+                                        //A pixel is represented by a 4-byte (32 bit) integer, like so:
+                                        //00000000 00000000 00000000 11111111
+                                        //^ Alpha  ^Red     ^Green   ^Blue
+                                        //Converting to RGB565
+
+                                        short pixel_to_send = 0;
+                                        int pixel_to_send_int = 0;
+                                        pixel_to_send_int = (red << 11) | (green << 5) | (blue);
+                                        pixel_to_send = (short) pixel_to_send_int;
+                                        //dividing into bytes
+                                        byte byteH=(byte)((pixel_to_send >> 8) & 0x0FF);
+                                        byte byteL=(byte)(pixel_to_send & 0x0FF);
+
+                                        //Writing it to array - High-byte is the first, big endian byte order
+                                        BitmapBytes[numByte]=byteL;
+                                        BitmapBytes[numByte+1]=byteH;
+
+                                        numByte+=2;
+                                    }
+                                }
+
+                                File decodeddir = new File(decodedDir); //this could be gif, gif64, or usergif
+                                if(decodeddir.exists() == false) 
+                                         decodeddir.mkdirs();
+
+                                try {
+                                    appendWrite(BitmapBytes, decodedDir + gifNameNoExt + ".rgb565"); //this writes one big file instead of individual ones
+                                 } catch (IOException e1) {
+                                        e1.printStackTrace();
+                                 }
+
+
+                      } //end for, we are done with the loop so let's now write the meta-data text file
+                   }       
+                }
+	       
+	        //********** now let's write the meta-data text file
+		   		
+                    if (arcadeFrameDelayTarget == 0 || numFrames == 1)   //we can't have a 0 frame delay so if so, let's add a 100ms delay by default
+                        arcadeFrameDelayTarget = 100; //to do fix there is some frame delay issue on some gifs
+
+                    if (numFrames == 1)   //again because of the above hack where single frame gifs aren't writing on raspberry pi, we'll turn a single frame gif into two frames
+                        filetag = "2" + "," + String.valueOf(arcadeFrameDelayTarget) + "," + String.valueOf(currentResolution) + "," + String.valueOf(md5); //current resolution may need to change to led panel type, we're adding the md5 here so we can check if unique file
+
+                    else 
+                        //filetag = String.valueOf(numFrames) + "," + String.valueOf(arcadeFrameDelayTarget) + "," + String.valueOf(currentResolution) + "," + String.valueOf(md5); //current resolution may need to change to led panel type
+                        filetag = String.valueOf(totalFramesCounter) + "," + String.valueOf(arcadeFrameDelayTarget) + "," + String.valueOf(currentResolution) + "," + String.valueOf(md5); //current resolution may need to change to led panel type
+                           
+
+                   // String filetag = String.valueOf(numFrames) + "," + String.valueOf(arcadeFrameDelayTarget) + "," + String.valueOf(currentResolution) + "," + String.valueOf(md5); //current resolution may need to change to led panel type
+
+                   File myFile = new File(decodedDir + gifNameNoExt + ".txt"); 
+                   
+                   logMe.aLogger.info("Smallest Frame Delay: " + arcadeFrameDelayTarget);
+                   logMe.aLogger.info("Total Original Frames: " + numFrames);
+                   logMe.aLogger.info("Total New Frames: " + totalFramesCounter);
+
+                   try {
+                            myFile.createNewFile();
+                            FileOutputStream fOut = null;
+                            fOut = new FileOutputStream(myFile);
+                            OutputStreamWriter myOutWriter = new OutputStreamWriter(fOut);
+                            myOutWriter.append(filetag); 
+                            myOutWriter.close();
+                            fOut.close();	
+                    } catch (IOException e) {
+                            // TODO Auto-generated catch block
+                            System.out.println("ERROR, could not write " + selectedFileName);
+                            logMe.aLogger.severe("Could not write " + selectedFileName);
+                            e.printStackTrace();
+                    }
+                   
+		} //did the file exist
+		else {
+			System.out.println("ERROR  Could not find file " + gifFilePath);
+                        logMe.aLogger.severe("Could not write " + selectedFileName);
+		}
+    }
+    
     /**
      * Currently only analog clock mode is supported
      * @param mode 
@@ -2153,14 +2453,14 @@ private static String checksum(String filepath, MessageDigest md) throws IOExcep
                                System.out.println("Decoding " + gifFilePath);
                                logMe.aLogger.info("Decoding " + gifFilePath);
                                // the text file is not there so we cannot continue and we must decode, let's first copy the file to home dir
-                               decodeArcadeGIF(decodedAnimationsPath, gifFilePath,selectedFileName, currentResolution, KIND.width, KIND.height);
+                               decodeArcadeGIFConstantFrameRate(decodedAnimationsPath, gifFilePath,selectedFileName, currentResolution, KIND.width, KIND.height);
                            }
 
                            if (GIFArcadeNeedsDecoding(decodedAnimationsPath, selectedFileName, currentResolution,gifFilePath) == true)
                            {
                                System.out.println("Selected LED panel is different than the encoded GIF, need to re-encode...");
                                logMe.aLogger.info("Selected LED panel is different than the encoded GIF, need to re-encode...");
-                               decodeArcadeGIF(decodedAnimationsPath, gifFilePath, selectedFileName, currentResolution, KIND.width, KIND.height);
+                               decodeArcadeGIFConstantFrameRate(decodedAnimationsPath, gifFilePath, selectedFileName, currentResolution, KIND.width, KIND.height);
                            }
 
                            //****** Now let's setup the animation ******
@@ -2316,14 +2616,14 @@ private static String checksum(String filepath, MessageDigest md) throws IOExcep
                               System.out.println("Decoding " + gifFilePath);
                               logMe.aLogger.info("Decoding " + gifFilePath);
                               // the text file is not there so we cannot continue and we must decode, let's first copy the file to home dir
-                              decodeArcadeGIF(decodedAnimationsPath, gifFilePath,selectedFileName, currentResolution, KIND.width, KIND.height);
+                              decodeArcadeGIFConstantFrameRate(decodedAnimationsPath, gifFilePath,selectedFileName, currentResolution, KIND.width, KIND.height);
                           }
 
                           if (GIFArcadeNeedsDecoding(decodedAnimationsPath, selectedFileName, currentResolution,gifFilePath) == true)
                           {
                               System.out.println("Selected LED panel is different than the encoded GIF, need to re-encode...");
                               logMe.aLogger.info("Selected LED panel is different than the encoded GIF, need to re-encode...");
-                              decodeArcadeGIF(decodedAnimationsPath, gifFilePath, selectedFileName, currentResolution, KIND.width, KIND.height);
+                              decodeArcadeGIFConstantFrameRate(decodedAnimationsPath, gifFilePath, selectedFileName, currentResolution, KIND.width, KIND.height);
                           }
 
                           //****** Now let's setup the animation ******
