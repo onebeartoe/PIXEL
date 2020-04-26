@@ -41,9 +41,8 @@ Note there are no SDA and SCL pins on Arduino Nano so use instead SDA\-->A4 and 
  */
 
 // ***************** 7 Segment ****************
-
-
-LedControl lc=LedControl(9,7,8,2); //pins for the 7 segment modules and 2 is the number of modules
+//LedControl lc=LedControl(9,7,8,2); //pins for the 7 segment modules and 2 is the number of modules
+//LedControl lc=LedControl(9,8,12,2); //pins for the 7 segment modules and 2 is the number of modules
 /*
  pin 9 is connected to DataIn 
  pin 7 is connected to CLK 
@@ -52,10 +51,10 @@ LedControl lc=LedControl(9,7,8,2); //pins for the 7 segment modules and 2 is the
 // ****************** LED MATRIX ***************
 #define HARDWARE_TYPE MD_MAX72XX::FC16_HW
 #define MAX_DEVICES 8                 //in this case we have 8 modules total and are defining 2 zones meaning we treat one zone of 4 and the second zone of 4 and can control them independently
-#define NUM_ZONES   1
-#define CLK_PIN     13
-#define DATA_PIN    11
-#define CS_PIN      10
+#define NUM_ZONES 2
+#define CLK_PIN   13
+#define DATA_PIN  11
+#define CS_PIN    10
 
 MD_Parola P = MD_Parola(HARDWARE_TYPE, CS_PIN, MAX_DEVICES);
 // LED MATRIX Scrolling parameters
@@ -94,9 +93,9 @@ unsigned long delaytime=250;
 */
 
 // Global message buffers shared by Serial and Scrolling functions
-#define  BUF_SIZE  200     //had to increase the buffer size from the default of 75 becasue our string length was exceeding and note on the pixelcade side we also truncate to ensure the incoming serial message is not too long
+#define  BUF_SIZE  250     //had to increase the buffer size from the default of 75 becasue our string length was exceeding and note on the pixelcade side we also truncate to ensure the incoming serial message is not too long
 char curMessage[BUF_SIZE] = { "" };
-char newMessage[BUF_SIZE] = { "Splatterhouse Edition Arcade Funcade" };
+char newMessage[BUF_SIZE] = { "Pixelcade" };
 bool newMessageAvailable = true;
 // **********************************************
 
@@ -118,15 +117,18 @@ SSD1306AsciiWire oled2;
 //**********************************
 
 bool    handShakeResponse = false;
-//int     gameYearArray[4] = {0x67, 0x10, 8, 8};  //used for the 7segment LED display
-int     gameYearArray[4] = {8, 8, 8, 8};  //used for the 7segment LED display
+int     gameYearArray[4] = {0x67, 0x10, 8, 8};
 String  gameTitle="";
 String  gameYear="";
 String  gameManufacturer="";
 String  gameGenre="";
 String  gameRating="";
-String  MatrixMessage="";
-int i = 0;
+
+int     firstSeparator=0;
+int     secondSeparator=0;
+int     thirdSeparator=0;
+int     fourthSeparator=0;
+int     fifthSeparator=0;
 
 void readSerial(void)
 {
@@ -145,54 +147,23 @@ void readSerial(void)
        
         newMessageAvailable = false;
         handShakeResponse = true;
-        Serial.println("went here");  //IMPORTANT: the handshake with pixelcade will break if you delete this one so be sure and leave as is 
+        Serial.println("went here");  //not sure why, but if this is removed, the handshake with pixelcade breaks so leave this here
         
       } else {
 
+            firstSeparator = String(cp).indexOf('%');
+            secondSeparator = String(cp).indexOf('%', firstSeparator+1);
+            thirdSeparator = String(cp).indexOf('%', secondSeparator+1);
+            fourthSeparator = String(cp).indexOf('%', thirdSeparator+1);
+            fifthSeparator = String(cp).indexOf('%', fourthSeparator+1);
             
-            //char string[50] ="Test,string1,Test,string2:Test:string3";
-            char *p;
-            //printf ("String  \"%s\" is split into tokens:\n",cp);
-            Serial.println(p);
-            i = 0;
-            p = strtok (cp,"%");
-            while (p!= NULL)
-            {
-              //printf ("%s\n",p);
-              //Serial.println("%s\n",p);
-              //Serial.println(p);
-
-               switch(i)
-              {
-                  case 0:
-                      //gameTitle = trim(p);
-                      gameTitle = p;
-                      break;
-                  case 1:
-                      //gameYear = trim(p);
-                      gameYear = p;
-                      break;
-                  case 2:
-                       //gameManufacturer = trim(p);
-                      gameManufacturer = p;
-                      break;
-                  case 3:
-                      //gameGenre = trim(p);
-                      gameGenre = p;
-                      break;
-                  case 4:
-                      //gameRating = trim(p);
-                      gameRating = p;
-                      break; 
-                  default:
-                      printf("string is longer, ignoring rest of string");
-              }
-              
-              p = strtok (NULL, "%");
-              i++;
-              
-            }
-            
+            gameTitle = String(cp).substring(0, firstSeparator); //as we don't have much memory in our buffer, need to shorten the game title if too long
+           
+            gameYear = String(cp).substring(firstSeparator+1, secondSeparator);
+            gameManufacturer = String(cp).substring(secondSeparator+1, thirdSeparator);
+            gameGenre = String(cp).substring(thirdSeparator+1, fourthSeparator);
+            gameRating = String(cp).substring(fourthSeparator+1, fifthSeparator); 
+           
             int YearStr_len = gameYear.length(); 
       
             Serial.print(gameTitle);
@@ -203,23 +174,10 @@ void readSerial(void)
             }
 
             //newMessage is what actuallly gets sent to the LED matrix so we'll manipulate our desired string here based on the meta-data we have available, you can customize here as you like!
-            Serial.println(gameYear);  //not sure why, but if this is removed, the handshake with pixelcade breaks so leave this here
-             MatrixMessage = gameTitle;
-
-             
-            //to do this part isn't workign and many will blank out the display so just scrolling game title for now
-//             if (gameYear.equals("0000")) {  //then we only have the rom name and no additional meta data so let's just scroll the rom name, pixelcade sends this is no metadata match romName + "%0000" + "%Manufacturer Unknown" + "%Genre Unknown" + "%Rating Unknown"; 
-//                  MatrixMessage = gameTitle;
-//             } else {
-//                  MatrixMessage = gameTitle + " from " + gameYear + " by " + gameManufacturer;
-//             }
-           
-            
-            if (!gameTitle.equals("dummy")) {
-                MatrixMessage.toCharArray(newMessage, BUF_SIZE);
-                newMessageAvailable = true;
-                handShakeResponse = false; 
-            }
+            String MatrixMessage = gameTitle + " from " + gameYear + " by " + gameManufacturer;
+            MatrixMessage.toCharArray(newMessage, BUF_SIZE);
+            newMessageAvailable = true;
+            handShakeResponse = false; 
        
       }
     }
@@ -228,19 +186,14 @@ void readSerial(void)
       cp++;
   }
 }
-
-void display7Segment()
-{
-    lc.setDigit(0,5,gameYearArray[0],false);
-    lc.setDigit(0,4,gameYearArray[1],false);
-    lc.setDigit(0,3,gameYearArray[2],false);
-    lc.setDigit(0,2,gameYearArray[3],false);
-
-    lc.setDigit(1,5,gameYearArray[0],false);
-    lc.setDigit(1,4,gameYearArray[1],false);
-    lc.setDigit(1,3,gameYearArray[2],false);
-    lc.setDigit(1,2,gameYearArray[3],false);
-}
+//
+//void display7Segment()
+//{
+//    lc.setDigit(0,5,gameYearArray[0],false);
+//    lc.setDigit(0,4,gameYearArray[1],false);
+//    lc.setDigit(0,3,gameYearArray[2],false);
+//    lc.setDigit(0,2,gameYearArray[3],false);
+//}
 
 //void display7SegmentInit() {
 //     lc.setChar(0,7,'p',false);
@@ -264,38 +217,27 @@ void display7Segment()
 //     delay(5000);
 //}
 
-//char *trim(char *s) {
-//    char *ptr;
-//    if (!s)
-//        return NULL;   // handle NULL string
-//    if (!*s)
-//        return s;      // handle empty string
-//    for (ptr = s + strlen(s) - 1; (ptr >= s) && isspace(*ptr); --ptr);
-//    ptr[1] = '\0';
-//    return s;
+//void MovingDigits7Segment() 
+//{
+//  
+//  lc.clearDisplay(0);
+//  for (int a=0; a<8; a++)
+//  {
+//    lc.setDigit(0,a,8,false);
+//    delay(100);
+//  }
+//  delay(100);
+//  lc.clearDisplay(0);
+//
+//   lc.clearDisplay(1);
+//  for (int a=0; a<8; a++)
+//  {
+//    lc.setDigit(1,a,8,false);
+//    delay(100);
+//  }
+//  delay(100);
+//  lc.clearDisplay(1);
 //}
-
-void MovingDigits7Segment() 
-{
-  
-  lc.clearDisplay(0);
-  for (int a=0; a<8; a++)
-  {
-    lc.setDigit(0,a,8,false);
-    delay(100);
-  }
-  delay(100);
-  lc.clearDisplay(0);
-  
-   lc.clearDisplay(1);
-  for (int a=0; a<8; a++)
-  {
-    lc.setDigit(1,a,8,false);
-    delay(100);
-  }
-  delay(100);
-  lc.clearDisplay(1);
-}
 
 
 void writeOled () {
@@ -305,69 +247,41 @@ void writeOled () {
   oled2.setFont(Adafruit5x7);
   oled2.clear();
   
-  if (gameTitle.equals("")) {                   //this means we haven't connected yet or have no good data coming in
-    oled1.println("Arcade Funcade"); //used to say display accessory
-    oled2.println("Arcade Funcade");
-    //oled1.set2X();
-    //oled2.set2X();
-    oled1.println("");
-    oled2.println("");
-    oled1.println("Splatterhouse");  //used to say Pixelcade
-    oled2.println("Splatterhouse");
-    oled1.println("Edition");  //used to say Pixelcade
-    oled2.println("Edition");
-  } 
-  
-  else {
-  
-      //now let's do something different depending if we have full meta data or just the rom name
-    
-      if (gameYear.equals("0000")) {  //then we only have the rom name and no additional meta data
-        
-          if (gameTitle.length() < 10) { //we can use the larger font
-               oled1.set2X();
-               oled2.set2X();
-               oled1.println(gameTitle);
-               oled2.println(gameTitle);
-          } else {                      //rom  name too long so let's use the smaller font
-    
-               oled1.set1X();
-               oled2.set1X();
-               oled1.println(gameTitle);
-               oled2.println(gameTitle);
-          }
-        
-      } else {                          //we have the game creation year so let's assume we have good meta-data and show all the stuff
-      
-        oled1.set1X();
-        oled2.set1X();
-        
-        oled1.println(gameTitle);
-        oled2.println(gameTitle);
-        
-        oled1.println(gameManufacturer);
-        oled1.println();
-        oled2.println(gameManufacturer);
-        oled2.println();
-        
-        oled1.set2X();
-        oled2.set2X();
-       
-        oled1.println(gameYear);
-        oled2.println(gameYear);
-       
-        oled1.set1X();
-        oled1.println(gameGenre);
-        oled1.println(gameRating);
-      
-        oled2.set1X();
-        oled2.println(gameGenre);
-        oled2.println(gameRating);
-      
-         // Use Adafruit5x7 font, field at row 2, set1X, columns 16 through 100.
-        //oled.tickerInit(&state, Adafruit5x7, 7, false, 16, 100); //this worked but couldn't figure out how to change dynamically
-      }
+  if (gameTitle.equals("")) {                   //this means we haven't connected yet
+    oled1.println("Display Accessory");
+    oled2.println("Display Accessory");
   }
+  else {
+    oled1.println(gameTitle);
+    oled2.println(gameTitle);
+  }
+  
+  oled1.println(gameManufacturer);
+  oled1.println();
+  oled2.println(gameManufacturer);
+  oled2.println();
+  
+  oled1.set2X();
+  oled2.set2X();
+  if (gameTitle.equals("")) {                  
+    oled1.println("Pixelcade");
+    oled2.println("Pixelcade");
+  }
+  else {
+     oled1.println(gameYear);
+     oled2.println(gameYear);
+  }
+ 
+  oled1.set1X();
+  oled1.println(gameGenre);
+  oled1.println(gameRating);
+
+  oled2.set1X();
+  oled2.println(gameGenre);
+  oled2.println(gameRating);
+
+   // Use Adafruit5x7 font, field at row 2, set1X, columns 16 through 100.
+  //oled.tickerInit(&state, Adafruit5x7, 7, false, 16, 100); //this worked but couldn't figure out how to change dynamically
 }
 
 void setup()
@@ -393,34 +307,75 @@ void setup()
   Serial.print(FW_VERSION);
  
   P.begin(NUM_ZONES);   //we have a total of 8 modules with two zones, the first zone is modules 0-3 and second zone is modules 4-7
-  P.setZone(0, 0, 7);
-  //P.setZone(1, 4, 7);
-  
-  //P.setZone(0, 0, 3);
-  //P.setZone(1, 4, 7);
+  P.setZone(0, 0, 3);
+  P.setZone(1, 4, 7);
 
   // change these to false if your displays are upside down
   P.setZoneEffect(0, true, PA_FLIP_UD);
   P.setZoneEffect(0, true, PA_FLIP_LR);
-  //P.setZoneEffect(1, true, PA_FLIP_UD);
-  //P.setZoneEffect(1, true, PA_FLIP_LR);
+  P.setZoneEffect(1, true, PA_FLIP_UD);
+  P.setZoneEffect(1, true, PA_FLIP_LR);
 
   for (uint8_t i=0; i<NUM_ZONES; i++) {
     P.displayZoneText(i, curMessage, scrollAlign, scrollSpeed, scrollPause, scrollEffectIn, scrollEffectOut);
   }
+  
+  
+  /* old code for one zone
+  P.begin();
+ 
+  P.displayText(curMessage, scrollAlign, scrollSpeed, scrollPause, scrollEffect, scrollEffect);
+  // *****change these to false if your display is upside down
+   P.setZoneEffect(0, true, PA_FLIP_UD);
+   P.setZoneEffect(0, true, PA_FLIP_LR);
+  // *****************
+  */
 
-  // the zero refers to the MAX7219 number, it is zero for 1 chip
-  lc.shutdown(0,false); // turn off power saving, enables display
-  lc.setIntensity(0,15); // sets brightness (0~15 possible values)
-  lc.clearDisplay(0); // clear screen
-
-  lc.shutdown(1,false); // turn off power saving, enables display
-  lc.setIntensity(1,15); // sets brightness (0~15 possible values)
-  lc.clearDisplay(1); // clear screen
+//  // the zero refers to the MAX7219 number, it is zero for 1 chip
+//  lc.shutdown(0,false); // turn off power saving, enables display
+//  lc.setIntensity(0,8); // sets brightness (0~15 possible values)
+//  lc.clearDisplay(0); // clear screen
+//
+//  lc.shutdown(1,false); // turn off power saving, enables display
+//  lc.setIntensity(1,8); // sets brightness (0~15 possible values)
+//  lc.clearDisplay(1); // clear screen
 }
 
 void loop()
 {
+  
+/*
+  if (P.displayAnimate())
+{
+ boolean bAllDone = true;
+
+ for (uint8_t i=0; i<MAX_ZONES && bAllDone; i++)
+   bAllDone = bAllDone && P.getZoneStatus(i);
+
+ if (bAllDone) 
+ {
+        
+    if (handShakeResponse) {
+       Serial.write(HANDSHAKE_RETURN);
+       Serial.write(HANDSHAKE_RETURN);
+       handShakeResponse = false;
+    }
+    
+    if (newMessageAvailable)
+    {
+      strcpy(curMessage, newMessage);
+      MovingDigits7Segment(); 
+      display7Segment();                //write game year to the 7 segment display
+      writeOled ();                     //write to the OLED
+      newMessageAvailable = false;
+    }
+    P.displayReset();
+  }
+  readSerial();
+ }
+
+*/
+  
   
   if (P.displayAnimate())
   {
@@ -435,8 +390,8 @@ void loop()
     if (newMessageAvailable)
     {
       strcpy(curMessage, newMessage);
-      MovingDigits7Segment(); 
-      display7Segment();                //write game year to the 7 segment display
+      //MovingDigits7Segment(); 
+      //display7Segment();                //write game year to the 7 segment display
       writeOled ();                     //write to the OLED
       newMessageAvailable = false;
     }

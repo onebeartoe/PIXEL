@@ -78,6 +78,8 @@ public class PinDMDHttpHandler extends ImageResourceHttpHandler
      
         URL url = new URL(urlPath);
         
+        //https://github.com/netty/netty/tree/4.1/example/src/main/java/io/netty/example/http/websocketx/client
+        
         
        // URL url = new URL("http://www.objects.com.au/services/sherpa.html");
 

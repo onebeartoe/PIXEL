@@ -216,6 +216,10 @@ public class ConsoleHttpHandler extends ImageResourceHttpHandler
                 consoleNameMapped = consoleName;                               //we were already mapped so let's just use it
             }
             
+            if (consoleNameMapped.equals("mame-libretro")) { //yes this is a hack, some users this was still not getting mapped right
+                consoleNameMapped = "mame";
+            }
+            
                 //more user friendly for the log since technically it's looping forever until stopped
 
              //System.out.println("Console after mapping: " + consoleNameMapped);

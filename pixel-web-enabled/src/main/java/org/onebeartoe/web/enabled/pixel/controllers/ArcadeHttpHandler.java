@@ -634,6 +634,8 @@ public class ArcadeHttpHandler extends ImageResourceHttpHandler
              logMe.aLogger.severe("Example: http://localhost:8080/arcade/write/mame/pacman.png or http://localhost:8080/arcade/stream/atari2600/digdug.gif");
         }
     }
+    
+    
 
     public static boolean consoleMatch(String[] arr, String targetValue) {
 	for(String s: arr){

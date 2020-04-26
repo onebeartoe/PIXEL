@@ -88,6 +88,7 @@ function displayImage(imagePath, name)
         case "animations/save/":
         {
             mode = "animations/write/";
+            alert("Pixelcade Marquee will be blank until writing has completed, please don't select anything else until the animation appears on Pixelcade");
             break;
         }
         case "animations/":
