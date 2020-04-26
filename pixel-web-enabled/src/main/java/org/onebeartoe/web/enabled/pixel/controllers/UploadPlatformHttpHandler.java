@@ -8,27 +8,34 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.apache.http.NameValuePair;
+import org.apache.http.client.utils.URLEncodedUtils;
 import org.eh.core.model.FileInfo;
 import org.eh.core.util.FileUploadContentAnalysis;
+import org.onebeartoe.pixel.LogMe;
+import org.onebeartoe.web.enabled.pixel.CliPixel;
 import org.onebeartoe.web.enabled.pixel.WebEnabledPixel;
+import static org.onebeartoe.web.enabled.pixel.WebEnabledPixel.logMe;
 
 /**
  * The classes from this Github repository are used:
  * https://github.com/NotBadPad/easy-httpserver
  * @author Roberto Marquez
  */
-public class UploadHttpHandler implements HttpHandler//extends TextHttpHandler
+public class UploadPlatformHttpHandler implements HttpHandler//extends TextHttpHandler
 {
     protected WebEnabledPixel application;
     
     private List<String> uploadOrigins;
     
-    public UploadHttpHandler(WebEnabledPixel application)
+    public UploadPlatformHttpHandler(WebEnabledPixel application)
     {
         this.application = application;
         
@@ -37,8 +44,8 @@ public class UploadHttpHandler implements HttpHandler//extends TextHttpHandler
 
     protected String handleUpload(HttpExchange httpExchange)
     {
-        System.out.println("request reviced");
-
+        
+       
         Headers headers = httpExchange.getRequestHeaders();
         // get ContentType
         String contentType = headers.get("Content-type").toString().replace("[", "")
@@ -70,6 +77,11 @@ public class UploadHttpHandler implements HttpHandler//extends TextHttpHandler
                 String path = null;
                         
                 UploadType type = UploadType.valueOf(s);
+                System.out.println("upload-type: " + s);
+                
+                String consoleKey = "console";
+                String PixelcadeConsole = (String) map.get(consoleKey);
+                System.out.println("console: " + PixelcadeConsole);
                 
                 uploadOrigins.add(type.name());
                 
@@ -77,13 +89,14 @@ public class UploadHttpHandler implements HttpHandler//extends TextHttpHandler
                 {
                     case ANIMATED_GIF:
                     {
-                        path = application.getPixel().getAnimationsPath();
+                        path = application.getPixel().getPixelHome() + "/" + PixelcadeConsole + "/"; 
                         
                         break;
                     }
                     case STILL_IMAGE:
                     {
-                        path = application.getPixel().getImagesPath();
+                        
+                        path = application.getPixel().getPixelHome() + "/" + PixelcadeConsole + "/"; 
                         
                         break;
                     }
