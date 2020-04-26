@@ -1,8 +1,13 @@
 EmulationStation
 ================
 
-This is a fork of EmulationStation for RetroPie.
-EmulationStation is a cross-platform graphical front-end for emulators with controller navigation.
+This is a fork of EmulationStation for RetroPie that has been modified to integrate with the Pixelcade LED Marquee http://pixelcade.org
+EmulationStation is a cross-platform graphical front-end for emulators with controller navigation. The Pixelcade integration includes the modification of these 4 files, specifically making calls to the Pixelcade REST API at http://pixelcade.org/api . To date, this code has been succesfully compiled for Raspberry Pi 3B (Stretch) and Ubuntu 18_04.
+
+* es-app/src/views/ViewController.cpp
+* es-app/src/SystemScreenSaver.cpp
+* es-app/src/views/SystemView.cpp
+* es-app/src/views/gamelist/ISimpleGameListView.cpp
 
 Building
 ========
@@ -40,12 +45,20 @@ cd EmulationStation
 git submodule update --init
 ```
 
-Then, generate and build the Makefile with CMake:
-```bash
-cd YourEmulationStationDirectory
-cmake .
-make
+```bash cd EmulationStation
+mkdir build
+cd build
+cmake ..
+make -j2
+make package
 ```
+
+On the RPi 2, you may need to add '-DFREETYPE_INCLUDE_DIRS=/usr/include/freetype2/'.
+See issue #384 on GitHub for details.
+
+
+you can add -j2 here to use 2 threads for compiling in parallel (depending on how many cores/how much memory your RPi has)
+
 
 NOTE: to generate a `Debug` build on Unix/Linux, run the Makefile generation step as:
 ```bash
