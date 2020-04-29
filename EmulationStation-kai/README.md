@@ -48,7 +48,7 @@ git submodule update --init
 ```bash cd EmulationStation
 mkdir build
 cd build
-cmake ..
+cmake ..  or cmake -DGL=On .. (for Pi 4)
 make -j2
 make package
 ```
