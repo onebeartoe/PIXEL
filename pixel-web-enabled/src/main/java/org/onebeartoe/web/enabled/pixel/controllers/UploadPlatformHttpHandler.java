@@ -8,8 +8,11 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URLEncoder;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -20,9 +23,13 @@ import org.apache.http.client.utils.URLEncodedUtils;
 import org.eh.core.model.FileInfo;
 import org.eh.core.util.FileUploadContentAnalysis;
 import org.onebeartoe.pixel.LogMe;
+import org.onebeartoe.pixel.hardware.Pixel;
 import org.onebeartoe.web.enabled.pixel.CliPixel;
 import org.onebeartoe.web.enabled.pixel.WebEnabledPixel;
 import static org.onebeartoe.web.enabled.pixel.WebEnabledPixel.logMe;
+import static org.onebeartoe.web.enabled.pixel.WebEnabledPixel.pixelwebVersion;
+import java.nio.charset.StandardCharsets;
+import org.apache.commons.codec.net.URLCodec;
 
 /**
  * The classes from this Github repository are used:
@@ -68,6 +75,8 @@ public class UploadPlatformHttpHandler implements HttpHandler//extends TextHttpH
             if(fileInfo == null)
             {
                 issues.append("No file was posted with request, for param named: " + uploadKey);
+                logMe.aLogger.info("No file was posted with request, for param named: " + uploadKey);
+                System.out.println("No file was posted with request, for param named: " + uploadKey);
             }
             else
             {
@@ -78,10 +87,23 @@ public class UploadPlatformHttpHandler implements HttpHandler//extends TextHttpH
                         
                 UploadType type = UploadType.valueOf(s);
                 System.out.println("upload-type: " + s);
+               
                 
                 String consoleKey = "console";
                 String PixelcadeConsole = (String) map.get(consoleKey);
-                System.out.println("console: " + PixelcadeConsole);
+                if(PixelcadeConsole == null) {
+                     logMe.aLogger.info("console was not passed, defaulting to mame");
+                     System.out.println("console was not passed, defaulting to mame");
+                     PixelcadeConsole = "mame";
+                }   
+                
+                String displayNowKey = "displaynow";
+                String displayNow = (String) map.get(displayNowKey);
+                if(displayNow == null) {
+                     logMe.aLogger.info("displaynow was not passed, should be 1 to display now and 0 to not display now, defaulting to 0");
+                     System.out.println("displaynow was not passed, should be 1 to display now and 0 to not display now, defaulting to 0");
+                     displayNow = "0";
+                } 
                 
                 uploadOrigins.add(type.name());
                 
@@ -102,15 +124,33 @@ public class UploadPlatformHttpHandler implements HttpHandler//extends TextHttpH
                     }
                     default:
                     {
-                        throw new Exception("upload type is needed");
+                        logMe.aLogger.info("upload-type was not passed");
+                        System.out.println("upload-type was not passed");
+                        throw new Exception("upload-type was not passed");
                     }
                 }
 
                 String outpath = path + fileInfo.getFilename();
+                //String outpath = path + fileInfo.getFilename().toLowerCase();  //to do upper case is not working for some reason so converting everything here to lower case
                 
                 FileOutputStream fos = new FileOutputStream(outpath);
                 fos.write(fileInfo.getBytes());
                 fos.close();
+                
+                logMe.aLogger.info("New file upload complete: " + outpath);
+                System.out.println("New file upload complete: " + outpath);
+                
+                //now that file has been uploaded, let's display it if the flag was set
+                if (displayNow.equals("1")) {
+                    ArcadeHttpHandler streamImage = new ArcadeHttpHandler(application);
+                    //String url = "/arcade/stream/" + PixelcadeConsole + "/" + encodeValue(fileInfo.getFilename()) + "?l=0";
+                    String encodedFilePath = new URLCodec().encode(fileInfo.getFilename()).replace("+","%20"); //these encoders all add a + for a space so quick hack to change that to %20
+                    //String encodedFilePath = new URLCodec().encode(fileInfo.getFilename().toLowerCase()).replace("+","%20");
+                    
+                    String url = "/arcade/stream/" + PixelcadeConsole + "/" + encodedFilePath + "?l=0";
+                    streamImage.writeImageResource(url);
+                }
+                
             }
         }
         catch (Exception ex)
@@ -126,6 +166,12 @@ public class UploadPlatformHttpHandler implements HttpHandler//extends TextHttpH
         return contentType + "\n" + 
                response + "\n" + 
                issues.toString();
+    }
+    
+    private static String encodeValue(String value) throws UnsupportedEncodingException {
+      
+            return URLEncoder.encode(value, StandardCharsets.UTF_8.toString());
+       
     }
 
     public String getLastUploadOrigin()
