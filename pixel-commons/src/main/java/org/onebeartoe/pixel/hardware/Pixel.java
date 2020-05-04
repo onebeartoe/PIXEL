@@ -1848,6 +1848,15 @@ private static String checksum(String filepath, MessageDigest md) throws IOExcep
 		//we also need to get the original width and vuHeight of the gif which is easily done from the gif decoder class
 		//String gifName = FilenameUtils.removeExtension(gifName); //with no extension
 		
+                 
+                //since this decoding may take awhile, let's add a pls wait message to pixelcade letting the user know what is happening
+                
+                
+                String plsWaitFilePathPNG = getPixelHome() + "system" + "/" + "wait.png";
+                File plsWaitFilePathPNG_ = new File(plsWaitFilePathPNG);
+                
+                if (plsWaitFilePathPNG_.exists())
+                    writeArcadeImage(plsWaitFilePathPNG_, false, 99999, "system", "wait.png",true); //loop cannot be blank otherwise we kill the Q for the random feature
         
                 int arcadeFrameDelayTarget = 100;
                 int arcadeCurrentFrameDelay = 100;
@@ -1856,7 +1865,16 @@ private static String checksum(String filepath, MessageDigest md) throws IOExcep
        
                 String selectedFileName = FilenameUtils.getName(gifFilePath); 
                 fileType = FilenameUtils.getExtension(gifFilePath);
+                //gifNameNoExt = FilenameUtils.removeExtension(selectedFileName); //with no extension
                 gifNameNoExt = FilenameUtils.removeExtension(selectedFileName); //with no extension
+                
+                
+                //if (arcadeNameExtension.length() > 3) {   //this means there just happened to be a period in the file  name 
+                //    arcadeNameOnly = arcadeName;
+                //}    
+                //else  { //there was no extension or it's a valid extension so proceed as normal and remove the extension if it's there
+                //    arcadeNameOnly = FilenameUtils.removeExtension(arcadeName);
+                //} 
 		
 		System.out.println("Arcade file name: " + selectedFileName);
 		System.out.println("Arcade file name path: " + gifFilePath);
