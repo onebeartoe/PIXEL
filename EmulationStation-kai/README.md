@@ -9,6 +9,8 @@ EmulationStation is a cross-platform graphical front-end for emulators with cont
 * es-app/src/views/SystemView.cpp
 * es-app/src/views/gamelist/ISimpleGameListView.cpp
 
+Big thanks to Kai for developing this code!
+
 Building
 ========
 
@@ -48,7 +50,7 @@ git submodule update --init
 ```bash cd EmulationStation
 mkdir build
 cd build
-cmake ..
+cmake ..  or cmake -DGL=On .. (for Pi 4)
 make -j2
 make package
 ```
