@@ -9,6 +9,7 @@ import java.net.URISyntaxException;
 import java.security.NoSuchAlgorithmException;
 import java.time.Duration;
 import java.util.List;
+import java.util.Random;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 //import java.util.logging.Level;
@@ -51,6 +52,7 @@ public class AnimationsHttpHandler extends ImageResourceHttpHandler
         String arcadeNameExtension = null; 
         String arcadeNameOnly = null;
         boolean saveAnimation = false;
+        boolean randomGIF = false;
 
         //logger.log(Level.INFO, "animation handler is writing " + imageClassPath);
         LogMe logMe = LogMe.getInstance();
@@ -85,6 +87,9 @@ public class AnimationsHttpHandler extends ImageResourceHttpHandler
                     case "c": //color
                        color_ = param.getValue();
                        break;
+                    case "r": //random   
+                        randomGIF = true;
+                        break;
                     }
         }
   
@@ -175,8 +180,17 @@ public class AnimationsHttpHandler extends ImageResourceHttpHandler
                     logMe.aLogger.info("Animation Handler sending GIF: " + arcadeNameOnly + ".gif");
             }
 
-             Pixel pixel = application.getPixel();
+            Pixel pixel = application.getPixel();
 
+            if (randomGIF == true) {
+                List<String> animationrandom = application.loadAnimationList();
+                Random rand = new Random();
+                String randomAnimationName = animationrandom.get(new Random().nextInt(animationrandom.size()));
+                System.out.println("Random Animation: " + randomAnimationName );
+                logMe.aLogger.info("Random Animation:: " + randomAnimationName);
+                arcadeNameOnly = FilenameUtils.getBaseName(randomAnimationName); //stripping out the extension
+            }
+            
             try {
                 // pixel.writeAnimation(animationName, saveAnimation); //old code, this only worked for gifs that were in the original jar
                 pixel.writeAnimationFilePath("animations", arcadeNameOnly + ".gif", saveAnimation,loop_,WebEnabledPixel.pixelConnected);  
