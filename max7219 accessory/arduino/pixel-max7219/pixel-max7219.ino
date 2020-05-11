@@ -51,8 +51,8 @@ LedControl lc=LedControl(9,7,8,2); //pins for the 7 segment modules and 2 is the
  */
 // ****************** LED MATRIX ***************
 #define HARDWARE_TYPE MD_MAX72XX::FC16_HW
-#define MAX_DEVICES 8                 //in this case we have 8 modules total and are defining 2 zones meaning we treat one zone of 4 and the second zone of 4 and can control them independently
-#define NUM_ZONES   1
+#define MAX_DEVICES 8                 //in this case we have 8 modules total 
+#define NUM_ZONES   1                 //but if you have 2 moduels of 4 each , then change this to 2 zones meaning we treat one zone of 4 and the second zone of 4 and can control them independently
 #define CLK_PIN     13
 #define DATA_PIN    11
 #define CS_PIN      10
@@ -96,7 +96,7 @@ unsigned long delaytime=250;
 // Global message buffers shared by Serial and Scrolling functions
 #define  BUF_SIZE  200     //had to increase the buffer size from the default of 75 becasue our string length was exceeding and note on the pixelcade side we also truncate to ensure the incoming serial message is not too long
 char curMessage[BUF_SIZE] = { "" };
-char newMessage[BUF_SIZE] = { "Splatterhouse Edition Arcade Funcade" };
+char newMessage[BUF_SIZE] = { "Pixelcade" };
 bool newMessageAvailable = true;
 // **********************************************
 
@@ -306,16 +306,16 @@ void writeOled () {
   oled2.clear();
   
   if (gameTitle.equals("")) {                   //this means we haven't connected yet or have no good data coming in
-    oled1.println("Arcade Funcade"); //used to say display accessory
-    oled2.println("Arcade Funcade");
+    oled1.println("Display Accessory"); //used to say display accessory
+    oled2.println("Sub-Display");
     //oled1.set2X();
     //oled2.set2X();
     oled1.println("");
     oled2.println("");
-    oled1.println("Splatterhouse");  //used to say Pixelcade
-    oled2.println("Splatterhouse");
-    oled1.println("Edition");  //used to say Pixelcade
-    oled2.println("Edition");
+    oled1.println("Pixelcade");  //used to say Pixelcade
+    oled2.println("Sub-Display");
+    oled1.println("Pixelcade");  //used to say Pixelcade
+    oled2.println("Sub-Display");
   } 
   
   else {
@@ -392,11 +392,11 @@ void setup()
   Serial.setTimeout(50);
   Serial.print(FW_VERSION);
  
-  P.begin(NUM_ZONES);   //we have a total of 8 modules with two zones, the first zone is modules 0-3 and second zone is modules 4-7
-  P.setZone(0, 0, 7);
+  P.begin(NUM_ZONES);   
+  P.setZone(0, 0, 7);      //one module of 8 with one zone
   //P.setZone(1, 4, 7);
   
-  //P.setZone(0, 0, 3);
+  //P.setZone(0, 0, 3);   //two modules of 4 with two zones, the first zone is modules 0-3 and second zone is modules 4-7
   //P.setZone(1, 4, 7);
 
   // change these to false if your displays are upside down
