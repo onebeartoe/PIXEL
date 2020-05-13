@@ -1,5 +1,7 @@
 Pi IMAGE CREATION STEPS
 
+image buster lite
+copy wpa_supplicant and blank ssh to root
 sudo curl -LO pixelcade.org/pi/setup-alu.sh && sudo chmod +x setup-alu.sh && ./setup-alu.sh
 don't reboot
 git clone https://github.com/jasbur/RaspiWiFi.git
@@ -14,3 +16,5 @@ zip -r artwork.zip . -x "*.DS_Store" -x "Thumbs.*"
 
 Compress PNGs (not sure this does much)
 find /Users/al/artwork/artworkcomp -type f -name "*.png" -exec pngout {} \;
+
+ssh-keygen -R raspberrypi.local
