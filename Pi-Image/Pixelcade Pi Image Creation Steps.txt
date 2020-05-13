@@ -1,0 +1,16 @@
+Pi IMAGE CREATION STEPS
+
+sudo curl -LO pixelcade.org/pi/setup-alu.sh && sudo chmod +x setup-alu.sh && ./setup-alu.sh
+don't reboot
+git clone https://github.com/jasbur/RaspiWiFi.git
+sudo python3 initial_setup.py
+update html files for jasbur
+delete wpa_supplicant.conf.old
+now create image using mac disk utility before rebooting, compressed image
+
+ARTWORK
+Run this from the art directory to zip up
+zip -r artwork.zip . -x "*.DS_Store" -x "Thumbs.*"
+
+Compress PNGs (not sure this does much)
+find /Users/al/artwork/artworkcomp -type f -name "*.png" -exec pngout {} \;
