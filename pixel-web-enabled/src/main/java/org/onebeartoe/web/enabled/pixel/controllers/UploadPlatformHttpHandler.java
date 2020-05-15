@@ -1,4 +1,4 @@
-
+    
 package org.onebeartoe.web.enabled.pixel.controllers;
 
 import com.sun.net.httpserver.Headers;
@@ -68,9 +68,40 @@ public class UploadPlatformHttpHandler implements HttpHandler//extends TextHttpH
         {
             InputStream requestBody = httpExchange.getRequestBody();
             Map<String, Object> map = FileUploadContentAnalysis.parse(requestBody, contentType, length);
-
+            
+             //************* to do remove this logging later
+             
+            /*
+            String uploadTypeKey2 = "upload-type";
+            String s2 = (String) map.get(uploadTypeKey2);
+            logMe.aLogger.info("upload-type: " + s2);
+            System.out.println("upload-type: " + s2);
+            
+            String consoleKey2 = "console";
+            String PixelcadeConsole2 = (String) map.get(consoleKey2);
+            //to do remove this logging later
+            logMe.aLogger.info("console: " + PixelcadeConsole2);
+            System.out.println("console: " + PixelcadeConsole2);
+             
+            String displayNowKey2 = "displaynow";
+            String displayNow2 = (String) map.get(displayNowKey2);
+            //to do remove this logging later
+            logMe.aLogger.info("displaynow: " + displayNow2);
+            System.out.println("displaynow: " + displayNow2);
+            */
+            
+            //**** keep ***
             String uploadKey = "upload";
             FileInfo fileInfo = (FileInfo) map.get(uploadKey);
+            //**************
+            
+            String outpath2 = fileInfo.getFilename();
+           
+                
+            logMe.aLogger.info("upload file path: " + outpath2);
+            System.out.println("upload file path: " + outpath2);
+            
+            //********************************
             
             if(fileInfo == null)
             {
@@ -82,15 +113,17 @@ public class UploadPlatformHttpHandler implements HttpHandler//extends TextHttpH
             {
                 String uploadTypeKey = "upload-type";
                 String s = (String) map.get(uploadTypeKey);
+                 if(s == null) {
+                     s = "STILL_IMAGE";
+                }   
                 
                 String path = null;
                         
                 UploadType type = UploadType.valueOf(s);
-                System.out.println("upload-type: " + s);
-               
                 
                 String consoleKey = "console";
                 String PixelcadeConsole = (String) map.get(consoleKey);
+                
                 if(PixelcadeConsole == null) {
                      logMe.aLogger.info("console was not passed, defaulting to mame");
                      System.out.println("console was not passed, defaulting to mame");
@@ -99,6 +132,7 @@ public class UploadPlatformHttpHandler implements HttpHandler//extends TextHttpH
                 
                 String displayNowKey = "displaynow";
                 String displayNow = (String) map.get(displayNowKey);
+                
                 if(displayNow == null) {
                      logMe.aLogger.info("displaynow was not passed, should be 1 to display now and 0 to not display now, defaulting to 0");
                      System.out.println("displaynow was not passed, should be 1 to display now and 0 to not display now, defaulting to 0");
@@ -130,6 +164,7 @@ public class UploadPlatformHttpHandler implements HttpHandler//extends TextHttpH
                     }
                 }
 
+               
                 String outpath = path + fileInfo.getFilename();
                 //String outpath = path + fileInfo.getFilename().toLowerCase();  //to do upper case is not working for some reason so converting everything here to lower case
                 

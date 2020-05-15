@@ -11,9 +11,13 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Font;
+import java.awt.FontFormatException;
 import java.awt.FontMetrics;
+import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.GraphicsEnvironment;
 import java.awt.RenderingHints;
+import java.awt.Toolkit;
 import java.awt.geom.AffineTransform;
 import java.awt.image.AffineTransformOp;
 import java.awt.image.BufferedImage;
@@ -164,12 +168,43 @@ public class Pixel
     
     public static String OS = System.getProperty("os.name").toLowerCase();
     
-    private static int framecount = 0;
-    
+     private static int framecount = 0;
+  
     private static int fontSize = 32;
+  
+    private static int yOffset = 0;
+  
+    private static boolean doubleLine = false;
+  
+    private static boolean fourLine = false;
+
+    private String maxMultiLine = null;
+
+    private static String fontFamily = "Arial";
+
+    private Font font;
+
+    private Font customFont;
     
-    //private ScheduledExecutorService scheduledExecutorService = Executors  //to do is this needed?
-    //                            .newSingleThreadScheduledExecutor();
+//    private int w = 128; 
+//    
+//    private int h = 32;       
+//    
+//    private BufferedImage textImg;
+//    
+//    private Graphics2D g2d;
+//    
+//    private Font font;
+//    
+//    private Font customFont;
+//    
+//    private GraphicsEnvironment ge;
+//    
+//     private int messageWidth;
+//    
+//    private int yText;
+//    
+//    private FontMetrics fm;
         
     private StreamGIFTask streamgifTask = new StreamGIFTask();
     private ScrollTextTask scollTextTask = new ScrollTextTask();
@@ -1102,75 +1137,430 @@ private static String checksum(String filepath, MessageDigest md) throws IOExcep
         }
     }
    
-    public void scrollText(String text, int loop, long speed, Color color, boolean pixelConnected,int scrollsmooth)
-    {
-        
-        //System.out.println("Scrolling Text Loop Flag " + isLooping);
-        
-        if (!pixelConnected) {  //if pixel is still starting up and we get a command, let's add to Q
-             
-           if (loop == 0) {
-             loop = 1;
-           }
-           
-           text = text.replaceAll(";"," "); 
-           addtoQueue("text", text, Long.toString(speed), loop, false, color,scrollsmooth);
-            
-     } 
-     
-     else { 
-        
-             if (isLooping && loop == 99999) {  //we were already looping and new command has a loop and is not a write command so let's write to the Q
-            
-                 text = text.replaceAll(";"," "); 
-                 addtoQueue("text",text,Long.toString(speed),loop,false,color,scrollsmooth);
-                 loop99999FlagText = true;
-             }
-         
-             else if (isLooping && loop != 0) {  //we were already looping and new command has a loop so let's write to the Q
-                
-                 loopScrollingTextCounter = 0;
-                 loopTimesGlobal = loop; 
-                 text = text.replaceAll(";"," "); 
-                 addtoQueue("text",text,Long.toString(speed),loop,false,color,scrollsmooth);
-
-            } 
-        
-            else  {
-            
-            scrollDelay = speed;
-            
-            scrollingTextMultiplier = scrollsmooth;
-            
-            scrollingText = text;
-          
-            setScrollTextColor(color);
-        
-            if (loop !=0 && loop != 99999) {   //if it's 99999, then we're actually no longer looping   //we were not already looping but new command has a loop and is not a write so let's continue and loop the gif
-                x = KIND.width;
-                isLooping = true;
-                loopScrollingTextCounter = 0;
-                loopTimesGlobal = loop; 
-                //System.out.println("looping for first time:" + loop);
-            } else {                                            //we are not looping or we have a write command so let's reset everything and clear the Q
-                x = KIND.width;
-                isLooping = false;
-                loopScrollingTextCounter = 0;
-                loopTimesGlobal = 0;
-                PixelQueue.clear();
-                //System.out.println("NOT looping");
-            }
-
-            stopExistingTimer();
-            
-            interactiveMode();
-            
-            ScheduledExecutorService scrollTextService = Executors.newScheduledThreadPool(1);
-            futurescroll = scrollTextService.scheduleAtFixedRate(scollTextTask, 0, scrollDelay, TimeUnit.MILLISECONDS);
-            scrollingTextTimerRunningFlag.set(true);  //atomic boolean , better for threads
-        }
-      }
-    }
+//    public void scrollText(String text, int loop, long speed, Color color, boolean pixelConnected,int scrollsmooth)
+//    {
+//        
+//        //System.out.println("Scrolling Text Loop Flag " + isLooping);
+//        
+//        if (!pixelConnected) {  //if pixel is still starting up and we get a command, let's add to Q
+//             
+//           if (loop == 0) {
+//             loop = 1;
+//           }
+//           
+//           text = text.replaceAll(";"," "); 
+//           addtoQueue("text", text, Long.toString(speed), loop, false, color,scrollsmooth);
+//            
+//     } 
+//     
+//     else { 
+//        
+//             if (isLooping && loop == 99999) {  //we were already looping and new command has a loop and is not a write command so let's write to the Q
+//            
+//                 text = text.replaceAll(";"," "); 
+//                 addtoQueue("text",text,Long.toString(speed),loop,false,color,scrollsmooth);
+//                 loop99999FlagText = true;
+//             }
+//         
+//             else if (isLooping && loop != 0) {  //we were already looping and new command has a loop so let's write to the Q
+//                
+//                 loopScrollingTextCounter = 0;
+//                 loopTimesGlobal = loop; 
+//                 text = text.replaceAll(";"," "); 
+//                 addtoQueue("text",text,Long.toString(speed),loop,false,color,scrollsmooth);
+//
+//            } 
+//        
+//            else  {
+//            
+//            scrollDelay = speed;
+//            
+//            scrollingTextMultiplier = scrollsmooth;
+//            
+//            scrollingText = text;
+//          
+//            setScrollTextColor(color);
+//        
+//            if (loop !=0 && loop != 99999) {   //if it's 99999, then we're actually no longer looping   //we were not already looping but new command has a loop and is not a write so let's continue and loop the gif
+//                x = KIND.width;
+//                isLooping = true;
+//                loopScrollingTextCounter = 0;
+//                loopTimesGlobal = loop; 
+//                //System.out.println("looping for first time:" + loop);
+//            } else {                                            //we are not looping or we have a write command so let's reset everything and clear the Q
+//                x = KIND.width;
+//                isLooping = false;
+//                loopScrollingTextCounter = 0;
+//                loopTimesGlobal = 0;
+//                PixelQueue.clear();
+//                //System.out.println("NOT looping");
+//            }
+//
+//            stopExistingTimer();
+//            
+//            interactiveMode();
+//            
+//            //***** below here is all new in case something goes wrong remove this
+//            int w = KIND.width;
+//            int h = KIND.height;
+//            BufferedImage img = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
+//            	    
+//            Graphics2D g2d = img.createGraphics();
+//            g2d.setPaint(scrollingTextColor);
+//       
+//            Font font = fonts.get(fontFamily);
+//            font = new Font(fontFamily, Font.PLAIN, fontSize);
+//            
+//            if (!fontFamily.equals("Arial")) {
+//                try {
+//                        Font customFont = Font.createFont(Font.TRUETYPE_FONT, new File("fonts//" + fontFamily + ".ttf"));
+//                           GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
+//                           ge.registerFont(customFont);
+//
+//                       } catch (IOException e) {
+//                           System.out.println(fontFamily + " not fount, defaulting to Arial");
+//                           font = new Font("Arial", Font.PLAIN, KIND.height);
+//                           fonts.put(fontFamily, font);
+//
+//                       } catch(FontFormatException e) {
+//                           System.out.println(fontFamily + " not fount, defaulting to Arial");
+//                           font = new Font("Arial", Font.PLAIN, KIND.height);
+//                           fonts.put(fontFamily, font);
+//                       }
+//            }
+//            
+//            if(font == null)  //then we have a custom font most likely
+//                { //default font size is 32 but we also set it from WebEnabledPixel
+//                font = new Font("Arial", Font.PLAIN, KIND.height);
+//                fonts.put(fontFamily, font);
+//            } 
+//            
+//            g2d.setFont(font);
+//            FontMetrics fm = g2d.getFontMetrics();
+//            
+//            int yDifference = KIND.height - fm.getHeight() *  72 / Toolkit.getDefaultToolkit().getScreenResolution();
+//           
+//            int y = (fm.getHeight() *  72 / Toolkit.getDefaultToolkit().getScreenResolution()) + yOffset;
+//
+//            try 
+//            {
+//                additionalBackgroundDrawing(g2d);
+//            } 
+//            catch (Exception ex) 
+//            {
+//                logger.log(Level.SEVERE, null, ex);
+//            }
+//            
+//            if (doubleLine == true) {
+//                String[] words = scrollingText.split(" +"); // Split words by spaces
+//                int count = (int) ((words.length / 2.0) + 0.5); // Number of words in part[0]
+//                String[] part = new String[2];
+//                Arrays.fill(part, ""); // Initialize to empty strings
+//                for (int i = 0; i < words.length; i++) {
+//                    if (i < count) { // First half of the words go into part[0]
+//                        part[0] += words[i] + " ";
+//                    } else { // Next half go into part[1]
+//                        part[1] += words[i] + " ";
+//                    }
+//                }
+//                part[1] = part[1].trim(); // Since there will be extra space at end of part[1]
+//                g2d.drawString(part[0] + "\n", 0, y);
+//                g2d.drawString(part[1] + "\n", 0, y + 12);
+//                if (part[0].length() > part[1].length())   //we need to get the longest length for the scrolling end
+//                    maxMultiLine = part[0];
+//                else 
+//                    maxMultiLine = part[1];
+//            }
+//            
+//            else if (fourLine == true) {
+//                
+//                fontFamily = "Minimal4";  //since we have 4 lines, we need to hard code the specific font here or it won't fit
+//                fontSize = 14;
+//                font = fonts.get(fontFamily);
+//                font = new Font(fontFamily, Font.PLAIN, fontSize);
+//
+//                    try {
+//                            Font customFont = Font.createFont(Font.TRUETYPE_FONT, new File("fonts//" + fontFamily + ".ttf"));
+//                               GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
+//                               ge.registerFont(customFont);
+//                           } catch (IOException e) {
+//                               System.out.println(fontFamily + " not fount, defaulting to Arial");
+//                               font = new Font("Arial", Font.PLAIN, KIND.height);
+//                               fonts.put(fontFamily, font);
+//                           } catch(FontFormatException e) {
+//                               System.out.println(fontFamily + " not fount, defaulting to Arial");
+//                               font = new Font("Arial", Font.PLAIN, KIND.height);
+//                               fonts.put(fontFamily, font);
+//                           }
+//                g2d.setFont(font);
+//                fm = g2d.getFontMetrics();
+//                
+//                String[] words = scrollingText.split(" +"); // Split words by spaces
+//                int quarter = (int) ((words.length / 4.0) + 0.5); // Number of words in part[0]
+//                String[] part = new String[4];
+//                Arrays.fill(part, ""); // Initialize to empty strings
+//                for (int i = 0; i < words.length; i++) {
+//                    
+//                    if (i < quarter)  // First quarter of the words go into part[0]
+//                        part[0] += words[i] + " ";
+//                    else if (i >= quarter && i < quarter*2)  // Next quarter go into part[1]
+//                        part[1] += words[i] + " ";
+//                    else if (i >= quarter*2 && i < quarter*3)  // third quarter go into part[2]
+//                        part[2] += words[i] + " ";
+//                    else 
+//                        part[3] += words[i] + " ";
+//                }
+//                part[1] = part[1].trim(); // Since there will be extra space at end of part[1]
+//                g2d.drawString(part[0] + "\n", 0, y);
+//                g2d.drawString(part[1] + "\n", 0, y + 6);
+//                g2d.drawString(part[2] + "\n", 0, y + 12);
+//                g2d.drawString(part[3] + "\n", 0, y + 18);
+//                
+//                int arr[] = {part[0].length(), part[1].length(), part[2].length(), part[3].length()}; 
+//                int i; 
+//                // Initialize maximum element 
+//                int max = arr[0]; 
+//                int maxElement = 0;
+//                // Traverse array elements from second and 
+//                // compare every element with current max   
+//                for (i = 1; i < arr.length; i++) 
+//                    if (arr[i] > max) 
+//                        maxElement = i;
+//                maxMultiLine = part[maxElement];
+//            }
+//            else {
+//                 g2d.drawString(scrollingText, 0, y);
+//            }
+//             
+//            try 
+//            {
+//                additionalForegroundDrawing(g2d);
+//            } 
+//            catch (Exception ex) 
+//            {
+//                logger.log(Level.SEVERE, null, ex);
+//            }
+//            
+//            g2d.dispose();
+//
+//            // uncomment this to see how often the pixel is communicated with the host            
+//            // System.out.print(".");
+//
+//            int messageWidth = fm.stringWidth(scrollingText);    
+//            // System.out.println("message width: " + messageWidth);
+//            
+//            if (doubleLine == true || fourLine == true) 
+//                 messageWidth = fm.stringWidth(maxMultiLine);  
+//            
+//            if (messageWidth < KIND.width) { //then it means we don't need to scroll
+//            
+//                if(matrix == null)
+//                {
+//                    // uncomment this for debugging
+//                    logger.log(Level.INFO, "There is no matrix for the text scrolller.");
+//                }
+//                else
+//                {
+//
+//                    //if (scrollingTextTimerRunningFlag.get() == true) {  //there was a timing issue on windows only so added this, if the timerflag has been set to false, then don't write this frame
+//                        try 
+//                        {  
+//                            writeImagetoMatrix(img, KIND.width, KIND.height);
+//                        } 
+//                        catch (ConnectionLostException ex) 
+//                        {
+//                            logger.log(Level.SEVERE, null, ex);
+//                        }   
+//                    //}
+//                }
+//                        
+//            }
+//            
+//            else {
+//                
+//            //***** above this is all new ********    
+//                    
+//                    ScheduledExecutorService scrollTextService = Executors.newScheduledThreadPool(1);
+//                    futurescroll = scrollTextService.scheduleAtFixedRate(scollTextTask, 0, scrollDelay, TimeUnit.MILLISECONDS);
+//                    scrollingTextTimerRunningFlag.set(true);  //atomic boolean , better for threads
+//            }
+//            
+//            
+//        }
+//      }
+//    }
+    
+     public void scrollText(String text, int loop, long speed, Color color, boolean pixelConnected, int scrollsmooth) {
+    if (!pixelConnected) {
+      if (loop == 0)
+        loop = 1; 
+      text = text.replaceAll(";", " ");
+      addtoQueue("text", text, Long.toString(speed), loop, Boolean.valueOf(false), color, scrollsmooth);
+    } else if (this.isLooping.booleanValue() && loop == 99999) {
+      text = text.replaceAll(";", " ");
+      addtoQueue("text", text, Long.toString(speed), loop, Boolean.valueOf(false), color, scrollsmooth);
+      this.loop99999FlagText = Boolean.valueOf(true);
+    } else if (this.isLooping.booleanValue() && loop != 0) {
+      this.loopScrollingTextCounter = 0;
+      this.loopTimesGlobal = loop;
+      text = text.replaceAll(";", " ");
+      addtoQueue("text", text, Long.toString(speed), loop, Boolean.valueOf(false), color, scrollsmooth);
+    } else {
+      this.scrollDelay = speed;
+      this.scrollingTextMultiplier = scrollsmooth;
+      this.scrollingText = text;
+      setScrollTextColor(color);
+      if (loop != 0 && loop != 99999) {
+        this.x = this.KIND.width;
+        this.isLooping = Boolean.valueOf(true);
+        this.loopScrollingTextCounter = 0;
+        this.loopTimesGlobal = loop;
+      } else {
+        this.x = this.KIND.width;
+        this.isLooping = Boolean.valueOf(false);
+        this.loopScrollingTextCounter = 0;
+        this.loopTimesGlobal = 0;
+        this.PixelQueue.clear();
+      } 
+      stopExistingTimer();
+      interactiveMode();
+      int w = this.KIND.width;
+      int h = this.KIND.height;
+      BufferedImage img = new BufferedImage(w, h, 2);
+      Graphics2D g2d = img.createGraphics();
+      g2d.setPaint(this.scrollingTextColor);
+      if (doubleLine) {
+        fontFamily = "Arial Narrow 7";
+        fontSize = 14;
+      } 
+      if (fourLine) {
+        fontFamily = "Minimal4";
+        fontSize = 14;
+      } 
+      boolean fontExists = false;
+      fontExists = Arrays.<String>asList(GraphicsEnvironment.getLocalGraphicsEnvironment().getAvailableFontFamilyNames()).contains(fontFamily);
+      if (fontExists) {
+        this.font = this.fonts.get(fontFamily);
+        this.font = new Font(fontFamily, 0, fontSize);
+      } else {
+        System.out.println(fontFamily + " is not registered on this OS, let's register it now...");
+        this.logger.log(Level.INFO, fontFamily + " is not registered on this OS, let's register it now...");
+        try {
+          this.customFont = Font.createFont(0, new File("fonts//" + fontFamily + ".ttf"));
+          GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
+          ge.registerFont(this.customFont);
+          this.font = this.fonts.get(fontFamily);
+          this.font = new Font(fontFamily, 0, fontSize);
+        } catch (IOException e) {
+          System.out.println(fontFamily + " not found, please copy your TTF font into the fonts folder, defaulting to Arial Narrow 7");
+          this.logger.log(Level.INFO, fontFamily + " not found, please copy your TTF font into the fonts folder, defaulting to Arial Narrow 7");
+          this.font = new Font("Arial Narrow 7", 0, this.KIND.height - 4);
+          this.fonts.put(fontFamily, this.font);
+        } catch (FontFormatException e) {
+          System.out.println(fontFamily + " not found, please copy your TTF font into the fonts folder, defaulting to Arial Narrow 7");
+          this.logger.log(Level.INFO, fontFamily + " not found, please copy your TTF font into the fonts folder, defaulting to Arial Narrow 7");
+          this.font = new Font("Arial Narrow 7", 0, this.KIND.height - 4);
+          this.fonts.put(fontFamily, this.font);
+        } 
+      } 
+      if (this.font == null) {
+        this.font = new Font("Arial", 0, this.KIND.height - 4);
+        this.fonts.put(fontFamily, this.font);
+      } 
+      g2d.setFont(this.font);
+      FontMetrics fm = g2d.getFontMetrics();
+      int yDifference = this.KIND.height - fm.getHeight() * 72 / 110;
+      int y = yDifference / 2 + fm.getHeight() * 72 / 110 + yOffset;
+      try {
+        additionalBackgroundDrawing(g2d);
+      } catch (Exception ex) {
+        this.logger.log(Level.SEVERE, (String)null, ex);
+      } 
+      if (doubleLine == true) {
+        int doublelineoffset = -7;
+        String[] words = this.scrollingText.split(" +");
+        int count = (int)(words.length / 2.0D + 0.5D);
+        String[] part = new String[2];
+        Arrays.fill((Object[])part, "");
+        for (int i = 0; i < words.length; i++) {
+          if (i < count) {
+            part[0] = part[0] + words[i] + " ";
+          } else {
+            part[1] = part[1] + words[i] + " ";
+          } 
+        } 
+        part[1] = part[1].trim();
+        g2d.drawString(part[0] + "\n", 0, y + doublelineoffset);
+        g2d.drawString(part[1] + "\n", 0, y + 14 + doublelineoffset);
+        if (part[0].length() > part[1].length()) {
+          this.maxMultiLine = part[0];
+        } else {
+          this.maxMultiLine = part[1];
+        } 
+      } else if (fourLine == true) {
+        int FourLineOffset = -11;
+        String[] words = this.scrollingText.split(" +");
+        int quarter = (int)(words.length / 4.0D + 0.5D);
+        String[] part = new String[4];
+        Arrays.fill((Object[])part, "");
+        for (int i = 0; i < words.length; i++) {
+          if (i < quarter) {
+            part[0] = part[0] + words[i] + " ";
+          } else if (i >= quarter && i < quarter * 2) {
+            part[1] = part[1] + words[i] + " ";
+          } else if (i >= quarter * 2 && i < quarter * 3) {
+            part[2] = part[2] + words[i] + " ";
+          } else {
+            part[3] = part[3] + words[i] + " ";
+          } 
+        } 
+        part[1] = part[1].trim();
+        g2d.drawString(part[0] + "\n", 0, y + FourLineOffset);
+        g2d.drawString(part[1] + "\n", 0, y + 6 + FourLineOffset);
+        g2d.drawString(part[2] + "\n", 0, y + 12 + FourLineOffset);
+        g2d.drawString(part[3] + "\n", 0, y + 18 + FourLineOffset);
+        int[] arr = { part[0].length(), part[1].length(), part[2].length(), part[3].length() };
+        int max = arr[0];
+        int maxElement = 0;
+        for (int j = 1; j < arr.length; j++) {
+          if (arr[j] > max)
+            maxElement = j; 
+        } 
+        this.maxMultiLine = part[maxElement];
+      } else {
+        g2d.drawString(this.scrollingText, 0, y);
+      } 
+      try {
+        additionalForegroundDrawing(g2d);
+      } catch (Exception ex) {
+        this.logger.log(Level.SEVERE, (String)null, ex);
+      } 
+      g2d.dispose();
+      int messageWidth = fm.stringWidth(this.scrollingText);
+      if (doubleLine == true || fourLine == true)
+        messageWidth = fm.stringWidth(this.maxMultiLine); 
+      if (messageWidth < this.KIND.width) {
+        if (this.matrix == null) {
+          this.logger.log(Level.INFO, "There is no matrix for the text scrolller.");
+        } else {
+          try {
+            writeImagetoMatrix(img, this.KIND.width, this.KIND.height);
+          } catch (ConnectionLostException ex) {
+            this.logger.log(Level.SEVERE, (String)null, (Throwable)ex);
+          } 
+          if (this.isLooping.booleanValue()) {
+            ScheduledExecutorService loopPNGservice = Executors.newScheduledThreadPool(1);
+            this.futureimage = loopPNGservice.scheduleAtFixedRate(this.pngLoopTask, 0L, 1L, TimeUnit.SECONDS);
+            this.PNGTimerRunningFlag.set(true);
+          } 
+        } 
+      } else {
+        ScheduledExecutorService scrollTextService = Executors.newScheduledThreadPool(1);
+        this.futurescroll = scrollTextService.scheduleAtFixedRate(this.scollTextTask, 0L, this.scrollDelay, TimeUnit.MILLISECONDS);
+        this.scrollingTextTimerRunningFlag.set(true);
+      } 
+    } 
+  }
     
     public void setDecodedAnimationsPath(String decodedAnimationsPath)
     {
@@ -1854,9 +2244,11 @@ private static String checksum(String filepath, MessageDigest md) throws IOExcep
                 
                 String plsWaitFilePathPNG = getPixelHome() + "system" + "/" + "wait.png";
                 File plsWaitFilePathPNG_ = new File(plsWaitFilePathPNG);
+               
+                //the please wait here screws up the Q so let's do a hack and not call if this is the q is not empty
                 
-                if (plsWaitFilePathPNG_.exists())
-                    writeArcadeImage(plsWaitFilePathPNG_, false, 99999, "system", "wait.png",true); //loop cannot be blank otherwise we kill the Q for the random feature
+                if (plsWaitFilePathPNG_.exists() && PixelQueue.isEmpty())
+                    writeArcadeImage(plsWaitFilePathPNG_, false, 0, "system", "wait.png",true); //loop cannot be blank otherwise we kill the Q for the random feature
         
                 int arcadeFrameDelayTarget = 100;
                 int arcadeCurrentFrameDelay = 100;
@@ -2272,7 +2664,7 @@ private static String checksum(String filepath, MessageDigest md) throws IOExcep
         Pixel.yScrollingTextOffset = yScrollingTextOffset; //used to be this.yScrolligTextOffset vs. Pixel.yScrollingTextOffset
     }
     
-     public static int getFontSize() 
+     public int getFontSize() 
     {
         return fontSize;
     }
@@ -2281,6 +2673,47 @@ private static String checksum(String filepath, MessageDigest md) throws IOExcep
     {
         Pixel.fontSize = fontSize;
     }
+    
+    public String getFont() 
+    {
+        return fontFamily;
+    }
+    
+    public static void setFontFamily(String fontFamily_) 
+    {
+        Pixel.fontFamily = fontFamily_;
+    }
+    
+    public int getYOffset() 
+    {
+        return yOffset;
+    }
+    
+    public static void setYOffset(int yOffset_) 
+    {
+        Pixel.yOffset = yOffset_;
+    }
+    
+    public boolean getDoubleLine() 
+    {
+        return doubleLine;
+    }
+    
+    public static void setDoubleLine(boolean doubleLine_) 
+    {
+        Pixel.doubleLine = doubleLine_;
+    }
+    
+    public boolean getFourLine() 
+    {
+        return fourLine;
+    }
+    
+    public static void setFourLine(boolean fourLine_) 
+    {
+        Pixel.fourLine = fourLine_;
+    }
+    
     
   
     /**
@@ -3915,147 +4348,376 @@ private static String checksum(String filepath, MessageDigest md) throws IOExcep
 		return (OS.indexOf("nix") >= 0 || OS.indexOf("nux") >= 0 || OS.indexOf("aix") > 0 );
 		
 	}
+        
+        
+ public class ScrollTextTask implements Runnable {
+    public void run() {
+      if (Pixel.this.scrollingTextTimerRunningFlag.get() == true && !Thread.currentThread().isInterrupted()) {
+        int w = Pixel.this.KIND.width;
+        int h = Pixel.this.KIND.height;
+        BufferedImage img = new BufferedImage(w, h, 2);
+        Graphics2D g2d = img.createGraphics();
+        g2d.setPaint(Pixel.this.scrollingTextColor);
+        g2d.setFont(Pixel.this.font);
+        FontMetrics fm = g2d.getFontMetrics();
+        int yDifference = Pixel.this.KIND.height - fm.getHeight() * 72 / 110;
+        int y = yDifference / 2 + fm.getHeight() * 72 / 110 + Pixel.yOffset;
+        try {
+          Pixel.this.additionalBackgroundDrawing(g2d);
+        } catch (Exception ex) {
+          Pixel.this.logger.log(Level.SEVERE, (String)null, ex);
+        } 
+        if (Pixel.doubleLine == true) {
+          int doublelineoffset = -7;
+          String[] words = Pixel.this.scrollingText.split(" +");
+          int count = (int)(words.length / 2.0D + 0.5D);
+          String[] part = new String[2];
+          Arrays.fill((Object[])part, "");
+          for (int i = 0; i < words.length; i++) {
+            if (i < count) {
+              part[0] = part[0] + words[i] + " ";
+            } else {
+              part[1] = part[1] + words[i] + " ";
+            } 
+          } 
+          part[1] = part[1].trim();
+          g2d.drawString(part[0] + "\n", Pixel.this.x, y + doublelineoffset);
+          g2d.drawString(part[1] + "\n", Pixel.this.x, y + 14 + doublelineoffset);
+          if (part[0].length() > part[1].length()) {
+            Pixel.this.maxMultiLine = part[0];
+          } else {
+            Pixel.this.maxMultiLine = part[1];
+          } 
+        } else if (Pixel.fourLine == true) {
+          int FourLineOffset = -11;
+          String[] words = Pixel.this.scrollingText.split(" +");
+          int quarter = (int)(words.length / 4.0D + 0.5D);
+          String[] part = new String[4];
+          Arrays.fill((Object[])part, "");
+          for (int i = 0; i < words.length; i++) {
+            if (i < quarter) {
+              part[0] = part[0] + words[i] + " ";
+            } else if (i >= quarter && i < quarter * 2) {
+              part[1] = part[1] + words[i] + " ";
+            } else if (i >= quarter * 2 && i < quarter * 3) {
+              part[2] = part[2] + words[i] + " ";
+            } else {
+              part[3] = part[3] + words[i] + " ";
+            } 
+          } 
+          part[1] = part[1].trim();
+          g2d.drawString(part[0] + "\n", Pixel.this.x, y + FourLineOffset);
+          g2d.drawString(part[1] + "\n", Pixel.this.x, y + 6 + FourLineOffset);
+          g2d.drawString(part[2] + "\n", Pixel.this.x, y + 12 + FourLineOffset);
+          g2d.drawString(part[3] + "\n", Pixel.this.x, y + 18 + FourLineOffset);
+          int[] arr = { part[0].length(), part[1].length(), part[2].length(), part[3].length() };
+          int max = arr[0];
+          int maxElement = 0;
+          for (int j = 1; j < arr.length; j++) {
+            if (arr[j] > max)
+              maxElement = j; 
+          } 
+          Pixel.this.maxMultiLine = part[maxElement];
+        } else {
+          g2d.drawString(Pixel.this.scrollingText, Pixel.this.x, y);
+        } 
+        try {
+          Pixel.this.additionalForegroundDrawing(g2d);
+        } catch (Exception ex) {
+          Pixel.this.logger.log(Level.SEVERE, (String)null, ex);
+        } 
+        g2d.dispose();
+        if (Pixel.this.matrix == null) {
+          Pixel.this.logger.log(Level.INFO, "There is no matrix for the text scrolller.");
+        } else if (Pixel.this.scrollingTextTimerRunningFlag.get() == true) {
+          try {
+            Pixel.this.writeImagetoMatrix(img, Pixel.this.KIND.width, Pixel.this.KIND.height);
+          } catch (ConnectionLostException ex) {
+            Pixel.this.logger.log(Level.SEVERE, (String)null, (Throwable)ex);
+          } 
+        } 
+        int messageWidth = fm.stringWidth(Pixel.this.scrollingText);
+        if (Pixel.doubleLine == true || Pixel.fourLine == true)
+          messageWidth = fm.stringWidth(Pixel.this.maxMultiLine); 
+        int resetX = 0 - messageWidth;
+        if (Pixel.this.x <= resetX) {
+          Pixel.this.x = w;
+          Pixel.this.loopScrollingTextCounter++;
+          if (Pixel.this.isLooping.booleanValue() == true && Pixel.this.loop99999FlagText.booleanValue() == true && Pixel.this.loopScrollingTextCounter == 0) {
+            Pixel.this.loopScrollingTextCounter = 0;
+            Pixel.this.loopTimesGlobal = 0;
+            Pixel.this.isLooping = Boolean.valueOf(false);
+            Pixel.this.loop99999FlagText = Boolean.valueOf(false);
+            System.out.println("Clearing Queue and Playing Indefintately");
+            Pixel.this.PixelQueue.clear();
+          } 
+          if (Pixel.this.isLooping.booleanValue() == true && Pixel.this.loopScrollingTextCounter >= Pixel.this.loopTimesGlobal) {
+            Pixel.this.loopScrollingTextCounter = 0;
+            System.out.println("Done looping scrolling text, now checking Queue");
+            Pixel.this.doneLoopingCheckQueue();
+          } 
+        } else {
+          Pixel.this.x = Pixel.this.x - Pixel.this.scrollingTextMultiplier;
+        } 
+      } 
+    }
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
     
     //private class TextScroller extends TimerTask
-     public class ScrollTextTask implements Runnable 
-    {
-        @Override
-        public void run()
-        {
-
-          if (scrollingTextTimerRunningFlag.get() == true && !Thread.currentThread().isInterrupted()) {
-            
-           // System.out.println("future scroll inside: " + futurescroll.isDone());
-           // System.out.println("scroll text timerflag: " + scrollingTextTimerRunningFlag.get());
-            
-              
-            //int delay = 200;//scrollSpeedSlider.getValue();	
-	    //delay = 710 - delay;                            // al linke: added this so the higher slider value means faster scrolling
-	    	    
-            //int w = 32;
-            int w = KIND.width;
-            
-            //int h = 64;
-            
-            int h = KIND.height;
-            
-            // use a height of 32, for the rectangle LED matrix type (32x16 for example)            
-            // int h = 32;
-	    
-            BufferedImage img = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
-            	    
-            Graphics2D g2d = img.createGraphics();
-            g2d.setPaint(scrollingTextColor);
-
-            String fontFamily = "Arial";
-            //String fontFamily = "Times";
-            
-            Font font = fonts.get(fontFamily);
-            if(font == null)
-            {
-                //default font size is 32 but we also set it from WebEnabledPixel
-                //int fontSize = 28;
-                // a font size of 28 looks good on the rectangle type matrix (32x16 for example)                
-                font = new Font(fontFamily, Font.PLAIN, fontSize);
-                fonts.put(fontFamily, font);
-            }            
-            
-            g2d.setFont(font);
-            
-            FontMetrics fm = g2d.getFontMetrics();
-            
-            int y = fm.getHeight() + yScrollingTextOffset;
-
-            try 
-            {
-                additionalBackgroundDrawing(g2d);
-            } 
-            catch (Exception ex) 
-            {
-                logger.log(Level.SEVERE, null, ex);
-            }
-
-            g2d.drawString(scrollingText, x, y);
-            
-            try 
-            {
-                additionalForegroundDrawing(g2d);
-            } 
-            catch (Exception ex) 
-            {
-                logger.log(Level.SEVERE, null, ex);
-            }
-            
-            g2d.dispose();
-
-            // uncomment this to see how often the pixel is communicated with the host            
-            // System.out.print(".");
-
-            if(matrix == null)
-            {
-                // uncomment this for debugging
-                logger.log(Level.INFO, "There is no matrix for the text scrolller.");
-            }
-            else
-            {
-               
-                if (scrollingTextTimerRunningFlag.get() == true) {  //there was a timing issue on windows only so added this, if the timerflag has been set to false, then don't write this frame
-                    
-                    try 
-                    {  
-                        writeImagetoMatrix(img, KIND.width, KIND.height);
-                        //System.out.println("sent text frame: " );
-                    } 
-                    catch (ConnectionLostException ex) 
-                    {
-                        logger.log(Level.SEVERE, null, ex);
-                    }   
-                }
-                
-            }
-                        
-            int messageWidth = fm.stringWidth(scrollingText);    
-            // System.out.println("message width: " + messageWidth);
-            int resetX = 0 - messageWidth;
-            //System.out.println("resetx: " + resetX);
-          
-            if(x <= resetX) {  //this means we finished one loop of scrolling text
-                x = w;
-                //System.out.println("x reset: " + x);
-                loopScrollingTextCounter++;
-                 
-                 if (isLooping == true && loop99999FlagText == true && loopScrollingTextCounter == 0) {  //first of all, we must be in loop mode and if so have we finished all of our loops
-                    //let's let it continue indefinitely and not stop and check Q
-                    loopScrollingTextCounter = 0;
-                    loopTimesGlobal = 0;
-                    isLooping = false;
-                    loop99999FlagText = false; //reset the flag
-                    System.out.println("Clearing Queue and Playing Indefintately");
-                    PixelQueue.clear(); //let's clear the Q
-                }
-                
-                if (isLooping == true && loopScrollingTextCounter >= loopTimesGlobal) {  //first of all, we must be in loop mode and if so have we finished all of our loops
-                    //ok we're done looping so now we need to stop this current animation or scrolling text and then check the queue
-                    loopScrollingTextCounter = 0; //reset this one, we'll reset the rest in doneLoopCheckingQueue
-                    System.out.println("Done looping scrolling text, now checking Queue");
-                    doneLoopingCheckQueue();
-                } 
-                 
-            }
-            else
-            {
-                //x--;
-                //System.out.println("x: " + x);
-                x = x-scrollingTextMultiplier; //TO DO tweak this for windows scrolling
-            }
-          }
-        }
+//     public class ScrollTextTask implements Runnable 
+//    {
+//        @Override
+//        public void run()
+//        {
+//
+//          if (scrollingTextTimerRunningFlag.get() == true && !Thread.currentThread().isInterrupted()) {
+//           
+//            int w = KIND.width;
+//            int h = KIND.height;
+//            BufferedImage img = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
+//            	    
+//            Graphics2D g2d = img.createGraphics();
+//            g2d.setPaint(scrollingTextColor);
+//       
+//            Font font = fonts.get(fontFamily);
+//            font = new Font(fontFamily, Font.PLAIN, fontSize);
+//            
+//            if (!fontFamily.equals("Arial")) {
+//                try {
+//                        Font customFont = Font.createFont(Font.TRUETYPE_FONT, new File("fonts//" + fontFamily + ".ttf"));
+//                           GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
+//                           ge.registerFont(customFont);
+//
+//                       } catch (IOException e) {
+//                           System.out.println(fontFamily + " not fount, defaulting to Arial");
+//                           font = new Font("Arial", Font.PLAIN, KIND.height);
+//                           fonts.put(fontFamily, font);
+//
+//                       } catch(FontFormatException e) {
+//                           System.out.println(fontFamily + " not fount, defaulting to Arial");
+//                           font = new Font("Arial", Font.PLAIN, KIND.height);
+//                           fonts.put(fontFamily, font);
+//                       }
+//            }
+//            
+//            if(font == null)  //then we have a custom font most likely
+//                { //default font size is 32 but we also set it from WebEnabledPixel
+//                font = new Font("Arial", Font.PLAIN, KIND.height);
+//                fonts.put(fontFamily, font);
+//            } 
+//            
+//            g2d.setFont(font);
+//            FontMetrics fm = g2d.getFontMetrics();
+//            
+//            //int descent = fm.getMaxDescent();
+//            //int descent = fm.getDescent();
+//            //System.out.println("descent size: " + descent);
+//            
+////            //int ascent = fm.getMaxAscent();
+////            int ascent = fm.getAscent();
+////            System.out.println("ascent size: " + ascent);
+////            
+////            System.out.println("font original height: " + fm.getHeight());
+////            System.out.println("font original height pixels: " + fm.getHeight() * 72 / Toolkit.getDefaultToolkit().getScreenResolution());
+//            //System.out.println("font width" + fm.stringWidth(scrollingText)); 
+//            //int y = fm.getHeight() + yScrollingTextOffset;
+//            
+//            int yDifference = KIND.height - fm.getHeight() *  72 / Toolkit.getDefaultToolkit().getScreenResolution();
+//            //System.out.println("yDifference Pixels: " + yDifference);
+//            //int y = fm.getHeight() + yDifference + yOffset ;
+//            //int y = KIND.height + yDifference + yOffset ;
+//            int y = (fm.getHeight() *  72 / Toolkit.getDefaultToolkit().getScreenResolution()) + yOffset;
+//            
+//            //System.out.println("mod height" + y); 
+//
+//            try 
+//            {
+//                additionalBackgroundDrawing(g2d);
+//            } 
+//            catch (Exception ex) 
+//            {
+//                logger.log(Level.SEVERE, null, ex);
+//            }
+//            
+//            if (doubleLine == true) {
+//                String[] words = scrollingText.split(" +"); // Split words by spaces
+//                int count = (int) ((words.length / 2.0) + 0.5); // Number of words in part[0]
+//                String[] part = new String[2];
+//                Arrays.fill(part, ""); // Initialize to empty strings
+//                for (int i = 0; i < words.length; i++) {
+//                    if (i < count) { // First half of the words go into part[0]
+//                        part[0] += words[i] + " ";
+//                    } else { // Next half go into part[1]
+//                        part[1] += words[i] + " ";
+//                    }
+//                }
+//                part[1] = part[1].trim(); // Since there will be extra space at end of part[1]
+//                g2d.drawString(part[0] + "\n", x, y);
+//                g2d.drawString(part[1] + "\n", x, y + 12);
+//                if (part[0].length() > part[1].length())   //we need to get the longest length for the scrolling end
+//                    maxMultiLine = part[0];
+//                else 
+//                    maxMultiLine = part[1];
+//            }
+//            else if (fourLine == true) { 
+//                
+//            fontFamily = "Minimal4";  //since we have 4 lines, we need to hard code the specific font here or it won't fit
+//            fontSize = 14;
+//            font = fonts.get(fontFamily);
+//            font = new Font(fontFamily, Font.PLAIN, fontSize);
+//           
+//                try {
+//                        Font customFont = Font.createFont(Font.TRUETYPE_FONT, new File("fonts//" + fontFamily + ".ttf"));
+//                           GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
+//                           ge.registerFont(customFont);
+//                       } catch (IOException e) {
+//                           System.out.println(fontFamily + " not fount, defaulting to Arial");
+//                           font = new Font("Arial", Font.PLAIN, KIND.height);
+//                           fonts.put(fontFamily, font);
+//                       } catch(FontFormatException e) {
+//                           System.out.println(fontFamily + " not fount, defaulting to Arial");
+//                           font = new Font("Arial", Font.PLAIN, KIND.height);
+//                           fonts.put(fontFamily, font);
+//                       }
+//            g2d.setFont(font);
+//            fm = g2d.getFontMetrics();
+//                
+//                String[] words = scrollingText.split(" +"); // Split words by spaces
+//                int quarter = (int) ((words.length / 4.0) + 0.5); // Number of words in part[0]
+////                System.out.println("total words: " + words.length);
+////                System.out.println("quarters: " + quarter);
+//                String[] part = new String[4];
+//                Arrays.fill(part, ""); // Initialize to empty strings
+//                for (int i = 0; i < words.length; i++) {
+//                    
+//                    if (i < quarter)  // First quarter of the words go into part[0]
+//                        part[0] += words[i] + " ";
+//                    else if (i >= quarter && i < quarter*2)  // Next quarter go into part[1]
+//                        part[1] += words[i] + " ";
+//                    else if (i >= quarter*2 && i < quarter*3)  // third quarter go into part[2]
+//                        part[2] += words[i] + " ";
+//                    else 
+//                        part[3] += words[i] + " ";
+//                }
+//                part[1] = part[1].trim(); // Since there will be extra space at end of part[1]
+//                g2d.drawString(part[0] + "\n", x, y);
+//                g2d.drawString(part[1] + "\n", x, y + 6);
+//                g2d.drawString(part[2] + "\n", x, y + 12);
+//                g2d.drawString(part[3] + "\n", x, y + 18);
+//                
+//                int arr[] = {part[0].length(), part[1].length(), part[2].length(), part[3].length()}; 
+//                int i; 
+//                // Initialize maximum element 
+//                int max = arr[0]; 
+//                int maxElement = 0;
+//                // Traverse array elements from second and 
+//                // compare every element with current max   
+//                for (i = 1; i < arr.length; i++) 
+//                    if (arr[i] > max) 
+//                        maxElement = i;
+//                maxMultiLine = part[maxElement];
+//            }
+//            else {
+//                 g2d.drawString(scrollingText, x, y);
+//            }
+//             
+//            try 
+//            {
+//                additionalForegroundDrawing(g2d);
+//            } 
+//            catch (Exception ex) 
+//            {
+//                logger.log(Level.SEVERE, null, ex);
+//            }
+//            
+//            g2d.dispose();
+//
+//            // uncomment this to see how often the pixel is communicated with the host            
+//            // System.out.print(".");
+//
+//            if(matrix == null)
+//            {
+//                // uncomment this for debugging
+//                logger.log(Level.INFO, "There is no matrix for the text scrolller.");
+//            }
+//            else
+//            {
+//               
+//                if (scrollingTextTimerRunningFlag.get() == true) {  //there was a timing issue on windows only so added this, if the timerflag has been set to false, then don't write this frame
+//                    try 
+//                    {  
+//                        writeImagetoMatrix(img, KIND.width, KIND.height);
+//                    } 
+//                    catch (ConnectionLostException ex) 
+//                    {
+//                        logger.log(Level.SEVERE, null, ex);
+//                    }   
+//                }
+//            }
+//                        
+//            int messageWidth = fm.stringWidth(scrollingText);    
+//            // System.out.println("message width: " + messageWidth);
+//            
+//            if (doubleLine == true || fourLine == true) 
+//                 messageWidth = fm.stringWidth(maxMultiLine);   
+//            
+//            int resetX = 0 - messageWidth;
+//            //System.out.println("resetx: " + resetX);
+//          
+//            if(x <= resetX) {  //this means we finished one loop of scrolling text
+//                x = w;
+//                //System.out.println("x reset: " + x);
+//                loopScrollingTextCounter++;
+//                 
+//                 if (isLooping == true && loop99999FlagText == true && loopScrollingTextCounter == 0) {  //first of all, we must be in loop mode and if so have we finished all of our loops
+//                    //let's let it continue indefinitely and not stop and check Q
+//                    loopScrollingTextCounter = 0;
+//                    loopTimesGlobal = 0;
+//                    isLooping = false;
+//                    loop99999FlagText = false; //reset the flag
+//                    System.out.println("Clearing Queue and Playing Indefintately");
+//                    PixelQueue.clear(); //let's clear the Q
+//                }
+//                
+//                if (isLooping == true && loopScrollingTextCounter >= loopTimesGlobal) {  //first of all, we must be in loop mode and if so have we finished all of our loops
+//                    //ok we're done looping so now we need to stop this current animation or scrolling text and then check the queue
+//                    loopScrollingTextCounter = 0; //reset this one, we'll reset the rest in doneLoopCheckingQueue
+//                    System.out.println("Done looping scrolling text, now checking Queue");
+//                    doneLoopingCheckQueue();
+//                } 
+//                 
+//            }
+//            else
+//            {
+//                //x--;
+//                //System.out.println("x: " + x);
+//                x = x-scrollingTextMultiplier; //TO DO tweak this for windows scrolling
+//            }
+//          }
+//        }
+        
+        
         
          public void cancel() {  //not using this right now
              
             //System.out.println("we got a cancel call:" + p);
         
          }
+         
         
          void shutdown() {
            

@@ -103,6 +103,13 @@
             <version>1.2</version>
             <type>jar</type>
         </dependency>
+        <!--
+        <dependency>
+            <groupId>org.onebeartoe.pixel.web.enabled</groupId>
+            <artifactId>pixel-web-enabled</artifactId>
+            <version>1.0</version>
+            <type>jar</type>
+        </dependency>-->
         
     </dependencies>
             
