@@ -199,10 +199,11 @@ bool SystemView::input(InputConfig* config, Input input)
 			config->isMappedLike("up", input) ||
 			config->isMappedLike("down", input))
 			listInput(0);
-std::string system = this->IList::getSelected()->getName();
-       HttpReq req("http://127.0.0.1:8080/console/stream/" + HttpReq::urlEncode(system));
-if(req.status() != 200 ){
-}
+		std::string system = this->IList::getSelected()->getName();
+        //if (system != NULL) {
+			HttpReq req("http://127.0.0.1:8080/console/stream/" + HttpReq::urlEncode(system));
+			if(req.status() != 200 ){}
+		//}
 		if(!UIModeController::getInstance()->isUIModeKid() && config->isMappedTo("select", input) && Settings::getInstance()->getBool("ScreenSaverControls"))
 		{
 			mWindow->startScreenSaver();
