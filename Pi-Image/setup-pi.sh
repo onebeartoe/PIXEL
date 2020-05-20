@@ -159,14 +159,14 @@ git clone https://github.com/alinke/pixelcade.git
 cd $HOME/pixelcade
 git config user.email "sample@sample.com"
 git config user.name "sample"
+cd $HOME/pixelcade/system
+sudo chmod +x update.sh
 
 
 if [ "$retropie" = true ] ; then #skip if no retropie as we'll start this later using systemd
-    cd $HOME/pixelcade
     java -jar pixelweb.jar -b & #run pixelweb in the background\
 fi
 
-cd $HOME
 #if retropie is present, add our mods
 if [ "$retropie" = true ] ; then
   # lets install the correct mod based on the OS
@@ -188,14 +188,10 @@ fi
 echo "${yellow}Configuring Pixelcade Startup Script...${white}"
 sudo chmod +x $HOME/pixelcade/system/pixelcade-startup.sh
 
-if [ "$auto_update" = true ] ; then #add git pull to startup
-    if cat $HOME/pixelcade/system/pixelcade-startup.sh | grep -q 'git'; then
-       echo "${yellow}Auto-update was already added to pixelcade-startup.sh, skipping...${white}"
-    else
-      echo "${yellow}Adding auto-update to pixelcade-startup.sh...${white}"
-      sudo sed -i '/^exit/i cd $HOME/pixelcade && git stash && git pull' $HOME/pixelcade/system/pixelcade-startup.sh #insert this line before exit
-    fi
-fi
+#if [ "$auto_update" = true ] ; then #add git pull to startup
+#  echo "${yellow}Configuring auto-update...${white}"
+#  sudo sed -i '/^exit.*/i cd $HOME/pixelcade && git stash && git pull' $HOME/pixelcade/system/pixelcade-startup.sh #insert this line before exit
+#fi
 
 if [ "$retropie" = true ] ; then
   # let's check if autostart.sh already has pixelcade added and if so, we don't want to add it twice
@@ -242,12 +238,10 @@ else
   sudo sed -i 's/raspberrypi/pixelcade/g' hosts
 fi
 
-# let's send a test image and see if it displays
 sleep 5
+# let's send a test image and see if it displays
 cd $HOME/pixelcade
 java -jar pixelcade.jar -m stream -c mame -g 1941
-
-
 
 #let's write the version so the next time the user can try and know if he/she needs to upgrade
 echo $version > $HOME/pixelcade/pixelcade-version

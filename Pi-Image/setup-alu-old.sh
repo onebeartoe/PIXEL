@@ -1,4 +1,5 @@
 #!/bin/bash
+
 stretch_os=false
 buster_os=false
 ubuntu_os=false
@@ -7,7 +8,6 @@ pizero=false
 pi4=false
 java_installed=false
 install_succesful=false
-auto_update=false
 black=`tput setaf 0`
 red=`tput setaf 1`
 green=`tput setaf 2`
@@ -34,20 +34,11 @@ echo "${red}IMPORTANT:${white} This script will work on a Pi 2, Pi Zero W, Pi 3B
 echo "Now connect Pixelcade to a free USB port on your Pi (directly connected to your Pi or use a powered USB hub)"
 echo "Ensure the toggle switch on the Pixelcade board is pointing towards USB and not BT"
 
-read -p "${magenta}Continue (y/n)? ${white}" -n 1 -r
+read -p "${magenta}Continue? ${white}" -n 1 -r
 echo    # (optional) move to a new line
 if [[ ! $REPLY =~ ^[Yy]$ ]]
 then
     exit 1
-fi
-
-read -p "${magenta}Would you like to enalbe auto updates (y/n)? ${white}" -n 1 -r
-echo    # (optional) move to a new line
-if [[ ! $REPLY =~ ^[Yy]$ ]]
-  then
-    auto_update=true
-  else
-    auto_update=false
 fi
 
 # let's check the version and only proceed if the user has an older version
@@ -148,36 +139,41 @@ if [ "$java_installed" = false ] ; then #only install java if it doesn't exist
     fi
 fi
 
-echo "${yellow}Installing Git...${white}"
-sudo apt -y install git
-
 # this is where pixelcade will live
 
-echo "${yellow}Installing Pixelcade from GitHub Repo...${white}"
-cd $HOME
-git clone https://github.com/alinke/pixelcade.git
-cd $HOME/pixelcade
-git config user.email "sample@sample.com"
-git config user.name "sample"
+if [ -d "$HOME/pixelcade" ]; then
+  echo "${yellow}Pixelcade directory also exists...${white}"
+  cd $HOME/pixelcade
+else
+  echo "${yellow}Creating home directory for Pixelcade...${white}"
+  mkdir $HOME/pixelcade && cd $HOME/pixelcade
+fi
+
+# download pixelweb.jar
+echo "${yellow}Downloading the Pixelcade Listener (pixelweb)...${white}"
+curl -LO http://pixelcade.org/pi/beta/pixelweb.jar
+echo " "
+# run pixelcade listener in the background, Pixelcade must be USB connected to the Pi at this point, it will hang here if Pixelcade not USB connected
 
 
 if [ "$retropie" = true ] ; then #skip if no retropie as we'll start this later using systemd
-    cd $HOME/pixelcade
     java -jar pixelweb.jar -b & #run pixelweb in the background\
 fi
 
-cd $HOME
-#if retropie is present, add our mods
+# download and install artwork
+echo "${yellow}Now downloading and installing artwork...${white}"
+cd $HOME/pixelcade
+curl -LO http://pixelcade.org/pi/artwork.zip && unzip -o artwork.zip
+rm artwork.zip #clean-up
+
 if [ "$retropie" = true ] ; then
   # lets install the correct mod based on the OS
-  if [ "$pi4" = true ] ; then
-      curl -LO http://pixelcade.org/pi/esmod-pi4.deb && sudo dpkg -i esmod-pi4.deb
-  elif [ "$stretch_os" = true ] ; then
-      curl -LO http://pixelcade.org/pi/esmod-stretch.deb && sudo dpkg -i esmod-stretch.deb
+  if [ "$stretch_os" = true ] ; then
+     curl -LO http://pixelcade.org/pi/esmod-stretch.deb && sudo dpkg -i esmod-stretch.deb
   elif [ "$buster_os" = true ]; then
-      curl -LO http://pixelcade.org/pi/esmod-buster.deb && sudo dpkg -i esmod-buster.deb
+     curl -LO http://pixelcade.org/pi/esmod-buster.deb && sudo dpkg -i esmod-buster.deb
   elif [ "$ubuntu_os" = true ]; then
-      curl -LO http://pixelcade.org/pi/esmod-ubuntu.deb && sudo dpkg -i esmod-ubuntu.deb
+     curl -LO http://pixelcade.org/pi/esmod-ubuntu.deb && sudo dpkg -i esmod-ubuntu.deb
   else
       echo "${red}Sorry, neither Linux Stretch, Linux Buster, or Ubuntu was detected, exiting..."
       exit 1
@@ -185,22 +181,17 @@ if [ "$retropie" = true ] ; then
 fi
 
 #get the pixelcade startup-up script
-echo "${yellow}Configuring Pixelcade Startup Script...${white}"
+echo "${yellow}Now downloading Pixelcade Startup Script...${white}"
+mkdir -p $HOME/pixelcade/system #it should already be there from artwork but just in case
+cd $HOME/pixelcade/system
+curl -LO http://pixelcade.org/pi/pixelcade-startup.sh
 sudo chmod +x $HOME/pixelcade/system/pixelcade-startup.sh
-
-if [ "$auto_update" = true ] ; then #add git pull to startup
-    if cat $HOME/pixelcade/system/pixelcade-startup.sh | grep -q 'git'; then
-       echo "${yellow}Auto-update was already added to pixelcade-startup.sh, skipping...${white}"
-    else
-      echo "${yellow}Adding auto-update to pixelcade-startup.sh...${white}"
-      sudo sed -i '/^exit/i cd $HOME/pixelcade && git stash && git pull' $HOME/pixelcade/system/pixelcade-startup.sh #insert this line before exit
-    fi
-fi
 
 if [ "$retropie" = true ] ; then
   # let's check if autostart.sh already has pixelcade added and if so, we don't want to add it twice
   #cd /opt/retropie/configs/all/
-
+  echo "${yellow}Installing Git...${white}"
+  sudo apt -y install git
   if cat /opt/retropie/configs/all/autostart.sh | grep -q 'pixelcade'; then
     echo "${yellow}Pixelcade already added to autostart.sh, skipping...${white}"
   else
@@ -208,20 +199,26 @@ if [ "$retropie" = true ] ; then
     sudo sed -i '/^emulationstation.*/i cd $HOME/pixelcade && java -jar pixelweb.jar -b &' /opt/retropie/configs/all/autostart.sh #insert this line before emulationstation #auto
     sudo sed -i '/^emulationstation.*/i sleep 10 && cd $HOME/pixelcade/system && ./pixelcade-startup.sh' /opt/retropie/configs/all/autostart.sh #insert this line before emulationstation #auto
     # now lastly let's comment out emulationstation since we are not using it for this use case
-    #sed -e '/^emulationstation.*/ s/^#*/#/' -i /opt/retropie/configs/all/autostart.sh
+    sed -e '/^emulationstation.*/ s/^#*/#/' -i /opt/retropie/configs/all/autostart.sh
   fi
 else #there is no retropie so we need to add pixelcade /etc/rc.local instead
+
+  echo "${yellow}Installing Git...${white}"
+  sudo apt -y install git
   echo "${yellow}Installing Fonts...${white}"
   cd $HOME/pixelcade
+  curl -LO http://pixelcade.org/pi/fonts.zip && unzip -o fonts.zip
+  rm fonts.zip #clean-up
   mkdir $HOME/.fonts
   sudo cp $HOME/pixelcade/fonts/*.ttf /$HOME/.fonts
   sudo apt -y install font-manager
   sudo fc-cache -v -f
   echo "${yellow}Adding Pixelcade to Startup...${white}"
   cd $HOME/pixelcade/system
+  curl -LO http://pixelcade.org/pi/autostart.sh
   sudo chmod +x $HOME/pixelcade/system/autostart.sh
+  curl -LO http://pixelcade.org/pi/pixelcade.service
   sudo cp pixelcade.service /etc/systemd/system/pixelcade.service
-  #to do add check if the service is already running
   sudo systemctl start pixelcade.service
   sudo systemctl enable pixelcade.service
 fi
@@ -242,19 +239,17 @@ else
   sudo sed -i 's/raspberrypi/pixelcade/g' hosts
 fi
 
-# let's send a test image and see if it displays
 sleep 5
+# let's send a test image and see if it displays
 cd $HOME/pixelcade
 java -jar pixelcade.jar -m stream -c mame -g 1941
-
-
 
 #let's write the version so the next time the user can try and know if he/she needs to upgrade
 echo $version > $HOME/pixelcade/pixelcade-version
 
 echo " "
 while true; do
-    read -p "${magenta}Is the 1941 Game Logo Displaying on Pixelcade Now? (y/n)${white}" yn
+    read -p "${magenta}Is the 1941 Game Logo Displaying on Pixelcade Now?${white}" yn
     case $yn in
         [Yy]* ) echo "${green}INSTALLATION COMPLETE , please now reboot and then Pixelcade will be controlled by RetroPie${white}" && install_succesful=true; break;;
         [Nn]* ) echo "${red}It may still be ok and try rebooting, you can also refer to https://pixelcade.org/download-pi/ for troubleshooting steps" && exit;;
@@ -264,7 +259,7 @@ done
 
 if [ "$install_succesful" = true ] ; then
   while true; do
-      read -p "${magenta}Reboot Now? (y/n)${white}" yn
+      read -p "${magenta}Reboot Now?${white}" yn
       case $yn in
           [Yy]* ) sudo reboot; break;;
           [Nn]* ) echo "${yellow}Please reboot when you get a chance" && exit;;

@@ -3,11 +3,14 @@ Pi IMAGE CREATION STEPS
 image buster lite
 copy wpa_supplicant and blank ssh to root
 sudo curl -LO pixelcade.org/pi/setup-alu.sh && sudo chmod +x setup-alu.sh && ./setup-alu.sh
-don't reboot
+DON'T REBOOT
 git clone https://github.com/jasbur/RaspiWiFi.git
+UPDATE html files for jasbur
 sudo python3 initial_setup.py
-update html files for jasbur
 delete wpa_supplicant.conf.old
+delete setup-alu.sh
+add deletewifi file to pixelcade
+sudo shutdown now
 now create image using mac disk utility before rebooting, compressed image
 
 ARTWORK
@@ -18,3 +21,19 @@ Compress PNGs (not sure this does much)
 find /Users/al/artwork/artworkcomp -type f -name "*.png" -exec pngout {} \;
 
 ssh-keygen -R raspberrypi.local
+
+accidently git commited a large file over 100 MB,then do this
+git reset --soft HEAD~3  where 3 is how many commits pending
+git commit -m "Pi Image and Setup Scripts"
+
+Pi 4 - how to compile ES
+
+cmake with the -DGL=On option, otherwise the legacy BRCM GLES drivers are used
+
+git config user.email "dummy@dummy.com"
+git config user.name "dummy"
+git stash
+git pull
+
+
+git checkout --ours "Software/RetroPie/V1 -Do not Use/pixelcade/default-coleco.gif"
