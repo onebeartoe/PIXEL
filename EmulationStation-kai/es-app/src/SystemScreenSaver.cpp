@@ -96,11 +96,18 @@ void SystemScreenSaver::startScreenSaver()
 #else
 			mVideoScreensaver = new VideoVlcComponent(mWindow, getTitlePath());
 #endif
-			HttpReq req("http://127.0.0.1:8080/arcade/stream/" + mCurrentGame->getSystem()->getName() + "/" + mCurrentGame->getFileName() + "?t=" + HttpReq::urlEncode( mCurrentGame->getName()));
-if(req.status() != 200){
+
+    //HttpReq req("http://127.0.0.1:8080/arcade/stream/" + mCurrentGame->getSystem()->getName() + "/" + mCurrentGame->getFileName() + "?t=" + //HttpReq::urlEncode( mCurrentGame->getName()));
+
+    if (mCurrentGame != NULL) {
+            HttpReq req("http://127.0.0.1:8080/arcade/stream/" + HttpReq::urlEncode(mCurrentGame->getSystem()->getName()) + "/" + HttpReq::urlEncode(mCurrentGame->getFileName()) + "?t=" + HttpReq::urlEncode(mCurrentGame->getName()));
+    }
+
+
+//if(req.status() != 200){
          //std::cout "http://127.0.0.1:8080/arcade/stream/" << mCurrentGame->getSystem()->getName() << "/" << mCurrentGame->getFileName() << "failed.";
 
-        }			
+  //      }
 mVideoScreensaver->topWindow(true);
 			mVideoScreensaver->setOrigin(0.5f, 0.5f);
 			mVideoScreensaver->setPosition(Renderer::getScreenWidth() / 2.0f, Renderer::getScreenHeight() / 2.0f);
@@ -177,11 +184,19 @@ mVideoScreensaver->topWindow(true);
 
 		PowerSaver::runningScreenSaver(true);
 		mTimer = 0;
-                HttpReq req("http://127.0.0.1:8080/arcade/stream/" + HttpReq::urlEncode(mCurrentGame->getSystem()->getName()) + "/" + HttpReq::urlEncode(mCurrentGame->getFileName()));
+
+	  //HttpReq req("http://127.0.0.1:8080/arcade/stream/" + HttpReq::urlEncode(mCurrentGame->getSystem()->getName()) + "/" + HttpReq::urlEncode(mCurrentGame->getFileName()));
+		if (mCurrentGame != NULL) {
+						HttpReq req("http://127.0.0.1:8080/arcade/stream/" + HttpReq::urlEncode(mCurrentGame->getSystem()->getName()) + "/" + HttpReq::urlEncode(mCurrentGame->getFileName()) + "?t=" + HttpReq::urlEncode(mCurrentGame->getName()));
+		}
+
 		return;
 	}
 	// No videos. Just use a standard screensaver
-	HttpReq req("http://127.0.0.1:8080/arcade/stream/" + HttpReq::urlEncode(mCurrentGame->getSystem()->getName()) + "/" + HttpReq::urlEncode(mCurrentGame->getFileName()));
+	//HttpReq req("http://127.0.0.1:8080/arcade/stream/" + HttpReq::urlEncode(mCurrentGame->getSystem()->getName()) + "/" + HttpReq::urlEncode(mCurrentGame->getFileName()));
+	if (mCurrentGame != NULL) {
+					HttpReq req("http://127.0.0.1:8080/arcade/stream/" + HttpReq::urlEncode(mCurrentGame->getSystem()->getName()) + "/" + HttpReq::urlEncode(mCurrentGame->getFileName()) + "?t=" + HttpReq::urlEncode(mCurrentGame->getName()));
+	}
 	mState = STATE_SCREENSAVER_ACTIVE;
 	mCurrentGame = NULL;
 }
