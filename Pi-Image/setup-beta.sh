@@ -28,44 +28,74 @@ cat << "EOF"
 |_|
 EOF
 
-echo "${magenta}       ART BROWSER INCLUDING AtGames Legends Ultimate : Installer Script Version $version    ${white}"
+echo "${magenta}       Pixelcade for RetroPie : Installer Version $version    ${white}"
 echo ""
 echo "${red}IMPORTANT:${white} This script will work on a Pi 2, Pi Zero W, Pi 3B, Pi 3B+, and Pi 4"
 echo "Now connect Pixelcade to a free USB port on your Pi (directly connected to your Pi or use a powered USB hub)"
 echo "Ensure the toggle switch on the Pixelcade board is pointing towards USB and not BT"
 
-read -p "${magenta}Continue (y/n)? ${white}" -n 1 -r
-echo    # (optional) move to a new line
-if [[ ! $REPLY =~ ^[Yy]$ ]]
-then
-    exit 1
-fi
+#change this
 
-read -p "${magenta}Would you like to enalbe auto updates (y/n)? ${white}" -n 1 -r
-echo    # (optional) move to a new line
-if [[ ! $REPLY =~ ^[Yy]$ ]]
-  then
-    auto_update=true
-  else
-    auto_update=false
-fi
+#read -p "${magenta}Continue (y/n)? ${white}" -n 1 -r
+#echo    # (optional) move to a new line
+#if [[ ! $REPLY =~ ^[Yy]$ ]]
+#then
+#    exit 1
+#fi
+
+#read -p "${magenta}Would you like to enalbe auto updates (y/n)? ${white}" -n 1 -r
+#echo    # (optional) move to a new line
+#if [[ ! $REPLY =~ ^[Yy]$ ]]
+#  then
+#    auto_update=true
+#  else
+#    auto_update=false
+#fi
+
+while true; do
+    read -p "${magenta}Would you like to enable auto updates (y/n)? ${white}" yn
+    case $yn in
+        [Yy]* ) auto_update=true; break;;
+        [Nn]* ) auto_update=false; break;;
+        * ) echo "Please answer y or n";;
+    esac
+done
+
+#add a prompt here if user really wants to install again
 
 # let's check the version and only proceed if the user has an older version
-if [[ -f "$HOME/pixelcade/pixelcade-version" ]]; then
-  echo "Existing Pixelcade installation detected, checking version..."
-  read -r currentVersion<$HOME/pixelcade/pixelcade-version
-
-  if [[ $currentVersion -lt $version ]]
-    then
-        echo "Older Pixelcade version detected, now upgrading..."
+if [[ -d "$HOME/pixelcade" ]]; then
+    if [[ -f "$HOME/pixelcade/pixelcade-version" ]]; then
+      echo "Existing Pixelcade installation detected, checking version..."
+      read -r currentVersion<$HOME/pixelcade/pixelcade-version
+      if [[ $currentVersion -lt $version ]]; then
+            echo "Older Pixelcade version detected, now upgrading..."
+            cd $HOME/pixelcade
+            git stash
+            git pull
+        else
+            while true; do
+                read -p "${magenta}Your Pixelcade version is already up to date. If you continue, your Pixelcade installation will be deleted including any custom artwork you've added, do you want to continue? (y/n) ${white}" yn
+                case $yn in
+                    [Yy]* ) cd $HOME && sudo rm -r pixelcade; break;;
+                    [Nn]* ) cd $HOME/pixelcade && git stash && git pull && exit 1; break;;
+                    * ) echo "Please answer y or n";;
+                esac
+            done
+      fi
     else
-        echo "Your Pixelcade version is up to date, exiting..."
-        echo "You may force a re-install by deleting the file $HOME/pixelcade/pixelcade-version"
-        exit 1
-  fi
-else
-   echo "Starting new Pixelcade installation..."
+       while true; do
+           read -p "${magenta}Your existing Pixelcade installation will be deleted including any custom artwork you've added, do you want to continue? (y/n) ${white}" yn
+           case $yn in
+               [Yy]* ) cd $HOME && sudo rm -r pixelcade; break;;
+               [Nn]* ) cd $HOME/pixelcade && git stash && git pull && exit 1; break;;
+               * ) echo "Please answer y or n";;
+           esac
+       done
+    fi
 fi
+#add prompt to remove existing pixelcade folder
+
 
 # detect what OS we have
 if lsb_release -a | grep -q 'stretch'; then
@@ -210,6 +240,12 @@ if [ "$retropie" = true ] ; then
     # now lastly let's comment out emulationstation since we are not using it for this use case
     #sed -e '/^emulationstation.*/ s/^#*/#/' -i /opt/retropie/configs/all/autostart.sh
   fi
+  echo "${yellow}Installing Fonts...${white}"
+  cd $HOME/pixelcade
+  mkdir $HOME/.fonts
+  sudo cp $HOME/pixelcade/fonts/*.ttf /$HOME/.fonts
+  sudo apt -y install font-manager
+  sudo fc-cache -v -f
 else #there is no retropie so we need to add pixelcade /etc/rc.local instead
   echo "${yellow}Installing Fonts...${white}"
   cd $HOME/pixelcade

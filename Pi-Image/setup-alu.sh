@@ -41,14 +41,14 @@ then
     exit 1
 fi
 
-read -p "${magenta}Would you like to enalbe auto updates (y/n)? ${white}" -n 1 -r
-echo    # (optional) move to a new line
-if [[ ! $REPLY =~ ^[Yy]$ ]]
-  then
-    auto_update=true
-  else
-    auto_update=false
-fi
+while true; do
+    read -p "${magenta}Would you like to enable auto updates (y/n)? ${white}" yn
+    case $yn in
+        [Yy]* ) auto_update=true; break;;
+        [Nn]* ) auto_update=false; break;;
+        * ) echo "Please answer y or n";;
+    esac
+done
 
 # let's check the version and only proceed if the user has an older version
 if [[ -f "$HOME/pixelcade/pixelcade-version" ]]; then
@@ -168,14 +168,32 @@ if [ "$retropie" = true ] ; then #skip if no retropie as we'll start this later 
 fi
 
 #if retropie is present, add our mods
+#if [ "$retropie" = true ] ; then
+  # lets install the correct mod based on the OS
+#  if [ "$stretch_os" = true ] ; then
+#     curl -LO http://pixelcade.org/pi/esmod-stretch.deb && sudo dpkg -i esmod-stretch.deb
+#  elif [ "$buster_os" = true ]; then
+#     curl -LO http://pixelcade.org/pi/esmod-buster.deb && sudo dpkg -i esmod-buster.deb
+#  elif [ "$ubuntu_os" = true ]; then
+#     curl -LO http://pixelcade.org/pi/esmod-ubuntu.deb && sudo dpkg -i esmod-ubuntu.deb
+#  else
+#      echo "${red}Sorry, neither Linux Stretch, Linux Buster, or Ubuntu was detected, exiting..."
+#      exit 1
+#  fi
+#fi
+
+cd $HOME
+#if retropie is present, add our mods
 if [ "$retropie" = true ] ; then
   # lets install the correct mod based on the OS
-  if [ "$stretch_os" = true ] ; then
-     curl -LO http://pixelcade.org/pi/esmod-stretch.deb && sudo dpkg -i esmod-stretch.deb
+  if [ "$pi4" = true ] ; then
+      curl -LO http://pixelcade.org/pi/esmod-pi4.deb && sudo dpkg -i esmod-pi4.deb
+  elif [ "$stretch_os" = true ] ; then
+      curl -LO http://pixelcade.org/pi/esmod-stretch.deb && sudo dpkg -i esmod-stretch.deb
   elif [ "$buster_os" = true ]; then
-     curl -LO http://pixelcade.org/pi/esmod-buster.deb && sudo dpkg -i esmod-buster.deb
+      curl -LO http://pixelcade.org/pi/esmod-buster.deb && sudo dpkg -i esmod-buster.deb
   elif [ "$ubuntu_os" = true ]; then
-     curl -LO http://pixelcade.org/pi/esmod-ubuntu.deb && sudo dpkg -i esmod-ubuntu.deb
+      curl -LO http://pixelcade.org/pi/esmod-ubuntu.deb && sudo dpkg -i esmod-ubuntu.deb
   else
       echo "${red}Sorry, neither Linux Stretch, Linux Buster, or Ubuntu was detected, exiting..."
       exit 1
@@ -186,10 +204,10 @@ fi
 echo "${yellow}Configuring Pixelcade Startup Script...${white}"
 sudo chmod +x $HOME/pixelcade/system/pixelcade-startup.sh
 
-#if [ "$auto_update" = true ] ; then #add git pull to startup
-#  echo "${yellow}Configuring auto-update...${white}"
-#  sudo sed -i '/^exit.*/i cd $HOME/pixelcade && git stash && git pull' $HOME/pixelcade/system/pixelcade-startup.sh #insert this line before exit
-#fi
+if [ "$auto_update" = true ] ; then #add git pull to startup
+  echo "${yellow}Configuring auto-update...${white}"
+  sudo sed -i '/^exit.*/i cd $HOME/pixelcade && git stash && git pull' $HOME/pixelcade/system/pixelcade-startup.sh #insert this line before exit
+fi
 
 if [ "$retropie" = true ] ; then
   # let's check if autostart.sh already has pixelcade added and if so, we don't want to add it twice
