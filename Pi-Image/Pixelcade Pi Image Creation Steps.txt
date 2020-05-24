@@ -1,17 +1,22 @@
-Pi IMAGE CREATION STEPS
+  Pi IMAGE CREATION STEPS
 
-image buster lite
-copy wpa_supplicant and blank ssh to root
-sudo curl -LO pixelcade.org/pi/setup-alu.sh && sudo chmod +x setup-alu.sh && ./setup-alu.sh
-DON'T REBOOT
-git clone https://github.com/jasbur/RaspiWiFi.git
-UPDATE html files for jasbur
-sudo python3 initial_setup.py
-delete wpa_supplicant.conf.old
-delete setup-alu.sh
-add deletewifi file to pixelcade
-sudo shutdown now
-now create image using mac disk utility before rebooting, compressed image
+  image buster lite
+  copy wpa_supplicant and blank ssh to root
+  sudo curl -LO pixelcade.org/pi/setup-alu.sh && sudo chmod +x setup-alu.sh && ./setup-alu.sh
+  REBOOT
+  git clone https://github.com/jasbur/RaspiWiFi.git
+  UPDATE html files for jasbur
+  add deletewifi file to pixelcade
+  sudo python3 initial_setup.py
+    no encrption, use Pixelcade Setup, no password, no ssl , no autoconfig,
+  delete wpa_supplicant.conf.old
+  delete setup-alu.sh
+  sudo shutdown now
+  check if auto update is in pixelcade-startup.sh
+  test auto update
+  now create image using mac disk utility before rebooting, make sure to select compressed image
+
+OTHER STUFF
 
 ARTWORK
 Run this from the art directory to zip up

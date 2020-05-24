@@ -70,25 +70,22 @@ if [[ -d "$HOME/pixelcade" ]]; then
       read -r currentVersion<$HOME/pixelcade/pixelcade-version
       if [[ $currentVersion -lt $version ]]; then
             echo "Older Pixelcade version detected, now upgrading..."
-            cd $HOME/pixelcade
-            git stash
-            git pull
         else
             while true; do
-                read -p "${magenta}Your Pixelcade version is already up to date. If you continue, your Pixelcade installation will be deleted including any custom artwork you've added, do you want to continue? (y/n) ${white}" yn
+                read -p "${magenta}Your Pixelcade version is already up to date. If you continue, your Pixelcade installation will be deleted including any custom artwork you've added, do you want to re-install? Or select n to just check for new artwork. (y/n) ${white}" yn
                 case $yn in
                     [Yy]* ) cd $HOME && sudo rm -r pixelcade; break;;
-                    [Nn]* ) cd $HOME/pixelcade && git stash && git pull && exit 1; break;;
+                    [Nn]* ) cd $HOME/pixelcade/system && sh ./update.sh && exit; break;;
                     * ) echo "Please answer y or n";;
                 esac
             done
       fi
     else
        while true; do
-           read -p "${magenta}Your existing Pixelcade installation will be deleted including any custom artwork you've added, do you want to continue? (y/n) ${white}" yn
+           read -p "${magenta}Your existing Pixelcade installation will be deleted including any custom artwork you've added, do you want to re-install? Or select n to just check for new artwork. (y/n) ${white}" yn
            case $yn in
                [Yy]* ) cd $HOME && sudo rm -r pixelcade; break;;
-               [Nn]* ) cd $HOME/pixelcade && git stash && git pull && exit 1; break;;
+               [Nn]* ) cd $HOME/pixelcade/system && sh ./update.sh && exit; break;;
                * ) echo "Please answer y or n";;
            esac
        done
@@ -215,7 +212,10 @@ if [ "$retropie" = true ] ; then
 fi
 
 #get the pixelcade startup-up script
+#note this file is not in the git repo because we're going to make a change locally
 echo "${yellow}Configuring Pixelcade Startup Script...${white}"
+cd $HOME/pixelcade/system
+curl -LO http://pixelcade.org/pi/pixelcade-startup.sh
 sudo chmod +x $HOME/pixelcade/system/pixelcade-startup.sh
 
 if [ "$auto_update" = true ] ; then #add git pull to startup
@@ -223,7 +223,7 @@ if [ "$auto_update" = true ] ; then #add git pull to startup
        echo "${yellow}Auto-update was already added to pixelcade-startup.sh, skipping...${white}"
     else
       echo "${yellow}Adding auto-update to pixelcade-startup.sh...${white}"
-      sudo sed -i '/^exit/i cd $HOME/pixelcade && git stash && git pull' $HOME/pixelcade/system/pixelcade-startup.sh #insert this line before exit
+      sudo sed -i '/^exit/i cd $HOME/pixelcade/system && sh ./update.sh' $HOME/pixelcade/system/pixelcade-startup.sh #insert this line before exit
     fi
 fi
 
@@ -282,8 +282,6 @@ fi
 sleep 5
 cd $HOME/pixelcade
 java -jar pixelcade.jar -m stream -c mame -g 1941
-
-
 
 #let's write the version so the next time the user can try and know if he/she needs to upgrade
 echo $version > $HOME/pixelcade/pixelcade-version

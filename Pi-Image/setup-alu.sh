@@ -34,13 +34,6 @@ echo "${red}IMPORTANT:${white} This script will work on a Pi 2, Pi Zero W, Pi 3B
 echo "Now connect Pixelcade to a free USB port on your Pi (directly connected to your Pi or use a powered USB hub)"
 echo "Ensure the toggle switch on the Pixelcade board is pointing towards USB and not BT"
 
-read -p "${magenta}Continue (y/n)? ${white}" -n 1 -r
-echo    # (optional) move to a new line
-if [[ ! $REPLY =~ ^[Yy]$ ]]
-then
-    exit 1
-fi
-
 while true; do
     read -p "${magenta}Would you like to enable auto updates (y/n)? ${white}" yn
     case $yn in
@@ -51,21 +44,34 @@ while true; do
 done
 
 # let's check the version and only proceed if the user has an older version
-if [[ -f "$HOME/pixelcade/pixelcade-version" ]]; then
-  echo "Existing Pixelcade installation detected, checking version..."
-  read -r currentVersion<$HOME/pixelcade/pixelcade-version
-
-  if [[ $currentVersion -lt $version ]]
-    then
-        echo "Older Pixelcade version detected, now upgrading..."
+if [[ -d "$HOME/pixelcade" ]]; then
+    if [[ -f "$HOME/pixelcade/pixelcade-version" ]]; then
+      echo "Existing Pixelcade installation detected, checking version..."
+      read -r currentVersion<$HOME/pixelcade/pixelcade-version
+      if [[ $currentVersion -lt $version ]]; then
+            echo "Older Pixelcade version detected, now updating..."
+        else
+            while true; do
+                read -p "${magenta}Your Pixelcade version is already up to date. If you continue, your Pixelcade installation will be deleted including any custom artwork you've added, do you want to continue? Or just select n to check for artwork updates. (y/n) ${white}" yn
+                case $yn in
+                    [Yy]* ) cd $HOME && sudo rm -r pixelcade; break;;
+                    [Nn]* ) cd $HOME/pixelcade/system && sh ./update.sh && exit; break;;
+                    * ) echo "Please answer y or n";;
+                esac
+            done
+      fi
     else
-        echo "Your Pixelcade version is up to date, exiting..."
-        echo "You may force a re-install by deleting the file $HOME/pixelcade/pixelcade-version"
-        exit 1
-  fi
-else
-   echo "Starting new Pixelcade installation..."
+       while true; do
+           read -p "${magenta}Your existing Pixelcade installation will be deleted including any custom artwork you've added, do you want to continue? Or just select n to check for artwork updates.(y/n) ${white}" yn
+           case $yn in
+               [Yy]* ) cd $HOME && sudo rm -r pixelcade; break;;
+               [Nn]* ) cd $HOME/pixelcade/system && sh ./update.sh && exit; break;;
+               * ) echo "Please answer y or n";;
+           esac
+       done
+    fi
 fi
+#add prompt to remove existing pixelcade folder
 
 # detect what OS we have
 if lsb_release -a | grep -q 'stretch'; then
@@ -159,9 +165,6 @@ git clone https://github.com/alinke/pixelcade.git
 cd $HOME/pixelcade
 git config user.email "sample@sample.com"
 git config user.name "sample"
-cd $HOME/pixelcade/system
-sudo chmod +x update.sh
-
 
 if [ "$retropie" = true ] ; then #skip if no retropie as we'll start this later using systemd
     java -jar pixelweb.jar -b & #run pixelweb in the background\
@@ -202,11 +205,21 @@ fi
 
 #get the pixelcade startup-up script
 echo "${yellow}Configuring Pixelcade Startup Script...${white}"
+cd $HOME/pixelcade/system
+curl -LO http://pixelcade.org/pi/pixelcade-startup.sh
 sudo chmod +x $HOME/pixelcade/system/pixelcade-startup.sh
+curl -LO http://pixelcade.org/pi/update.sh
+sudo chmod +x $HOME/pixelcade/system/update.sh
+#git rm $HOME/pixelcade/system/pixelcade-startup.sh #we dont' want this in git as we're going to edit it locally and don't want git to revert it
+#git rm $HOME/pixelcade/system/update.sh
 
 if [ "$auto_update" = true ] ; then #add git pull to startup
-  echo "${yellow}Configuring auto-update...${white}"
-  sudo sed -i '/^exit.*/i cd $HOME/pixelcade && git stash && git pull' $HOME/pixelcade/system/pixelcade-startup.sh #insert this line before exit
+    if cat $HOME/pixelcade/system/pixelcade-startup.sh | grep -q 'git'; then
+       echo "${yellow}Auto-update was already added to pixelcade-startup.sh, skipping...${white}"
+    else
+      echo "${yellow}Adding auto-update to pixelcade-startup.sh...${white}"
+      sudo sed -i '/^exit/i sh $HOME/pixelcade/system/update.sh' $HOME/pixelcade/system/pixelcade-startup.sh #insert this line before exit
+    fi
 fi
 
 if [ "$retropie" = true ] ; then
