@@ -206,7 +206,8 @@ fi
 #get the pixelcade startup-up script
 echo "${yellow}Configuring Pixelcade Startup Script...${white}"
 cd $HOME/pixelcade/system
-curl -LO http://pixelcade.org/pi/pixelcade-startup.sh
+curl -LO http://pixelcade.org/pi/pixelcade-startup-alu.sh
+mv pixelcade-startup-alu.sh pixelcade-startup.sh
 sudo chmod +x $HOME/pixelcade/system/pixelcade-startup.sh
 curl -LO http://pixelcade.org/pi/update.sh
 sudo chmod +x $HOME/pixelcade/system/update.sh
@@ -214,7 +215,7 @@ sudo chmod +x $HOME/pixelcade/system/update.sh
 #git rm $HOME/pixelcade/system/update.sh
 
 if [ "$auto_update" = true ] ; then #add git pull to startup
-    if cat $HOME/pixelcade/system/pixelcade-startup.sh | grep -q 'git'; then
+    if cat $HOME/pixelcade/system/pixelcade-startup.sh | grep -q 'update'; then
        echo "${yellow}Auto-update was already added to pixelcade-startup.sh, skipping...${white}"
     else
       echo "${yellow}Adding auto-update to pixelcade-startup.sh...${white}"

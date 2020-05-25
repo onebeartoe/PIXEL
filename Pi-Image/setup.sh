@@ -8,6 +8,7 @@ pi4=false
 java_installed=false
 install_succesful=false
 auto_update=false
+attractmode=false
 black=`tput setaf 0`
 red=`tput setaf 1`
 green=`tput setaf 2`
@@ -211,15 +212,35 @@ if [ "$retropie" = true ] ; then
   fi
 fi
 
+#now lets check if the user also has attractmode installed
+
+if [[ -d "/$HOME/.attract" ]]; then
+  echo "Attract Mode front end detected, installing Pixelcade plug-in for Attract Mode..."
+  attractmode=true
+  cd $HOME
+  if [[ -d "$HOME/pixelcade-attract-mode" ]]; then
+    sudo rm -r $HOME/pixelcade-attract-mode
+    git clone https://github.com/tnhabib/pixelcade-attract-mode.git
+  else
+    git clone https://github.com/tnhabib/pixelcade-attract-mode.git
+  fi
+  sudo cp -r $HOME/pixelcade-attract-mode/Pixelcade $HOME/.attract/plugins
+else
+  attractmode=false
+  echo "${yellow}Attract Mode front end is not installed..."
+fi
+
 #get the pixelcade startup-up script
 #note this file is not in the git repo because we're going to make a change locally
 echo "${yellow}Configuring Pixelcade Startup Script...${white}"
 cd $HOME/pixelcade/system
 curl -LO http://pixelcade.org/pi/pixelcade-startup.sh
 sudo chmod +x $HOME/pixelcade/system/pixelcade-startup.sh
+curl -LO http://pixelcade.org/pi/update.sh
+sudo chmod +x $HOME/pixelcade/system/update.sh
 
 if [ "$auto_update" = true ] ; then #add git pull to startup
-    if cat $HOME/pixelcade/system/pixelcade-startup.sh | grep -q 'git'; then
+    if cat $HOME/pixelcade/system/pixelcade-startup.sh | grep -q 'sh ./update.sh'; then
        echo "${yellow}Auto-update was already added to pixelcade-startup.sh, skipping...${white}"
     else
       echo "${yellow}Adding auto-update to pixelcade-startup.sh...${white}"
@@ -228,24 +249,26 @@ if [ "$auto_update" = true ] ; then #add git pull to startup
 fi
 
 if [ "$retropie" = true ] ; then
-  # let's check if autostart.sh already has pixelcade added and if so, we don't want to add it twice
-  #cd /opt/retropie/configs/all/
-
-  if cat /opt/retropie/configs/all/autostart.sh | grep -q 'pixelcade'; then
-    echo "${yellow}Pixelcade already added to autostart.sh, skipping...${white}"
-  else
-    echo "${yellow}Adding Pixelcade to /opt/retropie/configs/all/autostart.sh...${white}"
-    sudo sed -i '/^emulationstation.*/i cd $HOME/pixelcade && java -jar pixelweb.jar -b &' /opt/retropie/configs/all/autostart.sh #insert this line before emulationstation #auto
-    sudo sed -i '/^emulationstation.*/i sleep 10 && cd $HOME/pixelcade/system && ./pixelcade-startup.sh' /opt/retropie/configs/all/autostart.sh #insert this line before emulationstation #auto
-    # now lastly let's comment out emulationstation since we are not using it for this use case
-    #sed -e '/^emulationstation.*/ s/^#*/#/' -i /opt/retropie/configs/all/autostart.sh
-  fi
-  echo "${yellow}Installing Fonts...${white}"
-  cd $HOME/pixelcade
-  mkdir $HOME/.fonts
-  sudo cp $HOME/pixelcade/fonts/*.ttf /$HOME/.fonts
-  sudo apt -y install font-manager
-  sudo fc-cache -v -f
+    # let's check if autostart.sh already has pixelcade added and if so, we don't want to add it twice
+    #cd /opt/retropie/configs/all/
+    if cat /opt/retropie/configs/all/autostart.sh | grep -q 'pixelcade'; then
+      echo "${yellow}Pixelcade already added to autostart.sh, skipping...${white}"
+    else
+      echo "${yellow}Adding Pixelcade /opt/retropie/configs/all/autostart.sh...${white}"
+      sudo sed -i '/^emulationstation.*/i cd $HOME/pixelcade && java -jar pixelweb.jar -b &' /opt/retropie/configs/all/autostart.sh #insert this line before emulationstation #auto
+      sudo sed -i '/^emulationstation.*/i sleep 10 && cd $HOME/pixelcade/system && ./pixelcade-startup.sh' /opt/retropie/configs/all/autostart.sh #insert this line before emulationstation #auto
+      if [ "$attractmode" = true ] ; then
+          echo "${yellow}Adding Pixelcade for Attract Mode to /opt/retropie/configs/all/autostart.sh...${white}"
+          sudo sed -i '/^attract.*/i cd $HOME/pixelcade && java -jar pixelweb.jar -b &' /opt/retropie/configs/all/autostart.sh #insert this line before attract #auto
+          sudo sed -i '/^attract.*/i sleep 10 && cd $HOME/pixelcade/system && ./pixelcade-startup.sh' /opt/retropie/configs/all/autostart.sh #insert this line before attract #auto
+      fi
+    fi
+    echo "${yellow}Installing Fonts...${white}"
+    cd $HOME/pixelcade
+    mkdir $HOME/.fonts
+    sudo cp $HOME/pixelcade/fonts/*.ttf /$HOME/.fonts
+    sudo apt -y install font-manager
+    sudo fc-cache -v -f
 else #there is no retropie so we need to add pixelcade /etc/rc.local instead
   echo "${yellow}Installing Fonts...${white}"
   cd $HOME/pixelcade

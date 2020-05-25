@@ -7,13 +7,13 @@
   git clone https://github.com/jasbur/RaspiWiFi.git
   UPDATE html files for jasbur
   add deletewifi file to pixelcade
+  delete setup-alu.sh
+  check if auto update is in pixelcade-startup.sh
+  test auto update
   sudo python3 initial_setup.py
     no encrption, use Pixelcade Setup, no password, no ssl , no autoconfig,
   delete wpa_supplicant.conf.old
-  delete setup-alu.sh
   sudo shutdown now
-  check if auto update is in pixelcade-startup.sh
-  test auto update
   now create image using mac disk utility before rebooting, make sure to select compressed image
 
 OTHER STUFF
