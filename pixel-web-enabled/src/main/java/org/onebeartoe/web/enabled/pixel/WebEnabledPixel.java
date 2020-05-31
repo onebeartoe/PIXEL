@@ -433,10 +433,13 @@ public class WebEnabledPixel {
     Pixel.setFontSize(defaultFontSize);
     pixel.setScrollDelay(speed_);
     pixel.setScrollTextColor(Color.red);
+    
     if (!silentMode_)
       LogMe.aLogger.info("Pixelcade HOME DIRECTORY: " + pixel.getPixelHome()); 
     //extractDefaultContent();  //saving space by removing this as the retropie installer now includes all these files so no need to include here and make the .jar bigger
+    
     createControllers();
+    
     File mamefile = new File("mame.csv");
     if (mamefile.exists() && !mamefile.isDirectory()) {
       rom2GameMappingExists = true;
@@ -520,8 +523,8 @@ public class WebEnabledPixel {
     
     if (lcdMarquee_.equals("yes")) {
           LCDPixelcade lcdDisplay = new LCDPixelcade();
-          lcdDisplay.displayImage("slideshow");
-      }
+          lcdDisplay.displayImage("nodata","nodata");
+    }
     
     
     if (this.SubDisplayAccessory_.equals("yes")) {

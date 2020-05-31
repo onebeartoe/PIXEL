@@ -6,15 +6,16 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
-import java.net.URISyntaxException;
 
 
 public class WindowsLCD {
 
 GraphicsDevice[] screens = GraphicsEnvironment.getLocalGraphicsEnvironment().getScreenDevices();
-static String NOT_FOUND = "/Users/kaicherry/pixelcade.png";
+//static String NOT_FOUND = "/Users/kaicherry/pixelcade.png";
+static String NOT_FOUND = "";
 private static ImageIcon ii;
-private String basePath = "";
+private String basePath = "D:\\Arcade\\Pixelcade\\lcdmarquees";
+private String pixelHome = System.getProperty("user.dir") + "\\";  
 
 public GraphicsDevice[] connectedDevices() {
 
@@ -29,12 +30,10 @@ public GraphicsDevice[] connectedDevices() {
 
     void displayImage(String named, String system){
 
-        try {
-            basePath = new File(WindowsLCD.class.getProtectionDomain().getCodeSource().getLocation().toURI()).getParent() + "/lcdmarquees/";
-            NOT_FOUND = basePath + "pixelcade.png";
-        } catch (URISyntaxException e) {
-            e.printStackTrace();
-        };
+    //basePath = new File(WindowsLCD.class.getProtectionDomain().getCodeSource().getLocation().toURI()).getParent() + "/lcdmarquees/";
+    basePath = pixelHome + "lcdmarquees/";
+    NOT_FOUND = basePath + "pixelcade.png";  //if not found, we'll show d:\arcade\pixelcade\lcdmarquees\pixelcade.png for example
+
     String marqueePath = NOT_FOUND;
     if(new File(String.format("%s%s.png",basePath,named)).exists()){
         marqueePath = String.format("%s%s.png",basePath,named);
@@ -75,9 +74,6 @@ public GraphicsDevice[] connectedDevices() {
         frame.setExtendedState(frame.getExtendedState() | JFrame.MAXIMIZED_BOTH);
         frame.setVisible(true);
     }
-
-
-
 }
 
 class JImage{

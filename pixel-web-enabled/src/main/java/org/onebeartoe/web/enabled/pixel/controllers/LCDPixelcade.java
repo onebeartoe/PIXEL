@@ -73,7 +73,7 @@ public class LCDPixelcade {
         displayImage(named);
     }
 
-    static public void  displayImage(String named) throws IOException {
+    static public void  displayImage(String named) throws IOException {  //note this is Pi/linux only!
         if (named == null) return;
 
         //System.out.print("image: " + named +"\n");
