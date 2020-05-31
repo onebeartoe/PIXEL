@@ -1,6 +1,8 @@
 
 package org.onebeartoe.web.enabled.pixel.controllers;
 
+
+
 import ioio.lib.api.exception.ConnectionLostException;
 import java.awt.Color;
 import java.io.File;
@@ -20,6 +22,7 @@ import org.onebeartoe.pixel.hardware.Pixel;
 import org.onebeartoe.web.enabled.pixel.CliPixel;
 import org.onebeartoe.web.enabled.pixel.WebEnabledPixel;
 
+
 public class ArcadeHttpHandler extends ImageResourceHttpHandler {
   public ArcadeHttpHandler(WebEnabledPixel application) {
     super(application);
@@ -32,6 +35,7 @@ public class ArcadeHttpHandler extends ImageResourceHttpHandler {
     LogMe logMe = LogMe.getInstance();
     Pixel pixel = this.application.getPixel();
     pixel.writeArcadeImage(arcadeFilePNGFullPath, saveAnimation, loop, consoleNameMapped, PNGNameWithExtension, WebEnabledPixel.pixelConnected);
+    
   }
   
   public void handleGIF(String consoleName, String arcadeName, Boolean saveAnimation, int loop) {
@@ -40,7 +44,9 @@ public class ArcadeHttpHandler extends ImageResourceHttpHandler {
       pixel.writeArcadeAnimation(consoleName, arcadeName, saveAnimation.booleanValue(), loop, WebEnabledPixel.pixelConnected);
     } catch (NoSuchAlgorithmException ex) {
       Logger.getLogger(ArcadeHttpHandler.class.getName()).log(Level.SEVERE, (String)null, ex);
-    } 
+    }
+    
+   
   }
   
   public void writeImageResource(String urlParams) throws IOException, ConnectionLostException {
@@ -208,6 +214,11 @@ public class ArcadeHttpHandler extends ImageResourceHttpHandler {
         if (text_ != "")
           LogMe.aLogger.info("alt text if marquee file not found: " + text_); 
       } 
+     
+      if (WebEnabledPixel.getLCDMarquee().equals("yes")) {
+            LCDPixelcade lcdDisplay = new LCDPixelcade();
+            lcdDisplay.displayImage(arcadeNameOnly, consoleNameMapped);
+      }
       
       arcadeFilePathPNG = application.getPixel().getPixelHome() + consoleNameMapped + "/" + arcadeNameOnly + ".png";
       File arcadeFilePNG = new File(arcadeFilePathPNG);
@@ -317,7 +328,7 @@ public class ArcadeHttpHandler extends ImageResourceHttpHandler {
         } 
         
         if (arcadeFilePNG.exists() && !arcadeFilePNG.isDirectory() && arcadeFileGIF.exists() && !arcadeFileGIF.isDirectory()) {
-          handlePNG(arcadeFilePNG, Boolean.valueOf(false), 0, "black", "dummy");
+          handlePNG(arcadeFilePNG, Boolean.valueOf(false), 0, "black", "nodata");
           handleGIF(consoleNameMapped, arcadeNameOnly + ".gif", Boolean.valueOf(saveAnimation), 1);
           handlePNG(arcadeFilePNG, Boolean.valueOf(saveAnimation), 99999, consoleNameMapped, arcadeNameOnly + ".png");
           //to part does not work with the Q and looping, address later

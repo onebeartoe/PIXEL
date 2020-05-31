@@ -47,7 +47,9 @@ public class UpdateHttpHandler extends TextHttpHandler
             // -- Linux --
 
             // Run a shell command
-            processBuilder.command("bash", "-c", "git stash && git pull > gitpullresult");
+            //processBuilder.command("bash", "-c", "git stash && git pull > gitpullresult");
+            //current directory is already $home/pixelcade
+            processBuilder.command("bash", "-c", "system/update.sh");
 
              // Run a shell script
             //processBuilder.command("path/to/hello.sh");
@@ -79,35 +81,29 @@ public class UpdateHttpHandler extends TextHttpHandler
                     
                     //String value = output.substring(output.indexOf("\n") + 1).trim(); 
 
-                    int exitVal = process.waitFor();
-                    if (exitVal == 0) {
-                            
-                            File updateFileResult = new File("gitpullresult");
-                            if (updateFileResult.exists() && !updateFileResult.isDirectory()) {
-                                    BufferedReader br = new BufferedReader(new FileReader("gitpullresult"));
-                                    UpdateOutput = br.readLine();
-                                    System.out.println(UpdateOutput);
-                            }
-                          
-                            returnMessage = "Update command sent with result:\n";
-                            returnMessage = returnMessage + UpdateOutput;
-                            System.out.println(UpdateOutput);
-                            application.getPixel().scrollText("Update Complete: " + UpdateOutput,0,10,color.GREEN,WebEnabledPixel.pixelConnected,1); //only the scroll the second line of the output
-                            //app.getPixel().scrollText(text_, loop, speed, color,WebEnabledPixel.pixelConnected,scrollsmooth_);
-                            updateFileResult.delete(); //let's clean up and delete the file
-                           
-                    } else {
-                            //abnormal...
-                            returnMessage = "Update command failed:\n";
-                            returnMessage = returnMessage + output;
-                            System.out.println(returnMessage);
-                            application.getPixel().scrollText("Update Failed: " + output, 0, 10,color.RED ,WebEnabledPixel.pixelConnected,1);
-                            //app.getPixel().scrollText(text_, loop, speed, color,WebEnabledPixel.pixelConnected,scrollsmooth_);
-                    }
+//                   int exitVal = process.waitFor();
+//                    if (exitVal == 0) {
+//                            
+//                            File updateFileResult = new File("gitpullresult");
+//                            if (updateFileResult.exists() && !updateFileResult.isDirectory()) {
+//                                    BufferedReader br = new BufferedReader(new FileReader("gitpullresult"));
+//                                    UpdateOutput = br.readLine();
+//                                    System.out.println(UpdateOutput);
+//                            }
+//                            returnMessage = "Update command sent with result:\n";
+//                            returnMessage = returnMessage + UpdateOutput;
+//                            System.out.println(UpdateOutput);
+//                            application.getPixel().scrollText("Update Complete: " + UpdateOutput,0,10,color.GREEN,WebEnabledPixel.pixelConnected,1); //only the scroll the second line of the output
+//                            updateFileResult.delete(); //let's clean up and delete the file
+//                           
+//                    } else {
+//                            returnMessage = "Update command failed:\n";
+//                            returnMessage = returnMessage + output;
+//                            System.out.println(returnMessage);
+//                            application.getPixel().scrollText("Update Failed: " + output, 0, 10,color.RED ,WebEnabledPixel.pixelConnected,1);
+//                    }
 
                     } catch (IOException e) {
-                            e.printStackTrace();
-                    } catch (InterruptedException e) {
                             e.printStackTrace();
                     }
            

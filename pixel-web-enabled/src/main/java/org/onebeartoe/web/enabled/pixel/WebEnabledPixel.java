@@ -52,6 +52,7 @@ import org.onebeartoe.web.enabled.pixel.controllers.ArcadeListHttpHandler;
 import org.onebeartoe.web.enabled.pixel.controllers.ClockHttpHandler;
 import org.onebeartoe.web.enabled.pixel.controllers.ConsoleHttpHandler;
 import org.onebeartoe.web.enabled.pixel.controllers.IndexHttpHandler;
+import org.onebeartoe.web.enabled.pixel.controllers.LCDPixelcade;
 import org.onebeartoe.web.enabled.pixel.controllers.LocalModeHttpHandler;
 import org.onebeartoe.web.enabled.pixel.controllers.PinDMDHttpHandler;
 import org.onebeartoe.web.enabled.pixel.controllers.QuitHttpHandler;
@@ -70,8 +71,9 @@ import org.onebeartoe.web.enabled.pixel.controllers.ShutdownHttpHandler;
 import org.onebeartoe.web.enabled.pixel.controllers.UpdateHttpHandler;
 import org.onebeartoe.web.enabled.pixel.controllers.RebootHttpHandler;
 
+
 public class WebEnabledPixel {
-  public static String pixelwebVersion = "2.7.8";
+  public static String pixelwebVersion = "2.8.0";
   
   public static LogMe logMe = null;
   
@@ -144,6 +146,8 @@ public class WebEnabledPixel {
   private static Color  color = Color.RED;
   
   private static String textSpeed_ = "normal";
+  
+  private static String lcdMarquee_ = "no";
   
   private static String defaultFont = "Arial Narrow 7";
   
@@ -326,6 +330,16 @@ public class WebEnabledPixel {
         sec.add("yTextOffset", "0");
         ini.store();
       } 
+      
+      if (sec.containsKey("LCDMarquee")) {
+        lcdMarquee_ = (String)sec.get("LCDMarquee");
+      } else {
+        sec.add("LCDMarquee", "no");
+        sec.add("LCDMarquee_OPTION", "no");
+        sec.add("LCDMarquee_OPTION", "yes");
+        ini.store();
+      } 
+      
       if (this.ledResolution_.equals("128x32")) {
         if (!silentMode_) {
           System.out.println("PIXEL resolution found in settings.ini: resolution=" + this.ledResolution_);
@@ -421,7 +435,7 @@ public class WebEnabledPixel {
     pixel.setScrollTextColor(Color.red);
     if (!silentMode_)
       LogMe.aLogger.info("Pixelcade HOME DIRECTORY: " + pixel.getPixelHome()); 
-    extractDefaultContent();
+    //extractDefaultContent();  //saving space by removing this as the retropie installer now includes all these files so no need to include here and make the .jar bigger
     createControllers();
     File mamefile = new File("mame.csv");
     if (mamefile.exists() && !mamefile.isDirectory()) {
@@ -503,6 +517,13 @@ public class WebEnabledPixel {
     } else {
       System.out.println("consolemetadata.csv not found");
     } 
+    
+    if (lcdMarquee_.equals("yes")) {
+          LCDPixelcade lcdDisplay = new LCDPixelcade();
+          lcdDisplay.displayImage("slideshow");
+      }
+    
+    
     if (this.SubDisplayAccessory_.equals("yes")) {
       System.out.println("Attempting to connect to Pixelcade Sub Display Accessory...");
       arduino1MatrixPort = SerialPort.getCommPort(this.SubDisplayAccessoryPort_);
@@ -703,10 +724,10 @@ public class WebEnabledPixel {
     inpath = contentClasspath + "console.csv";
     extractClasspathResource(inpath, pixelHomeDirectory);
     inpath = contentClasspath + "pixel-logo.txt";
-    extractClasspathResource(inpath, pixelHomeDirectory);
-    inpath = contentClasspath + "pixelc.jar";
-    extractClasspathResource(inpath, pixelHomeDirectory);
-    inpath = contentClasspath + "pixelcade.jar";
+    //extractClasspathResource(inpath, pixelHomeDirectory);
+    //inpath = contentClasspath + "pixelc.jar";
+    //extractClasspathResource(inpath, pixelHomeDirectory);
+    //inpath = contentClasspath + "pixelcade.jar";
     extractClasspathResource(inpath, pixelHomeDirectory);
     inpath = contentClasspath + "retrogame.cfg";
     extractClasspathResource(inpath, pixelHomeDirectory);
@@ -734,7 +755,7 @@ public class WebEnabledPixel {
     extractArcadeDirs(animationsListFile, animationsListClasspath, pathPrefix);
   }
   
-  private void extractDefaultContent() {
+  private void extractDefaultContent() {   //no longer used
     try {
       extractHtmlAndJavascript();
       if (isMac() || isUnix()) {
@@ -747,7 +768,7 @@ public class WebEnabledPixel {
     } 
   }
   
-  private void extractHtmlAndJavascript() throws IOException {
+  private void extractHtmlAndJavascript() throws IOException {           //no longer used
     File indexHTMLFile = new File(pixel.getPixelHome() + "index.html");
     if (!indexHTMLFile.exists()) {
       String contentClasspath = "/web-content/";
@@ -937,6 +958,10 @@ public class WebEnabledPixel {
   
   public static String getDefaultFont() {
     return defaultFont;
+  }
+  
+  public static String getLCDMarquee() {
+    return lcdMarquee_;
   }
   
   public static int getDefaultFontSize() {
