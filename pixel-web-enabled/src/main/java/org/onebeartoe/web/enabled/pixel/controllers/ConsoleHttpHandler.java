@@ -1023,6 +1023,13 @@ public class ConsoleHttpHandler extends ImageResourceHttpHandler {
         if (text_ != "")
           LogMe.aLogger.info("alt text if marquee file not found: " + text_); 
       } 
+      
+      if (WebEnabledPixel.getLCDMarquee().equals("yes")) {
+            LCDPixelcade lcdDisplay = new LCDPixelcade();
+            lcdDisplay.displayImage("nodata", consoleNameMapped);
+      }
+      
+      
       String requestedPath = this.application.getPixel().getPixelHome() + "console\\" + consoleNameMapped;
       if (!CliPixel.getSilentMode()) {
         System.out.println("Looking for: " + requestedPath + ".png or .gif");

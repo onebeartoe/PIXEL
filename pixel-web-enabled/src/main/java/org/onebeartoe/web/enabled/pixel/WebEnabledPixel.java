@@ -73,7 +73,7 @@ import org.onebeartoe.web.enabled.pixel.controllers.RebootHttpHandler;
 
 
 public class WebEnabledPixel {
-  public static String pixelwebVersion = "2.8.0";
+  public static String pixelwebVersion = "2.8.1";
   
   public static LogMe logMe = null;
   

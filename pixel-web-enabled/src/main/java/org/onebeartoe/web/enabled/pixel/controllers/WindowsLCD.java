@@ -16,6 +16,7 @@ static String NOT_FOUND = "";
 private static ImageIcon ii;
 private String basePath = "D:\\Arcade\\Pixelcade\\lcdmarquees";
 private String pixelHome = System.getProperty("user.dir") + "\\";  
+private JFrame myFrame = new JFrame();
 
 public GraphicsDevice[] connectedDevices() {
 
@@ -43,8 +44,10 @@ public GraphicsDevice[] connectedDevices() {
 
     ii = new ImageIcon(marqueePath);
         JImage imageLabel = new JImage(marqueePath);
-
-        JFrame myFrame = new JFrame();
+        myFrame.getContentPane().removeAll();
+        //JFrame myFrame = new JFrame();
+        myFrame = new JFrame();
+        myFrame.setType(Window.Type.UTILITY);
 
         myFrame.setSize(1280,390);
         myFrame.add(imageLabel.p);
@@ -79,9 +82,14 @@ public GraphicsDevice[] connectedDevices() {
 class JImage{
     BufferedImage bi = null;
     MyJPanel p;
+    
+ 
+    
     JImage(String file){
         try{
             bi = ImageIO.read(new File(file));
+            BufferedImage rs = resize(bi, 390,1280); //new
+            bi = rs; //new
             JFrame f = new JFrame();
             f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
             p = new MyJPanel();
