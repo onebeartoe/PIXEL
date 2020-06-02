@@ -12,6 +12,14 @@ import java.awt.EventQueue;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import javafx.beans.property.DoubleProperty;
+import javafx.embed.swing.JFXPanel;
+import javafx.scene.Scene;
+import javafx.scene.layout.StackPane;
+import javafx.scene.media.Media;
+import javafx.scene.media.MediaPlayer;
+import javafx.scene.media.MediaView;
+import javafx.stage.Screen;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -61,12 +69,9 @@ public GraphicsDevice[] connectedDevices() {
     }
 
     //basePath = new File(WindowsLCD.class.getProtectionDomain().getCodeSource().getLocation().toURI()).getParent() + "/lcdmarquees/";
-    try {
-     basePath = pixelHome + "lcdmarquees/";
-     NOT_FOUND = basePath + "pixelcade.png";  //if not found, we'll show d:\arcade\pixelcade\lcdmarquees\pixelcade.png for example
-    } catch (URISyntaxException e) {
-            e.printStackTrace();
-        };
+    basePath = pixelHome + "lcdmarquees/";
+    NOT_FOUND = basePath + "pixelcade.png";  //if not found, we'll show d:\arcade\pixelcade\lcdmarquees\pixelcade.png for example
+;
     String marqueePath = NOT_FOUND;
     if(new File(String.format("%s%s.png",basePath,named)).exists()){
         marqueePath = String.format("%s%s.png",basePath,named);

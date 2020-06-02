@@ -1,8 +1,6 @@
 
 package org.onebeartoe.web.enabled.pixel.controllers;
 
-
-
 import ioio.lib.api.exception.ConnectionLostException;
 import java.awt.Color;
 import java.io.File;
@@ -45,8 +43,6 @@ public class ArcadeHttpHandler extends ImageResourceHttpHandler {
     } catch (NoSuchAlgorithmException ex) {
       Logger.getLogger(ArcadeHttpHandler.class.getName()).log(Level.SEVERE, (String)null, ex);
     }
-    
-   
   }
   
   public void writeImageResource(String urlParams) throws IOException, ConnectionLostException {
@@ -96,6 +92,7 @@ public class ArcadeHttpHandler extends ImageResourceHttpHandler {
       Logger.getLogger(ArcadeHttpHandler.class.getName()).log(Level.SEVERE, (String)null, ex);
     } 
     URI tempURI = null;
+    LCDPixelcade lcdDisplay = null;
     
     try {
       tempURI = new URI("http://localhost:8080" + urlParams);
@@ -215,8 +212,14 @@ public class ArcadeHttpHandler extends ImageResourceHttpHandler {
           LogMe.aLogger.info("alt text if marquee file not found: " + text_); 
       } 
      
+//      if (WebEnabledPixel.getLCDMarquee().equals("yes")) {
+//            LCDPixelcade lcdDisplay = new LCDPixelcade();
+//            lcdDisplay.displayImage(arcadeNameOnly, consoleNameMapped);
+//      }
+      
       if (WebEnabledPixel.getLCDMarquee().equals("yes")) {
-            LCDPixelcade lcdDisplay = new LCDPixelcade();
+            if(lcdDisplay == null)
+               lcdDisplay = new LCDPixelcade();
             lcdDisplay.displayImage(arcadeNameOnly, consoleNameMapped);
       }
       
@@ -224,37 +227,43 @@ public class ArcadeHttpHandler extends ImageResourceHttpHandler {
       File arcadeFilePNG = new File(arcadeFilePathPNG);
       arcadeFilePathGIF = this.application.getPixel().getPixelHome() + consoleNameMapped + "/" + arcadeNameOnly + ".gif";
       File arcadeFileGIF = new File(arcadeFilePathGIF);
+      
       if (arcadeFilePNG.exists() && !arcadeFilePNG.isDirectory()) {
         arcadeNameOnly = FilenameUtils.removeExtension(arcadeName);
-      } else {
-        String arcadeNameOnlyUnderscore = arcadeNameOnly.replaceAll("_", " ");
-        String arcadeFilePathPNGUnderscore = this.application.getPixel().getPixelHome() + consoleNameMapped + "/" + arcadeNameOnlyUnderscore + ".png";
-        arcadeFilePNG = new File(arcadeFilePathPNGUnderscore);
-        if (arcadeFilePNG.exists() && !arcadeFilePNG.isDirectory()) {
-          arcadeNameOnly = arcadeNameOnlyUnderscore;
-        } else {
-          String arcadeNamelowerCase = arcadeNameOnly.toLowerCase();
-          String arcadeFilePathPNGlowerCase = this.application.getPixel().getPixelHome() + consoleNameMapped + "/" + arcadeNamelowerCase + ".png";
-          arcadeFilePNG = new File(arcadeFilePathPNGlowerCase);
-          if (arcadeFilePNG.exists() && !arcadeFilePNG.isDirectory())
-            arcadeNameOnly = arcadeNamelowerCase; 
-        } 
+      } 
+      else {
+            String arcadeNameOnlyUnderscore = arcadeNameOnly.replaceAll("_", " ");
+            String arcadeFilePathPNGUnderscore = this.application.getPixel().getPixelHome() + consoleNameMapped + "/" + arcadeNameOnlyUnderscore + ".png";
+            arcadeFilePNG = new File(arcadeFilePathPNGUnderscore);
+            if (arcadeFilePNG.exists() && !arcadeFilePNG.isDirectory()) {
+              arcadeNameOnly = arcadeNameOnlyUnderscore;
+            } else {
+              String arcadeNamelowerCase = arcadeNameOnly.toLowerCase();
+              String arcadeFilePathPNGlowerCase = this.application.getPixel().getPixelHome() + consoleNameMapped + "/" + arcadeNamelowerCase + ".png";
+              arcadeFilePNG = new File(arcadeFilePathPNGlowerCase);
+              if (arcadeFilePNG.exists() && !arcadeFilePNG.isDirectory())
+                arcadeNameOnly = arcadeNamelowerCase; 
+            } 
       } 
       if (arcadeFileGIF.exists() && !arcadeFileGIF.isDirectory()) {
         arcadeNameOnly = FilenameUtils.removeExtension(arcadeName);
-      } else {
-        String arcadeNameOnlyUnderscore = arcadeNameOnly.replaceAll("_", " ");
-        String arcadeFilePathGIFUnderscore = this.application.getPixel().getPixelHome() + consoleNameMapped + "/" + arcadeNameOnlyUnderscore + ".gif";
-        arcadeFileGIF = new File(arcadeFilePathGIFUnderscore);
-        if (arcadeFileGIF.exists() && !arcadeFileGIF.isDirectory()) {
-          arcadeNameOnly = arcadeNameOnlyUnderscore;
-        } else {
-          String arcadeNamelowerCase = arcadeNameOnly.toLowerCase();
-          String arcadeFilePathGIFlowerCase = this.application.getPixel().getPixelHome() + consoleNameMapped + "/" + arcadeNamelowerCase + ".gif";
-          arcadeFileGIF = new File(arcadeFilePathGIFlowerCase);
-          if (arcadeFileGIF.exists() && !arcadeFileGIF.isDirectory())
-            arcadeNameOnly = arcadeNamelowerCase; 
-        } 
+      } 
+      else {
+            String arcadeNameOnlyUnderscore = arcadeNameOnly.replaceAll("_", " ");
+            String arcadeFilePathGIFUnderscore = this.application.getPixel().getPixelHome() + consoleNameMapped + "/" + arcadeNameOnlyUnderscore + ".gif";
+            arcadeFileGIF = new File(arcadeFilePathGIFUnderscore);
+
+            if (arcadeFileGIF.exists() && !arcadeFileGIF.isDirectory()) {
+              arcadeNameOnly = arcadeNameOnlyUnderscore;
+            } 
+            else {
+              String arcadeNamelowerCase = arcadeNameOnly.toLowerCase();
+              String arcadeFilePathGIFlowerCase = this.application.getPixel().getPixelHome() + consoleNameMapped + "/" + arcadeNamelowerCase + ".gif";
+              arcadeFileGIF = new File(arcadeFilePathGIFlowerCase);
+
+              if (arcadeFileGIF.exists() && !arcadeFileGIF.isDirectory())
+                arcadeNameOnly = arcadeNamelowerCase; 
+            } 
       } 
       String requestedPath = this.application.getPixel().getPixelHome() + consoleNameMapped + "\\" + arcadeNameOnly;
       if (!CliPixel.getSilentMode()) {

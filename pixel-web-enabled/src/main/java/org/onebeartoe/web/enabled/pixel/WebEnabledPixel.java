@@ -167,6 +167,8 @@ public class WebEnabledPixel {
   
   public static PrintWriter Arduino1MatrixOutput;
   
+  LCDPixelcade lcdDisplay = null;
+  
   public WebEnabledPixel(String[] args) throws FileNotFoundException, IOException {
     this.cli = new CliPixel(args);
     this.cli.parse();
@@ -174,17 +176,21 @@ public class WebEnabledPixel {
     silentMode_ = CliPixel.getSilentMode();
     backgroundMode_ = CliPixel.getBackgroundMode();
     logMe = LogMe.getInstance();
+    
     if (!silentMode_) {
       LogMe.aLogger.info("Pixelcade Listener (pixelweb) Version " + pixelwebVersion);
       System.out.println("Pixelcade Listener (pixelweb) Version " + pixelwebVersion);
     } 
+    
     defaultyTextOffset = this.cli.getyTextOffset();
     LED_MATRIX_ID = this.cli.getLEDMatrixType();
+    
     if (isWindows()) {
       alreadyRunningErrorMsg = "*** ERROR *** \nPixel Listener (pixelweb.exe) is already running\nYou don't need to launch it again\nYou may also want to add the Pixel Listener to your Windows Startup Folder";
     } else {
       alreadyRunningErrorMsg = "*** ERROR *** \nPixel Listener (pixelweb.jar) is already running\nYou don't need to launch it again\nYou may also want to add the Pixel Listener to your system.d startup";
     } 
+    
     File file = new File("settings.ini");
     if (file.exists() && !file.isDirectory()) {
       Ini ini = null;
@@ -347,6 +353,7 @@ public class WebEnabledPixel {
         } 
         LED_MATRIX_ID = 15;
       } 
+      
       if (this.ledResolution_.equals("64x32")) {
         if (!silentMode_) {
           System.out.println("PIXEL resolution found in settings.ini: resolution=" + this.ledResolution_);
@@ -354,6 +361,7 @@ public class WebEnabledPixel {
         } 
         LED_MATRIX_ID = 13;
       } 
+      
       if (this.ledResolution_.equals("32x32")) {
         if (!silentMode_) {
           System.out.println("PIXEL resolution found in settings.ini: resolution=" + this.ledResolution_);
@@ -361,6 +369,7 @@ public class WebEnabledPixel {
         } 
         LED_MATRIX_ID = 11;
       } 
+      
       if (this.ledResolution_.equals("64x64")) {
         if (!silentMode_) {
           System.out.println("PIXEL resolution found in settings.ini: resolution=" + this.ledResolution_);
@@ -368,6 +377,7 @@ public class WebEnabledPixel {
         } 
         LED_MATRIX_ID = 14;
       } 
+      
       if (this.ledResolution_.equals("64x32C")) {
         if (!silentMode_) {
           System.out.println("PIXEL resolution found in settings.ini: resolution=" + this.ledResolution_);
@@ -382,6 +392,7 @@ public class WebEnabledPixel {
         } 
         LED_MATRIX_ID = 25;
       } 
+      
       if (this.ledResolution_.equals("64x32C2")) {
         if (!silentMode_) {
           System.out.println("PIXEL resolution found in settings.ini: resolution=" + this.ledResolution_);
@@ -397,6 +408,7 @@ public class WebEnabledPixel {
         LED_MATRIX_ID = 27;
       } 
     } 
+    
     pixelEnvironment = new PixelEnvironment(LED_MATRIX_ID);
     MATRIX_TYPE = pixelEnvironment.LED_MATRIX;
     pixel = new Pixel(pixelEnvironment.LED_MATRIX, pixelEnvironment.currentResolution);
@@ -521,10 +533,17 @@ public class WebEnabledPixel {
       System.out.println("consolemetadata.csv not found");
     } 
     
-    if (lcdMarquee_.equals("yes")) {
-          LCDPixelcade lcdDisplay = new LCDPixelcade();
-          lcdDisplay.displayImage("nodata","nodata");
-    }
+//    if (lcdMarquee_.equals("yes")) {
+//          LCDPixelcade lcdDisplay = new LCDPixelcade();
+//          lcdDisplay.displayImage("nodata","nodata");
+//    }
+    
+     if (lcdMarquee_.equals("yes")) {
+            if(lcdDisplay == null)
+               lcdDisplay = new LCDPixelcade();
+             lcdDisplay.displayImage("nodata","nodata");
+      }
+      
     
     
     if (this.SubDisplayAccessory_.equals("yes")) {
@@ -1637,8 +1656,10 @@ public class WebEnabledPixel {
             WebEnabledPixel.this.searchTimer.cancel();
             message.append("PIXEL Status: Connected");
             WebEnabledPixel.pixelConnected = true;
+            
             if (!WebEnabledPixel.this.playLastSavedMarqueeOnStartup_.equals("no"))
               WebEnabledPixel.pixel.playLocalMode(); 
+            
             if (!WebEnabledPixel.pixel.PixelQueue.isEmpty()) {
               WebEnabledPixel.pixel.doneLoopingCheckQueue();
               if (!WebEnabledPixel.silentMode_) {
