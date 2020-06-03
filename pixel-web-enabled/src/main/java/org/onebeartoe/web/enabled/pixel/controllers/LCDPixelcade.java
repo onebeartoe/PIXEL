@@ -25,6 +25,7 @@ public class LCDPixelcade {
     private static final String ENGINE_PATH = "lcdmarquees/";
     public static String theCommand = DEFAULT_COMMAND;
     public static  WindowsLCD windowsLCD = null;
+    //public static  WindowsLCD windowsLCD = new WindowsLCD();
     public static boolean isWindows = System.getProperty("os.name").toLowerCase().startsWith("windows");
     public static void main(String[] args) {
 
@@ -62,10 +63,13 @@ public class LCDPixelcade {
 
     static public void displayImage(String named, String system) throws IOException {
         if(isWindows) {
-            if(windowsLCD == null)
-            windowsLCD = new WindowsLCD();
+            new WindowsLCD().displayImage(named, system);
+
             
-            windowsLCD.displayImage(named, system);
+           // if(windowsLCD == null)
+           // windowsLCD = new WindowsLCD();
+           // 
+           // windowsLCD.displayImage(named, system);
             return;
         }
 //        if (new File(String.format("/home/pi/pixelcade/lcdmarquees/console/default-%s.png", system)).exists())
