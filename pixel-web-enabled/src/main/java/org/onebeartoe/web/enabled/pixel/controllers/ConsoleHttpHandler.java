@@ -67,7 +67,7 @@ public class ConsoleHttpHandler extends ImageResourceHttpHandler {
     String text_ = "";
     String color_ = null;
     Color color = null;
-    int scrollsmooth_ = 1;
+    int scrollsmooth_ = 0;
     String speed_ = null;
     Long speed = null;
     Long speeddelay_ = Long.valueOf(10L);

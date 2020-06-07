@@ -1031,12 +1031,13 @@ public class WebEnabledPixel {
         scrollsmooth_ = 1;
         return scrollsmooth_;
       case "normal":
-        scrollsmooth_ = 2;
+        scrollsmooth_ = 3;
         return scrollsmooth_;
       case "fast":
         scrollsmooth_ = 5;
         return scrollsmooth_;
     } 
+    //if no match
     int scrollsmooth_ = 2;
     return scrollsmooth_;
   }

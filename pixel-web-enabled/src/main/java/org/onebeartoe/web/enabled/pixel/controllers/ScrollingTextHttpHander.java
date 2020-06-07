@@ -50,7 +50,7 @@ public class ScrollingTextHttpHander extends TextHttpHandler  //TO DO have TextH
         Long speed = null;
         String loop_ = null;
         int loop = 0;
-        int scrollsmooth_ = 1;
+        int scrollsmooth_ = 0;
         Long speeddelay_ = 10L;
         int fontSize_ = 0;
         int yOffset_ = 0;

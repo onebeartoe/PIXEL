@@ -71,7 +71,7 @@ public class ArcadeHttpHandler extends ImageResourceHttpHandler {
     boolean saveAnimation = false;
     int loop_ = 0;
     String text_ = "";
-    int scrollsmooth_ = 1;
+    int scrollsmooth_ = 0;
     Long speeddelay_ = Long.valueOf(10L);
     String speed_ = null;
     Long speed = null;
@@ -83,8 +83,8 @@ public class ArcadeHttpHandler extends ImageResourceHttpHandler {
     int yOffset_ = 0;
     int lines_ = 1;
     String font_ = null;
-    if (WebEnabledPixel.isWindows())
-      scrollsmooth_ = 3; 
+//    if (WebEnabledPixel.isWindows())
+//      scrollsmooth_ = 3; 
     List<NameValuePair> params = null;
     try {
       params = URLEncodedUtils.parse(new URI(urlParams), "UTF-8");
