@@ -3,6 +3,7 @@ package org.onebeartoe.web.enabled.pixel.controllers;
 
 import ioio.lib.api.exception.ConnectionLostException;
 import java.awt.Color;
+import java.awt.Font;
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -59,6 +60,8 @@ public class ArcadeHttpHandler extends ImageResourceHttpHandler {
     String defaultConsoleFilePathPNG = null;
     String consoleNameMapped = null;
     LogMe logMe = null;
+    Font font = null;
+    WindowsLCD windowsLCDdisplay = null;
     
     String[] consoleArray = { 
         "mame", "atari2600", "daphne", "nes", "neogeo", "atarilynx", "snes", "atari5200", "atari7800", "atarijaguar", 
@@ -294,6 +297,13 @@ public class ArcadeHttpHandler extends ImageResourceHttpHandler {
           
           pixel.scrollText(text_, loop_, speed.longValue(), color, WebEnabledPixel.pixelConnected, scrollsmooth_);
           
+          if (Pixel.isWindows() && WebEnabledPixel.getLCDMarquee().equals("yes")) {
+                if(windowsLCDdisplay == null)
+                   windowsLCDdisplay = new WindowsLCD();
+
+                windowsLCDdisplay.scrollText(text_, new Font(font_, Font.PLAIN, 288), color, 5); //int speed
+          }
+          
         } else {
           consoleFilePathGIF = this.application.getPixel().getPixelHome() + "console/default-" + consoleNameMapped + ".gif";
           File consoleFileGIF = new File(consoleFilePathGIF);
@@ -396,6 +406,16 @@ public class ArcadeHttpHandler extends ImageResourceHttpHandler {
           
           
           pixel.scrollText(text_, loop_, speed.longValue(), color, WebEnabledPixel.pixelConnected, scrollsmooth_);
+          
+          
+          if (Pixel.isWindows() && WebEnabledPixel.getLCDMarquee().equals("yes")) {
+                if(windowsLCDdisplay == null)
+                   windowsLCDdisplay = new WindowsLCD();
+
+                windowsLCDdisplay.scrollText(text_, new Font(font_, Font.PLAIN, 288), color, 5); //int speed
+          }
+          
+          
         } else {
           consoleFilePathPNG = this.application.getPixel().getPixelHome() + "console/default-" + consoleNameMapped + ".png";
           File consoleFilePNG = new File(consoleFilePathPNG);

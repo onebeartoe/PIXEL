@@ -28,11 +28,11 @@
     <modules>
         <module>ioio-commons</module>
         <module>ioio-pc</module>
-        <module>ioio-bluetooth</module>
-        <module>ioio-android</module>
+       <!--  <module>ioio-bluetooth</module> -->
+      <!--   <module>ioio-android</module> -->
         <module>pixel-commons</module>
-        <module>pixel-pc</module>
-        <module>pixel-jee</module>
+      <!--   <module>pixel-pc</module> -->
+      <!--  <module>pixel-jee</module> -->
         <module>pixel-web-enabled</module>
       <!--  <module>pixelcade-front-end</module> -->
     </modules>

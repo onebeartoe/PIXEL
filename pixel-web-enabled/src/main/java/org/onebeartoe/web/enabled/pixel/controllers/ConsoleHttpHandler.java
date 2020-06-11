@@ -2,6 +2,7 @@ package org.onebeartoe.web.enabled.pixel.controllers;
 
 import ioio.lib.api.exception.ConnectionLostException;
 import java.awt.Color;
+import java.awt.Font;
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -77,6 +78,8 @@ public class ConsoleHttpHandler extends ImageResourceHttpHandler {
     String font_ = null;
     List<NameValuePair> params = null;
     LCDPixelcade lcdDisplay = null;
+    Font font = null;
+    WindowsLCD windowsLCDdisplay = null;
     
     try {
       params = URLEncodedUtils.parse(new URI(urlParams), "UTF-8");
@@ -221,7 +224,17 @@ public class ConsoleHttpHandler extends ImageResourceHttpHandler {
             speed = speeddelay_; 
           if (color_ != null)
             color = getColorFromHexOrName(color_); 
+          
+          
           pixel.scrollText(text_, loop_, speed.longValue(), color, WebEnabledPixel.pixelConnected, scrollsmooth_);
+          
+          if (Pixel.isWindows() && WebEnabledPixel.getLCDMarquee().equals("yes")) {
+                if(windowsLCDdisplay == null)
+                   windowsLCDdisplay = new WindowsLCD();
+
+                windowsLCDdisplay.scrollText(text_, new Font(font_, Font.PLAIN, 288), color, 5); //int speed
+          }
+          
         } else {
           if (!CliPixel.getSilentMode()) {
             System.out.println("GIF default console LED Marquee file not found, looking for default marquee: " + consoleFilePathGIF);
@@ -302,7 +315,16 @@ public class ConsoleHttpHandler extends ImageResourceHttpHandler {
             Pixel.setDoubleLine(false); //don't forget to set it back
           
           
-          pixel.scrollText(text_, loop_, speed.longValue(), color, WebEnabledPixel.pixelConnected, scrollsmooth_);
+        pixel.scrollText(text_, loop_, speed.longValue(), color, WebEnabledPixel.pixelConnected, scrollsmooth_);
+        
+        if (Pixel.isWindows() && WebEnabledPixel.getLCDMarquee().equals("yes")) {
+                if(windowsLCDdisplay == null)
+                   windowsLCDdisplay = new WindowsLCD();
+
+                windowsLCDdisplay.scrollText(text_, new Font(font_, Font.PLAIN, 288), color, 5); //int speed
+        }
+        
+        
         } 
         
         else {
