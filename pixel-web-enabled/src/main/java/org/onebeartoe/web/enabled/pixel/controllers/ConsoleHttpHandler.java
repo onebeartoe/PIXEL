@@ -183,6 +183,15 @@ public class ConsoleHttpHandler extends ImageResourceHttpHandler {
           LogMe.aLogger.info("alt text if marquee file not found: " + text_); 
       } 
       
+       if (WebEnabledPixel.getLCDMarquee().equals("yes")) {
+        if (this.lcdDisplay == null)
+            this.lcdDisplay = new LCDPixelcade();
+
+            lcdDisplay.displayImage("blankgame", consoleNameMapped);
+      }
+      
+      
+      
 //      if (WebEnabledPixel.getLCDMarquee().equals("yes")) {
 //            LCDPixelcade lcdDisplay = new LCDPixelcade();
 //            lcdDisplay.displayImage("nodata", consoleNameMapped);
