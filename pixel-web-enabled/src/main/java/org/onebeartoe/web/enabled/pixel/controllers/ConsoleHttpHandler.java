@@ -23,8 +23,14 @@ import org.onebeartoe.web.enabled.pixel.CliPixel;
 import org.onebeartoe.web.enabled.pixel.WebEnabledPixel;
 
 public class ConsoleHttpHandler extends ImageResourceHttpHandler {
+    protected LCDPixelcade lcdDisplay = null;
+    
   public ConsoleHttpHandler(WebEnabledPixel application) {
     super(application);
+    
+     if(WebEnabledPixel.getLCDMarquee().equals("yes"))
+       lcdDisplay = new LCDPixelcade();
+     
     this.basePath = "";
     this.defaultImageClassPath = "mame";
     this.modeName = "arcade";
@@ -79,7 +85,7 @@ public class ConsoleHttpHandler extends ImageResourceHttpHandler {
     List<NameValuePair> params = null;
     LCDPixelcade lcdDisplay = null;
     Font font = null;
-    WindowsLCD windowsLCDdisplay = null;
+    //WindowsLCD windowsLCDdisplay = null;
     
     try {
       params = URLEncodedUtils.parse(new URI(urlParams), "UTF-8");
@@ -182,11 +188,11 @@ public class ConsoleHttpHandler extends ImageResourceHttpHandler {
 //            lcdDisplay.displayImage("nodata", consoleNameMapped);
 //      }
       
-      if (WebEnabledPixel.getLCDMarquee().equals("yes")) {
-            if(lcdDisplay == null)
-               lcdDisplay = new LCDPixelcade();
-            lcdDisplay.displayImage("nodata", consoleNameMapped);
-      }
+//      if (WebEnabledPixel.getLCDMarquee().equals("yes")) {
+//            if(lcdDisplay == null)
+//               lcdDisplay = new LCDPixelcade();
+//            lcdDisplay.displayImage("nodata", consoleNameMapped);
+//      }
       
       
       String requestedPath = this.application.getPixel().getPixelHome() + "console\\" + consoleNameMapped;
@@ -228,12 +234,12 @@ public class ConsoleHttpHandler extends ImageResourceHttpHandler {
           
           pixel.scrollText(text_, loop_, speed.longValue(), color, WebEnabledPixel.pixelConnected, scrollsmooth_);
           
-          if (Pixel.isWindows() && WebEnabledPixel.getLCDMarquee().equals("yes")) {
-                if(windowsLCDdisplay == null)
-                   windowsLCDdisplay = new WindowsLCD();
-
-                windowsLCDdisplay.scrollText(text_, new Font(font_, Font.PLAIN, 288), color, 5); //int speed
-          }
+//          if (Pixel.isWindows() && WebEnabledPixel.getLCDMarquee().equals("yes")) {
+//                if(windowsLCDdisplay == null)
+//                   windowsLCDdisplay = new WindowsLCD();
+//
+//                windowsLCDdisplay.scrollText(text_, new Font(font_, Font.PLAIN, 288), color, 5); //int speed
+//          }
           
         } else {
           if (!CliPixel.getSilentMode()) {
@@ -317,15 +323,15 @@ public class ConsoleHttpHandler extends ImageResourceHttpHandler {
           
         pixel.scrollText(text_, loop_, speed.longValue(), color, WebEnabledPixel.pixelConnected, scrollsmooth_);
         
-        if (Pixel.isWindows() && WebEnabledPixel.getLCDMarquee().equals("yes")) {
-                if(windowsLCDdisplay == null)
-                   windowsLCDdisplay = new WindowsLCD();
-
-                windowsLCDdisplay.scrollText(text_, new Font(font_, Font.PLAIN, 288), color, 5); //int speed
-        }
+//        if (Pixel.isWindows() && WebEnabledPixel.getLCDMarquee().equals("yes")) {
+//                if(windowsLCDdisplay == null)
+//                   windowsLCDdisplay = new WindowsLCD();
+//
+//                windowsLCDdisplay.scrollText(text_, new Font(font_, Font.PLAIN, 288), color, 5); //int speed
+//        }
         
         
-        } 
+      } 
         
         else {
           if (!CliPixel.getSilentMode()) {

@@ -27,17 +27,22 @@ import org.onebeartoe.web.enabled.pixel.CliPixel;
  * @author Roberto Marquez
  */
 public class ScrollingTextHttpHander extends TextHttpHandler  //TO DO have TextHttpHandler send a return
-        
 {
-    //private Logger logger;
-    
+    protected LCDPixelcade windowsLCDdisplay = null;
     protected WebEnabledPixel app;
     
     public ScrollingTextHttpHander(WebEnabledPixel application)
     {
+        //super(application);
+    
+        if(WebEnabledPixel.getLCDMarquee().equals("yes"))
+            windowsLCDdisplay = new LCDPixelcade();
+    
         String name = getClass().getName();
         
         this.app = application;
+        
+        
     }
 
     @Override
@@ -206,12 +211,15 @@ public class ScrollingTextHttpHander extends TextHttpHandler  //TO DO have TextH
         
     app.getPixel().scrollText(text_, loop, speed, color,WebEnabledPixel.pixelConnected,scrollsmooth_);
     
-    if (Pixel.isWindows() && WebEnabledPixel.getLCDMarquee().equals("yes")) { //scrolling text for LCD only works on windows
-        if(windowsLCDdisplay == null)
-           windowsLCDdisplay = new WindowsLCD();
-
-        windowsLCDdisplay.scrollText(text_, new Font(font_, Font.PLAIN, 288), color, 5); //last parameter is an int for speed
-    }
+    if(windowsLCDdisplay != null)
+        windowsLCDdisplay.scrollText(text_, new Font(font_, Font.PLAIN, 288), color, 5); 
+    
+//    if (Pixel.isWindows() && WebEnabledPixel.getLCDMarquee().equals("yes")) { //scrolling text for LCD only works on windows
+//        if(windowsLCDdisplay == null)
+//           windowsLCDdisplay = new WindowsLCD();
+//
+//        windowsLCDdisplay.scrollText(text_, new Font(font_, Font.PLAIN, 288), color, 5); //last parameter is an int for speed
+//    }
         
     return "scrolling text request received: " + text_ ;
     
