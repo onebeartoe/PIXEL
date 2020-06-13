@@ -109,7 +109,21 @@ public class LCDPixelcade {
         }
         assert exitCode == 0;
     }
+    
+    static public void scrollText(String message, Font font, Color color, int speed) {
+    if(isWindows){
+        if(windowsLCD == null)
+            windowsLCD = new WindowsLCD();
+        windowsLCD.scrollText(message,font,color, speed);
+        return;
+    }
 }
+    
+    
+    
+}
+
+
 
 //package org.onebeartoe.web.enabled.pixel.controllers;
 //

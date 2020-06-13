@@ -41,6 +41,13 @@ public class ArcadeHttpHandler extends ImageResourceHttpHandler {
     Pixel pixel = this.application.getPixel();
     pixel.writeArcadeImage(arcadeFilePNGFullPath, saveAnimation, loop, consoleNameMapped, PNGNameWithExtension, WebEnabledPixel.pixelConnected);
     
+     if (WebEnabledPixel.getLCDMarquee().equals("yes")) {
+        if (this.lcdDisplay == null)
+            this.lcdDisplay = new LCDPixelcade();
+            String arcadeNameOnly = FilenameUtils.removeExtension(PNGNameWithExtension);
+            lcdDisplay.displayImage(arcadeNameOnly, consoleNameMapped);
+      }
+    
   }
   
   public void handleGIF(String consoleName, String arcadeName, Boolean saveAnimation, int loop) {
@@ -50,6 +57,17 @@ public class ArcadeHttpHandler extends ImageResourceHttpHandler {
     } catch (NoSuchAlgorithmException ex) {
       Logger.getLogger(ArcadeHttpHandler.class.getName()).log(Level.SEVERE, (String)null, ex);
     }
+    
+    if (WebEnabledPixel.getLCDMarquee().equals("yes")) {
+        if (this.lcdDisplay == null)
+            this.lcdDisplay = new LCDPixelcade();
+            String arcadeNameOnly = FilenameUtils.removeExtension(arcadeName);
+        try {
+            lcdDisplay.displayImage(arcadeNameOnly, consoleName);
+        } catch (IOException ex) {
+            Logger.getLogger(ArcadeHttpHandler.class.getName()).log(Level.SEVERE, null, ex);
+        }
+      }
     
    
   }
@@ -220,12 +238,12 @@ public class ArcadeHttpHandler extends ImageResourceHttpHandler {
           LogMe.aLogger.info("alt text if marquee file not found: " + text_); 
       } 
      
-      if (WebEnabledPixel.getLCDMarquee().equals("yes")) {
-        if (this.lcdDisplay == null)
-            this.lcdDisplay = new LCDPixelcade();
-
-            lcdDisplay.displayImage(arcadeNameOnly, consoleNameMapped);
-      }
+//      if (WebEnabledPixel.getLCDMarquee().equals("yes")) {
+//        if (this.lcdDisplay == null)
+//            this.lcdDisplay = new LCDPixelcade();
+//
+//            lcdDisplay.displayImage(arcadeNameOnly, consoleNameMapped);
+//      }
       
       arcadeFilePathPNG = application.getPixel().getPixelHome() + consoleNameMapped + "/" + arcadeNameOnly + ".png";
       File arcadeFilePNG = new File(arcadeFilePathPNG);
@@ -291,6 +309,12 @@ public class ArcadeHttpHandler extends ImageResourceHttpHandler {
             color = WebEnabledPixel.getColorFromHexOrName(color_);
           
           pixel.scrollText(text_, loop_, speed.longValue(), color, WebEnabledPixel.pixelConnected, scrollsmooth_);
+          
+           if (Pixel.isWindows() && WebEnabledPixel.getLCDMarquee().equals("yes")) {
+                if(lcdDisplay == null)
+                   lcdDisplay = new LCDPixelcade();
+            lcdDisplay.scrollText(text_, new Font(font_, Font.PLAIN, 288), color, 5); //int speed
+        }
           
           
         } else {
@@ -395,6 +419,12 @@ public class ArcadeHttpHandler extends ImageResourceHttpHandler {
           
           
           pixel.scrollText(text_, loop_, speed.longValue(), color, WebEnabledPixel.pixelConnected, scrollsmooth_);
+          
+           if (Pixel.isWindows() && WebEnabledPixel.getLCDMarquee().equals("yes")) {
+                if(lcdDisplay == null)
+                   lcdDisplay = new LCDPixelcade();
+            lcdDisplay.scrollText(text_, new Font(font_, Font.PLAIN, 288), color, 5); //int speed
+        }
           
         } else {
           consoleFilePathPNG = this.application.getPixel().getPixelHome() + "console/default-" + consoleNameMapped + ".png";

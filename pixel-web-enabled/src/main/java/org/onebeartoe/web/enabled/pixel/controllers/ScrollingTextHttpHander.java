@@ -28,7 +28,7 @@ import org.onebeartoe.web.enabled.pixel.CliPixel;
  */
 public class ScrollingTextHttpHander extends TextHttpHandler  //TO DO have TextHttpHandler send a return
 {
-    protected LCDPixelcade windowsLCDdisplay = null;
+    protected LCDPixelcade lcdDisplay = null;
     protected WebEnabledPixel app;
     
     public ScrollingTextHttpHander(WebEnabledPixel application)
@@ -36,7 +36,7 @@ public class ScrollingTextHttpHander extends TextHttpHandler  //TO DO have TextH
         //super(application);
     
         if(WebEnabledPixel.getLCDMarquee().equals("yes"))
-            windowsLCDdisplay = new LCDPixelcade();
+            lcdDisplay = new LCDPixelcade();
     
         String name = getClass().getName();
         
@@ -65,7 +65,7 @@ public class ScrollingTextHttpHander extends TextHttpHandler  //TO DO have TextH
         LogMe logMe = LogMe.getInstance();
         URI requestURI = exchange.getRequestURI();
         Font font = null;
-        WindowsLCD windowsLCDdisplay = null;
+        
         
          if (!CliPixel.getSilentMode()) {
              logMe.aLogger.info("Scrolling text handler received a request: " + requestURI);
@@ -211,15 +211,11 @@ public class ScrollingTextHttpHander extends TextHttpHandler  //TO DO have TextH
         
     app.getPixel().scrollText(text_, loop, speed, color,WebEnabledPixel.pixelConnected,scrollsmooth_);
     
-    if(windowsLCDdisplay != null)
-        windowsLCDdisplay.scrollText(text_, new Font(font_, Font.PLAIN, 288), color, 5); 
-    
-//    if (Pixel.isWindows() && WebEnabledPixel.getLCDMarquee().equals("yes")) { //scrolling text for LCD only works on windows
-//        if(windowsLCDdisplay == null)
-//           windowsLCDdisplay = new WindowsLCD();
-//
-//        windowsLCDdisplay.scrollText(text_, new Font(font_, Font.PLAIN, 288), color, 5); //last parameter is an int for speed
-//    }
+    if (Pixel.isWindows() && WebEnabledPixel.getLCDMarquee().equals("yes")) {
+                if(lcdDisplay == null)
+                   lcdDisplay = new LCDPixelcade();
+            lcdDisplay.scrollText(text_, new Font(font_, Font.PLAIN, 288), color, 5); //int speed
+    }
         
     return "scrolling text request received: " + text_ ;
     

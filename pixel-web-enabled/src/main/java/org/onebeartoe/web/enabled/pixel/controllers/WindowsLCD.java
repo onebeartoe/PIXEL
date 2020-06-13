@@ -95,12 +95,13 @@ public GraphicsDevice[] connectedDevices() {
     }
         basePath = pixelHome + "lcdmarquees\\";
         NOT_FOUND = basePath + "\\pixelcade.png";  //if not found, we'll show d:\arcade\pixelcade\lcdmarquees\pixelcade.png for example
-    if(named.contains("nodata")){
+        
+    if(named.contains("nodata")) {
         marqueePanel.setMessage("Welcome and Game On!");
         showOnScreen(1,marqueeFrame);
         //this.scrollText("Welcome to KnJ's Funhouse!!!",this.font,Color.magenta,60);
             return;
-        }
+    }
     String marqueePath = NOT_FOUND;
     if(new File(String.format("%s%s.png",basePath,named)).exists()){
         marqueePath = String.format("%s%s.png",basePath,named);
