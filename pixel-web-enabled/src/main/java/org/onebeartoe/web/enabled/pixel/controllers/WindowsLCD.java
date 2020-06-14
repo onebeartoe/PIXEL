@@ -40,7 +40,6 @@ import javafx.scene.control.Button;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import javafx.util.Duration;
-import org.onebeartoe.pixel.hardware.Pixel;
 import org.onebeartoe.web.enabled.pixel.WebEnabledPixel;
 
 
@@ -52,7 +51,7 @@ public class WindowsLCD {
     private boolean addedScroller = false;
     private String basePath = "D:\\Arcade\\Pixelcade\\lcdmarquees";
     //private String pixelHome = System.getProperty("user.dir") + "\\";
-    private static String pixelHome = Pixel.getHomePath();
+    private String pixelHome = WebEnabledPixel.getHome();
     protected JFrame myFrame = new JFrame();
     protected JFrame videoFrame = new JFrame();
     public JFrame marqueeFrame = new JFrame();
@@ -264,11 +263,9 @@ public class WindowsLCD {
     }
 }
 
-
-
 class MarqueePanel extends JFXPanel implements ActionListener {
     //private String pixelHome = System.getProperty("user.dir") + "\\";
-    private String pixelHome = Pixel.getHomePath();
+    private String pixelHome = WebEnabledPixel.getHome();
     private static final int RATE = 12;
     private final Timer timer = new Timer(60 / RATE, this);
     final HBox scrollingArea = new HBox();
@@ -446,7 +443,6 @@ class MarqueePanel extends JFXPanel implements ActionListener {
     }
 
 }
-
 
 //package org.onebeartoe.web.enabled.pixel.controllers;
 //

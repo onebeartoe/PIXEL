@@ -5,15 +5,20 @@ import java.awt.*;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import org.onebeartoe.pixel.hardware.Pixel;
 
 import org.onebeartoe.web.enabled.pixel.WebEnabledPixel;
 
 public class LCDPixelcade {
 
 
-    //private static String pixelHome = "/home/pi/pixelcade/";
-    private static String pixelHome = Pixel.getHomePath();
+//    private static String DEFAULT_COMMAND = "sudo fbi /home/pi/pixelcade/lcdmarquees/pixelcade.png -T 1  --noverbose --nocomments --fixwidth -a";
+//    private static final String JPG_COMMAND = "sudo fbi /home/pi/pixelcade/lcdmarquees/${named}.jpg -T 1 --noverbose --nocomments --fixwidth -a";
+//    private static final String PNG_COMMAND = "sudo fbi /home/pi/pixelcade/lcdmarquees/${named}.png -T 1 --noverbose --nocomments --fixwidth -a";
+//    private static final String SLIDESHOW = "sudo fbi /home/pi/pixelcade/lcdmarquees/* -T 1 -t 2 --noverbose --nocomments --fixwidth -a";
+//    private static final String RESET_COMMAND = "sudo killall -9 fbi;";
+//    private static final String MARQUEE_PATH = "/home/pi/pixelcade/lcdmarquees/";
+//    private static final String ENGINE_PATH = "/home/pi/pixelcade/lcdmarquees/";
+    private static String pixelHome = "/home/pi/pixelcade/";
     private static String sep = "/";
     private static String DEFAULT_COMMAND = "sudo fbi " + pixelHome + "lcdmarquees/pixelcade.png -T 1  -d /dev/fb0 --noverbose --nocomments --fixwidth -a";
     private static final String JPG_COMMAND = "sudo fbi " + pixelHome + "lcdmarquees/${named}.jpg -T 1  -d /dev/fb0 --noverbose --nocomments --fixwidth -a";
@@ -31,8 +36,7 @@ public class LCDPixelcade {
         String shell = "bash";
         if(isWindows){
             windowsLCD = new WindowsLCD();
-            //pixelHome =  System.getProperty("user.dir") + "\\";
-            pixelHome = Pixel.getHomePath();
+            pixelHome =  System.getProperty("user.dir") + "\\";
             sep = "\\";
         }
 
@@ -77,7 +81,7 @@ public class LCDPixelcade {
         windowsLCD.marqueePanel.setFont(font);
         windowsLCD.marqueePanel.setFontFileName(fontFilename);
         if(!windowsLCD.marqueePanel.didHi)
-        windowsLCD.marqueePanel.setMessage("Welcome to Pixelcade and Game On!");
+        windowsLCD.marqueePanel.setMessage("Welcome to the House of Fun!");
     }
 
     public void setNumLoops(int loops){

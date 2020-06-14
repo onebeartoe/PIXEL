@@ -335,7 +335,6 @@ public class ConsoleHttpHandler extends ImageResourceHttpHandler {
         else
             Pixel.setDoubleLine(false); //don't forget to set it back
           
-          
         pixel.scrollText(text_, loop_, speed.longValue(), color, WebEnabledPixel.pixelConnected, scrollsmooth_);
         
         if (Pixel.isWindows() && WebEnabledPixel.getLCDMarquee().equals("yes")) {
