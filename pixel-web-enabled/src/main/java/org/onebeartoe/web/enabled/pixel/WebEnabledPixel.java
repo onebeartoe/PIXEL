@@ -64,7 +64,7 @@ import org.onebeartoe.web.enabled.pixel.controllers.RebootHttpHandler;
 
 
 public class WebEnabledPixel {
-  public static String pixelwebVersion = "2.8.4";
+  public static String pixelwebVersion = "2.8.5";
   
   public static LogMe logMe = null;
   
@@ -140,6 +140,8 @@ public class WebEnabledPixel {
   
   private static String lcdMarquee_ = "no";
   
+  private static String lcdMarqueeMessage_ = "Welcome to Pixelcade and Game On!";
+  
   private static String defaultFont = "Arial Narrow 7";
   
   private static int defaultFontSize = 28;
@@ -158,7 +160,11 @@ public class WebEnabledPixel {
   
   public static PrintWriter Arduino1MatrixOutput;
 
-  private String pixelHome = System.getProperty("user.dir") + "\\";
+  //private String pixelHome = System.getProperty("user.dir") + "\\";
+  
+  private  String pixelHome = Pixel.getHomePath();
+  
+  
 
   public WebEnabledPixel(String[] args) throws FileNotFoundException, IOException {
     this.cli = new CliPixel(args);
@@ -330,6 +336,13 @@ public class WebEnabledPixel {
         sec.add("LCDMarquee", "no");
         sec.add("LCDMarquee_OPTION", "no");
         sec.add("LCDMarquee_OPTION", "yes");
+        ini.store();
+      } 
+      
+     if (sec.containsKey("LCDMarquee_Message")) {
+        lcdMarqueeMessage_ = (String)sec.get("LCDMarquee_Message");
+      } else {
+        sec.add("LCDMarquee_Message", "Welcome to Pixelcade and Game On!");
         ini.store();
       } 
       
@@ -522,14 +535,12 @@ public class WebEnabledPixel {
       }else {
         try {
           Font temp = Font.createFont(Font.TRUETYPE_FONT, new FileInputStream(pixelHome + "fonts/" + defaultFont + ".ttf"));
-          lcdDisplay.setLCDFont(temp.deriveFont(244f));
-          //lcdDisplay.windowsLCD.marqueeFrame.setFont(temp.deriveFont(244f));
+          lcdDisplay.setLCDFont(temp.deriveFont(244f),defaultFont + ".ttf");
         }catch (FontFormatException|IOException| NullPointerException e){
           System.out.println("Could not set lcd font :(...\n");
         }
       }
     }
-    
     
     if (this.SubDisplayAccessory_.equals("yes")) {
       System.out.println("Attempting to connect to Pixelcade Sub Display Accessory...");
@@ -678,202 +689,197 @@ public class WebEnabledPixel {
         }
     }
   
-
-  
-  
-  
-  
-  public void extractAnimationImages() throws IOException {
-    String animationsListFilesystemPath = pixel.getPixelHome() + "animations.text";
-    File animationsListFile = new File(animationsListFilesystemPath);
-    String pathPrefix = "animations/";
-    String animationsListClasspath = "/animations.text";
-    extractClasspathResourcesList(animationsListFile, animationsListClasspath, pathPrefix);
-  }
-  
-  public void extractGifSourceAnimationImages() throws IOException {
-    String animationsListFilesystemPath = pixel.getPixelHome() + "gifsource.text";
-    File animationsListFile = new File(animationsListFilesystemPath);
-    String pathPrefix = "animations/gifsource/";
-    String animationsListClasspath = "/gifsource.text";
-    extractClasspathResourcesList(animationsListFile, animationsListClasspath, pathPrefix);
-  }
-  
-  public void extractArcadeConsoleGIFs() throws IOException {
-    String animationsListFilesystemPath = pixel.getPixelHome() + "consoles.text";
-    File animationsListFile = new File(animationsListFilesystemPath);
-    String pathPrefix = "console/";
-    String animationsListClasspath = "/consoles.text";
-    extractClasspathResourcesList(animationsListFile, animationsListClasspath, pathPrefix);
-  }
-  
-  public void extractArcadeMAMEGIFs() throws IOException {
-    String animationsListFilesystemPath = pixel.getPixelHome() + "mame.text";
-    File animationsListFile = new File(animationsListFilesystemPath);
-    String pathPrefix = "mame/";
-    String animationsListClasspath = "/mame.text";
-    String mamePath = pixel.getPixelHome() + "mame";
-    File mameDirectory = new File(mamePath);
-    if (!mameDirectory.exists()) {
-      extractClasspathResourcesList(animationsListFile, animationsListClasspath, pathPrefix);
-    } else {
-      String message = "Pixel app will not extract the contents of " + mamePath + ".  The folder already exists";
-      System.out.println(message);
-    } 
-  }
-  
-  public void extractRetroPie() throws IOException {
-    String contentClasspath = "/retropie/";
-    String pixelHomePath = pixel.getPixelHome();
-    File pixelHomeDirectory = new File(pixelHomePath);
-    String inpath = contentClasspath + "mame.csv";
-    extractClasspathResource(inpath, pixelHomeDirectory);
-    inpath = contentClasspath + "console.csv";
-    extractClasspathResource(inpath, pixelHomeDirectory);
-    inpath = contentClasspath + "pixel-logo.txt";
-    //extractClasspathResource(inpath, pixelHomeDirectory);
-    //inpath = contentClasspath + "pixelc.jar";
-    //extractClasspathResource(inpath, pixelHomeDirectory);
-    //inpath = contentClasspath + "pixelcade.jar";
-    extractClasspathResource(inpath, pixelHomeDirectory);
-    inpath = contentClasspath + "retrogame.cfg";
-    extractClasspathResource(inpath, pixelHomeDirectory);
-    inpath = contentClasspath + "runcommand-onend.sh";
-    extractClasspathResource(inpath, pixelHomeDirectory);
-    inpath = contentClasspath + "runcommand-onstart.sh";
-    extractClasspathResource(inpath, pixelHomeDirectory);
-    inpath = contentClasspath + "shutdown_button.py";
-    extractClasspathResource(inpath, pixelHomeDirectory);
-    inpath = contentClasspath + "shutdown_button.service";
-    extractClasspathResource(inpath, pixelHomeDirectory);
-    inpath = contentClasspath + "settings.ini";
-    extractClasspathResource(inpath, pixelHomeDirectory);
-    inpath = contentClasspath + "gamemetadata.csv";
-    extractClasspathResource(inpath, pixelHomeDirectory);
-    inpath = contentClasspath + "consolemetadata.csv";
-    extractClasspathResource(inpath, pixelHomeDirectory);
-  }
-  
-  public void createArcadeDirs() throws IOException {
-    String animationsListFilesystemPath = pixel.getPixelHome() + "arcadedirs.text";
-    File animationsListFile = new File(animationsListFilesystemPath);
-    String pathPrefix = "";
-    String animationsListClasspath = "/arcadedirs.text";
-    extractArcadeDirs(animationsListFile, animationsListClasspath, pathPrefix);
-  }
-  
-  private void extractDefaultContent() {   //no longer used
-    try {
-      extractHtmlAndJavascript();
-      if (isMac() || isUnix()) {
-        File settings = new File(pixel.getPixelHome() + "settings.ini");
-        if (!settings.exists())
-          extractRetroPie(); 
-      } 
-    } catch (IOException ex) {
-      LogMe.aLogger.log(Level.SEVERE, "could not extract all default content", ex);
-    } 
-  }
-  
-  private void extractHtmlAndJavascript() throws IOException {           //no longer used
-    File indexHTMLFile = new File(pixel.getPixelHome() + "index.html");
-    if (!indexHTMLFile.exists()) {
-      String contentClasspath = "/web-content/";
-      String inpath = contentClasspath + "index.html";
-      String pixelHomePath = pixel.getPixelHome();
-      File pixelHomeDirectory = new File(pixelHomePath);
-      extractClasspathResource(inpath, pixelHomeDirectory);
-      inpath = contentClasspath + "pixel.js";
-      extractClasspathResource(inpath, pixelHomeDirectory);
-      inpath = contentClasspath + "images.css";
-      extractClasspathResource(inpath, pixelHomeDirectory);
-    } 
-  }
-  
-  private void extractStillImages() throws IOException {
-    String imagesListFilesystemPath = pixel.getPixelHome() + "images.text";
-    File imagesListFile = new File(imagesListFilesystemPath);
-    String pathPrefix = "images/";
-    String imagesListClasspath = "/images.text";
-    extractClasspathResourcesList(imagesListFile, imagesListClasspath, pathPrefix);
-  }
-  
-  private void extractClasspathResource(String classpath, File parentDirectory) throws IOException {
-    InputStream instream = getClass().getResourceAsStream(classpath);
-    if (!parentDirectory.exists())
-      parentDirectory.mkdirs(); 
-    int i = classpath.lastIndexOf("/") + 1;
-    String outname = classpath.substring(i);
-    String outpath = parentDirectory.getAbsolutePath() + File.separator + outname;
-    File outfile = new File(outpath);
-    FileOutputStream fos = new FileOutputStream(outfile);
-    IOUtils.copy(instream, fos);
-  }
-  
-  private void extractClasspathResourcesList(File resourceListFile, String resourceListClasspath, String pathPrefix) throws IOException {
-    if (resourceListFile.exists()) {
-      String message = "Pixel app will not extract the contents of " + resourceListClasspath + ".  The list already exists at " + resourceListFile.getAbsolutePath();
-      if (!silentMode_)
-        System.out.println(message); 
-    } else {
-      extractClasspathResource(resourceListClasspath, resourceListFile);
-      String outputDirectoryPath = "";
-      if (pathPrefix == "") {
-        outputDirectoryPath = pixel.getPixelHome();
-      } else {
-        outputDirectoryPath = pixel.getPixelHome() + pathPrefix;
-      } 
-      File outputDirectory = new File(outputDirectoryPath);
-      BufferedTextFileReader bufferedTextFileReader = new BufferedTextFileReader();
-      List<String> imageNames = bufferedTextFileReader.readTextLinesFromClasspath(resourceListClasspath);
-      for (String name : imageNames) {
-        String classpath = "/" + pathPrefix + name;
-        if (!silentMode_)
-          System.out.println("Extracting " + classpath); 
-        extractClasspathResource(classpath, outputDirectory);
-      } 
-    } 
-  }
-  
-  private void extractClasspathResourcesListRoot(File resourceListFile, String resourceListClasspath) throws IOException {
-    if (resourceListFile.exists()) {
-      String message = "Pixel app will not extract the contents of " + resourceListClasspath + ".  The list already exists at " + resourceListFile.getAbsolutePath();
-      if (!silentMode_)
-        System.out.println(message); 
-    } else {
-      extractClasspathResource(resourceListClasspath, resourceListFile);
-      String outputDirectoryPath = pixel.getPixelHome();
-      File outputDirectory = new File(outputDirectoryPath);
-      BufferedTextFileReader bufferedTextFileReader = new BufferedTextFileReader();
-      List<String> imageNames = bufferedTextFileReader.readTextLinesFromClasspath(resourceListClasspath);
-      for (String name : imageNames) {
-        String classpath = name;
-        if (!silentMode_)
-          System.out.println("Extracting " + classpath); 
-        extractClasspathResource(classpath, outputDirectory);
-      } 
-    } 
-  }
-  
-  private void extractArcadeDirs(File resourceListFile, String resourceListClasspath, String pathPrefix) throws IOException {
-    if (resourceListFile.exists()) {
-      String message = "Pixel app will not extract the contents of " + resourceListClasspath + ".  The list already exists at " + resourceListFile.getAbsolutePath();
-      if (!silentMode_)
-        System.out.println(message); 
-    } else {
-      extractClasspathResource(resourceListClasspath, resourceListFile);
-      BufferedTextFileReader bufferedTextFileReader = new BufferedTextFileReader();
-      List<String> imageNames = bufferedTextFileReader.readTextLinesFromClasspath(resourceListClasspath);
-      for (String name : imageNames) {
-        String outputArcadeDirectoryPath = pixel.getPixelHome() + name;
-        File outputArcadeDirectory = new File(outputArcadeDirectoryPath);
-        if (!silentMode_)
-          System.out.println("Creating Arcade Directory: " + outputArcadeDirectoryPath); 
-        if (!outputArcadeDirectory.exists())
-          outputArcadeDirectory.mkdirs(); 
-      } 
-    } 
-  }
+//  public void extractAnimationImages() throws IOException {
+//    String animationsListFilesystemPath = pixel.getPixelHome() + "animations.text";
+//    File animationsListFile = new File(animationsListFilesystemPath);
+//    String pathPrefix = "animations/";
+//    String animationsListClasspath = "/animations.text";
+//    extractClasspathResourcesList(animationsListFile, animationsListClasspath, pathPrefix);
+//  }
+//  
+//  public void extractGifSourceAnimationImages() throws IOException {
+//    String animationsListFilesystemPath = pixel.getPixelHome() + "gifsource.text";
+//    File animationsListFile = new File(animationsListFilesystemPath);
+//    String pathPrefix = "animations/gifsource/";
+//    String animationsListClasspath = "/gifsource.text";
+//    extractClasspathResourcesList(animationsListFile, animationsListClasspath, pathPrefix);
+//  }
+//  
+//  public void extractArcadeConsoleGIFs() throws IOException {
+//    String animationsListFilesystemPath = pixel.getPixelHome() + "consoles.text";
+//    File animationsListFile = new File(animationsListFilesystemPath);
+//    String pathPrefix = "console/";
+//    String animationsListClasspath = "/consoles.text";
+//    extractClasspathResourcesList(animationsListFile, animationsListClasspath, pathPrefix);
+//  }
+//  
+//  public void extractArcadeMAMEGIFs() throws IOException {
+//    String animationsListFilesystemPath = pixel.getPixelHome() + "mame.text";
+//    File animationsListFile = new File(animationsListFilesystemPath);
+//    String pathPrefix = "mame/";
+//    String animationsListClasspath = "/mame.text";
+//    String mamePath = pixel.getPixelHome() + "mame";
+//    File mameDirectory = new File(mamePath);
+//    if (!mameDirectory.exists()) {
+//      extractClasspathResourcesList(animationsListFile, animationsListClasspath, pathPrefix);
+//    } else {
+//      String message = "Pixel app will not extract the contents of " + mamePath + ".  The folder already exists";
+//      System.out.println(message);
+//    } 
+//  }
+//  
+//  public void extractRetroPie() throws IOException {
+//    String contentClasspath = "/retropie/";
+//    String pixelHomePath = pixel.getPixelHome();
+//    File pixelHomeDirectory = new File(pixelHomePath);
+//    String inpath = contentClasspath + "mame.csv";
+//    extractClasspathResource(inpath, pixelHomeDirectory);
+//    inpath = contentClasspath + "console.csv";
+//    extractClasspathResource(inpath, pixelHomeDirectory);
+//    inpath = contentClasspath + "pixel-logo.txt";
+//    //extractClasspathResource(inpath, pixelHomeDirectory);
+//    //inpath = contentClasspath + "pixelc.jar";
+//    //extractClasspathResource(inpath, pixelHomeDirectory);
+//    //inpath = contentClasspath + "pixelcade.jar";
+//    extractClasspathResource(inpath, pixelHomeDirectory);
+//    inpath = contentClasspath + "retrogame.cfg";
+//    extractClasspathResource(inpath, pixelHomeDirectory);
+//    inpath = contentClasspath + "runcommand-onend.sh";
+//    extractClasspathResource(inpath, pixelHomeDirectory);
+//    inpath = contentClasspath + "runcommand-onstart.sh";
+//    extractClasspathResource(inpath, pixelHomeDirectory);
+//    inpath = contentClasspath + "shutdown_button.py";
+//    extractClasspathResource(inpath, pixelHomeDirectory);
+//    inpath = contentClasspath + "shutdown_button.service";
+//    extractClasspathResource(inpath, pixelHomeDirectory);
+//    inpath = contentClasspath + "settings.ini";
+//    extractClasspathResource(inpath, pixelHomeDirectory);
+//    inpath = contentClasspath + "gamemetadata.csv";
+//    extractClasspathResource(inpath, pixelHomeDirectory);
+//    inpath = contentClasspath + "consolemetadata.csv";
+//    extractClasspathResource(inpath, pixelHomeDirectory);
+//  }
+//  
+//  public void createArcadeDirs() throws IOException {
+//    String animationsListFilesystemPath = pixel.getPixelHome() + "arcadedirs.text";
+//    File animationsListFile = new File(animationsListFilesystemPath);
+//    String pathPrefix = "";
+//    String animationsListClasspath = "/arcadedirs.text";
+//    extractArcadeDirs(animationsListFile, animationsListClasspath, pathPrefix);
+//  }
+//  
+//  private void extractDefaultContent() {   //no longer used
+//    try {
+//      extractHtmlAndJavascript();
+//      if (isMac() || isUnix()) {
+//        File settings = new File(pixel.getPixelHome() + "settings.ini");
+//        if (!settings.exists())
+//          extractRetroPie(); 
+//      } 
+//    } catch (IOException ex) {
+//      LogMe.aLogger.log(Level.SEVERE, "could not extract all default content", ex);
+//    } 
+//  }
+//  
+//  private void extractHtmlAndJavascript() throws IOException {           //no longer used
+//    File indexHTMLFile = new File(pixel.getPixelHome() + "index.html");
+//    if (!indexHTMLFile.exists()) {
+//      String contentClasspath = "/web-content/";
+//      String inpath = contentClasspath + "index.html";
+//      String pixelHomePath = pixel.getPixelHome();
+//      File pixelHomeDirectory = new File(pixelHomePath);
+//      extractClasspathResource(inpath, pixelHomeDirectory);
+//      inpath = contentClasspath + "pixel.js";
+//      extractClasspathResource(inpath, pixelHomeDirectory);
+//      inpath = contentClasspath + "images.css";
+//      extractClasspathResource(inpath, pixelHomeDirectory);
+//    } 
+//  }
+//  
+//  private void extractStillImages() throws IOException {
+//    String imagesListFilesystemPath = pixel.getPixelHome() + "images.text";
+//    File imagesListFile = new File(imagesListFilesystemPath);
+//    String pathPrefix = "images/";
+//    String imagesListClasspath = "/images.text";
+//    extractClasspathResourcesList(imagesListFile, imagesListClasspath, pathPrefix);
+//  }
+//  
+//  private void extractClasspathResource(String classpath, File parentDirectory) throws IOException {
+//    InputStream instream = getClass().getResourceAsStream(classpath);
+//    if (!parentDirectory.exists())
+//      parentDirectory.mkdirs(); 
+//    int i = classpath.lastIndexOf("/") + 1;
+//    String outname = classpath.substring(i);
+//    String outpath = parentDirectory.getAbsolutePath() + File.separator + outname;
+//    File outfile = new File(outpath);
+//    FileOutputStream fos = new FileOutputStream(outfile);
+//    IOUtils.copy(instream, fos);
+//  }
+//  
+//  private void extractClasspathResourcesList(File resourceListFile, String resourceListClasspath, String pathPrefix) throws IOException {
+//    if (resourceListFile.exists()) {
+//      String message = "Pixel app will not extract the contents of " + resourceListClasspath + ".  The list already exists at " + resourceListFile.getAbsolutePath();
+//      if (!silentMode_)
+//        System.out.println(message); 
+//    } else {
+//      extractClasspathResource(resourceListClasspath, resourceListFile);
+//      String outputDirectoryPath = "";
+//      if (pathPrefix == "") {
+//        outputDirectoryPath = pixel.getPixelHome();
+//      } else {
+//        outputDirectoryPath = pixel.getPixelHome() + pathPrefix;
+//      } 
+//      File outputDirectory = new File(outputDirectoryPath);
+//      BufferedTextFileReader bufferedTextFileReader = new BufferedTextFileReader();
+//      List<String> imageNames = bufferedTextFileReader.readTextLinesFromClasspath(resourceListClasspath);
+//      for (String name : imageNames) {
+//        String classpath = "/" + pathPrefix + name;
+//        if (!silentMode_)
+//          System.out.println("Extracting " + classpath); 
+//        extractClasspathResource(classpath, outputDirectory);
+//      } 
+//    } 
+//  }
+//  
+//  private void extractClasspathResourcesListRoot(File resourceListFile, String resourceListClasspath) throws IOException {
+//    if (resourceListFile.exists()) {
+//      String message = "Pixel app will not extract the contents of " + resourceListClasspath + ".  The list already exists at " + resourceListFile.getAbsolutePath();
+//      if (!silentMode_)
+//        System.out.println(message); 
+//    } else {
+//      extractClasspathResource(resourceListClasspath, resourceListFile);
+//      String outputDirectoryPath = pixel.getPixelHome();
+//      File outputDirectory = new File(outputDirectoryPath);
+//      BufferedTextFileReader bufferedTextFileReader = new BufferedTextFileReader();
+//      List<String> imageNames = bufferedTextFileReader.readTextLinesFromClasspath(resourceListClasspath);
+//      for (String name : imageNames) {
+//        String classpath = name;
+//        if (!silentMode_)
+//          System.out.println("Extracting " + classpath); 
+//        extractClasspathResource(classpath, outputDirectory);
+//      } 
+//    } 
+//  }
+//  
+//  private void extractArcadeDirs(File resourceListFile, String resourceListClasspath, String pathPrefix) throws IOException {
+//    if (resourceListFile.exists()) {
+//      String message = "Pixel app will not extract the contents of " + resourceListClasspath + ".  The list already exists at " + resourceListFile.getAbsolutePath();
+//      if (!silentMode_)
+//        System.out.println(message); 
+//    } else {
+//      extractClasspathResource(resourceListClasspath, resourceListFile);
+//      BufferedTextFileReader bufferedTextFileReader = new BufferedTextFileReader();
+//      List<String> imageNames = bufferedTextFileReader.readTextLinesFromClasspath(resourceListClasspath);
+//      for (String name : imageNames) {
+//        String outputArcadeDirectoryPath = pixel.getPixelHome() + name;
+//        File outputArcadeDirectory = new File(outputArcadeDirectoryPath);
+//        if (!silentMode_)
+//          System.out.println("Creating Arcade Directory: " + outputArcadeDirectoryPath); 
+//        if (!outputArcadeDirectory.exists())
+//          outputArcadeDirectory.mkdirs(); 
+//      } 
+//    } 
+//  }
   
   public static String getGameName(String romName) {
     String GameName = "";

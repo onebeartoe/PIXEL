@@ -341,6 +341,8 @@ public class ConsoleHttpHandler extends ImageResourceHttpHandler {
         if (Pixel.isWindows() && WebEnabledPixel.getLCDMarquee().equals("yes")) {
                 if(lcdDisplay == null)
                    lcdDisplay = new LCDPixelcade();
+                
+            lcdDisplay.setNumLoops(loop_);      
             lcdDisplay.scrollText(text_, new Font(font_, Font.PLAIN, 288), color, 5); //int speed
         }
         
