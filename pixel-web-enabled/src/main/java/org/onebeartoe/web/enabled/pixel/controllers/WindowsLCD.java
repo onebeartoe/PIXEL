@@ -26,7 +26,10 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.net.URL;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.TimerTask;
+import java.util.UUID;
 import javax.swing.*;
 
 
@@ -112,8 +115,7 @@ public class WindowsLCD {
     }
 
     void scrollText(String message, Font font, Color color, int speed) {
-
-
+        
         marqueePanel.setColor(color);
         marqueePanel.setSpeed(speed);
         System.out.print(String.format("scrollText about to setFont: %s\n",font.getFontName()));
@@ -387,31 +389,81 @@ class MarqueePanel extends JFXPanel implements ActionListener {
         setSpeed(n);
         setMessage(s);
     }
+    
+    public void scrollingText(HBox parent, String text, int loops)
+{
+    System.out.println("loops before if " + loops);
+    
+    String thiscall = new UUID().randomUUID().toString();
+    Map callTrace = new HashMap();
+    callTrace.put(thiscall,loops);
+    System.out.println(String.format("Welcome, %s - %i loops planned",thiscall,callTrace.get(thiscall)));
+    if(loops == 0){
+        System.out.println(String.format("Setting Infinity for [%s,%i]",callTrace,callTrace.get(thiscall)));
+        loops = Timeline.INDEFINITE;
+   }
+    String.format("In scrollingText, continuing for [%s,%i], loops is now %i",callTrace,callTrace.get(thiscall),loops);
+  
+    this.scrollingText.setText(text);
+    this.scrollingText.setFill(javafx.scene.paint.Color.rgb(color.getRed(), color.getGreen(), color.getBlue()));
+    this.scrollingText.setLayoutX(0);
+    this.scrollingText.setLayoutY(20);
+    this.scrollingText.setTextAlignment(TextAlignment.LEFT);
+    this.scrollingText.setFont(jfont);
+    this.scrollingText.setWrappingWidth(1920 * 2);
+    TranslateTransition tt = new TranslateTransition(Duration.millis(10000), this.scrollingText);
+    tt.setToX(0 - this.scrollingText.getWrappingWidth() - 10); // setFromX sets the starting position, coming from the left and going to the right.
+    int boundWidth = (int)parent.getBoundsInParent().getWidth();
+    tt.setFromX(1281); // setToX sets to target position, go beyond the right side of the screen.
+    System.out.println("loops before setcyclecount " + loops);
+    tt.setCycleCount(loops);
+    tt.setAutoReverse(false); //Always start over
+    tt.play();
+}
+    
+public void scrollingText(HBox parent, String text) {
+    scrollingText(parent, text, numLoops);
+}
 
-    public void scrollingText(HBox parent, String text) {
+//public void scrollingText(HBox parent, String text) {
+//    int l = 0 + numLoops;
+//    scrollingText(parent, text, l);
+//}
 
-        this.scrollingText.setText(text);
-        this.scrollingText.setFill(javafx.scene.paint.Color.rgb(color.getRed(), color.getGreen(), color.getBlue()));
-        this.scrollingText.setLayoutX(0);
-        this.scrollingText.setLayoutY(20);
-        this.scrollingText.setTextAlignment(TextAlignment.LEFT);
-        this.scrollingText.setFont(jfont);
-        this.scrollingText.setWrappingWidth(1920 * 2);
-        TranslateTransition tt = new TranslateTransition(Duration.millis(10000), this.scrollingText);
-        tt.setToX(0 - this.scrollingText.getWrappingWidth() - 10); // setFromX sets the starting position, coming from the left and going to the right.
-        int boundWidth = (int)parent.getBoundsInParent().getWidth();
-        tt.setFromX(1281); // setToX sets to target position, go beyond the right side of the screen.
-        if(numLoops == 0)
-            tt.setCycleCount(Timeline.INDEFINITE); // repeats for ever
-        else {
-            tt.setCycleCount(numLoops);
-            numLoops = 0;
-        }
-
-        tt.setAutoReverse(false); //Always start over
-        tt.play();
-
-    }
+//    public void scrollingText(HBox parent, String text) {
+//
+//        this.scrollingText.setText(text);
+//        this.scrollingText.setFill(javafx.scene.paint.Color.rgb(color.getRed(), color.getGreen(), color.getBlue()));
+//        this.scrollingText.setLayoutX(0);
+//        this.scrollingText.setLayoutY(20);
+//        this.scrollingText.setTextAlignment(TextAlignment.LEFT);
+//        this.scrollingText.setFont(jfont);
+//        this.scrollingText.setWrappingWidth(1920 * 2);
+//        TranslateTransition tt = new TranslateTransition(Duration.millis(10000), this.scrollingText);
+//        tt.setToX(0 - this.scrollingText.getWrappingWidth() - 10); // setFromX sets the starting position, coming from the left and going to the right.
+//        int boundWidth = (int)parent.getBoundsInParent().getWidth();
+//        tt.setFromX(1281); // setToX sets to target position, go beyond the right side of the screen.
+//        
+//        //System.out.println("number of loops before if:" + numLoops);
+////        if(numLoops == 0) {
+////            //tt.setCycleCount(Timeline.INDEFINITE); // repeats for ever
+////            tt.setCycleCount(1000); // repeats for ever
+////            System.out.println("went here to indefinite");
+////        }    
+////        else {
+////            tt.setCycleCount(numLoops);
+////            System.out.println("number of loops to do:" + numLoops);
+////            numLoops = 0;
+////        }
+//        
+//        //System.out.println("current cycle count from java:" + tt.getCycleCount());
+//      
+//        
+//        tt.setCycleCount(numLoops);
+//        tt.setAutoReverse(false); //Always start over
+//        tt.play();
+//
+//    }
 
     public void start() {
         Platform.runLater(new Runnable() {
