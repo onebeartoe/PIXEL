@@ -394,7 +394,7 @@ class MarqueePanel extends JFXPanel implements ActionListener {
 {
     System.out.println("loops before if " + loops);
     
-    String thiscall = new UUID().randomUUID().toString();
+    String thiscall = UUID.randomUUID().toString();
     Map callTrace = new HashMap();
     callTrace.put(thiscall,loops);
     System.out.println(String.format("Welcome, %s - %i loops planned",thiscall,callTrace.get(thiscall)));
