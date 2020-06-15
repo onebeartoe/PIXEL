@@ -394,7 +394,7 @@ class MarqueePanel extends JFXPanel implements ActionListener {
 {
     System.out.println("loops before if " + loops);
     
-    String thiscall = new UUID().randomUUID().toString();
+    String thiscall = UUID.randomUUID().toString();
     Map callTrace = new HashMap();
     callTrace.put(thiscall,loops);
     System.out.println(String.format("Welcome, %s - %i loops planned",thiscall,callTrace.get(thiscall)));
@@ -410,7 +410,7 @@ class MarqueePanel extends JFXPanel implements ActionListener {
     this.scrollingText.setLayoutY(20);
     this.scrollingText.setTextAlignment(TextAlignment.LEFT);
     this.scrollingText.setFont(jfont);
-    this.scrollingText.setWrappingWidth(1920 * 2);
+    this.scrollingText.setWrappingWidth(this.scrollingText.getBoundsInLocal().getWidth());
     TranslateTransition tt = new TranslateTransition(Duration.millis(10000), this.scrollingText);
     tt.setToX(0 - this.scrollingText.getWrappingWidth() - 10); // setFromX sets the starting position, coming from the left and going to the right.
     int boundWidth = (int)parent.getBoundsInParent().getWidth();
