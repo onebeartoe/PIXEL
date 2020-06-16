@@ -81,6 +81,7 @@ public class LCDPixelcade {
 public void setLCDFont(Font font, String fontFilename) {
         if(!isWindows) {
             this.fontPath = fontFilename; 
+	   System.out.print("fontPath: " + fontFilename +"\n");
             return;
 
         }
@@ -124,11 +125,11 @@ public void setLCDFont(Font font, String fontFilename) {
         doGif = new File(String.format("%s%s/%s.gif",pixelHome, system,named)).exists();
         gifSystem = system;
 	theCommand = DEFAULT_COMMAND;
-        displayImage(named);
-    	if(marqueePath.contains(NOT_FOUND)){
-            scrollText(String.format("%s - %s...",named, system), new Font("Helvetica", Font.PLAIN, 268), Color.magenta, 1);
-            return;
-        }
+    	
+	if(marqueePath.contains(NOT_FOUND)) return;
+      
+	displayImage(named);
+
 	}
 
     static public void  displayImage(String named) throws IOException {  //note this is Pi/linux only!
@@ -176,7 +177,9 @@ public void setLCDFont(Font font, String fontFilename) {
         }
 
 	 System.out.println("Gonna scroll: " + message + "\n");
-	 System.out.println(String.format("Font:%s%s Color:%s Speed:%d\n",fontPath,font.getFontName(),fontColor,speed));
+	 System.out.println(String.format("Font:%s Color:%s Speed:%d\n",fontPath,fontColor,speed));
 
     }
 }
+
+
