@@ -114,19 +114,22 @@ public void setLCDFont(Font font, String fontFilename) {
         }
 //        if (new File(String.format("/home/pi/pixelcade/lcdmarquees/console/default-%s.png", system)).exists())
 //            DEFAULT_COMMAND = "sudo fbi /home/pi/pixelcade/lcdmarquees/console/default-" + system + ".png -T 1  --noverbose --nocomments --fixwidth -a";
-        System.out.print("System: " + system +"\n");
+        System.out.print("System: " + system + "Game:" + named + "\n");
 
 	String marqueePath = NOT_FOUND;
-        if (new File(String.format("%slcdmarquees/console/default-%s.png",pixelHome, system)).exists()){
-            DEFAULT_COMMAND = "sudo fbi" + pixelHome + "lcdmarquees/console/default-" + system + ".png -T 1 -/d /dev/fb0  --noverbose --nocomments --fixwidth -a";
-	marqueePath = String.format("%slcdmarquees/console/default-%s.png",pixelHome, system);
+        if (new File(String.format("%slcdmarquees/%s.png",pixelHome, named)).exists()){
+            DEFAULT_COMMAND = "sudo fbi" + pixelHome + "lcdmarquees/" + named + ".png -T 1 -/d /dev/fb0  --noverbose --nocomments --fixwidth -a";
+	marqueePath = String.format("%slcdmarquees/%s.png",pixelHome, named);
 	}
 
         doGif = new File(String.format("%s%s/%s.gif",pixelHome, system,named)).exists();
         gifSystem = system;
 	theCommand = DEFAULT_COMMAND;
     	
-	if(marqueePath.contains(NOT_FOUND)) return;
+	if(marqueePath.contains(NOT_FOUND)){
+	     System.out.print(String.format("[INTERNAL] Could not locate %s in %slcdmarquees",named, pixelHome));
+	    named = "resetti";
+	} 
       
 	displayImage(named);
 
@@ -135,7 +138,7 @@ public void setLCDFont(Font font, String fontFilename) {
     static public void  displayImage(String named) throws IOException {  //note this is Pi/linux only!
         if (named == null) return;
 
-        System.out.print("image: " + named +"\n");
+        System.out.print("image: " + named +".png\n");
        //theCommand = DEFAULT_COMMAND;
 
         if (named != null) if (named.contains("slideshow")) {
@@ -144,9 +147,11 @@ public void setLCDFont(Font font, String fontFilename) {
             theCommand = PNG_COMMAND.replace("${named}", named);
         } else if (new File(MARQUEE_PATH + named + ".png").exists()) {
             theCommand = PNG_COMMAND.replace("${named}", named);
-        } else if (new File(MARQUEE_PATH + named + ".jpg").exists())
+        } else if (new File(MARQUEE_PATH + named + ".jpg").exists()) {
             theCommand = JPG_COMMAND.replace("${named}", named);
-	
+	} else if (named.contains("resetti")) 
+            theCommand = PNG_COMMAND.replace("${named}", "black");
+
        if(doGif){
 	  theCommand = GIF_COMMAND.replace("${named}", named).replace("${system}", gifSystem);
 	  doGif = false;
@@ -181,5 +186,3 @@ public void setLCDFont(Font font, String fontFilename) {
 
     }
 }
-
-
