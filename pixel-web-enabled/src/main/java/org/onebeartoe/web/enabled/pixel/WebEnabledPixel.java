@@ -531,18 +531,14 @@ public class WebEnabledPixel {
 
     if (lcdMarquee_.equals("yes")) {
       LCDPixelcade lcdDisplay = new LCDPixelcade();
-
-      if(!isWindows()) {
-        lcdDisplay.displayImage("nodata", "nodata");
-      } else {
-        try {
+	try {
           Font temp = Font.createFont(Font.TRUETYPE_FONT, new FileInputStream(pixelHome + "fonts/" + defaultFont + ".ttf"));
           lcdDisplay.setLCDFont(temp.deriveFont(244f),defaultFont + ".ttf");
           //lcdDisplay.windowsLCD.marqueeFrame.setFont(temp.deriveFont(244f));
         }catch (FontFormatException|IOException| NullPointerException e){
           System.out.println("Could not set lcd font :(...\n");
         }
-      }
+
     }
     
     if (this.SubDisplayAccessory_.equals("yes")) {
