@@ -19,7 +19,7 @@ public class LCDPixelcade {
     private static final String JPG_COMMAND = "sudo fbi " + pixelHome + "lcdmarquees/${named}.jpg -T 1  -d /dev/fb0 --noverbose --nocomments --fixwidth -a";
     private static final String PNG_COMMAND = "sudo fbi "+ pixelHome + "lcdmarquees/${named}.png -T 1  -d /dev/fb0 --noverbose --nocomments --fixwidth -a";
     private static final String GIF_COMMAND = pixelHome + "gsho  -platform linuxfb " + pixelHome + "${system}/${named}.gif";
-    private static final String TXT_COMMAND = pixelHome + "skrola -platform linuxfb \"${txt}\" \"${fontpath}\" ${color} ${speed}";
+    private static final String TXT_COMMAND = pixelHome + "skrola -platform linuxfb \"${txt}\" \"${fontpath}\" \"${color}\" ${speed}";
     private static final String SLIDESHOW = "sudo fbi " + pixelHome + "lcdmarquees/* -T 1 -d /f]dev/fb0 -t 2 --noverbose --nocomments --fixwidth -a";
     private static final String RESET_COMMAND = "sudo killall -9 fbi;killall -9 gsho; killall -9 skrola;";
     private static final String MARQUEE_PATH = pixelHome + "lcdmarquees/";
@@ -182,7 +182,8 @@ public void setLCDFont(Font font, String fontFilename) {
             windowsLCD.scrollText(message,font,color, speed);
             return;
         }
-		//fontColor = color.toString();
+          String hex = String.format("#%02x%02x%02x", color.getRed(), color.getGreen(), color.getBlue());
+                fontColor = hex;
 	 System.out.println("Gonna scroll: " + message + "\n");
 	 System.out.println(String.format("Font:%s Color:%s Speed:%d\n",fontPath,fontColor,speed));
 	 String theCommand = TXT_COMMAND.replace("${txt}",message).replace("${fontpath}",fontPath.replace(".ttf","")).replace("${color}",fontColor).replace("${speed}",String.format("%d",speed));
