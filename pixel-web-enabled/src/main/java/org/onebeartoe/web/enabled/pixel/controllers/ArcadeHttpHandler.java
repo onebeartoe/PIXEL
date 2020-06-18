@@ -66,22 +66,22 @@ public class ArcadeHttpHandler extends ImageResourceHttpHandler {
     }
     
     
-     if (WebEnabledPixel.getLCDMarquee().equals("yes")) {
-         String arcadeNameOnly = FilenameUtils.removeExtension(arcadeName);
-         String arcadeLCDFilePathGIF = this.application.getPixel().getPixelHome() + "lcdmarquees" + "/" + arcadeNameOnly + ".gif";
-        // File arcadeLCDFileGIF = new File(arcadeLCDFilePathGIF);
-         System.out.println("Looking for lcd marquee @: " + arcadeLCDFilePathGIF);
-         LogMe.aLogger.info("Looking for lcd marquee @: " + arcadeLCDFilePathGIF);
-       
-            if (this.lcdDisplay == null)
-               this.lcdDisplay = new LCDPixelcade();
-
-             try {
-                 lcdDisplay.displayImage(arcadeNameOnly, consoleName);
-             } catch (IOException ex) {
-                 Logger.getLogger(ArcadeHttpHandler.class.getName()).log(Level.SEVERE, null, ex);
-             }
-     }
+//     if (WebEnabledPixel.getLCDMarquee().equals("yes")) {
+//         String arcadeNameOnly = FilenameUtils.removeExtension(arcadeName);
+//         String arcadeLCDFilePathGIF = this.application.getPixel().getPixelHome() + "lcdmarquees" + "/" + arcadeNameOnly + ".gif";
+//        // File arcadeLCDFileGIF = new File(arcadeLCDFilePathGIF);
+//         System.out.println("Looking for lcd marquee @: " + arcadeLCDFilePathGIF);
+//         LogMe.aLogger.info("Looking for lcd marquee @: " + arcadeLCDFilePathGIF);
+//       
+//            if (this.lcdDisplay == null)
+//               this.lcdDisplay = new LCDPixelcade();
+//
+//             try {
+//                 lcdDisplay.displayImage(arcadeNameOnly, consoleName);
+//             } catch (IOException ex) {
+//                 Logger.getLogger(ArcadeHttpHandler.class.getName()).log(Level.SEVERE, null, ex);
+//             }
+//     }
   }
   
   public void writeImageResource(String urlParams) throws IOException, ConnectionLostException {
