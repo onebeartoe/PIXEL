@@ -343,7 +343,7 @@ class MarqueePanel extends JFXPanel implements ActionListener {
                     jfont = javafx.scene.text.Font.loadFont(inputStream, 244);
                     System.out.println(String.format("internal mPanel jFont set with %s\n",font.getFontName()));
                     if(!didHi) {
-                        setMessage("Welcome to KnJ's Funhouse!!!");
+                        setMessage("Welcome to Pixelcade");
                         didHi = true;
                     }
                 } catch (FileNotFoundException e){
