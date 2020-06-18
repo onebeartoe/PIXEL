@@ -162,7 +162,7 @@ public class WebEnabledPixel {
   public static PrintWriter Arduino1MatrixOutput;
 
   public static String pixelHome = System.getProperty("user.dir") + "\\";
-
+  public static LCDPixelcade lcdDisplay = null;
   public WebEnabledPixel(String[] args) throws FileNotFoundException, IOException {
     this.cli = new CliPixel(args);
     this.cli.parse();
@@ -342,7 +342,17 @@ public class WebEnabledPixel {
         sec.add("LCDMarquee_Message", "Welcome to Pixelcade and Game On!");
         ini.store();
       } 
-      
+
+if (lcdMarquee_.equals("yes") && lcdDisplay != null) {
+	if(lcdDisplay == null) lcdDisplay = new LCDPixelcade();
+        try {
+          Font temp = Font.createFont(Font.TRUETYPE_FONT, new FileInputStream(pixelHome + "fonts/" + defaultFont + ".ttf"));
+          lcdDisplay.setLCDFont(temp.deriveFont(244f),defaultFont + ".ttf");
+          //lcdDisplay.windowsLCD.marqueeFrame.setFont(temp.deriveFont(244f));
+        }catch (FontFormatException|IOException| NullPointerException e){
+          System.out.println("Could not set lcd font from: " + pixelHome + "fonts/" + defaultFont + ".ttf" +"   (...\n");
+        }
+    }      
       if (this.ledResolution_.equals("128x32")) {
         if (!silentMode_) {
           System.out.println("PIXEL resolution found in settings.ini: resolution=" + this.ledResolution_);
@@ -536,7 +546,7 @@ public class WebEnabledPixel {
           lcdDisplay.setLCDFont(temp.deriveFont(244f),defaultFont + ".ttf");
           //lcdDisplay.windowsLCD.marqueeFrame.setFont(temp.deriveFont(244f));
         }catch (FontFormatException|IOException| NullPointerException e){
-          System.out.println("Could not set lcd font :(...\n");
+          System.out.println("Could not set lcd font from: " + pixelHome + "fonts/" + defaultFont + ".ttf" +" :(...\n");
         }
 
     }
