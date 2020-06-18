@@ -10,14 +10,6 @@ import org.onebeartoe.web.enabled.pixel.WebEnabledPixel;
 
 public class LCDPixelcade {
 
-
-//    private static String DEFAULT_COMMAND = "sudo fbi /home/pi/pixelcade/lcdmarquees/pixelcade.png -T 1  --noverbose --nocomments --fixwidth -a";
-//    private static final String JPG_COMMAND = "sudo fbi /home/pi/pixelcade/lcdmarquees/${named}.jpg -T 1 --noverbose --nocomments --fixwidth -a";
-//    private static final String PNG_COMMAND = "sudo fbi /home/pi/pixelcade/lcdmarquees/${named}.png -T 1 --noverbose --nocomments --fixwidth -a";
-//    private static final String SLIDESHOW = "sudo fbi /home/pi/pixelcade/lcdmarquees/* -T 1 -t 2 --noverbose --nocomments --fixwidth -a";
-//    private static final String RESET_COMMAND = "sudo killall -9 fbi; killall -9 qml;";
-//    private static final String MARQUEE_PATH = "/home/pi/pixelcade/lcdmarquees/";
-//    private static final String ENGINE_PATH = "/home/pi/pixelcade/lcdmarquees/";
     private static String pixelHome = "/home/pi/pixelcade/";
     private static String sep = "/";
     private static String fontPath = pixelHome + "fonts/";
@@ -27,12 +19,14 @@ public class LCDPixelcade {
     private static final String JPG_COMMAND = "sudo fbi " + pixelHome + "lcdmarquees/${named}.jpg -T 1  -d /dev/fb0 --noverbose --nocomments --fixwidth -a";
     private static final String PNG_COMMAND = "sudo fbi "+ pixelHome + "lcdmarquees/${named}.png -T 1  -d /dev/fb0 --noverbose --nocomments --fixwidth -a";
     private static final String GIF_COMMAND = pixelHome + "gsho  -platform linuxfb " + pixelHome + "${system}/${named}.gif";
+    private static final String TXT_COMMAND = pixelHome + "skrola -platform linuxfb \"${txt}\" \"${fontpath}\" \"${color}\" ${speed}";
     private static final String SLIDESHOW = "sudo fbi " + pixelHome + "lcdmarquees/* -T 1 -d /f]dev/fb0 -t 2 --noverbose --nocomments --fixwidth -a";
-    private static final String RESET_COMMAND = "sudo killall -9 fbi; killall -9 qml;";
+    private static final String RESET_COMMAND = "sudo killall -9 fbi;killall -9 gsho; killall -9 skrola;";
     private static final String MARQUEE_PATH = pixelHome + "lcdmarquees/";
     private static final String ENGINE_PATH = "/usr/bin/fbi";
     static String NOT_FOUND = pixelHome + "lcdmarquees/" + "pixelcade.png";
     public static String theCommand = DEFAULT_COMMAND;
+    public static String currentMessage = "Welcome and Game On!";
     public static String gifSystem = "";
     public static  WindowsLCD windowsLCD = null;
     public static boolean isWindows = System.getProperty("os.name").toLowerCase().startsWith("windows");
@@ -45,8 +39,6 @@ public class LCDPixelcade {
             pixelHome =  System.getProperty("user.dir") + "\\";
             sep = "\\";
         }
-
-
         
         boolean haveFBI = new File(ENGINE_PATH).exists();
         //boolean haveExtraDisplay = new File("/dev/fb1").exists();
@@ -95,8 +87,16 @@ public void setLCDFont(Font font, String fontFilename) {
         windowsLCD.marqueePanel.setMessage("Welcome to the House of Fun!");
     }
 
+    public void setAltText(String text){
+        this.currentMessage = text;
+        System.out.print("AltMessage set\n");
+        if(isWindows && windowsLCD != null)
+            windowsLCD.marqueePanel.setNumLoops(loops);
+    }
+
     public void setNumLoops(int loops){
         this.loops = loops;
+	System.out.print("Loops set\n");
         if(isWindows && windowsLCD != null)
             windowsLCD.marqueePanel.setNumLoops(loops);
     }
@@ -127,7 +127,7 @@ public void setLCDFont(Font font, String fontFilename) {
 	theCommand = DEFAULT_COMMAND;
     	
 	if(marqueePath.contains(NOT_FOUND)){
-	     System.out.print(String.format("[INTERNAL] Could not locate %s in %slcdmarquees",named, pixelHome));
+	     System.out.print(String.format("[INTERNAL] Could not locate %s.png in %slcdmarquees\nmp:%s\nnf:%s\n",named, pixelHome,marqueePath,NOT_FOUND));
 	    named = "resetti";
 	} 
       
@@ -161,7 +161,8 @@ public void setLCDFont(Font font, String fontFilename) {
         builder.command("sh", "-c", RESET_COMMAND + theCommand);
         System.out.println("Running cmd: " + "sh -c " +  RESET_COMMAND + theCommand);
         Process process = builder.start();
-	
+	if (named.contains("resetti"))
+	scrollText(currentMessage,new Font("Helvetica", Font.PLAIN, 18), Color.red,15);
        // int exitCode = 0;
        // try {
        //     exitCode = process.waitFor();
@@ -174,15 +175,24 @@ public void setLCDFont(Font font, String fontFilename) {
 
     static public void scrollText(String message, Font font, Color color, int speed) {
         if(isWindows){
+		System.out.println("Switching to WindowsSubsystem");
             if(windowsLCD == null)
                 windowsLCD = new WindowsLCD();
 
             windowsLCD.scrollText(message,font,color, speed);
             return;
         }
-
+          String hex = String.format("#%02x%02x%02x", color.getRed(), color.getGreen(), color.getBlue());
+                fontColor = hex;
 	 System.out.println("Gonna scroll: " + message + "\n");
 	 System.out.println(String.format("Font:%s Color:%s Speed:%d\n",fontPath,fontColor,speed));
-
+	 String theCommand = TXT_COMMAND.replace("${txt}",message).replace("${fontpath}",fontPath.replace(".ttf","")).replace("${color}",fontColor).replace("${speed}",String.format("%d",speed));
+       try {    
+	ProcessBuilder builder = new ProcessBuilder();
+        builder.command("sh", "-c", RESET_COMMAND + theCommand);
+        System.out.println("Running cmd: " + "sh -c " +  RESET_COMMAND + theCommand);
+        Process process = builder.start();
+	} catch (IOException ioe) {}
     }
 }
+
