@@ -40,13 +40,7 @@ public class ConsoleHttpHandler extends ImageResourceHttpHandler {
     LogMe logMe = LogMe.getInstance();
     Pixel pixel = this.application.getPixel();
     pixel.writeArcadeImage(arcadeFilePNGFullPath, saveAnimation, loop, console, PNGNameWithExtension, WebEnabledPixel.pixelConnected);
-    
-    if (WebEnabledPixel.getLCDMarquee().equals("yes")) {
-            if (this.lcdDisplay == null)
-                this.lcdDisplay = new LCDPixelcade();
-
-            lcdDisplay.displayImage("blankgame", consoleNameMapped);
-    }
+   
   }
   
   private void handleGIF(String consoleName, String arcadeName, Boolean saveAnimation, int loop, String consoleNameMapped) {
@@ -56,18 +50,6 @@ public class ConsoleHttpHandler extends ImageResourceHttpHandler {
     } catch (NoSuchAlgorithmException ex) {
       Logger.getLogger(ArcadeHttpHandler.class.getName()).log(Level.SEVERE, (String)null, ex);
     } 
-    
-    if (WebEnabledPixel.getLCDMarquee().equals("yes")) {
-                if (this.lcdDisplay == null)
-                    this.lcdDisplay = new LCDPixelcade();
-                
-        try {
-            lcdDisplay.displayImage("blankgame", consoleNameMapped);
-        } catch (IOException ex) {
-            Logger.getLogger(ConsoleHttpHandler.class.getName()).log(Level.SEVERE, null, ex);
-            }
-        }
-    
     
   }
   
@@ -206,6 +188,35 @@ public class ConsoleHttpHandler extends ImageResourceHttpHandler {
         System.out.println("Looking for: " + requestedPath + ".png or .gif");
         LogMe.aLogger.info("Looking for: " + requestedPath + ".png or .gif");
       } 
+      
+      
+      if (WebEnabledPixel.getLCDMarquee().equals("yes")) {  //if the lcdmarquee is enabled in settings, then let's go here
+            String consoleLCDFilePathPNG = this.application.getPixel().getPixelHome() + "lcdmarquees/console" + "/" + consoleNameMapped + ".png"; 
+            System.out.println("Looking for console lcd marquee @: " + consoleLCDFilePathPNG);
+            LogMe.aLogger.info("Looking for console lcd marquee @: " + consoleLCDFilePathPNG);
+            File consoleLCDFilePNG = new File(consoleLCDFilePathPNG);  
+             
+            if (consoleLCDFilePNG.exists()) {
+                    System.out.println("FOUND: " + consoleLCDFilePNG);
+                    LogMe.aLogger.info("FOUND: " + consoleLCDFilePNG);
+                     if (this.lcdDisplay == null) 
+                            this.lcdDisplay = new LCDPixelcade();
+
+                     lcdDisplay.displayImage("blankgame", consoleNameMapped);
+            } 
+            else if (!text_.equals("")) {          // do we have scrolling text to display
+                    lcdDisplay.setNumLoops(loop_);   
+                    lcdDisplay.scrollText(text_, new Font(font_, Font.PLAIN, 288), color, 15);
+            }
+
+            else {         //we don't have a matching lcd marquee png or alt text so just show the default marquee
+                    lcdDisplay.displayImage("pixelcade", consoleNameMapped);
+            }
+        }
+      
+      
+      
+      
       if (streamOrWrite.equals("write")) {
         saveAnimation = true;
         consoleFilePathGIF = this.application.getPixel().getPixelHome() + "console/default-" + consoleNameMapped + ".gif";
@@ -246,13 +257,6 @@ public class ConsoleHttpHandler extends ImageResourceHttpHandler {
           
           pixel.scrollText(text_, loop_, speed.longValue(), color, WebEnabledPixel.pixelConnected, scrollsmooth_);
           
-          if (Pixel.isWindows() && WebEnabledPixel.getLCDMarquee().equals("yes")) {
-                if(lcdDisplay == null)
-                   lcdDisplay = new LCDPixelcade();
-                
-                lcdDisplay.setNumLoops(loop_);      
-                lcdDisplay.scrollText(text_, new Font(font_, Font.PLAIN, 288), color, 5); //int speed
-          }
           
         } else {
           if (!CliPixel.getSilentMode()) {
@@ -338,14 +342,6 @@ public class ConsoleHttpHandler extends ImageResourceHttpHandler {
             Pixel.setDoubleLine(false); //don't forget to set it back
           
         pixel.scrollText(text_, loop_, speed.longValue(), color, WebEnabledPixel.pixelConnected, scrollsmooth_);
-        
-        if (Pixel.isWindows() && WebEnabledPixel.getLCDMarquee().equals("yes")) {
-                if(lcdDisplay == null)
-                   lcdDisplay = new LCDPixelcade();
-                
-            lcdDisplay.setNumLoops(loop_);      
-            lcdDisplay.scrollText(text_, new Font(font_, Font.PLAIN, 288), color, 5); //int speed
-        }
         
       } 
         
