@@ -153,13 +153,16 @@ public class ConsoleHttpHandler extends ImageResourceHttpHandler {
       consoleName = consoleName.trim();
       consoleName = consoleName.replace("\n", "").replace("\r", "");
       consoleName = consoleName.toLowerCase();
+      
       if (!consoleMatch(consoleArray, consoleName)) {
         consoleNameMapped = WebEnabledPixel.getConsoleMapping(consoleName);
       } else {
         consoleNameMapped = consoleName;
       } 
+      
       if (consoleNameMapped.equals("mame-libretro"))
         consoleNameMapped = "mame"; 
+      
       if (!CliPixel.getSilentMode()) {
         System.out.println(streamOrWrite.toUpperCase() + " MODE");
         System.out.println("Console Before Mapping: " + consoleName);
@@ -174,6 +177,7 @@ public class ConsoleHttpHandler extends ImageResourceHttpHandler {
         LogMe.aLogger.info(streamOrWrite.toUpperCase() + " MODE");
         LogMe.aLogger.info("Console Before Mapping: " + consoleName);
         LogMe.aLogger.info("Console Mapped: " + consoleNameMapped);
+        
         if (loop_ == 0) {
           LogMe.aLogger.info("# of Times to Loop: null");
         } else {
@@ -189,33 +193,39 @@ public class ConsoleHttpHandler extends ImageResourceHttpHandler {
         LogMe.aLogger.info("Looking for: " + requestedPath + ".png or .gif");
       } 
       
-      
-      if (WebEnabledPixel.getLCDMarquee().equals("yes")) {  //if the lcdmarquee is enabled in settings, then let's go here
-            String consoleLCDFilePathPNG = this.application.getPixel().getPixelHome() + "lcdmarquees/console" + "/" + consoleNameMapped + ".png"; 
+       if (color_ == null) {
+            if (WebEnabledPixel.getTextColor().equals("random")) {
+              color = WebEnabledPixel.getRandomColor();
+            } else {
+              color = WebEnabledPixel.getColorFromHexOrName(WebEnabledPixel.getTextColor());
+            } 
+          } else {
+            color = WebEnabledPixel.getColorFromHexOrName(color_);
+        } 
+       
+      if (WebEnabledPixel.getLCDMarquee().equals("yes")) { 
+            String consoleLCDFilePathPNG = this.application.getPixel().getPixelHome() + "lcdmarquees/console" + "/" + "default-" + consoleNameMapped + ".png"; 
             System.out.println("Looking for console lcd marquee @: " + consoleLCDFilePathPNG);
             LogMe.aLogger.info("Looking for console lcd marquee @: " + consoleLCDFilePathPNG);
             File consoleLCDFilePNG = new File(consoleLCDFilePathPNG);  
-             
+            
             if (consoleLCDFilePNG.exists()) {
-                    System.out.println("FOUND: " + consoleLCDFilePNG);
-                    LogMe.aLogger.info("FOUND: " + consoleLCDFilePNG);
-                     if (this.lcdDisplay == null) 
-                            this.lcdDisplay = new LCDPixelcade();
-
-                     lcdDisplay.displayImage("blankgame", consoleNameMapped);
-            } 
-            else if (!text_.equals("")) {          // do we have scrolling text to display
-                    lcdDisplay.setNumLoops(loop_);   
-                    lcdDisplay.scrollText(text_, new Font(font_, Font.PLAIN, 288), color, 15);
+                 System.out.println("FOUND: " + consoleLCDFilePNG);
+                LogMe.aLogger.info("FOUND: " + consoleLCDFilePNG);
+                if (this.lcdDisplay == null) {
+                   this.lcdDisplay = new LCDPixelcade();
+                }  
+                lcdDisplay.displayImage("no-game", consoleNameMapped);
+            } else if (text_ != "") {  //if not matching png, do we have some scrolling text we can show?
+                lcdDisplay.setAltText(text_);	
+                lcdDisplay.setNumLoops(loop_);   
+                lcdDisplay.scrollText(text_, new Font(font_, Font.PLAIN, 288), color, 15);
             }
-
-            else {         //we don't have a matching lcd marquee png or alt text so just show the default marquee
-                    lcdDisplay.displayImage("pixelcade", consoleNameMapped);
+             else {         //we don't have a matching lcd marquee png or alt text so just show the default marquee
+                lcdDisplay.displayImage("pixelcade", consoleNameMapped);
+                System.out.println("went to generic image");
             }
-        }
-      
-      
-      
+      }
       
       if (streamOrWrite.equals("write")) {
         saveAnimation = true;
@@ -249,11 +259,12 @@ public class ConsoleHttpHandler extends ImageResourceHttpHandler {
           int LED_MATRIX_ID = WebEnabledPixel.getMatrixID();
           speed = Long.valueOf(10L);
           speed = Long.valueOf(WebEnabledPixel.getScrollingTextSpeed(LED_MATRIX_ID));
+          
           if (speeddelay_.longValue() != 10L)
             speed = speeddelay_; 
-          if (color_ != null)
-            color = getColorFromHexOrName(color_); 
           
+//          if (color_ != null)
+//            color = getColorFromHexOrName(color_); 
           
           pixel.scrollText(text_, loop_, speed.longValue(), color, WebEnabledPixel.pixelConnected, scrollsmooth_);
           
@@ -301,36 +312,45 @@ public class ConsoleHttpHandler extends ImageResourceHttpHandler {
           handlePNG(consoleFilePNG, Boolean.valueOf(saveAnimation), loop_, "console", FilenameUtils.getName(consoleFilePathPNG),consoleNameMapped);
          
         } else if (text_ != "") {
-          if (color_ == null) {
-            if (WebEnabledPixel.getTextColor().equals("random")) {
-              color = WebEnabledPixel.getRandomColor();
-            } else {
-              color = WebEnabledPixel.getColorFromHexOrName(WebEnabledPixel.getTextColor());
-            } 
-          } else {
-            color = WebEnabledPixel.getColorFromHexOrName(color_);
-          } 
+            
+//          if (color_ == null) {
+//            if (WebEnabledPixel.getTextColor().equals("random")) {
+//              color = WebEnabledPixel.getRandomColor();
+//            } else {
+//              color = WebEnabledPixel.getColorFromHexOrName(WebEnabledPixel.getTextColor());
+//            } 
+//          } else {
+//            color = WebEnabledPixel.getColorFromHexOrName(color_);
+//          } 
+
           int LED_MATRIX_ID = WebEnabledPixel.getMatrixID();
           speed = Long.valueOf(WebEnabledPixel.getScrollingTextSpeed(LED_MATRIX_ID));
+          
           if (speed_ != null) {
             speed = Long.valueOf(speed_);
             if (speed.longValue() == 0L)
               speed = Long.valueOf(10L); 
           } 
+          
           if (scrollsmooth_ == 0) {
             String scrollSpeedSettings = WebEnabledPixel.getTextScrollSpeed();
             scrollsmooth_ = WebEnabledPixel.getScrollingSmoothSpeed(scrollSpeedSettings);
           } 
+          
           if (font_ == null)
             font_ = WebEnabledPixel.getDefaultFont(); 
+          
           this.application.getPixel();
           Pixel.setFontFamily(font_);
+          
           if (yOffset_ == 0)
             yOffset_ = WebEnabledPixel.getDefaultyTextOffset(); 
           this.application.getPixel();
           Pixel.setYOffset(yOffset_);
+          
           if (fontSize_ == 0)
             fontSize_ = WebEnabledPixel.getDefaultFontSize(); 
+          
           this.application.getPixel();
           Pixel.setFontSize(fontSize_);
           
