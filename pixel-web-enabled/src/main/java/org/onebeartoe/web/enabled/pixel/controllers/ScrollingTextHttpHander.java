@@ -36,7 +36,7 @@ public class ScrollingTextHttpHander extends TextHttpHandler  //TO DO have TextH
         //super(application);
     
         if(WebEnabledPixel.getLCDMarquee().equals("yes"))
-            lcdDisplay = new LCDPixelcade();
+            lcdDisplay = new LCDPixelcade(); //bombing out on windows here
     
         String name = getClass().getName();
         

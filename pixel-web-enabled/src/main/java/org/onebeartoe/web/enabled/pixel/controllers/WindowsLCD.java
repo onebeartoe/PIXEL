@@ -54,7 +54,7 @@ public class WindowsLCD {
     private boolean addedScroller = false;
     private String basePath = "D:\\Arcade\\Pixelcade\\lcdmarquees";
     //private String pixelHome = System.getProperty("user.dir") + "\\";
-    private String pixelHome = WebEnabledPixel.getHome();
+    private static String pixelHome = WebEnabledPixel.getHome();
     protected JFrame myFrame = new JFrame();
     protected JFrame videoFrame = new JFrame();
     public JFrame marqueeFrame = new JFrame();
@@ -135,7 +135,7 @@ public class WindowsLCD {
         NOT_FOUND = basePath + "\\pixelcade.png";  //if not found, we'll show d:\arcade\pixelcade\lcdmarquees\pixelcade.png for example
         if(named.contains("nodata")){
             //getVideo(basePath + "video\\");
-            marqueePanel.setMessage("Welcome to KnJ's Funhouse!!!");
+            marqueePanel.setMessage("Welcome to Pixelcade and Game On!");
             showOnScreen(1,marqueeFrame);
             //this.scrollText("Welcome to KnJ's Funhouse!!!",this.font,Color.magenta,60);
             return;
@@ -392,17 +392,17 @@ class MarqueePanel extends JFXPanel implements ActionListener {
     
     public void scrollingText(HBox parent, String text, int loops)
 {
-    System.out.println("loops before if " + loops);
+    //System.out.println("loops before if " + loops);
     
     String thiscall = UUID.randomUUID().toString();
     Map callTrace = new HashMap();
     callTrace.put(thiscall,loops);
-    System.out.println(String.format("Welcome, %s - %i loops planned",thiscall,callTrace.get(thiscall)));
-    if(loops == 0){
-        System.out.println(String.format("Setting Infinity for [%s,%i]",callTrace,callTrace.get(thiscall)));
-        loops = Timeline.INDEFINITE;
-   }
-    String.format("In scrollingText, continuing for [%s,%i], loops is now %i",callTrace,callTrace.get(thiscall),loops);
+    //System.out.println(String.format("Welcome, %s - %d loops planned",thiscall,callTrace.get(thiscall)));
+//    if(loops == 0){
+//        System.out.println(String.format("Setting Infinity for [%s,%d]",callTrace,callTrace.get(thiscall)));
+//        loops = Timeline.INDEFINITE;
+//   }
+    //String.format("In scrollingText, continuing for [%s,%d], loops is now %d",callTrace,callTrace.get(thiscall),loops);
   
     this.scrollingText.setText(text);
     this.scrollingText.setFill(javafx.scene.paint.Color.rgb(color.getRed(), color.getGreen(), color.getBlue()));
@@ -415,7 +415,7 @@ class MarqueePanel extends JFXPanel implements ActionListener {
     tt.setToX(0 - this.scrollingText.getWrappingWidth() - 10); // setFromX sets the starting position, coming from the left and going to the right.
     int boundWidth = (int)parent.getBoundsInParent().getWidth();
     tt.setFromX(1281); // setToX sets to target position, go beyond the right side of the screen.
-    System.out.println("loops before setcyclecount " + loops);
+    //System.out.println("loops before set cyclecount " + loops);
     tt.setCycleCount(loops);
     tt.setAutoReverse(false); //Always start over
     tt.play();

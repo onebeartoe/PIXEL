@@ -51,6 +51,7 @@ import purejavacomm.PortInUseException;
 import org.onebeartoe.pixel.LogMe;
 import org.onebeartoe.pixel.hardware.Pixel;
 
+
 public class SerialPortIOIOConnectionBootstrap implements
 		IOIOConnectionBootstrap {
 	private static final String TAG = "SerialPortIOIOConnectionBootstrap";

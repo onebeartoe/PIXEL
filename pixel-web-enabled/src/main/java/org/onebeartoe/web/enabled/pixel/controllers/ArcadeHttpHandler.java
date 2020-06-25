@@ -32,7 +32,7 @@ public class ArcadeHttpHandler extends ImageResourceHttpHandler {
        lcdDisplay = new LCDPixelcade();
 
     this.basePath = "";
-    this.defaultImageClassPath = "pacman.png";
+    this.defaultImageClassPath = "btime.png";
     this.modeName = "arcade";
   }
   

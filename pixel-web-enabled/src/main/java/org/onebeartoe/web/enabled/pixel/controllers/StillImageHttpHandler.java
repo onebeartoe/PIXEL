@@ -26,7 +26,7 @@ public class StillImageHttpHandler extends ImageResourceHttpHandler
         super(application);
         
         basePath = "images/";
-        defaultImageClassPath = basePath + "pacman.png";
+        defaultImageClassPath = basePath + "btime.png";
         modeName = "still";
     }
     

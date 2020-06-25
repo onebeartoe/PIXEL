@@ -44,7 +44,7 @@ public class PinDMDHttpHandler extends ImageResourceHttpHandler
         
         //basePath = "arcade/";
         basePath = "";
-        defaultImageClassPath = "pacman.png"; //to do change this
+        defaultImageClassPath = "btime.png"; //to do change this
         modeName = "pindmd";
     }
     

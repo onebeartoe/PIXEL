@@ -10,20 +10,34 @@ import org.onebeartoe.web.enabled.pixel.WebEnabledPixel;
 
 public class LCDPixelcade {
 
-    private static String pixelHome = "/home/pi/pixelcade/";
+    //private static String pixelHome = "/home/pi/pixelcade/";
+    private static String pixelHome = WebEnabledPixel.getHome();
     private static String sep = "/";
     private static String fontPath = pixelHome + "fonts/";
     private static int loops = 0;
+    private static String jarPath = new File(LCDPixelcade.class.getProtectionDomain().getCodeSource().getLocation().getPath()).getAbsolutePath();
+    
+    //private static String wrapperHome = jarPath.substring(0, jarPath.lastIndexOf("/")) + sep;  //error on windows , out of range string -1
+    private static String wrapperHome = jarPath.substring(0, jarPath.lastIndexOf(File.separator)) + File.separator;
+   // private static String wrapperHome = "";
     private static String fontColor = "purple";
-    private static String DEFAULT_COMMAND = "sudo fbi " + pixelHome + "lcdmarquees/pixelcade.png -T 1  -d /dev/fb0 --noverbose --nocomments --fixwidth -a";
-    private static final String JPG_COMMAND = "sudo fbi " + pixelHome + "lcdmarquees/${named}.jpg -T 1  -d /dev/fb0 --noverbose --nocomments --fixwidth -a";
-    private static final String PNG_COMMAND = "sudo fbi "+ pixelHome + "lcdmarquees/${named}.png -T 1  -d /dev/fb0 --noverbose --nocomments --fixwidth -a";
-    private static final String GIF_COMMAND = pixelHome + "gsho  -platform linuxfb " + pixelHome + "${system}/${named}.gif";
-    private static final String TXT_COMMAND = pixelHome + "skrola -platform linuxfb \"${txt}\" \"${fontpath}\" \"${color}\" ${speed}";
+    //private static String DEFAULT_COMMAND = "sudo fbi " + pixelHome + "lcdmarquees/pixelcade.png -T 1  -d /dev/fb0 --noverbose --nocomments --fixwidth -a";
+    private static String DEFAULT_COMMAND = "gsho -platform linuxfb " + pixelHome + "lcdmarquees/pixelcade.png";
+    //PNG_COMMAND = wrapperHome + "gsho -platform linuxfb  "+ pixelHome + "lcdmarquees/${named}.png ";
+    //private static final String JPG_COMMAND = "sudo fbi " + pixelHome + "lcdmarquees/${named}.jpg -T 1  -d /dev/fb0 --noverbose --nocomments --fixwidth -a";
+    private static final String JPG_COMMAND = "gsho -platform linuxfb " + pixelHome + "lcdmarquees/${named}.jpg";
+    //private static String PNG_COMMAND = wrapperHome + "gsho -platform linuxfb  "+ pixelHome + "lcdmarquees/${named}.png ";
+    private static String PNG_COMMAND = wrapperHome + "gsho -platform linuxfb  "+ pixelHome + "lcdmarquees/${named}.png ";
+    private static String GIF_COMMAND = wrapperHome + "gsho  -platform linuxfb " + pixelHome + "${system}/${named}.gif";
+    private static String TXT_COMMAND = wrapperHome + "skrola -platform linuxfb \"${txt}\" \"${fontpath}\" \"${color}\" ${speed}";
+//    private static String PNG_COMMAND = "";
+//    private static String GIF_COMMAND = "";
+//    private static String TXT_COMMAND = "";
     private static final String SLIDESHOW = "sudo fbi " + pixelHome + "lcdmarquees/* -T 1 -d /f]dev/fb0 -t 2 --noverbose --nocomments --fixwidth -a";
     private static final String RESET_COMMAND = "sudo killall -9 fbi;killall -9 gsho; killall -9 skrola;";
     private static final String MARQUEE_PATH = pixelHome + "lcdmarquees/";
-    private static final String ENGINE_PATH = "/usr/bin/fbi";
+    private static final String ENGINE_PATH = wrapperHome + "/gsho";
+    //private static String ENGINE_PATH = "";
     static String NOT_FOUND = pixelHome + "lcdmarquees/" + "pixelcade.png";
     public static String theCommand = DEFAULT_COMMAND;
     public static String currentMessage = "Welcome and Game On!";
@@ -36,10 +50,23 @@ public class LCDPixelcade {
         String shell = "bash";
         if(isWindows){
             windowsLCD = new WindowsLCD();
-            pixelHome =  System.getProperty("user.dir") + "\\";
+            //pixelHome =  System.getProperty("user.dir") + "\\";
             sep = "\\";
         }
-        
+
+//        String shell = "bash";
+//        if(isWindows){
+//            windowsLCD = new WindowsLCD();
+//            pixelHome =  WebEnabledPixel.getHome();
+//            sep = "\\";
+//        } else{
+//            wrapperHome = jarPath.substring(0, jarPath.lastIndexOf("/")) + sep;
+//            PNG_COMMAND = wrapperHome + "gsho -platform linuxfb  "+ pixelHome + "lcdmarquees/${named}.png ";
+//            GIF_COMMAND = wrapperHome + "gsho  -platform linuxfb " + pixelHome + "${system}/${named}.gif";
+//            TXT_COMMAND = wrapperHome + "skrola -platform linuxfb \"${txt}\" \"${fontpath}\" \"${color}\" ${speed}";
+//            ENGINE_PATH = wrapperHome + "gsho";
+//        }
+   
         boolean haveFBI = new File(ENGINE_PATH).exists();
         //boolean haveExtraDisplay = new File("/dev/fb1").exists();
 
@@ -112,14 +139,20 @@ public void setLCDFont(Font font, String fontFilename) {
             windowsLCD.displayImage(named, system);
             return;
         }
-//        if (new File(String.format("/home/pi/pixelcade/lcdmarquees/console/default-%s.png", system)).exists())
-//            DEFAULT_COMMAND = "sudo fbi /home/pi/pixelcade/lcdmarquees/console/default-" + system + ".png -T 1  --noverbose --nocomments --fixwidth -a";
-        System.out.print("System: " + system + "Game:" + named + "\n");
-
+		
 	String marqueePath = NOT_FOUND;
+
+        if (new File(String.format("/home/pi/pixelcade/lcdmarquees/console/default-%s.png", system)).exists()){
+            //DEFAULT_COMMAND = "sudo fbi /home/pi/pixelcade/lcdmarquees/console/default-" + system + ".png -T 1  --noverbose --nocomments --fixwidth -a";
+            DEFAULT_COMMAND = wrapperHome + "gsho -platform linuxfb " + pixelHome + "lcdmarquees/console/default-" + system + ".png";
+            marqueePath = String.format("/home/pi/pixelcade/lcdmarquees/console/default-%s.png", system);
+	}
+	System.out.print("System: " + system + "Game:" + named + "\n");
+
         if (new File(String.format("%slcdmarquees/%s.png",pixelHome, named)).exists()){
-            DEFAULT_COMMAND = "sudo fbi" + pixelHome + "lcdmarquees/" + named + ".png -T 1 -/d /dev/fb0  --noverbose --nocomments --fixwidth -a";
-	marqueePath = String.format("%slcdmarquees/%s.png",pixelHome, named);
+            //DEFAULT_COMMAND = "sudo fbi" + pixelHome + "lcdmarquees/" + named + ".png -T 1 -/d /dev/fb0  --noverbose --nocomments --fixwidth -a";
+            DEFAULT_COMMAND = wrapperHome + "gsho  -platform linuxfb " + pixelHome + "lcdmarquees/" + named + ".png";
+            marqueePath = String.format("%slcdmarquees/%s.png",pixelHome, named);
 	}
 
         doGif = new File(String.format("%s%s/%s.gif",pixelHome, system,named)).exists();

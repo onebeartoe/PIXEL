@@ -37,7 +37,7 @@ public class LocalModeHttpHandler extends ImageResourceHttpHandler
         super(application);
         
         basePath = "";
-        defaultImageClassPath = "pacman.png"; //to do change this
+        defaultImageClassPath = "btime.png"; //to do change this
         modeName = "arcade"; //to do change this to localplayback and fix
       
     }

@@ -1,0 +1,19 @@
+#!/bin/bash
+DIR="$(dirname "$(readlink -f "$0")")"
+ZEROJ=`which java`
+OMX=`which omxplayer`
+echo "Welcome to Pixelcade - the Ultimate Home Arcade Upgrade"
+echo "Starting Up..."
+$OMX --display 7 --vol 100 --win 0,0,1280,390 $DIR/pixelcade3s.mp4 > /dev/null 2>&1
+$DIR/skrola -platform linuxfb "Pixelcade - the Ultimate Arcade Upgrade" "Vectroid" "#ff0000" 8 &
+sleep 8;
+killall -9 skrola
+$DIR/skrola -platform linuxfb "Starting Up..." "Vectroid" "#ff0000" 10 &
+sleep 6;
+killall -9 skrola
+#export JAVA_HOME=$DIR/usr/
+$DIR/gsho -platform linuxfb $DIR/logo.png &
+cd ~/pixelcade
+$ZEROJ -jar $DIR/pixelweb.jar "$@" &
+disown
+exit 0

@@ -16,6 +16,7 @@ import ioio.lib.util.pc.IOIOConsoleApp;
 import java.awt.*;
 import java.io.*;
 import java.net.InetSocketAddress;
+import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -28,6 +29,7 @@ import java.util.TimerTask;
 import java.util.logging.Level;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.ini4j.Config;
 import org.ini4j.Ini;
@@ -65,7 +67,7 @@ import org.onebeartoe.web.enabled.pixel.controllers.RebootHttpHandler;
 
 
 public class WebEnabledPixel {
-  public static String pixelwebVersion = "2.8.8";
+  public static String pixelwebVersion = "2.9.0";
   
   public static LogMe logMe = null;
   
@@ -162,25 +164,41 @@ public class WebEnabledPixel {
   public static PrintWriter Arduino1MatrixOutput;
 
   public static String pixelHome = System.getProperty("user.dir") + "\\";
+  
   public static LCDPixelcade lcdDisplay = null;
+  
   public WebEnabledPixel(String[] args) throws FileNotFoundException, IOException {
+      
     this.cli = new CliPixel(args);
     this.cli.parse();
     this.httpPort = this.cli.getWebPort();
     silentMode_ = CliPixel.getSilentMode();
     backgroundMode_ = CliPixel.getBackgroundMode();
     logMe = LogMe.getInstance();
+    
     if (!silentMode_) {
       LogMe.aLogger.info("Pixelcade Listener (pixelweb) Version " + pixelwebVersion);
       System.out.println("Pixelcade Listener (pixelweb) Version " + pixelwebVersion);
     } 
+    
     defaultyTextOffset = this.cli.getyTextOffset();
     LED_MATRIX_ID = this.cli.getLEDMatrixType();
+    
     if (isWindows()) {
       alreadyRunningErrorMsg = "*** ERROR *** \nPixel Listener (pixelweb.exe) is already running\nYou don't need to launch it again\nYou may also want to add the Pixel Listener to your Windows Startup Folder";
     } else {
       alreadyRunningErrorMsg = "*** ERROR *** \nPixel Listener (pixelweb.jar) is already running\nYou don't need to launch it again\nYou may also want to add the Pixel Listener to your system.d startup";
     } 
+    
+    if (isWindows()) {
+          pixelHome = System.getProperty("user.dir") + "\\";  //user dir is the folder where pixelweb.jar lives and would be placed there by the windows installer
+    } else {       
+          //pixelHome = System.getProperty("user.home") + "/pixelcade/";  //let's force user.home since we don't have an installer for Pi or Mac
+          String path = Pixel.class.getProtectionDomain().getCodeSource().getLocation().getPath(); //get the path that pixelweb.jar is launched from 
+          String decodedPath = URLDecoder.decode(path, "UTF-8");
+          pixelHome = "/" + FilenameUtils.getPath(decodedPath) ;  //important won't work without the "/" in front
+    }
+    
     File file = new File("settings.ini");
     if (file.exists() && !file.isDirectory()) {
       Ini ini = null;
@@ -447,11 +465,6 @@ if (lcdMarquee_.equals("yes") && lcdDisplay != null) {
     pixel.setScrollDelay(speed_);
     pixel.setScrollTextColor(Color.red);
     
-    if (isWindows()) 
-          pixelHome = System.getProperty("user.dir") + "\\";  //user dir is the folder where pixelweb.jar lives and would be placed there by the windows installer
-    else               
-          pixelHome = System.getProperty("user.home") + "/pixelcade/";  //let's force user.home since we don't have an installer for Pi or Mac
-               
     if (!silentMode_)
       LogMe.aLogger.info("Pixelcade HOME DIRECTORY: " + pixel.getPixelHome()); 
     //extractDefaultContent();  //saving space by removing this as the retropie installer now includes all these files so no need to include here and make the .jar bigger
@@ -682,7 +695,7 @@ if (lcdMarquee_.equals("yes") && lcdDisplay != null) {
             //if we got here, most likely the pixel listener was already running so let's give a message and then exit gracefully
             
              System.out.println(alreadyRunningErrorMsg);
-             System.out.println("Exiting...");
+             //System.out.println("Exiting...");
              
              // took this out as the pop up is no good when pinball dmdext also running as this interrupts
              /* if (isWindows() || isMac()) {  //we won't have xwindows on the Pi so skip this for the Pi
