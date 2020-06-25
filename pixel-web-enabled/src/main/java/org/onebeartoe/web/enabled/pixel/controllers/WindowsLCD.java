@@ -13,12 +13,9 @@ import javafx.scene.text.TextAlignment;
 import javafx.stage.Screen;
 
 import javax.imageio.ImageIO;
-//import javax.swing.*;
-//import java.awt.*;
 import java.awt.*;
 import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
-//import java.io.*;
 import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
@@ -53,7 +50,6 @@ public class WindowsLCD {
     private static ImageIcon ii;
     private boolean addedScroller = false;
     private String basePath = "D:\\Arcade\\Pixelcade\\lcdmarquees";
-    //private String pixelHome = System.getProperty("user.dir") + "\\";
     private static String pixelHome = WebEnabledPixel.getHome();
     protected JFrame myFrame = new JFrame();
     protected JFrame videoFrame = new JFrame();
@@ -65,7 +61,6 @@ public class WindowsLCD {
     protected MarqueePanel marqueePanel;
     MediaView viewer = null;
     Scene scene = null;
-
 
     {
         this.myFrame.setSize(1280, 390);
@@ -397,12 +392,15 @@ class MarqueePanel extends JFXPanel implements ActionListener {
     String thiscall = UUID.randomUUID().toString();
     Map callTrace = new HashMap();
     callTrace.put(thiscall,loops);
-    //System.out.println(String.format("Welcome, %s - %d loops planned",thiscall,callTrace.get(thiscall)));
+    
+    //TO DO if this is uncommented out, scrolling text will scroll infinite even if loop = 2 for example, fix this later
+    
+   
 //    if(loops == 0){
 //        System.out.println(String.format("Setting Infinity for [%s,%d]",callTrace,callTrace.get(thiscall)));
 //        loops = Timeline.INDEFINITE;
 //   }
-    //String.format("In scrollingText, continuing for [%s,%d], loops is now %d",callTrace,callTrace.get(thiscall),loops);
+   
   
     this.scrollingText.setText(text);
     this.scrollingText.setFill(javafx.scene.paint.Color.rgb(color.getRed(), color.getGreen(), color.getBlue()));
@@ -414,8 +412,7 @@ class MarqueePanel extends JFXPanel implements ActionListener {
     TranslateTransition tt = new TranslateTransition(Duration.millis(10000), this.scrollingText);
     tt.setToX(0 - this.scrollingText.getWrappingWidth() - 10); // setFromX sets the starting position, coming from the left and going to the right.
     int boundWidth = (int)parent.getBoundsInParent().getWidth();
-    tt.setFromX(1281); // setToX sets to target position, go beyond the right side of the screen.
-    //System.out.println("loops before set cyclecount " + loops);
+    tt.setFromX(1281); // setToX sets to target position, go beyond the right side of the screen. //to do this should be configurable to other resolutions work
     tt.setCycleCount(loops);
     tt.setAutoReverse(false); //Always start over
     tt.play();

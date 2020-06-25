@@ -378,19 +378,7 @@ public class ArcadeHttpHandler extends ImageResourceHttpHandler {
           handleGIF(consoleNameMapped, arcadeNameOnly + ".gif", Boolean.valueOf(saveAnimation), loop_);
         
         } else if (text_ != "" && !text_.equals("nomatch")) {
-//          if (color_ == null) {
-//              
-//            if (WebEnabledPixel.getTextColor().equals("random")) {
-//              color = WebEnabledPixel.getRandomColor();
-//              
-//            } else {
-//                
-//              color = WebEnabledPixel.getColorFromHexOrName(WebEnabledPixel.getTextColor());
-//            } 
-//            
-//          } else {
-//            color = WebEnabledPixel.getColorFromHexOrName(color_);
-//          } 
+
           int LED_MATRIX_ID = WebEnabledPixel.getMatrixID();
           speed = Long.valueOf(WebEnabledPixel.getScrollingTextSpeed(LED_MATRIX_ID));
           if (speed_ != null) {
@@ -423,7 +411,7 @@ public class ArcadeHttpHandler extends ImageResourceHttpHandler {
         else
             Pixel.setDoubleLine(false); //don't forget to set it back
           
-          pixel.scrollText(text_, loop_, speed.longValue(), color, WebEnabledPixel.pixelConnected, scrollsmooth_);
+            pixel.scrollText(text_, loop_, speed.longValue(), color, WebEnabledPixel.pixelConnected, scrollsmooth_);
           
          
         } else {
