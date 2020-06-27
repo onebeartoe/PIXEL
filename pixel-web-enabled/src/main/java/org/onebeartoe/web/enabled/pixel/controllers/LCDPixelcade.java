@@ -10,9 +10,9 @@ import org.onebeartoe.web.enabled.pixel.WebEnabledPixel;
 
 public class LCDPixelcade {
 
-    //private static String pixelHome = "/home/pi/pixelcade/";
-    private static String pixelHome = WebEnabledPixel.getHome();
-    private static String sep = "/";
+    private static String pixelHome = "/home/pi/pixelcade/";
+    //private static String pixelHome = WebEnabledPixel.getHome();
+    private static String sep = File.separator;
     private static String fontPath = pixelHome + "fonts/";
     private static int loops = 0;
     private static String jarPath = new File(LCDPixelcade.class.getProtectionDomain().getCodeSource().getLocation().getPath()).getAbsolutePath();
@@ -23,7 +23,7 @@ public class LCDPixelcade {
     private static String PNG_COMMAND = wrapperHome + "gsho -platform linuxfb  "+ pixelHome + "lcdmarquees/${named}.png ";
     private static String GIF_COMMAND = wrapperHome + "gsho  -platform linuxfb " + pixelHome + "${system}/${named}.gif";
     private static String TXT_COMMAND = wrapperHome + "skrola -platform linuxfb \"${txt}\" \"${fontpath}\" \"${color}\" ${speed}";
-    private static final String SLIDESHOW = "sudo fbi " + pixelHome + "lcdmarquees/* -T 1 -d /f]dev/fb0 -t 2 --noverbose --nocomments --fixwidth -a";
+    private static final String SLIDESHOW = "sudo fbi " + pixelHome + "lcdmarquees/* -T 1 -d /dev/fb0 -t 2 --noverbose --nocomments --fixwidth -a";
     private static final String RESET_COMMAND = "sudo killall -9 fbi;killall -9 gsho; killall -9 skrola;";
     private static final String MARQUEE_PATH = pixelHome + "lcdmarquees/";
     private static final String ENGINE_PATH = wrapperHome + "/gsho";
@@ -37,10 +37,9 @@ public class LCDPixelcade {
     public static void main(String[] args) {
 
         String shell = "bash";
-        if(isWindows){
+        if(isWindows) {
             windowsLCD = new WindowsLCD();
-            //pixelHome =  System.getProperty("user.dir") + "\\";
-            sep = "\\";
+            pixelHome =  WebEnabledPixel.getHome();
         }
    
         boolean haveFBI = new File(ENGINE_PATH).exists();
@@ -135,6 +134,7 @@ public void setLCDFont(Font font, String fontFilename) {
     	
 	if(marqueePath.contains(NOT_FOUND)){
 	     System.out.print(String.format("[INTERNAL] Could not locate %s.png in %slcdmarquees\nmp:%s\nnf:%s\n",named, pixelHome,marqueePath,NOT_FOUND));
+	     //currentMessage = String.format("%s - %s",named,system);
 	    named = "resetti";
 	} 
       
@@ -194,4 +194,3 @@ public void setLCDFont(Font font, String fontFilename) {
 	} catch (IOException ioe) {}
     }
 }
-
