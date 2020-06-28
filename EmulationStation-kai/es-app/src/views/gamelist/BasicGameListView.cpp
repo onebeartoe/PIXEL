@@ -3,11 +3,9 @@
 #include "utils/FileSystemUtil.h"
 #include "views/UIModeController.h"
 #include "views/ViewController.h"
-#include "views/HttpLib.h"
 #include "CollectionSystemManager.h"
 #include "Settings.h"
 #include "SystemData.h"
-#include <iostream>
 
 BasicGameListView::BasicGameListView(Window* window, FileData* root)
 	: ISimpleGameListView(window, root), mList(window)
@@ -56,11 +54,11 @@ void BasicGameListView::populateList(const std::vector<FileData*>& files)
 	{
 		addPlaceholder();
 	}
-} 
+}
 
 FileData* BasicGameListView::getCursor()
 {
-        return mList.getSelected();
+	return mList.getSelected();
 }
 
 void BasicGameListView::setCursor(FileData* cursor)
@@ -88,7 +86,6 @@ void BasicGameListView::setCursor(FileData* cursor)
 				mCursorStack.push(tmp.top());
 				tmp.pop();
 			}
-
 		}
 	}
 }
