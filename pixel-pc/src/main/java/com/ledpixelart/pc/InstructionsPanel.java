@@ -29,12 +29,12 @@ public class InstructionsPanel extends JPanel
     
     public InstructionsPanel()
     {
-	String version = "0.5";
-	String text = "PIXEL Instructions";
+	String version = "4.1.0";
+	String text = "Welcome PIXEL User";
 	String html = "<html><body><h1>" + text + "</h1></body></html>";
 	JLabel productLabel = new JLabel(html, JLabel.CENTER);
 	
-	String developmentHtml = "<html><body>" + "Before this application will function, you must first Bluetooth pair PIXEL to your Android device<br/><br/>PIXEL will show up in Bluetooth settings as “PIXEL”, use pairing code 4545<br/><br/>If this application does not find PIXEL: power off and on PIXEL, Bluetooth pair again, and then re-run this application<br/><br/>More info at http://ledpixelart.com" + "</body></html>";
+	String developmentHtml = "<html><body>" + "IMPORTANT: You must first Bluetooth pair or USB connect PIXEL to your device.<br/><br/>Move the toggle switch on PIXEL to the 'PC USB' <br/>position if connecting wtih USB or leave selected on <br/>'Bluetooth' (default) for Bluetooth connections.<br/><br/>PIXEL will show up in Bluetooth settings as “PIXEL”, use <br/>pairing code 0000 or 4545 if you have a PIXEL V1 frame.<br/><br/>If this application does not find PIXEL: power off and on, <br/>Bluetooth pair again, and then re-run this application.<br/><br/>Click to stream GIFs and images or double click to write them <br/>for stand alone mode operation (only PIXEL V2 frames can write). <br/><br/>IMPORTANT: When double clicking to write, let the write <br/>fully finish before clicking somewhere else. <br/><br/>More info at http://ledpixelart.com" + "</body></html>";
 	developmentLabel = new JLabel(developmentHtml);
 	developmentLabel.addMouseListener(new DevelopmentLabelListener() );
 	
@@ -42,7 +42,7 @@ public class InstructionsPanel extends JPanel
 	//JLabel projectLabel = new JLabel(projectHtml);
 	//projectLabel.addMouseListener(new DevelopmentLabelListener() );
 	
-	GridLayout layout = new GridLayout(3, 1, 6, 6);
+	GridLayout layout = new GridLayout(2, 1, 6, 6);
 	setLayout(layout);
 	
 	add(productLabel);

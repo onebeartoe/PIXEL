@@ -3,7 +3,6 @@ package org.onebeartoe.pixel.preferences;
 
 import com.ledpixelart.pc.PixelApp;
 import com.ledpixelart.pc.plugins.PluginConfigEntry;
-//import com.ledpixelart.pc.plugins.swing.PixelPanel;
 import com.ledpixelart.pc.plugins.swing.UserProvidedPanel;
 import ioio.lib.api.RgbLedMatrix;
 import java.awt.Dimension;
@@ -25,7 +24,8 @@ import javax.swing.JFrame;
 import org.onebeartoe.pixel.plugins.swing.PixelPanel;
 
 /**
- * @author rmarquez
+ * @deprecated Use the version at https://github.com/onebeartoe/java-libraries/tree/master/onebeartoe-application/src/main/java/org/onebeartoe/application
+ * @author Roberto Marquez
  */
 public class JavaPreferencesService implements PreferencesService
 {
@@ -44,6 +44,15 @@ public class JavaPreferencesService implements PreferencesService
 	return value;
     }
     
+    /**
+AS AN ALTERNATIVE TO THE USER HAVING TO SUPPLY THE CLASS NAME,
+TRY THIS CLASS: https://commons.apache.org/proper/commons-discovery/apidocs/index.html?org/apache/commons/discovery/tools/DiscoverSingleton.html
+     * @param jarPath
+     * @param className
+     * @param KIND
+     * @return
+     * @throws Exception 
+     */
     @Override
     public PixelPanel loadPlugin(String jarPath, String className, RgbLedMatrix.Matrix KIND) throws Exception
     {	

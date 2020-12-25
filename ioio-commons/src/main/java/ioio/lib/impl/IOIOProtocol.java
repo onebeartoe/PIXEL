@@ -94,8 +94,11 @@ class IOIOProtocol {
 	static final int SOFT_CLOSE                          = 0x1D;
 	static final int RGB_LED_MATRIX_ENABLE               = 0x1E;
 	static final int RGB_LED_MATRIX_FRAME                = 0x1F;
+	static final int RGB_LED_MATRIX_WRITE_FILE           = 0x20;
 
 	static final int[] SCALE_DIV = new int[] {
+		0x21,
+		0x20,
 		0x1F,  // 31.25
 		0x1E,  // 35.714
 		0x1D,  // 41.667
@@ -148,6 +151,7 @@ class IOIOProtocol {
 			flush();
 		}
 		//Log.v(TAG, "sending: 0x" + Integer.toHexString(b));
+                //System.out.println(TAG +  " writeByte // sending: 0x" + Integer.toHexString(b)); //logging was here for the pinDMD work
 		outbuf_[pos_++] = (byte) b;
 	}
 	
@@ -373,7 +377,14 @@ class IOIOProtocol {
 				| (stopbits == Uart.StopBits.TWO ? 0x04 : 0x00) | parbits);
 		writeTwoBytes(rate);
 		endBatch();
+                
+               
+                
+                
+                
 	}
+        
+        
 
 	synchronized public void uartClose(int uartNum) throws IOException {
 		beginBatch();
@@ -497,13 +508,28 @@ class IOIOProtocol {
 		endBatch();
 	}
 
-	synchronized public void rgbLedMatrixEnable(int shifterLen32) throws IOException {
+	synchronized public void rgbLedMatrixEnable(int shifterLen32, int rows) throws IOException {
 		beginBatch();
 		writeByte(RGB_LED_MATRIX_ENABLE);
-		writeByte(shifterLen32 & 0x07);
+		writeByte(shifterLen32 & 0x0F | ((rows == 8 ? 0 : 1) << 4));  
 		endBatch();
 	}
-
+	
+	
+	//ADDED BY MANJU
+	synchronized public void rgbLedMatrixWriteFile(float fps, int shifterLen32,  int rows) throws IOException {
+		int delay = Math.round(62500 / fps) - 1;
+		
+		beginBatch();
+		writeByte(RGB_LED_MATRIX_WRITE_FILE);
+		writeByte(delay & 0xFF);
+		writeByte((delay >> 8) & 0xFF);
+		writeByte(shifterLen32 & 0x0F | ((rows == 8 ? 0 : 1) << 4));
+		endBatch();
+	}
+	
+	//Ends Here
+	
 	synchronized public void rgbLedMatrixFrame(byte[] data) throws IOException {
 		beginBatch();
 		writeByte(RGB_LED_MATRIX_FRAME);
@@ -614,6 +640,7 @@ class IOIOProtocol {
 					throw new IOException("Unexpected stream closure");
 				}
 				//Log.v(TAG, "received " + validBytes_ + " bytes");
+                                //System.out.println(TAG + " fillBuf // received " + validBytes_ + " bytes"); //had this here for pinDMD integration
 				readOffset_ = 0;
 			} catch (IOException e) {
 				Log.i(TAG, "IOIO disconnected");
@@ -628,6 +655,8 @@ class IOIOProtocol {
 			int b = inbuf_[readOffset_++];
 			b &= 0xFF;  // make unsigned
 			//Log.v(TAG, "received: 0x" + Integer.toHexString(b));
+                        //System.out.println(TAG + " readByte() // received: 0x" + Integer.toHexString(b)); //had this for pinDMD integration
+                        
 			return b;
 		}
 

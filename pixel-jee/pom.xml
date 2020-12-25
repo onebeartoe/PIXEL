@@ -1,11 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    
     <modelVersion>4.0.0</modelVersion>
+    
     <parent>
-    <artifactId>pixel</artifactId>
-    <groupId>org.onebeartoe</groupId>
-    <version>0.0.1-SNAPSHOT</version>
-  </parent>
+        <artifactId>pixel</artifactId>
+        <groupId>org.onebeartoe</groupId>
+        <version>0.0.1-SNAPSHOT</version>
+    </parent>
 
     <groupId>org.onebeartoe</groupId>
     <artifactId>pixel-jee</artifactId>
@@ -18,30 +20,35 @@
         <endorsed.dir>${project.build.directory}/endorsed</endorsed.dir>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
-<slf4j.version>1.5.8</slf4j.version>
+        <slf4j.version>1.5.8</slf4j.version>
     </properties>
 
+    <repositories>
+        <repository>
+            <id>sparetimelabs</id>
+            <url>http://www.sparetimelabs.com/maven2</url>
+        </repository>
+    </repositories>
 
     <dependencies>
-        
       	<dependency>
-	    <groupId>org.ioio</groupId>
-	    <artifactId>pc</artifactId>
-	    <version>1.0-SNAPSHOT</version>
-	</dependency>        
-        
-        <!--dependency>
-            <groupId>org.ioio</groupId>  
-            <artifactId>bluetooth</artifactId>
-            <version>1.0-SNAPSHOT</version>
-        </dependency-->                
+            <groupId>org.onebeartoe</groupId>
+            <artifactId>ioio-pc</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+	</dependency>
             
         <dependency>
-            <groupId>org.ioio</groupId>
-            <artifactId>commons</artifactId>
-            <version>1.0-SNAPSHOT</version>  
-        </dependency>    
+            <groupId>org.onebeartoe.pixel</groupId>  
+            <artifactId>commons</artifactId>  
+            <version>1.0-SNAPSHOT</version>
+        </dependency>
         
+        <!--dependency>
+            <groupId>org.onebeartoe.pixel</groupId>    
+            <artifactId>pixel-pc</artifactId>    
+            <version>0.6</version>            
+        </dependency-->
+                        
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
@@ -58,14 +65,14 @@
             <groupId>javax</groupId>
             <artifactId>javaee-web-api</artifactId>
             <version>6.0</version>
-            <scope>provided</scope>
+            <!--scope>provided</scope-->
         </dependency>
 
         <dependency>
                <groupId>javax.servlet</groupId>
                <artifactId>servlet-api</artifactId>
                <version>2.5</version>
-               <scope>provided</scope>
+               <!--scope>provided</scope-->
         </dependency>
   
     </dependencies>
@@ -77,8 +84,8 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>2.3.2</version>
                 <configuration>
-                    <source>1.6</source>
-                    <target>1.6</target>
+                    <source>1.7</source>
+                    <target>1.7</target>
                     <compilerArguments>
                         <endorseddirs>${endorsed.dir}</endorseddirs>
                     </compilerArguments>
@@ -97,27 +104,11 @@
                 <artifactId>maven-dependency-plugin</artifactId>
                 <version>2.1</version>
                 <executions>
-                    <execution>
-                        <phase>validate</phase>
-                        <goals>
-                            <goal>copy</goal>
-                        </goals>
-                        <configuration>
-                            <outputDirectory>${endorsed.dir}</outputDirectory>
-                            <silent>true</silent>
-                            <artifactItems>
-                                <artifactItem>
-                                    <groupId>javax</groupId>
-                                    <artifactId>javaee-endorsed-api</artifactId>
-                                    <version>6.0</version>
-                                    <type>jar</type>
-                                </artifactItem>
-                            </artifactItems>
-                        </configuration>
-                    </execution>
+                    
                 </executions>
             </plugin>
         </plugins>
     </build>
 
 </project>
+

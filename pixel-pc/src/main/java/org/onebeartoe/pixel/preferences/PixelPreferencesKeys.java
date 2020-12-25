@@ -2,7 +2,8 @@
 package org.onebeartoe.pixel.preferences;
 
 /**
- * @author rmarquez
+ * @deprecated Use the version at https://github.com/onebeartoe/java-libraries/tree/master/onebeartoe-application/src/main/java/org/onebeartoe/application
+ * @author Roberto Marquez
  */
 public class PixelPreferencesKeys
 {
@@ -21,4 +22,6 @@ public class PixelPreferencesKeys
     public static final String windowX = "windowX";
     
     public static final String windowY = "windowY";
+    
+    public static final String ledMatrix = "ledMatrix"; //not used right now
 }

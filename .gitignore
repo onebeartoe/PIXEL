@@ -21,3 +21,9 @@
 /pixel-games/target/
 /pixel-plugins/target/
 /pixel-commons/target/
+/pixel-web-enabled/target/
+/pixel-web-enabled copy/target/
+/pixelcade-frontend/target/
+/pixelcade-installer/target/
+/pixelcade-frontend copy/target/
+/pixelcade-pipeserver/target/
