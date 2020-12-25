@@ -2,7 +2,7 @@ EmulationStation
 ================
 
 This is a fork of EmulationStation for RetroPie that has been modified to integrate with the Pixelcade LED Marquee http://pixelcade.org
-EmulationStation is a cross-platform graphical front-end for emulators with controller navigation. The Pixelcade integration includes the modification of these 4 files, specifically making calls to the Pixelcade REST API at http://pixelcade.org/api . To date, this code has been succesfully compiled for Raspberry Pi 3B (Stretch) and Ubuntu 18_04.
+EmulationStation is a cross-platform graphical front-end for emulators with controller navigation. The Pixelcade integration includes the modification of these 4 files, specifically making calls to the Pixelcade REST API at http://pixelcade.org/api . To date, this code has been succesfully compiled for Raspberry Pi 3B (Stretch) and Raspberry Pi 4 (Buster) and Ubuntu 18_04.
 
 * es-app/src/views/ViewController.cpp
 * es-app/src/SystemScreenSaver.cpp
